@@ -1,0 +1,13 @@
+# Image Mapping for mixed flowers
+# Rename your images according to this mapping:
+
+WhatsApp Image 2025-08-16 at 13.50.06_db5f08b7.jpg → mixed-bouquet-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.08_bd1058b8.jpg → mixed-arrangement-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.12_a1877da7.jpg → mixed-flowers-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.13_3994e156.jpg → mixed-gift-set-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.13_f3fa0848.jpg → mixed-wedding-bouquet-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.14_9581b08f.jpg → mixed-seasonal-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.15_6ab384ee.jpg → mixed-bouquet-2.jpg
+WhatsApp Image 2025-08-16 at 13.50.15_7c72d32d.jpg → mixed-arrangement-2.jpg
+WhatsApp Image 2025-08-16 at 13.50.16_efb6bcbb.jpg → mixed-flowers-2.jpg
+WhatsApp Image 2025-08-16 at 16.25.45_ad64b7df.jpg → mixed-gift-set-2.jpg

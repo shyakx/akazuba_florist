@@ -1,0 +1,4 @@
+# Image Mapping for orange flowers
+# Rename your images according to this mapping:
+
+WhatsApp Image 2025-08-16 at 13.50.06_10a11322.jpg → orange-marigold-1.jpg
