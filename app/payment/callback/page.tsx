@@ -1,13 +1,13 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 import { paymentAPI } from '@/lib/payment-api'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 
-const PaymentCallbackPage = () => {
+const PaymentCallbackContent = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
@@ -156,6 +156,22 @@ const PaymentCallbackPage = () => {
         )}
       </div>
     </div>
+  )
+}
+
+const PaymentCallbackPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading...</h2>
+          <p className="text-gray-600">Please wait...</p>
+        </div>
+      </div>
+    }>
+      <PaymentCallbackContent />
+    </Suspense>
   )
 }
 

@@ -9,9 +9,15 @@ const protectedRoutes = [
   '/wishlist'
 ]
 
-// Define admin-only routes
+// Define admin-only routes (require authentication)
 const adminRoutes = [
   '/admin'
+]
+
+// Define admin test routes (no authentication required)
+const adminTestRoutes = [
+  '/admin/test-simple',
+  '/admin/enhanced'
 ]
 
 // Define auth routes (login, register)
@@ -45,6 +51,12 @@ export function middleware(request: NextRequest) {
       }
     }
     // Allow access to auth routes for unauthenticated users
+    return NextResponse.next()
+  }
+  
+  // Handle admin test routes (no authentication required)
+  if (adminTestRoutes.some(route => pathname.startsWith(route))) {
+    // Allow access to test routes without authentication
     return NextResponse.next()
   }
   

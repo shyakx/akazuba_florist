@@ -1,9 +1,8 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
-import { Truck, Clock, MapPin, Shield, Phone, Mail, CheckCircle, Star, Calendar } from 'lucide-react'
 import Link from 'next/link'
-import Header from '@/components/Header'
+import { Truck, MapPin, Clock, Package, CheckCircle, Phone } from 'lucide-react'
 import Footer from '@/components/Footer'
 
 const formatPrice = (price: number) => {
@@ -37,7 +36,7 @@ const DeliveryPage = () => {
       description: 'Choose your preferred delivery date and time',
       price: '2,000 RWF',
       time: 'Flexible',
-      icon: Calendar,
+      icon: Package,
       features: ['Advance booking', 'Time slots available', 'Special occasions', 'Gift wrapping included']
     }
   ]
@@ -95,8 +94,6 @@ const DeliveryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-pink-50 to-rose-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -114,24 +111,24 @@ const DeliveryPage = () => {
               We ensure your arrangements arrive fresh and perfect every time.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
+              <a
                 href="/contact"
                 className="btn-primary"
               >
                 Contact Us
-              </Link>
-              <Link
+              </a>
+              <a
                 href="/category/roses"
                 className="btn-outline"
               >
                 Order Roses
-              </Link>
-              <Link
+              </a>
+              <a
                 href="/category/tulips"
                 className="btn-outline"
               >
                 Order Tulips
-              </Link>
+              </a>
             </div>
           </div>
         </div>
@@ -264,12 +261,12 @@ const DeliveryPage = () => {
             Our delivery team is here to help. Contact us for any questions about delivery times, areas, or special arrangements.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
+            <a
               href="/contact"
               className="bg-white text-pink-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
             >
               Contact Us
-            </Link>
+            </a>
             <a
               href="tel:+250784586110"
               className="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-pink-600 transition-colors"

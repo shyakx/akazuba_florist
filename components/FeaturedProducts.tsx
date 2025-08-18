@@ -1,11 +1,20 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Star, ShoppingCart, Heart } from 'lucide-react'
+import { Heart, ShoppingCart, Star } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
-import { featuredProducts } from '@/data/products'
+import { realFlowerProducts } from '@/data/real-flowers'
 
-export default function FeaturedProducts() {
+// Format price function for RWF currency
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('en-RW', {
+    style: 'currency',
+    currency: 'RWF',
+    minimumFractionDigits: 0,
+  }).format(price)
+}
+
+const FeaturedProducts = () => {
   const { addToCart } = useCart()
 
   const handleAddToCart = (product: any) => {
@@ -33,7 +42,7 @@ export default function FeaturedProducts() {
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {featuredProducts.map((product, index) => (
+          {realFlowerProducts.map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 20 }}
@@ -115,7 +124,7 @@ export default function FeaturedProducts() {
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-lg text-gray-800">
-                      {product.price.toLocaleString()} RWF
+                      {formatPrice(product.price)}
                     </div>
                   </div>
                 </div>
@@ -144,4 +153,6 @@ export default function FeaturedProducts() {
       </div>
     </section>
   )
-} 
+}
+
+export default FeaturedProducts 

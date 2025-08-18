@@ -1,9 +1,8 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { Shield, Lock, Eye, Users, FileText, Calendar, Phone, Mail } from 'lucide-react'
 import Link from 'next/link'
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 const PrivacyPage = () => {
@@ -94,7 +93,6 @@ const PrivacyPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-pink-50 to-rose-50 py-20">

@@ -5,6 +5,15 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Flower, Palette } from 'lucide-react';
 import { realFlowerProducts } from '@/data/real-flowers';
 
+// Format price function for RWF currency
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('en-RW', {
+    style: 'currency',
+    currency: 'RWF',
+    minimumFractionDigits: 0,
+  }).format(price)
+}
+
 const colors = [
   { name: 'Red', value: 'red', bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800' },
   { name: 'Pink', value: 'pink', bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-800' },
@@ -101,7 +110,7 @@ export default function RealFlowerShowcase() {
                     {filteredProducts[currentImageIndex].name}
                   </h3>
                   <div className="text-3xl font-bold text-white mb-2">
-                  {filteredProducts[currentImageIndex].price.toLocaleString()} RWF
+                  {formatPrice(filteredProducts[currentImageIndex].price)}
                 </div>
                   <p className="text-sm opacity-90">
                     {filteredProducts[currentImageIndex].description}
@@ -223,7 +232,7 @@ export default function RealFlowerShowcase() {
             className="text-center"
           >
             <div className="text-3xl font-bold text-pink-600 mb-2">
-              {Math.min(...realFlowerProducts.map(p => p.price)).toLocaleString()} RWF
+              {formatPrice(Math.min(...realFlowerProducts.map(p => p.price)))}
             </div>
             <div className="text-gray-600">Starting Price</div>
           </motion.div>

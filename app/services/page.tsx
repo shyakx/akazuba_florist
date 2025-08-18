@@ -1,9 +1,8 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { Clock, Crown, Flower, Gift, Heart, Sparkles, Truck, Users, ArrowRight, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 const formatPrice = (price: number) => {
@@ -107,8 +106,6 @@ const ServicesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-pink-50 to-rose-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

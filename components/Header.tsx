@@ -1,5 +1,7 @@
 'use client'
 
+// Cache busting timestamp: 2025-08-17T23:00:00Z - FORCE REFRESH
+// Unique ID: nav-fix-001
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -76,7 +78,7 @@ const Header = () => {
       if (count >= 2 && importantTypes.includes(type)) {
         navigation.push({
           name: type + 's', // Pluralize
-          href: `/category/${type.toLowerCase()}`
+          href: `/category/${type.toLowerCase()}s` // Pluralize URL too
         })
       }
     })
@@ -186,12 +188,12 @@ const Header = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center space-x-1 nav-fix-001">
               {finalNavigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="px-4 py-2 text-gray-700 hover:text-pink-600 font-medium transition-all duration-200 relative group rounded-lg hover:bg-pink-50"
+                  className="px-4 py-2 text-gray-700 hover:text-pink-600 font-medium transition-all duration-200 relative group rounded-lg hover:bg-pink-50 nav-link-fixed"
                 >
                   {item.name}
                   <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-rose-500 group-hover:w-3/4 transition-all duration-300"></span>

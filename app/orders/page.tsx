@@ -1,9 +1,8 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Package, Clock, CheckCircle, XCircle, Truck, MapPin, Calendar, DollarSign, ArrowLeft } from 'lucide-react'
+import { Package, Clock, CheckCircle, XCircle, Truck, MapPin, Calendar, Tag, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 
 interface Order {
@@ -146,7 +145,6 @@ const OrdersPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
@@ -163,7 +161,6 @@ const OrdersPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
         <div className="py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
@@ -186,7 +183,6 @@ const OrdersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
       
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-pink-50 to-rose-50 py-20">
@@ -317,7 +313,7 @@ const OrdersPage = () => {
                       )}
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                          <DollarSign className="h-5 w-5 text-green-600" />
+                          <Tag className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
                           <p className="font-medium text-gray-900">Total Amount</p>

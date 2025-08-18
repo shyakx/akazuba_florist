@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { X, Upload, Image as ImageIcon, DollarSign, Package, Tag, FileText, Save, Plus, Trash2 } from 'lucide-react'
+import { X, Upload, Image as ImageIcon, Tag, Package, Tag as TagIcon, FileText, Save, Plus, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 interface ProductModalProps {
@@ -198,7 +198,7 @@ const ProductModal = ({ isOpen, onClose, product, mode }: ProductModalProps) => 
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-gray-400" />
+                    <Tag className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     type="number"

@@ -1,0 +1,10 @@
+{
+  "DistributionId": "EBRNRUCWZSG3P",
+  "DistributionDomain": "d238m8iiglcoij.cloudfront.net",
+  "DomainName": "akazuba.rw",
+  "CreatedAt": "2025-08-17T22:42:51.547000+00:00",
+  "Status": "InProgress",
+  "HTTPS": true,
+  "SSL": "CloudFront Default Certificate",
+  "ViewerProtocolPolicy": "redirect-to-https"
+} 

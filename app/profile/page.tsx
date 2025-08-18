@@ -1,10 +1,10 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Eye, EyeOff, User, Mail, Phone, Lock, Save, Edit, X, Check } from 'lucide-react'
-import Header from '@/components/Header'
 import { apiUtils, User as UserType } from '@/lib/api'
+import Footer from '@/components/Footer'
 
 const Profile = () => {
   const { user, updateProfile, changePassword, logout } = useAuth()
@@ -109,8 +109,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
-      
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-sm">
           {/* Header */}
@@ -415,6 +413,7 @@ const Profile = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   )
 }

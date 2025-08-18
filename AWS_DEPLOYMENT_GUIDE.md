@@ -119,7 +119,7 @@ After successful deployment, you'll get:
 ### URLs and Endpoints:
 - **Frontend URL**: `http://akazuba-florist-frontend.s3-website-us-east-1.amazonaws.com`
 - **Backend API**: `http://[EC2-IP]:5000`
-- **Database Endpoint**: `[RDS-ENDPOINT]:5432`
+- **Database Endpoint**: `[RDS-ENDPOINT]:5434`
 - **Admin Dashboard**: `http://akazuba-florist-frontend.s3-website-us-east-1.amazonaws.com/admin`
 
 ### Default Credentials:
