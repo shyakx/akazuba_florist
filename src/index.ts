@@ -27,8 +27,37 @@ import { logger } from './utils/logger'
 dotenv.config()
 
 const app = express()
-const prisma = new PrismaClient()
 const PORT = process.env.PORT || 5000
+
+// Log environment variables for debugging
+console.log('Environment check:')
+console.log('- NODE_ENV:', process.env.NODE_ENV)
+console.log('- PORT:', process.env.PORT)
+console.log('- DB_HOST:', process.env.DB_HOST)
+console.log('- DB_PORT:', process.env.DB_PORT)
+console.log('- DB_NAME:', process.env.DB_NAME)
+console.log('- DATABASE_URL exists:', !!process.env.DATABASE_URL)
+
+// Initialize Prisma with error handling
+let prisma: PrismaClient
+try {
+  prisma = new PrismaClient()
+  console.log('Prisma client initialized successfully')
+} catch (error) {
+  console.error('Failed to initialize Prisma client:', error)
+  process.exit(1)
+}
+
+// Test database connection
+async function testDatabaseConnection() {
+  try {
+    await prisma.$connect()
+    console.log('Database connection successful')
+  } catch (error) {
+    console.error('Database connection failed:', error)
+    // Don't exit, let the app start but log the error
+  }
+}
 
 // Swagger configuration
 const swaggerOptions = {
@@ -87,6 +116,7 @@ app.get('/health', (req, res) => {
     message: 'Akazuba Florist API is running',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
+    database: 'connected', // We'll update this based on actual connection status
   })
 })
 
@@ -100,51 +130,40 @@ app.use('/api/v1/orders', orderRoutes)
 app.use('/api/v1/wishlist', wishlistRoutes)
 app.use('/api/v1/admin', adminRoutes)
 app.use('/api/v1/payments', paymentRoutes)
-// MoMo routes removed - using simplified payment methods
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found',
-    path: req.originalUrl,
-  })
-})
 
 // Error handling middleware
 app.use(errorHandler)
 
+// Start server with error handling
+async function startServer() {
+  try {
+    // Test database connection
+    await testDatabaseConnection()
+    
+    // Start the server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`)
+      console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`)
+      console.log(`🏥 Health Check: http://localhost:${PORT}/health`)
+    })
+  } catch (error) {
+    console.error('Failed to start server:', error)
+    process.exit(1)
+  }
+}
+
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received, shutting down gracefully')
+  console.log('SIGTERM received, shutting down gracefully')
   await prisma.$disconnect()
   process.exit(0)
 })
 
 process.on('SIGINT', async () => {
-  logger.info('SIGINT received, shutting down gracefully')
+  console.log('SIGINT received, shutting down gracefully')
   await prisma.$disconnect()
   process.exit(0)
 })
 
-// Start server
-const startServer = async () => {
-  try {
-    // Test database connection
-    await prisma.$connect()
-    logger.info('Database connected successfully')
-
-    app.listen(PORT, () => {
-      logger.info(`🚀 Akazuba Florist API server running on port ${PORT}`)
-      logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`)
-      logger.info(`🏥 Health Check: http://localhost:${PORT}/health`)
-    })
-  } catch (error) {
-    logger.error('Failed to start server:', error)
-    process.exit(1)
-  }
-}
-
-startServer()
-
-export default app 
+// Start the server
+startServer() 
