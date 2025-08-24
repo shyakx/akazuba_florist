@@ -1,0 +1,10 @@
+# Image Mapping for red flowers
+# Rename your images according to this mapping:
+
+WhatsApp Image 2025-08-16 at 13.50.06_88773bd4.jpg → red-rose-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.07_6ae3025c.jpg → red-tulip-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.07_6e7f5fc5.jpg → red-carnation-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.08_cb146601.jpg → red-poppy-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.13_c5b3c3d0.jpg → red-geranium-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.15_e02b1583.jpg → red-chrysanthemum-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.16_c19a92fe.jpg → red-dahlia-1.jpg

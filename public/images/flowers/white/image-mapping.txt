@@ -1,0 +1,6 @@
+# Image Mapping for white flowers
+# Rename your images according to this mapping:
+
+WhatsApp Image 2025-08-16 at 13.50.07_2f76cf83.jpg → white-lily-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.07_c9998141.jpg → white-rose-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.14_981861c2.jpg → white-daisy-1.jpg

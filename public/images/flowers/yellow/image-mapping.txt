@@ -1,0 +1,5 @@
+# Image Mapping for yellow flowers
+# Rename your images according to this mapping:
+
+WhatsApp Image 2025-08-16 at 13.50.13_94da17fc.jpg → yellow-sunflower-1.jpg
+WhatsApp Image 2025-08-16 at 16.22.37_3a0648f2.jpg → yellow-rose-1.jpg

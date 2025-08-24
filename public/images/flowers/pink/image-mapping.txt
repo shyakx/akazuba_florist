@@ -1,0 +1,6 @@
+# Image Mapping for pink flowers
+# Rename your images according to this mapping:
+
+WhatsApp Image 2025-08-16 at 13.50.07_c9998141.jpg → pink-rose-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.15_4aecb206.jpg → pink-peony-1.jpg
+WhatsApp Image 2025-08-16 at 13.50.16_20693062.jpg → pink-cherry-blossom-1.jpg

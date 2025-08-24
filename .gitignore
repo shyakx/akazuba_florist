@@ -1,8 +1,18 @@
 # Dependencies
 node_modules/
+<<<<<<< HEAD
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+>>>>>>> 2d2c1e45299f1c6935aabd8041c42266c4ee7236
+backend/node_modules/
+package-lock.json
+backend/package-lock.json
+
+# Next.js
+.next/
+out/
+>>>>>>> 2d2c1e45299f1c6935aabd8041c42266c4ee7236
 
 # Environment variables
 .env
@@ -11,6 +21,7 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+<<<<<<< HEAD
 # Build outputs
 dist/
 build/
@@ -21,6 +32,18 @@ logs/
 
 # Runtime data
 pids/
+=======
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+>>>>>>> 2d2c1e45299f1c6935aabd8041c42266c4ee7236
 *.pid
 *.seed
 *.pid.lock
@@ -37,6 +60,18 @@ jspm_packages/
 # Optional npm cache directory
 .npm
 
+<<<<<<< HEAD
+=======
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+>>>>>>> 2d2c1e45299f1c6935aabd8041c42266c4ee7236
 # Optional REPL history
 .node_repl_history
 
@@ -46,20 +81,76 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
+<<<<<<< HEAD
 # dotenv environment variables file
 .env
 
 # IDE files
+=======
+# parcel-bundler cache (https://parceljs.org/)
+.cache
+.parcel-cache
+
+# next.js build output
+.next
+
+# nuxt.js build output
+.nuxt
+
+# vuepress build output
+.vuepress/dist
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# Test files
+test-*.js
+debug-*.js
+check-*.js
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# IDE
+>>>>>>> 2d2c1e45299f1c6935aabd8041c42266c4ee7236
 .vscode/
 .idea/
 *.swp
 *.swo
+<<<<<<< HEAD
 
 # OS generated files
+=======
+*~
+
+# OS
+>>>>>>> 2d2c1e45299f1c6935aabd8041c42266c4ee7236
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+<<<<<<< HEAD
 Thumbs.db
+=======
+Thumbs.db 
+>>>>>>> 2d2c1e45299f1c6935aabd8041c42266c4ee7236
