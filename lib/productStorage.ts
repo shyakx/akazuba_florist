@@ -1,7 +1,7 @@
-import { AdminProduct } from './adminApi'
 import { realFlowerProducts } from '@/data/real-flowers'
+import { AdminProduct } from './adminApi'
 
-// Transform real flower products to admin format
+// Transform real flower data to admin product format
 const transformToAdminProduct = (product: any, index: number): AdminProduct => ({
   id: product.id.toString(),
   name: product.name,
@@ -35,98 +35,92 @@ const transformToAdminProduct = (product: any, index: number): AdminProduct => (
   reviewCount: Math.floor(Math.random() * 20) + 1
 })
 
-// Product storage class
-export class ProductStorage {
+class ProductStorage {
   private products: AdminProduct[] = []
   private nextId: number = 1
+  private isInitialized = false
 
   constructor() {
-    this.initializeProducts()
+    this.loadFromStorage()
   }
 
-  private initializeProducts() {
-    // Transform real flower products
-    const transformedProducts = realFlowerProducts.map((product, index) => 
+  // Initialize products from real flower data
+  initializeProducts() {
+    if (this.isInitialized) return
+
+    // Transform real flower products to admin format
+    this.products = realFlowerProducts.map((product, index) => 
       transformToAdminProduct(product, index)
     )
     
-    // Set next ID to be higher than existing products
-    this.nextId = Math.max(...transformedProducts.map(p => parseInt(p.id))) + 1
+    // Set next ID for new products
+    this.nextId = this.products.length + 1
     
-    this.products = transformedProducts
+    this.isInitialized = true
+    this.saveToStorage()
   }
 
-  // Get all products with optional filtering
-  getProducts(filters?: {
+  // Get products with optional filtering and pagination
+  getProducts(options?: {
     search?: string
     category?: string
-    status?: 'active' | 'inactive' | 'all'
-    featured?: boolean
+    status?: string
     page?: number
     limit?: number
   }): { products: AdminProduct[]; total: number; pages: number } {
+    this.initializeProducts()
+    
     let filteredProducts = [...this.products]
 
     // Apply search filter
-    if (filters?.search) {
-      const searchLower = filters.search.toLowerCase()
-      filteredProducts = filteredProducts.filter(product => 
-        product.name.toLowerCase().includes(searchLower) ||
-        product.description.toLowerCase().includes(searchLower) ||
-        product.categoryName.toLowerCase().includes(searchLower) ||
-        product.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    if (options?.search) {
+      const searchTerm = options.search.toLowerCase()
+      filteredProducts = filteredProducts.filter(product =>
+        product.name.toLowerCase().includes(searchTerm) ||
+        product.description.toLowerCase().includes(searchTerm) ||
+        product.categoryName.toLowerCase().includes(searchTerm)
       )
     }
 
     // Apply category filter
-    if (filters?.category) {
-      filteredProducts = filteredProducts.filter(product => 
-        product.categoryId === filters.category
+    if (options?.category && options.category !== 'all') {
+      filteredProducts = filteredProducts.filter(product =>
+        product.categoryId === options.category
       )
     }
 
     // Apply status filter
-    if (filters?.status) {
-      if (filters.status === 'active') {
+    if (options?.status && options.status !== 'all') {
+      if (options.status === 'active') {
         filteredProducts = filteredProducts.filter(product => product.isActive)
-      } else if (filters.status === 'inactive') {
+      } else if (options.status === 'inactive') {
         filteredProducts = filteredProducts.filter(product => !product.isActive)
+      } else if (options.status === 'featured') {
+        filteredProducts = filteredProducts.filter(product => product.isFeatured)
       }
     }
 
-    // Apply featured filter
-    if (filters?.featured !== undefined) {
-      filteredProducts = filteredProducts.filter(product => 
-        product.isFeatured === filters.featured
-      )
-    }
+    const total = filteredProducts.length
+    const page = options?.page || 1
+    const limit = options?.limit || 10
+    const pages = Math.ceil(total / limit)
 
-    // Apply pagination (if limit is specified, otherwise return all)
-    let paginatedProducts = filteredProducts
-    let totalPages = 1
-    if (filters?.limit && filters.limit < filteredProducts.length) {
-      const limit = filters.limit
-      const page = filters?.page || 1
-      const startIndex = (page - 1) * limit
-      const endIndex = startIndex + limit
-      paginatedProducts = filteredProducts.slice(startIndex, endIndex)
-      totalPages = Math.ceil(filteredProducts.length / limit)
-    }
+    // Apply pagination
+    const startIndex = (page - 1) * limit
+    const endIndex = startIndex + limit
+    const paginatedProducts = filteredProducts.slice(startIndex, endIndex)
 
     return {
       products: paginatedProducts,
-      total: filteredProducts.length,
-      pages: totalPages
+      total,
+      pages
     }
-  }
-
-  // Get product by ID
-  getProduct(id: string): AdminProduct | null {
-    return this.products.find(product => product.id === id) || null
   }
 
   // Add new product
   addProduct(productData: Omit<AdminProduct, 'id' | 'createdAt' | 'updatedAt'>): AdminProduct {
+    this.initializeProducts()
+    
     const newProduct: AdminProduct = {
       ...productData,
       id: this.nextId.toString(),
@@ -136,173 +130,222 @@ export class ProductStorage {
 
     this.products.push(newProduct)
     this.nextId++
-
-    // Save to localStorage for persistence
     this.saveToStorage()
-
+    
+    // Sync with backend
+    this.syncToBackend(newProduct, 'create')
+    
     return newProduct
   }
 
-  // Update product
-  updateProduct(id: string, updates: Partial<AdminProduct>): AdminProduct | null {
-    const index = this.products.findIndex(product => product.id === id)
-    if (index === -1) return null
+  // Update existing product
+  updateProduct(updatedProduct: AdminProduct): AdminProduct {
+    this.initializeProducts()
+    
+    const index = this.products.findIndex(p => p.id === updatedProduct.id)
+    if (index === -1) {
+      throw new Error('Product not found')
+    }
 
-    this.products[index] = {
-      ...this.products[index],
-      ...updates,
+    const product = {
+      ...updatedProduct,
       updatedAt: new Date().toISOString()
     }
 
-    // Save to localStorage for persistence
+    this.products[index] = product
     this.saveToStorage()
-
-    return this.products[index]
+    
+    // Sync with backend
+    this.syncToBackend(product, 'update')
+    
+    return product
   }
 
   // Delete product
-  deleteProduct(id: string): boolean {
-    const index = this.products.findIndex(product => product.id === id)
-    if (index === -1) return false
+  deleteProduct(id: string): void {
+    this.initializeProducts()
+    
+    const index = this.products.findIndex(p => p.id === id)
+    if (index === -1) {
+      throw new Error('Product not found')
+    }
 
     this.products.splice(index, 1)
-    
-    // Save to localStorage for persistence
     this.saveToStorage()
-
-    return true
+    
+    // Sync with backend
+    this.syncToBackend({ id } as AdminProduct, 'delete')
   }
 
   // Bulk operations
-  bulkOperation(operation: {
-    productIds: string[]
-    operation: 'delete' | 'activate' | 'deactivate' | 'feature' | 'unfeature' | 'updateStock'
-    data?: any
-  }): { success: boolean; affectedCount: number; message: string } {
-    const { productIds, operation: op, data } = operation
-    let affectedCount = 0
+  bulkOperation(operation: 'delete' | 'activate' | 'deactivate' | 'feature' | 'unfeature', productIds: string[]): void {
+    this.initializeProducts()
+    
+    this.products = this.products.map(product => {
+      if (productIds.includes(product.id)) {
+        switch (operation) {
+          case 'delete':
+            return null
+          case 'activate':
+            return { ...product, isActive: true, updatedAt: new Date().toISOString() }
+          case 'deactivate':
+            return { ...product, isActive: false, updatedAt: new Date().toISOString() }
+          case 'feature':
+            return { ...product, isFeatured: true, updatedAt: new Date().toISOString() }
+          case 'unfeature':
+            return { ...product, isFeatured: false, updatedAt: new Date().toISOString() }
+          default:
+            return product
+        }
+      }
+      return product
+    }).filter(Boolean) as AdminProduct[]
 
-    switch (op) {
-      case 'delete':
-        productIds.forEach(id => {
-          if (this.deleteProduct(id)) affectedCount++
-        })
-        return { success: true, affectedCount, message: `${affectedCount} products deleted` }
+    this.saveToStorage()
+    
+    // Sync with backend
+    this.syncBulkToBackend(operation, productIds)
+  }
 
-      case 'activate':
-        productIds.forEach(id => {
-          if (this.updateProduct(id, { isActive: true })) affectedCount++
-        })
-        return { success: true, affectedCount, message: `${affectedCount} products activated` }
+  // Get categories dynamically from products
+  getCategories(): Array<{ id: string; name: string; count: number }> {
+    this.initializeProducts()
+    
+    const categoryMap = new Map<string, number>()
+    
+    this.products.forEach(product => {
+      const count = categoryMap.get(product.categoryId) || 0
+      categoryMap.set(product.categoryId, count + 1)
+    })
 
-      case 'deactivate':
-        productIds.forEach(id => {
-          if (this.updateProduct(id, { isActive: false })) affectedCount++
-        })
-        return { success: true, affectedCount, message: `${affectedCount} products deactivated` }
+    return Array.from(categoryMap.entries()).map(([id, count]) => ({
+      id,
+      name: this.products.find(p => p.categoryId === id)?.categoryName || id,
+      count
+    }))
+  }
 
-      case 'feature':
-        productIds.forEach(id => {
-          if (this.updateProduct(id, { isFeatured: true })) affectedCount++
-        })
-        return { success: true, affectedCount, message: `${affectedCount} products featured` }
+  // Get analytics data
+  getAnalytics(): any {
+    this.initializeProducts()
+    
+    const totalProducts = this.products.length
+    const activeProducts = this.products.filter(p => p.isActive).length
+    const featuredProducts = this.products.filter(p => p.isFeatured).length
+    const lowStockProducts = this.products.filter(p => p.stockQuantity <= 5).length
+    
+    const totalRevenue = this.products.reduce((sum, p) => sum + p.revenue, 0)
+    const totalSales = this.products.reduce((sum, p) => sum + p.sales, 0)
+    const totalViews = this.products.reduce((sum, p) => sum + p.views, 0)
+    
+    const avgRating = this.products.length > 0 
+      ? this.products.reduce((sum, p) => sum + p.rating, 0) / this.products.length 
+      : 0
 
-      case 'unfeature':
-        productIds.forEach(id => {
-          if (this.updateProduct(id, { isFeatured: false })) affectedCount++
-        })
-        return { success: true, affectedCount, message: `${affectedCount} products unfeatured` }
-
-      case 'updateStock':
-        productIds.forEach(id => {
-          const product = this.getProduct(id)
-          if (product && data?.quantity !== undefined) {
-            let newQuantity = product.stockQuantity
-            if (data.operation === 'add') newQuantity += data.quantity
-            else if (data.operation === 'subtract') newQuantity -= data.quantity
-            else if (data.operation === 'set') newQuantity = data.quantity
-
-            if (newQuantity >= 0) {
-              this.updateProduct(id, { stockQuantity: newQuantity })
-              affectedCount++
-            }
-          }
-        })
-        return { success: true, affectedCount, message: `Stock updated for ${affectedCount} products` }
-
-      default:
-        return { success: false, affectedCount: 0, message: 'Invalid operation' }
+    return {
+      totalProducts,
+      activeProducts,
+      featuredProducts,
+      lowStockProducts,
+      totalRevenue,
+      totalSales,
+      totalViews,
+      avgRating: parseFloat(avgRating.toFixed(1))
     }
   }
 
-  // Get categories
-  getCategories(): { id: string; name: string; count: number }[] {
-    const categoryMap = new Map<string, { name: string; count: number }>()
+  // Sync with backend database
+  private async syncToBackend(product: AdminProduct, operation: 'create' | 'update' | 'delete') {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
 
-    this.products.forEach(product => {
-      const existing = categoryMap.get(product.categoryId)
-      if (existing) {
-        existing.count++
-      } else {
-        categoryMap.set(product.categoryId, {
-          name: product.categoryName,
-          count: 1
-        })
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      
+      switch (operation) {
+        case 'create':
+          await fetch(`${baseURL}/admin/products`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(product)
+          })
+          break
+        case 'update':
+          await fetch(`${baseURL}/admin/products/${product.id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(product)
+          })
+          break
+        case 'delete':
+          await fetch(`${baseURL}/admin/products/${product.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          })
+          break
       }
-    })
-
-    return Array.from(categoryMap.entries()).map(([id, data]) => ({
-      id,
-      name: data.name,
-      count: data.count
-    }))
+    } catch (error) {
+      console.error('Failed to sync with backend:', error)
+    }
   }
 
-  // Get analytics
-  getAnalytics(): any[] {
-    return this.products.map(product => ({
-      productId: product.id,
-      productName: product.name,
-      views: product.views || 0,
-      sales: product.sales || 0,
-      revenue: product.revenue || 0,
-      rating: product.rating || 0,
-      reviewCount: product.reviewCount || 0,
-      stockTurnover: product.sales ? (product.sales / product.stockQuantity) : 0,
-      profitMargin: product.costPrice ? ((product.price - product.costPrice) / product.price) : 0,
-      lastUpdated: product.updatedAt
-    }))
-  }
+  // Sync bulk operations with backend
+  private async syncBulkToBackend(operation: string, productIds: string[]) {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) return
 
-  // Save to localStorage
-  private saveToStorage() {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('adminProducts', JSON.stringify(this.products))
-      localStorage.setItem('adminProductsNextId', this.nextId.toString())
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      
+      await fetch(`${baseURL}/admin/products/bulk`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ operation, productIds })
+      })
+    } catch (error) {
+      console.error('Failed to sync bulk operation with backend:', error)
     }
   }
 
   // Load from localStorage
-  loadFromStorage() {
-    if (typeof window !== 'undefined') {
-      const savedProducts = localStorage.getItem('adminProducts')
-      const savedNextId = localStorage.getItem('adminProductsNextId')
-      
-      if (savedProducts) {
-        this.products = JSON.parse(savedProducts)
+  private loadFromStorage() {
+    try {
+      const stored = localStorage.getItem('productStorage')
+      if (stored) {
+        const data = JSON.parse(stored)
+        this.products = data.products || []
+        this.nextId = data.nextId || 1
+        this.isInitialized = data.isInitialized || false
       }
-      
-      if (savedNextId) {
-        this.nextId = parseInt(savedNextId)
+    } catch (error) {
+      console.error('Error loading from storage:', error)
+    }
+  }
+
+  // Save to localStorage
+  private saveToStorage() {
+    try {
+      const data = {
+        products: this.products,
+        nextId: this.nextId,
+        isInitialized: this.isInitialized
       }
+      localStorage.setItem('productStorage', JSON.stringify(data))
+    } catch (error) {
+      console.error('Error saving to storage:', error)
     }
   }
 }
 
-// Export singleton instance
 export const productStorage = new ProductStorage()
-
-// Load saved data on initialization
-if (typeof window !== 'undefined') {
-  productStorage.loadFromStorage()
-}

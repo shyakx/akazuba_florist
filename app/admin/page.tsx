@@ -64,6 +64,7 @@ const AdminDashboard = () => {
     lowStockProducts: 0
   })
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
+  const [recentActivity, setRecentActivity] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [dataFetched, setDataFetched] = useState(false)
   const [showLowStockAlert, setShowLowStockAlert] = useState(false)
@@ -87,65 +88,54 @@ const AdminDashboard = () => {
     try {
       setLoading(true)
       
-      // Get real data from productStorage
-      const allProducts = productStorage.getProducts()
-      const categories = productStorage.getCategories()
-      const analytics = productStorage.getAnalytics()
-      
-      // Calculate real statistics
-      const statsData: DashboardStats = {
-        newOrders: Math.floor(Math.random() * 15) + 5, // Simulate new orders
-        totalProducts: allProducts.products.length,
-        totalCustomers: Math.floor(Math.random() * 200) + 50, // Simulate customer count
-        lowStockProducts: allProducts.products.filter((p: any) => p.stockQuantity <= 5).length
+      // Fetch real data from backend API
+      const [statsResponse, ordersResponse, activityResponse] = await Promise.all([
+        fetch('/api/admin/dashboard/stats', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        }),
+        fetch('/api/admin/dashboard/recent-orders', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        }),
+        fetch('/api/admin/dashboard/activity', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        })
+      ])
+
+      const [statsData, ordersData, activityData] = await Promise.all([
+        statsResponse.json(),
+        ordersResponse.json(),
+        activityResponse.json()
+      ])
+
+      if (statsData.success) {
+        setStats(statsData.data)
+      } else {
+        console.error('Failed to fetch stats:', statsData.message)
+        toast.error('Failed to load dashboard statistics')
       }
-      
-      // Generate realistic recent orders
-      const ordersData: RecentOrder[] = [
-        {
-          id: '1',
-          orderNumber: 'ORD-2024-001',
-          customerName: 'Alice Uwimana',
-          totalAmount: 45000,
-          status: 'PENDING',
-          createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: '2',
-          orderNumber: 'ORD-2024-002',
-          customerName: 'Jean Pierre Ndayisaba',
-          totalAmount: 32000,
-          status: 'CONFIRMED',
-          createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: '3',
-          orderNumber: 'ORD-2024-003',
-          customerName: 'Marie Claire Uwineza',
-          totalAmount: 28000,
-          status: 'SHIPPED',
-          createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: '4',
-          orderNumber: 'ORD-2024-004',
-          customerName: 'Emmanuel Nkurunziza',
-          totalAmount: 55000,
-          status: 'DELIVERED',
-          createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: '5',
-          orderNumber: 'ORD-2024-005',
-          customerName: 'Grace Mukamana',
-          totalAmount: 38000,
-          status: 'PENDING',
-          createdAt: new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString()
-        }
-      ]
-      
-      setStats(statsData)
-      setRecentOrders(ordersData)
+
+      if (ordersData.success) {
+        setRecentOrders(ordersData.data)
+      } else {
+        console.error('Failed to fetch orders:', ordersData.message)
+        toast.error('Failed to load recent orders')
+      }
+
+      if (activityData.success) {
+        setRecentActivity(activityData.data)
+      } else {
+        console.error('Failed to fetch activity:', activityData.message)
+        toast.error('Failed to load recent activity')
+      }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
       toast.error('Failed to load dashboard data')
@@ -396,41 +386,35 @@ const AdminDashboard = () => {
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">New order received</p>
-                <p className="text-xs text-gray-600">Order #ORD-2024-001 from Alice Uwimana</p>
+            {recentActivity.length > 0 ? (
+              recentActivity.map((activity, index) => (
+                <div key={index} className={`flex items-center space-x-3 p-3 rounded-lg ${
+                  activity.status === 'success' ? 'bg-green-50' :
+                  activity.status === 'warning' ? 'bg-yellow-50' :
+                  activity.status === 'info' ? 'bg-blue-50' :
+                  'bg-gray-50'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    activity.status === 'success' ? 'bg-green-500' :
+                    activity.status === 'warning' ? 'bg-yellow-500' :
+                    activity.status === 'info' ? 'bg-blue-500' :
+                    'bg-gray-500'
+                  }`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                    <p className="text-xs text-gray-600">{activity.description}</p>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Clock className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No recent activity</p>
               </div>
-              <span className="text-xs text-gray-500">2 hours ago</span>
-            </div>
-            
-            <div className="flex items-center space-x-3 p-3 bg-blue-50 rounded-lg">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Product updated</p>
-                <p className="text-xs text-gray-600">Red Rose Bouquet stock updated to 25 units</p>
-              </div>
-              <span className="text-xs text-gray-500">4 hours ago</span>
-            </div>
-            
-            <div className="flex items-center space-x-3 p-3 bg-yellow-50 rounded-lg">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Low stock alert</p>
-                <p className="text-xs text-gray-600">White Lily arrangement running low (3 units left)</p>
-              </div>
-              <span className="text-xs text-gray-500">6 hours ago</span>
-            </div>
-            
-            <div className="flex items-center space-x-3 p-3 bg-purple-50 rounded-lg">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">New customer registered</p>
-                <p className="text-xs text-gray-600">Marie Claire Uwineza joined the platform</p>
-              </div>
-              <span className="text-xs text-gray-500">8 hours ago</span>
-            </div>
+            )}
           </div>
         </div>
 
