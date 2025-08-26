@@ -1,8 +1,8 @@
 'use client'
 
-import React, { useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/RealAuthContext'
 import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/admin/login')
+      router.push('/login')
     }
   }, [isAuthenticated, isLoading, router])
 

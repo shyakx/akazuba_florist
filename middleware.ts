@@ -16,15 +16,13 @@ const adminRoutes = [
 
 // Define admin test routes (no authentication required)
 const adminTestRoutes = [
-  '/admin/test-simple',
-  '/admin/enhanced'
+      '/admin'
 ]
 
 // Define auth routes (login, register)
 const authRoutes = [
   '/login',
-  '/register',
-  '/admin/login'
+  '/register'
 ]
 
 export function middleware(request: NextRequest) {
@@ -38,11 +36,16 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!accessToken
   const isAdmin = userRole === 'ADMIN'
   
+  // Redirect admin login attempts to main login page
+  if (pathname.startsWith('/admin/login')) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+  
   // Handle auth routes (login, register)
   if (authRoutes.some(route => pathname.startsWith(route))) {
     // If user is already authenticated, redirect appropriately
     if (isAuthenticated) {
-      if (pathname.startsWith('/admin/login')) {
+      if (isAdmin) {
         // Admin is logged in, redirect to admin dashboard
         return NextResponse.redirect(new URL('/admin', request.url))
       } else {
@@ -63,8 +66,8 @@ export function middleware(request: NextRequest) {
   // Handle admin routes
   if (adminRoutes.some(route => pathname.startsWith(route))) {
     if (!isAuthenticated) {
-      // Not authenticated, redirect to admin login
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      // Not authenticated, redirect to main login
+      return NextResponse.redirect(new URL('/login', request.url))
     }
     
     if (!isAdmin) {

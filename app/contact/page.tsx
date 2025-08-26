@@ -97,11 +97,11 @@ const ContactPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-pink-50 via-white to-rose-50 py-20">
+      <section className="bg-pink-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Get in <span className="text-gradient bg-gradient-to-r from-pink-600 to-rose-600">Touch</span>
+              Get in <span className="text-pink-600">Touch</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Have questions about our flowers or need help with your order? 
@@ -224,7 +224,7 @@ const ContactPage = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-300 flex items-center justify-center gap-2"
+                  className="w-full bg-pink-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <Send className="h-5 w-5" />
                   Send Message
@@ -244,7 +244,7 @@ const ContactPage = () => {
               </div>
 
               {/* Quick Contact Info */}
-              <div className="bg-gradient-to-r from-pink-600 to-rose-600 rounded-2xl p-6 text-white">
+              <div className="bg-pink-600 rounded-2xl p-6 text-white">
                 <h3 className="text-xl font-bold mb-4">Quick Contact</h3>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
@@ -301,7 +301,7 @@ const ContactPage = () => {
               <p className="text-gray-600 mb-6">
                 Can&apos;t find what you&apos;re looking for? Contact us directly and we&apos;ll be happy to help!
               </p>
-              <button className="bg-gradient-to-r from-pink-600 to-rose-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-300">
+              <button className="bg-pink-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300">
                 Contact Us
               </button>
             </div>

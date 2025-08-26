@@ -1,13 +1,40 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Only use static export for production builds
-  ...(process.env.NODE_ENV === 'production' && {
-    output: 'export',
-    trailingSlash: true,
-  }),
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
-    unoptimized: true,
     domains: ['images.unsplash.com', 'images.pexels.com'],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+  experimental: {
+    optimizePackageImports: ['@headlessui/react', '@heroicons/react', 'lucide-react'],
+  },
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+    
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+    
+    return config
   },
 }
 

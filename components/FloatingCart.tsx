@@ -61,13 +61,13 @@ const FloatingCart = () => {
                   {state.items.map((item) => (
                     <div key={item.id} className="flex items-center space-x-3 p-3 border rounded-lg">
                       <img
-                        src={item.image}
-                        alt={item.name}
+                        src={item.product?.images?.[0] || '/images/placeholder-flower.jpg'}
+                        alt={item.product?.name || 'Flower'}
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 truncate">{item.name}</h3>
-                        <p className="text-sm text-gray-600">{formatPrice(item.price)}</p>
+                        <h3 className="font-medium text-gray-900 truncate">{item.product?.name || 'Flower'}</h3>
+                        <p className="text-sm text-gray-600">{formatPrice(item.product?.price || 0)}</p>
                         <div className="flex items-center space-x-2 mt-2">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}

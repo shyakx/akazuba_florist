@@ -1,32 +1,22 @@
-// Real Payment API Integration for Akazuba Florist
-// Using Flutterwave for MoMo and Bank transfers in Rwanda
+// MTN MoMo Payment API Integration for Akazuba Florist
+// Direct MTN MoMo integration for Rwanda
 // Routes through backend to avoid CORS issues
 
 interface PaymentRequest {
   amount: number
-  currency: string
-  email: string
-  phone_number: string
-  tx_ref: string
-  redirect_url: string
-  customer: {
-    email: string
-    phone_number: string
-    name: string
-  }
-  customizations: {
-    title: string
-    description: string
-    logo: string
-  }
+  phoneNumber: string
+  reference: string
+  description: string
 }
 
 interface PaymentResponse {
   status: string
   message: string
   data: {
-    link: string
-    reference: string
+    financialTransactionId: string
+    externalId: string
+    amount: string
+    currency: string
     status: string
   }
 }
@@ -35,33 +25,12 @@ interface PaymentVerification {
   status: string
   message: string
   data: {
-    id: number
-    tx_ref: string
-    flw_ref: string
-    amount: number
+    financialTransactionId: string
+    externalId: string
+    amount: string
     currency: string
-    charged_amount: number
-    app_fee: number
-    merchant_fee: number
-    processor_response: string
-    auth_model: string
-    ip: string
-    narration: string
     status: string
-    payment_type: string
-    created_at: string
-    account_id: number
-    customer: {
-      id: number
-      phone_number: string
-      name: string
-      email: string
-      created_at: string
-    }
-    meta: any
-    amount_settled: number
-    subaccounts: any[]
-    charge_response: any
+    reason?: string
   }
 }
 
@@ -73,7 +42,7 @@ class PaymentAPI {
     this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
   }
 
-  // Initialize MoMo Payment
+  // Initialize MTN MoMo Payment
   async initiateMoMoPayment(paymentData: {
     amount: number
     phoneNumber: string
@@ -84,16 +53,12 @@ class PaymentAPI {
     try {
       const payload = {
         amount: paymentData.amount,
-        currency: 'RWF',
-        email: paymentData.email,
         phoneNumber: paymentData.phoneNumber,
-        customerName: paymentData.customerName,
         reference: paymentData.reference,
-        redirectUrl: `${window.location.origin}/payment/callback`,
-        paymentType: 'momo'
+        description: `Payment for ${paymentData.customerName}`
       }
 
-      const response = await fetch(`${this.baseURL}/payments/initiate`, {
+      const response = await fetch(`${this.baseURL}/momo/initiate-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -108,55 +73,15 @@ class PaymentAPI {
       const result = await response.json()
       return result
     } catch (error) {
-      console.error('MoMo payment initiation failed:', error)
-      throw new Error('Failed to initiate MoMo payment')
+      console.error('MTN MoMo payment initiation failed:', error)
+      throw new Error('Failed to initiate MTN MoMo payment')
     }
   }
 
-  // Initialize Bank Transfer Payment
-  async initiateBankTransfer(paymentData: {
-    amount: number
-    accountNumber: string
-    accountName: string
-    email: string
-    reference: string
-  }): Promise<PaymentResponse> {
-    try {
-      const payload = {
-        amount: paymentData.amount,
-        currency: 'RWF',
-        email: paymentData.email,
-        accountNumber: paymentData.accountNumber,
-        accountName: paymentData.accountName,
-        reference: paymentData.reference,
-        redirectUrl: `${window.location.origin}/payment/callback`,
-        paymentType: 'bank_transfer'
-      }
-
-      const response = await fetch(`${this.baseURL}/payments/initiate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-      return result
-    } catch (error) {
-      console.error('Bank transfer initiation failed:', error)
-      throw new Error('Failed to initiate bank transfer')
-    }
-  }
-
-  // Verify Payment Status
+  // Verify MTN MoMo Payment Status
   async verifyPayment(transactionId: string): Promise<PaymentVerification> {
     try {
-      const response = await fetch(`${this.baseURL}/payments/verify/${transactionId}`, {
+      const response = await fetch(`${this.baseURL}/momo/payment-status/${transactionId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -170,30 +95,8 @@ class PaymentAPI {
       const result = await response.json()
       return result
     } catch (error) {
-      console.error('Payment verification failed:', error)
-      throw new Error('Failed to verify payment')
-    }
-  }
-
-  // Get Bank Transfer Details
-  async getBankTransferDetails(transactionId: string): Promise<any> {
-    try {
-      const response = await fetch(`${this.baseURL}/payments/transfer/${transactionId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const result = await response.json()
-      return result
-    } catch (error) {
-      console.error('Bank transfer details fetch failed:', error)
-      throw new Error('Failed to get bank transfer details')
+      console.error('MTN MoMo payment verification failed:', error)
+      throw new Error('Failed to verify MTN MoMo payment')
     }
   }
 

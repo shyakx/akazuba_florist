@@ -1,218 +1,201 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Eye, EyeOff, Lock, User, Flower, ArrowLeft, Shield } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/RealAuthContext'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
-import { apiUtils } from '@/lib/api'
+import { Eye, EyeOff, Flower, Shield, AlertCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const AdminLogin = () => {
+  const router = useRouter()
+  const { login, user, isAuthenticated, isLoading } = useAuth()
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<{ username?: string; password?: string; general?: string }>({})
-  
-  const { adminLogin, isLoading } = useAuth()
-  const router = useRouter()
+  const [loading, setLoading] = useState(false)
 
-  const validateForm = () => {
-    const newErrors: { username?: string; password?: string } = {}
-
-    // Validate username (email)
-    if (!formData.username) {
-      newErrors.username = 'Username is required'
-    } else if (!apiUtils.validateEmail(formData.username)) {
-      newErrors.username = 'Please enter a valid email address'
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && user?.role === 'ADMIN') {
+      router.push('/admin')
     }
-
-    // Validate password
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+  }, [isAuthenticated, user, isLoading, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setErrors({})
-
-    if (!validateForm()) {
+    
+    if (!formData.email || !formData.password) {
+      toast.error('Please fill in all fields')
       return
     }
 
     try {
-      const success = await adminLogin(formData.username, formData.password)
+      setLoading(true)
+      await login(formData.email, formData.password)
       
-      if (success) {
-        // Redirect to admin dashboard
+      // Check if user is admin after login
+      if (user?.role === 'ADMIN') {
+        toast.success('Welcome back!')
         router.push('/admin')
       } else {
-        setErrors({ general: 'Invalid credentials. Please try again.' })
+        toast.error('Access denied. Admin privileges required.')
+        // Logout non-admin users
+        // await logout()
       }
-    } catch (error) {
-      console.error('Admin login error:', error)
-      setErrors({ general: 'An error occurred during login. Please try again.' })
+    } catch (error: any) {
+      console.error('Login error:', error)
+      toast.error(error.message || 'Login failed. Please check your credentials.')
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-    
-    // Clear field-specific error when user starts typing
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }))
-    }
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isAuthenticated && user?.role === 'ADMIN') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting to dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-pink-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="flex justify-center">
-            <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-3 rounded-full">
-              <Shield className="h-8 w-8 text-white" />
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="w-20 h-20 bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <Flower className="h-10 w-10 text-white" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <Shield className="h-4 w-4 text-white" />
+              </div>
             </div>
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Admin Access</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to manage your flower business
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Admin Access
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Secure login for store management
           </p>
-        </div>
-
-        {/* Back to Home */}
-        <div className="text-center">
-          <Link 
-            href="/" 
-            className="inline-flex items-center text-sm text-pink-600 hover:text-pink-500 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to home
-          </Link>
+          <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span>Secure connection</span>
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <span>Admin only</span>
+          </div>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* General Error */}
-            {errors.general && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-600 text-sm">{errors.general}</p>
-              </div>
-            )}
-
-            {/* Username Field */}
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Username (Email)
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="email"
-                  required
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.username ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {errors.username && (
-                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
-              )}
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+                placeholder="admin@akazubaflorist.com"
+              />
             </div>
 
-            {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
                 <input
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <EyeOff className="h-5 w-5 text-gray-400" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                    <Eye className="h-5 w-5 text-gray-400" />
                   )}
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-              )}
             </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-            >
-              {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Signing in...</span>
-                </div>
-              ) : (
-                'Sign in to Admin Panel'
-              )}
-            </button>
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {loading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Sign in to Admin
+                  </div>
+                )}
+              </button>
+            </div>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h3>
-            <div className="text-xs text-gray-600 space-y-1">
-              <p><strong>Username:</strong> admin@akazubaflorist.com</p>
-              <p><strong>Password:</strong> akazuba2024</p>
+          {/* Security Notice */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-md">
+            <div className="flex">
+              <AlertCircle className="h-5 w-5 text-blue-400 mr-2 mt-0.5" />
+              <div className="text-sm text-blue-700">
+                <p className="font-medium">Secure Access</p>
+                <p>This area is restricted to authorized personnel only.</p>
+              </div>
             </div>
-          </div>
-
-          {/* Customer Login Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Are you a customer?{' '}
-              <Link href="/login" className="font-medium text-pink-600 hover:text-pink-500">
-                Sign in here
-              </Link>
-            </p>
           </div>
         </div>
 
         {/* Footer */}
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Admin access is restricted to authorized personnel only
+            © 2024 Akazuba Florist. All rights reserved.
           </p>
         </div>
       </div>
@@ -220,4 +203,4 @@ const AdminLogin = () => {
   )
 }
 
-export default AdminLogin 
+export default AdminLogin

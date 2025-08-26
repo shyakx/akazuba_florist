@@ -20,7 +20,7 @@ const Hero = () => {
       title: "Wedding Flowers",
       subtitle: "Perfect for Your Special Day",
       description: "From bridal bouquets to venue decorations, we create magical floral arrangements that make your wedding day unforgettable.",
-      image: "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+      image: "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
       accent: "rose"
     },
     {
@@ -48,7 +48,7 @@ const Hero = () => {
   }
 
   return (
-    <section className="relative min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 overflow-hidden">
+    <section className="relative min-h-screen bg-pink-50 overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-32 h-32 bg-pink-200 rounded-full animate-pulse"></div>
@@ -74,7 +74,7 @@ const Hero = () => {
               <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 leading-tight">
                 {heroSlides[currentSlide].title}
                 <br />
-                <span className={`text-gradient bg-gradient-to-r from-${heroSlides[currentSlide].accent}-600 to-${heroSlides[currentSlide].accent === 'pink' ? 'rose' : 'pink'}-600`}>
+                <span className={`text-${heroSlides[currentSlide].accent}-600`}>
                   {heroSlides[currentSlide].subtitle}
                 </span>
               </h1>
@@ -127,7 +127,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link 
                 href="/category/roses" 
-                className="group bg-gradient-to-r from-pink-600 to-rose-600 text-white text-lg px-8 py-4 rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="group bg-pink-600 text-white text-lg px-8 py-4 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >
                 <Flower className="h-5 w-5" />
                 Shop Roses
@@ -135,7 +135,7 @@ const Hero = () => {
               </Link>
               <Link 
                 href="/category/tulips" 
-                className="group bg-gradient-to-r from-purple-600 to-pink-600 text-white text-lg px-8 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="group bg-purple-600 text-white text-lg px-8 py-4 rounded-xl font-semibold hover:bg-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >
                 <Flower className="h-5 w-5" />
                 Shop Tulips
@@ -218,7 +218,7 @@ const Hero = () => {
                   alt="Luxury Roses"
                   className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <h3 className="font-semibold text-gray-900 mt-4 text-lg">Luxury Roses</h3>
               <p className="text-sm text-gray-600 mb-2">Premium red roses</p>
@@ -228,11 +228,11 @@ const Hero = () => {
             <div className="group text-center">
               <div className="relative overflow-hidden rounded-2xl shadow-lg group-hover:shadow-2xl transition-all duration-300">
                 <img
-                  src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
+                  src="https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80"
                   alt="Mixed Bouquet"
                   className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <h3 className="font-semibold text-gray-900 mt-4 text-lg">Mixed Bouquet</h3>
               <p className="text-sm text-gray-600 mb-2">Colorful arrangement</p>
@@ -246,7 +246,7 @@ const Hero = () => {
                   alt="Wedding Bouquet"
                   className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <h3 className="font-semibold text-gray-900 mt-4 text-lg">Wedding Bouquet</h3>
               <p className="text-sm text-gray-600 mb-2">Elegant white roses</p>
@@ -260,7 +260,7 @@ const Hero = () => {
                   alt="Sunflower Bundle"
                   className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <h3 className="font-semibold text-gray-900 mt-4 text-lg">Sunflower Bundle</h3>
               <p className="text-sm text-gray-600 mb-2">Cheerful sunflowers</p>

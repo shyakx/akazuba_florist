@@ -69,25 +69,25 @@ const TulipsShowcase = () => {
       icon: Clock,
       title: 'Fresh Daily',
       description: 'Our tulips are handpicked fresh every morning from local Rwandan farms',
-      color: 'from-red-500 to-pink-500'
+      color: 'bg-red-500'
     },
     {
       icon: Truck,
       title: 'Same Day Delivery',
       description: 'Get your tulips delivered within hours in Kigali and surrounding areas',
-      color: 'from-pink-500 to-purple-500'
+      color: 'bg-pink-500'
     },
     {
       icon: Heart,
       title: 'Care Instructions',
       description: 'Detailed care guide included with every order to ensure longevity',
-      color: 'from-purple-500 to-blue-500'
+      color: 'bg-purple-500'
     },
     {
       icon: Star,
       title: 'Premium Quality',
       description: 'Only the finest tulips selected for our discerning customers',
-      color: 'from-blue-500 to-green-500'
+      color: 'bg-green-500'
     }
   ]
 
@@ -115,7 +115,7 @@ const TulipsShowcase = () => {
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-br from-pink-50 via-white to-purple-50">
+    <section className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div 
@@ -124,7 +124,7 @@ const TulipsShowcase = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-pink-100 to-purple-100 rounded-full px-6 py-2 mb-6">
+          <div className="inline-flex items-center space-x-2 bg-pink-100 rounded-full px-6 py-2 mb-6">
             <Flower className="h-5 w-5 text-pink-600" />
             <span className="text-pink-600 font-semibold">Premium Tulips Collection</span>
           </div>
@@ -158,7 +158,7 @@ const TulipsShowcase = () => {
                       e.currentTarget.style.display = 'none'
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   
                   {/* Rating Badge */}
                   <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 flex items-center space-x-1">
@@ -175,7 +175,7 @@ const TulipsShowcase = () => {
                     {variety.features.map((feature, featureIndex) => (
                       <span
                         key={featureIndex}
-                        className="px-3 py-1 bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 text-xs rounded-full font-medium"
+                        className="px-3 py-1 bg-pink-100 text-pink-700 text-xs rounded-full font-medium"
                       >
                         {feature}
                       </span>
@@ -197,7 +197,7 @@ const TulipsShowcase = () => {
 
                   <Link
                     href="/category/tulips"
-                    className="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-pink-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
+                    className="w-full bg-pink-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
                   >
                     <span>Shop Now</span>
                     <ArrowRight className="h-4 w-4" />
@@ -218,7 +218,7 @@ const TulipsShowcase = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="text-center group"
             >
-              <div className={`w-20 h-20 bg-gradient-to-br ${tip.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+              <div className={`w-20 h-20 ${tip.color} rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                 <tip.icon className="h-10 w-10 text-white" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">{tip.title}</h3>
@@ -248,9 +248,9 @@ const TulipsShowcase = () => {
                 initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="flex items-start space-x-4 p-6 bg-gradient-to-r from-pink-50 to-purple-50 rounded-2xl hover:shadow-lg transition-shadow duration-300"
+                className="flex items-start space-x-4 p-6 bg-pink-50 rounded-2xl hover:shadow-lg transition-shadow duration-300"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <fact.icon className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -271,7 +271,7 @@ const TulipsShowcase = () => {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <div className="bg-gradient-to-r from-pink-600 via-purple-600 to-pink-700 rounded-3xl p-12 text-white shadow-2xl">
+          <div className="bg-pink-600 rounded-3xl p-12 text-white shadow-2xl">
             <h3 className="text-3xl font-bold mb-4">Ready to Experience Tulip Magic?</h3>
             <p className="text-xl text-pink-100 mb-8 max-w-2xl mx-auto leading-relaxed">
               Choose from our beautiful tulip collection and bring spring colors to your space. 

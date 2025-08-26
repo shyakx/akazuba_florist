@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Eye, EyeOff, Lock, User, Flower, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
-import { apiUtils } from '@/lib/api'
+import { useAuth } from '@/contexts/RealAuthContext'
+import { authAPI } from '@/lib/auth-api'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -15,8 +15,20 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({})
   
-  const { login, isLoading } = useAuth()
+  const { login, isLoading, user, isAuthenticated } = useAuth()
   const router = useRouter()
+
+  // Monitor authentication state changes
+  useEffect(() => {
+    // If user is already authenticated, redirect them to appropriate page
+    if (!isLoading && isAuthenticated && user) {
+      if (user.role === 'ADMIN') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
+    }
+  }, [isAuthenticated, user, isLoading, router])
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {}
@@ -24,7 +36,7 @@ const Login = () => {
     // Validate email
     if (!formData.email) {
       newErrors.email = 'Email is required'
-    } else if (!apiUtils.validateEmail(formData.email)) {
+    } else if (!authAPI.utils.validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address'
     }
 
@@ -46,17 +58,15 @@ const Login = () => {
     }
 
     try {
-      const success = await login(formData.email, formData.password)
+      const success = await login(formData)
       
       if (success) {
-        // Redirect to home page
-        router.push('/')
+        // Redirect will happen automatically via useEffect
       } else {
-        setErrors({ general: 'Invalid email or password. Please try again.' })
+        setErrors({ general: 'Invalid email or password' })
       }
-    } catch (error) {
-      console.error('Login error:', error)
-      setErrors({ general: 'An error occurred during login. Please try again.' })
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Login failed. Please try again.' })
     }
   }
 
@@ -64,41 +74,39 @@ const Login = () => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     
-    // Clear field-specific error when user starts typing
+    // Clear specific field error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }))
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex justify-center">
-            <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-3 rounded-full">
-              <Flower className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to your account to continue shopping
-          </p>
-        </div>
-
-        {/* Back to Home */}
-        <div className="text-center">
+    <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Back Button */}
+        <div className="mb-6">
           <Link 
             href="/" 
-            className="inline-flex items-center text-sm text-pink-600 hover:text-pink-500 transition-colors"
+            className="inline-flex items-center text-gray-600 hover:text-pink-600 transition-colors duration-200 group"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to home
+            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
+            Back to Home
           </Link>
         </div>
 
-        {/* Login Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        {/* Login Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          {/* Header */}
+          <div className="bg-pink-500 px-8 py-6 text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Flower className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
+            <p className="text-pink-100">Sign in to your account to continue</p>
+          </div>
+
+          {/* Form */}
+          <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* General Error */}
             {errors.general && (
@@ -120,17 +128,19 @@ const Login = () => {
                   id="email"
                   name="email"
                   type="email"
-                  required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                      errors.email 
+                        ? 'border-red-300 bg-red-50' 
+                        : 'border-gray-300 focus:border-pink-500'
                   }`}
                   placeholder="Enter your email"
+                    disabled={isLoading}
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
               )}
             </div>
 
@@ -147,18 +157,21 @@ const Login = () => {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                      errors.password 
+                        ? 'border-red-300 bg-red-50' 
+                        : 'border-gray-300 focus:border-pink-500'
                   }`}
                   placeholder="Enter your password"
+                    disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    disabled={isLoading}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -168,7 +181,7 @@ const Login = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.password}</p>
               )}
             </div>
 
@@ -176,57 +189,36 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+                  isLoading
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-pink-500 hover:bg-pink-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                }`}
             >
               {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Signing in...</span>
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Signing in...
                 </div>
               ) : (
-                'Sign in to your account'
+                  'Sign In'
               )}
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h3>
-            <div className="text-xs text-gray-600 space-y-1">
-              <p><strong>Email:</strong> customer@example.com</p>
-              <p><strong>Password:</strong> password123</p>
-            </div>
-          </div>
-
-          {/* Sign Up Link */}
+            {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{' '}
-              <Link href="/register" className="font-medium text-pink-600 hover:text-pink-500">
-                Sign up here
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <Link
+                  href="/register"
+                  className="font-medium text-pink-600 hover:text-pink-500 transition-colors"
+                >
+                  Create one here
               </Link>
             </p>
           </div>
-
-          {/* Admin Login Link */}
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              Are you an admin?{' '}
-              <Link href="/admin/login" className="font-medium text-pink-600 hover:text-pink-500">
-                Admin login
-              </Link>
-            </p>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            By signing in, you agree to our{' '}
-            <a href="#" className="text-pink-600 hover:text-pink-500">Terms of Service</a>
-            {' '}and{' '}
-            <a href="#" className="text-pink-600 hover:text-pink-500">Privacy Policy</a>
-          </p>
         </div>
       </div>
     </div>

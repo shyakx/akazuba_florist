@@ -19,7 +19,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center shadow-lg">
                 <Flower className="h-6 w-6 text-white" />
               </div>
               <span className="ml-3 text-2xl font-bold">Akazuba Florist</span>

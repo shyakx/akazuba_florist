@@ -12,21 +12,45 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const client_1 = require("@prisma/client");
 const swagger_jsdoc_1 = __importDefault(require("swagger-jsdoc"));
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
+const path_1 = __importDefault(require("path"));
 const auth_1 = __importDefault(require("./routes/auth"));
 const users_1 = __importDefault(require("./routes/users"));
 const products_1 = __importDefault(require("./routes/products"));
 const categories_1 = __importDefault(require("./routes/categories"));
 const cart_1 = __importDefault(require("./routes/cart"));
 const orders_1 = __importDefault(require("./routes/orders"));
+const wishlist_1 = __importDefault(require("./routes/wishlist"));
 const admin_1 = __importDefault(require("./routes/admin"));
 const payments_1 = __importDefault(require("./routes/payments"));
-const momo_1 = __importDefault(require("./routes/momo"));
 const errorHandler_1 = require("./middleware/errorHandler");
-const logger_1 = require("./utils/logger");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const prisma = new client_1.PrismaClient();
 const PORT = process.env.PORT || 5000;
+console.log('Environment check:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- PORT:', process.env.PORT);
+console.log('- DB_HOST:', process.env.DB_HOST);
+console.log('- DB_PORT:', process.env.DB_PORT);
+console.log('- DB_NAME:', process.env.DB_NAME);
+console.log('- DATABASE_URL exists:', !!process.env.DATABASE_URL);
+let prisma;
+try {
+    prisma = new client_1.PrismaClient();
+    console.log('Prisma client initialized successfully');
+}
+catch (error) {
+    console.error('Failed to initialize Prisma client:', error);
+    process.exit(1);
+}
+async function testDatabaseConnection() {
+    try {
+        await prisma.$connect();
+        console.log('Database connection successful');
+    }
+    catch (error) {
+        console.error('Database connection failed:', error);
+    }
+}
 const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
@@ -64,6 +88,7 @@ app.use((0, compression_1.default)());
 app.use(limiter);
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true }));
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
 app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
 app.get('/health', (req, res) => {
     res.status(200).json({
@@ -71,6 +96,7 @@ app.get('/health', (req, res) => {
         message: 'Akazuba Florist API is running',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
+        database: 'connected',
     });
 });
 app.use('/api/v1/auth', auth_1.default);
@@ -79,42 +105,33 @@ app.use('/api/v1/products', products_1.default);
 app.use('/api/v1/categories', categories_1.default);
 app.use('/api/v1/cart', cart_1.default);
 app.use('/api/v1/orders', orders_1.default);
+app.use('/api/v1/wishlist', wishlist_1.default);
 app.use('/api/v1/admin', admin_1.default);
 app.use('/api/v1/payments', payments_1.default);
-app.use('/api/v1/momo', momo_1.default);
-app.use('*', (req, res) => {
-    res.status(404).json({
-        success: false,
-        message: 'Route not found',
-        path: req.originalUrl,
-    });
-});
 app.use(errorHandler_1.errorHandler);
+async function startServer() {
+    try {
+        await testDatabaseConnection();
+        app.listen(PORT, () => {
+            console.log(`🚀 Server is running on port ${PORT}`);
+            console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+            console.log(`🏥 Health Check: http://localhost:${PORT}/health`);
+        });
+    }
+    catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+}
 process.on('SIGTERM', async () => {
-    logger_1.logger.info('SIGTERM received, shutting down gracefully');
+    console.log('SIGTERM received, shutting down gracefully');
     await prisma.$disconnect();
     process.exit(0);
 });
 process.on('SIGINT', async () => {
-    logger_1.logger.info('SIGINT received, shutting down gracefully');
+    console.log('SIGINT received, shutting down gracefully');
     await prisma.$disconnect();
     process.exit(0);
 });
-const startServer = async () => {
-    try {
-        await prisma.$connect();
-        logger_1.logger.info('Database connected successfully');
-        app.listen(PORT, () => {
-            logger_1.logger.info(`🚀 Akazuba Florist API server running on port ${PORT}`);
-            logger_1.logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
-            logger_1.logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
-        });
-    }
-    catch (error) {
-        logger_1.logger.error('Failed to start server:', error);
-        process.exit(1);
-    }
-};
 startServer();
-exports.default = app;
 //# sourceMappingURL=index.js.map

@@ -1,155 +1,152 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Heart, ShoppingCart, Star } from 'lucide-react'
-import { useCart } from '@/contexts/CartContext'
+import { useProducts } from '@/contexts/ProductsContext'
+import ProductCard from './ProductCard'
 import { realFlowerProducts } from '@/data/real-flowers'
 
-// Format price function for RWF currency
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('en-RW', {
-    style: 'currency',
-    currency: 'RWF',
-    minimumFractionDigits: 0,
-  }).format(price)
-}
-
 const FeaturedProducts = () => {
-  const { addToCart } = useCart()
+  const { state } = useProducts()
+  const { products, isLoading } = state
 
-  const handleAddToCart = (product: any) => {
-    addToCart({
-      ...product,
-      quantity: 1
-    })
+  // Fallback data in case context fails
+  const fallbackProducts = realFlowerProducts.slice(0, 8).map((product, index) => ({
+    ...product,
+    id: index + 1,
+    featured: true
+  }))
+
+  // Debug logging
+  console.log('🔄 FeaturedProducts - Context products:', products.length)
+  console.log('🔄 FeaturedProducts - Is loading:', isLoading)
+  console.log('🔄 FeaturedProducts - Fallback products:', fallbackProducts.length)
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-white">
+        <div className="container-responsive">
+          <div className="container-max">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
+                Featured Flowers
+              </h2>
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+                Loading beautiful flowers...
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {[...Array(8)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="bg-gray-200 aspect-square rounded-lg mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Show products from backend or fallback data
+  const displayProducts = products.length > 0 ? products.slice(0, 8) : fallbackProducts
+
+  console.log('🔄 FeaturedProducts - Display products:', displayProducts.length)
+
+  // Ensure we always have products to display
+  if (displayProducts.length === 0) {
+    console.error('❌ FeaturedProducts - No products available, using fallback')
+    return (
+      <section className="py-8 sm:py-12 lg:py-16 bg-white">
+        <div className="container-responsive">
+          <div className="container-max">
+            <div className="text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
+                Featured Flowers
+              </h2>
+              <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+                Discover our most popular and beautiful flower selections
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {fallbackProducts.map((product, index) => (
+                <div key={product.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                  <div className="relative aspect-square overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        console.log('Image failed to load:', product.image)
+                        e.currentTarget.src = '/images/placeholder-flower.jpg'
+                      }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
+                    <p className="text-pink-600 font-bold text-lg mb-2">
+                      RWF {product.price.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
-    <section className="py-16 bg-white">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-4xl font-bold text-gray-800 mb-4">
-            Featured Flowers
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Discover our most popular and beautiful flower selections, carefully chosen to brighten your day
-          </p>
-        </motion.div>
+    <section className="py-8 sm:py-12 lg:py-16 bg-white">
+      <div className="container-responsive">
+        <div className="container-max">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8 sm:mb-12"
+          >
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
+              Featured Flowers
+            </h2>
+            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+              Discover our most popular and beautiful flower selections, carefully chosen to brighten your day
+            </p>
+          </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {realFlowerProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
-            >
-              <div className="relative aspect-square overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  onError={(e) => {
-                    console.log('Image failed to load:', product.image)
-                    e.currentTarget.style.display = 'none'
-                  }}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            {displayProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+              >
+                <ProductCard 
+                  product={product}
+                  showRating={true}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
-                {/* Color Badge */}
-                {product.color && (
-                  <div className="absolute top-3 left-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium text-white ${
-                      product.color === 'red' ? 'bg-red-500' :
-                      product.color === 'pink' ? 'bg-pink-500' :
-                      product.color === 'white' ? 'bg-gray-500' :
-                      product.color === 'yellow' ? 'bg-yellow-500' :
-                      product.color === 'purple' ? 'bg-purple-500' :
-                      product.color === 'orange' ? 'bg-orange-500' :
-                      'bg-gradient-to-r from-pink-500 to-purple-500'
-                    }`}>
-                      {product.color.charAt(0).toUpperCase() + product.color.slice(1)}
-                    </span>
-                  </div>
-                )}
+              </motion.div>
+            ))}
+          </div>
 
-                {/* Type Badge */}
-                {product.type && (
-                  <div className="absolute top-3 right-3">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/90 text-gray-700">
-                      {product.type}
-                    </span>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <button className="p-2 bg-white/90 rounded-full hover:bg-white transition-colors duration-200">
-                    <Heart className="w-4 h-4 text-gray-600" />
-                  </button>
-                  <button 
-                    onClick={() => handleAddToCart(product)}
-                    className="p-2 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-colors duration-200"
-                  >
-                    <ShoppingCart className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-800 mb-2 line-clamp-1">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                  {product.description}
-                </p>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                    <span className="text-sm text-gray-500 ml-1">(4.8)</span>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold text-lg text-gray-800">
-                      {formatPrice(product.price)}
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleAddToCart(product)}
-                  className="w-full mt-3 bg-pink-500 text-white py-2 px-4 rounded-lg hover:bg-pink-600 transition-colors duration-200 font-medium"
-                >
-                  Add to Cart
-                </button>
-              </div>
-            </motion.div>
-          ))}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-center mt-12"
+          >
+            <a 
+              href="/products"
+              className="inline-block bg-pink-500 text-white px-8 py-3 rounded-lg hover:bg-pink-600 transition-colors duration-200 font-medium"
+            >
+              View All Flowers
+            </a>
+          </motion.div>
         </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-12"
-        >
-          <button className="bg-pink-500 text-white px-8 py-3 rounded-lg hover:bg-pink-600 transition-colors duration-200 font-medium">
-            View All Flowers
-          </button>
-        </motion.div>
       </div>
     </section>
   )

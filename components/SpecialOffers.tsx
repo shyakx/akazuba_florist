@@ -29,7 +29,7 @@ const SpecialOffers = () => {
       originalPrice: 150000,
       discountedPrice: 120000,
       discount: 20,
-      image: "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
+      image: "https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80",
       category: "bouquets",
       badge: "Best Seller",
       badgeColor: "bg-yellow-500",

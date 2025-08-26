@@ -4,9 +4,10 @@
   "description": "Backend API for Akazuba Florist e-commerce platform",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "nodemon database-server.js",
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:simple": "node dist/simple-server.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -16,6 +17,9 @@
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [
     "e-commerce",

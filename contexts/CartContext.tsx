@@ -1,119 +1,120 @@
 'use client'
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react'
-import { Product, CartItem } from '@/types'
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react'
+import { useRouter } from 'next/navigation'
+import { Product } from '@/types'
+import { CartItem } from '@/lib/api'
+import { useAuth } from './RealAuthContext'
+import { useProducts } from './ProductsContext'
+import { cartAPI } from '@/lib/api'
 import toast from 'react-hot-toast'
 
 interface CartState {
   items: CartItem[]
   total: number
   itemCount: number
+  isLoading: boolean
 }
 
 type CartAction =
-  | { type: 'ADD_ITEM'; payload: Product }
-  | { type: 'REMOVE_ITEM'; payload: number }
-  | { type: 'UPDATE_QUANTITY'; payload: { productId: number; quantity: number } }
-  | { type: 'CLEAR_CART' }
+  | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'LOAD_CART'; payload: CartItem[] }
+  | { type: 'ADD_ITEM'; payload: CartItem }
+  | { type: 'REMOVE_ITEM'; payload: string }
+  | { type: 'UPDATE_ITEM'; payload: CartItem }
+  | { type: 'CLEAR_CART' }
+  | { type: 'SET_ERROR'; payload: string }
 
 const CartContext = createContext<{
   state: CartState
-  addToCart: (product: Product) => void
-  removeFromCart: (productId: number) => void
-  updateQuantity: (productId: number, quantity: number) => void
-  clearCart: () => void
-  getCartItem: (productId: number) => CartItem | undefined
+  addToCart: (product: Product) => Promise<void>
+  removeFromCart: (itemId: string) => Promise<void>
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>
+  clearCart: () => Promise<void>
+  getCartItem: (productId: string) => CartItem | undefined
+  refreshCart: () => Promise<void>
 } | undefined>(undefined)
 
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload }
+    
+    case 'LOAD_CART': {
+      const items = action.payload
+      const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
+      const total = items.reduce((sum, item) => {
+        const price = item.product?.price || 0
+        return sum + (price * item.quantity)
+      }, 0)
+      return {
+        ...state,
+        items,
+        itemCount,
+        total,
+        isLoading: false
+      }
+    }
+    
     case 'ADD_ITEM': {
-      const existingItem = state.items.find(item => item.id === action.payload.id)
+      const newItem = action.payload
+      const existingItem = state.items.find(item => item.productId === newItem.productId)
       
       if (existingItem) {
         const updatedItems = state.items.map(item =>
-          item.id === action.payload.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+          item.productId === newItem.productId ? newItem : item
         )
-        const newState = {
-          ...state,
-          items: updatedItems,
-          itemCount: state.itemCount + 1,
-          total: state.total + action.payload.price
-        }
-        localStorage.setItem('cart', JSON.stringify(newState.items))
-        return newState
+        const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0)
+        const total = updatedItems.reduce((sum, item) => {
+          const price = item.product?.price || 0
+          return sum + (price * item.quantity)
+        }, 0)
+        return { ...state, items: updatedItems, itemCount, total }
       } else {
-        const newItem: CartItem = { ...action.payload, quantity: 1 }
-        const newState = {
-          ...state,
-          items: [...state.items, newItem],
-          itemCount: state.itemCount + 1,
-          total: state.total + action.payload.price
-        }
-        localStorage.setItem('cart', JSON.stringify(newState.items))
-        return newState
+        const updatedItems = [...state.items, newItem]
+        const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0)
+        const total = updatedItems.reduce((sum, item) => {
+          const price = item.product?.price || 0
+          return sum + (price * item.quantity)
+        }, 0)
+        return { ...state, items: updatedItems, itemCount, total }
       }
     }
     
     case 'REMOVE_ITEM': {
-      const itemToRemove = state.items.find(item => item.id === action.payload)
-      if (!itemToRemove) return state
-      
-      const newState = {
-        ...state,
-        items: state.items.filter(item => item.id !== action.payload),
-        itemCount: state.itemCount - itemToRemove.quantity,
-        total: state.total - (itemToRemove.price * itemToRemove.quantity)
-      }
-      localStorage.setItem('cart', JSON.stringify(newState.items))
-      return newState
+      const itemId = action.payload
+      const updatedItems = state.items.filter(item => item.id !== itemId)
+      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0)
+      const total = updatedItems.reduce((sum, item) => {
+        const price = item.product?.price || 0
+        return sum + (price * item.quantity)
+      }, 0)
+      return { ...state, items: updatedItems, itemCount, total }
     }
     
-    case 'UPDATE_QUANTITY': {
-      const { productId, quantity } = action.payload
-      const item = state.items.find(item => item.id === productId)
-      if (!item) return state
-      
-      const quantityDiff = quantity - item.quantity
-      const newState = {
-        ...state,
-        items: state.items.map(item =>
-          item.id === productId
-            ? { ...item, quantity }
-            : item
-        ),
-        itemCount: state.itemCount + quantityDiff,
-        total: state.total + (item.price * quantityDiff)
-      }
-      localStorage.setItem('cart', JSON.stringify(newState.items))
-      return newState
+    case 'UPDATE_ITEM': {
+      const updatedItem = action.payload
+      const updatedItems = state.items.map(item =>
+        item.id === updatedItem.id ? updatedItem : item
+      )
+      const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0)
+      const total = updatedItems.reduce((sum, item) => {
+        const price = item.product?.price || 0
+        return sum + (price * item.quantity)
+      }, 0)
+      return { ...state, items: updatedItems, itemCount, total }
     }
     
-    case 'CLEAR_CART': {
-      const newState = {
+    case 'CLEAR_CART':
+      return {
         ...state,
         items: [],
         itemCount: 0,
         total: 0
       }
-      localStorage.removeItem('cart')
-      return newState
-    }
     
-    case 'LOAD_CART': {
-      const items = action.payload
-      const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)
-      const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-      return {
-        ...state,
-        items,
-        itemCount,
-        total
-      }
-    }
+    case 'SET_ERROR':
+      return { ...state, isLoading: false }
     
     default:
       return state
@@ -124,50 +125,150 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     total: 0,
-    itemCount: 0
+    itemCount: 0,
+    isLoading: false
   })
+  const { isAuthenticated, user } = useAuth()
+  const { getBackendProductId } = useProducts()
+  const router = useRouter()
 
+  // Load cart from backend when user is authenticated
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart')
-    if (savedCart) {
-      try {
-        const cartItems = JSON.parse(savedCart)
+    if (isAuthenticated && user) {
+      refreshCart()
+    } else {
+      // Clear cart when user is not authenticated
+      dispatch({ type: 'CLEAR_CART' })
+    }
+  }, [isAuthenticated, user])
+
+  const refreshCart = async () => {
+    if (!isAuthenticated) return
+    
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      const response = await cartAPI.getCart()
+      
+      if (response.success && response.data) {
+        const cartItems = response.data.cartItems || []
         dispatch({ type: 'LOAD_CART', payload: cartItems })
+      } else {
+        dispatch({ type: 'LOAD_CART', payload: [] })
+      }
       } catch (error) {
-        console.error('Error loading cart from localStorage:', error)
-        localStorage.removeItem('cart')
+      console.error('Error loading cart:', error)
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load cart' })
       }
     }
-  }, [])
 
-  const addToCart = (product: Product) => {
-    dispatch({ type: 'ADD_ITEM', payload: product })
+  const addToCart = async (product: Product) => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to add items to cart')
+      router.push('/login')
+      return
+    }
+    
+
+    
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      
+      // Get the backend product ID for cart operations
+      const backendProductId = getBackendProductId(product.id)
+      if (!backendProductId) {
+        toast.error('Product not found')
+        return
+      }
+      
+      const response = await cartAPI.addItem({
+        productId: backendProductId,
+        quantity: 1
+      })
+      
+      if (response.success && response.data) {
+        dispatch({ type: 'ADD_ITEM', payload: response.data })
     toast.success(`${product.name} added to cart!`)
-  }
-
-  const removeFromCart = (productId: number) => {
-    const item = state.items.find(item => item.id === productId)
-    if (item) {
-      dispatch({ type: 'REMOVE_ITEM', payload: productId })
-      toast.success(`${item.name} removed from cart!`)
+      } else {
+        toast.error('Failed to add item to cart')
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+      toast.error('Failed to add item to cart')
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const removeFromCart = async (itemId: string) => {
+    if (!isAuthenticated) return
+    
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      const response = await cartAPI.removeItem(itemId)
+      
+      if (response.success) {
+        dispatch({ type: 'REMOVE_ITEM', payload: itemId })
+        toast.success('Item removed from cart!')
+      } else {
+        toast.error('Failed to remove item from cart')
+      }
+    } catch (error) {
+      console.error('Error removing from cart:', error)
+      toast.error('Failed to remove item from cart')
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
+    }
+  }
+
+  const updateQuantity = async (itemId: string, quantity: number) => {
+    if (!isAuthenticated) return
+    
     if (quantity <= 0) {
-      removeFromCart(productId)
+      await removeFromCart(itemId)
+      return
+    }
+    
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      const response = await cartAPI.updateItem(itemId, { quantity })
+      
+      if (response.success && response.data) {
+        dispatch({ type: 'UPDATE_ITEM', payload: response.data })
+        toast.success('Cart updated!')
     } else {
-      dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, quantity } })
+        toast.error('Failed to update cart')
+      }
+    } catch (error) {
+      console.error('Error updating cart:', error)
+      toast.error('Failed to update cart')
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 
-  const clearCart = () => {
+  const clearCart = async () => {
+    if (!isAuthenticated) return
+    
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      const response = await cartAPI.clearCart()
+      
+      if (response.success) {
     dispatch({ type: 'CLEAR_CART' })
     toast.success('Cart cleared!')
+      } else {
+        toast.error('Failed to clear cart')
+      }
+    } catch (error) {
+      console.error('Error clearing cart:', error)
+      toast.error('Failed to clear cart')
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
+    }
   }
 
-  const getCartItem = (productId: number) => {
-    return state.items.find(item => item.id === productId)
+  const getCartItem = (productId: string) => {
+    return state.items.find(item => item.productId === productId)
   }
 
   return (
@@ -177,7 +278,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       removeFromCart,
       updateQuantity,
       clearCart,
-      getCartItem
+      getCartItem,
+      refreshCart
     }}>
       {children}
     </CartContext.Provider>

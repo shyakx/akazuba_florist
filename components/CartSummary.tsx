@@ -21,7 +21,7 @@ const CartSummary = () => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-pink-500 rounded-xl flex items-center justify-center">
             <ShoppingCart className="h-5 w-5 text-white" />
           </div>
           <div>
@@ -46,16 +46,16 @@ const CartSummary = () => {
             {state.items.slice(0, 3).map((item) => (
               <div key={item.id} className="flex items-center space-x-3">
                 <img
-                  src={item.image}
-                  alt={item.name}
+                  src={item.product?.images?.[0] || '/images/placeholder-flower.jpg'}
+                  alt={item.product?.name || 'Flower'}
                   className="w-12 h-12 object-cover rounded-lg"
                 />
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-gray-900 truncate">{item.name}</h4>
+                  <h4 className="font-semibold text-gray-900 truncate">{item.product?.name || 'Flower'}</h4>
                   <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-pink-600">{formatPrice(item.price * item.quantity)}</p>
+                  <p className="font-bold text-pink-600">{formatPrice((item.product?.price || 0) * item.quantity)}</p>
                 </div>
               </div>
             ))}
@@ -111,7 +111,7 @@ const CartSummary = () => {
       <div className="space-y-3">
         {state.itemCount > 0 ? (
           <>
-            <Link href="/checkout" className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg block text-center">
+            <Link href="/checkout" className="w-full bg-pink-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg block text-center">
               Checkout Now
             </Link>
             <Link href="/cart" className="w-full border-2 border-pink-600 text-pink-600 py-3 px-6 rounded-xl font-semibold hover:bg-pink-50 transition-all duration-300 block text-center">
@@ -120,10 +120,10 @@ const CartSummary = () => {
           </>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            <Link href="/" className="bg-gradient-to-r from-pink-600 to-rose-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-sm block text-center">
+            <Link href="/" className="bg-pink-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-sm block text-center">
               Shop Flowers
             </Link>
-            <Link href="/category/mixed-bouquets" className="bg-gradient-to-r from-rose-600 to-pink-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-rose-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-sm block text-center">
+            <Link href="/category/mixed-bouquets" className="bg-rose-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-rose-700 transition-all duration-300 transform hover:scale-105 shadow-lg text-sm block text-center">
               View Bouquets
             </Link>
           </div>

@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 import { Eye, EyeOff, Lock, User, Mail, Phone, Flower, ArrowLeft, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
-import { apiUtils } from '@/lib/api'
+import { useAuth } from '@/contexts/RealAuthContext'
+import { authAPI } from '@/lib/auth-api'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -46,23 +46,25 @@ const Register = () => {
     // Validate email
     if (!formData.email) {
       newErrors.email = 'Email is required'
-    } else if (!apiUtils.validateEmail(formData.email)) {
+    } else if (!authAPI.utils.validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address'
     }
 
-    // Validate phone (optional but if provided, must be valid)
-    if (formData.phone && !apiUtils.validatePhone(formData.phone)) {
-      newErrors.phone = 'Please enter a valid phone number (e.g., +250 784 586 110)'
+    // Validate phone (optional but if provided, should be valid)
+    if (formData.phone && formData.phone.trim()) {
+      const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/
+      if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+        newErrors.phone = 'Please enter a valid phone number'
+      }
     }
 
     // Validate password
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    } else if (!passwordStrength.isValid) {
-      newErrors.password = passwordStrength.message
+    const passwordValidation = authAPI.utils.validatePassword(formData.password)
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.message
     }
 
-    // Validate confirm password
+    // Validate password confirmation
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Please confirm your password'
     } else if (formData.password !== formData.confirmPassword) {
@@ -73,36 +75,31 @@ const Register = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handlePasswordChange = (password: string) => {
-    const strength = apiUtils.validatePassword(password)
-    setPasswordStrength(strength)
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrors({})
 
     if (!validateForm()) {
       return
     }
 
     try {
-      const success = await register({
+      const registerData = {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
-        email: formData.email,
-        phone: formData.phone || undefined,
-        password: formData.password
-      })
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        password: formData.password,
+      }
+
+      const success = await register(registerData)
       
       if (success) {
-        // Redirect to home page
-        router.push('/')
-      } else {
-        setErrors({ general: 'Registration failed. Please try again.' })
+        // Redirect to dashboard
+        router.push('/dashboard')
       }
-    } catch (error) {
-      console.error('Registration error:', error)
-      setErrors({ general: 'An error occurred during registration. Please try again.' })
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Registration failed. Please try again.' })
     }
   }
 
@@ -110,51 +107,49 @@ const Register = () => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
     
-    // Clear field-specific error when user starts typing
+    // Clear specific field error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
     }
 
-    // Handle password validation
+    // Check password strength in real-time
     if (name === 'password') {
-      handlePasswordChange(value)
+      const validation = authAPI.utils.validatePassword(value)
+      setPasswordStrength(validation)
     }
-  }
-
-  const getPasswordStrengthColor = () => {
-    if (!formData.password) return 'text-gray-400'
-    return passwordStrength.isValid ? 'text-green-600' : 'text-red-600'
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex justify-center">
-            <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-3 rounded-full">
-              <Flower className="h-8 w-8 text-white" />
-            </div>
-          </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Join Akazuba Florist and start shopping for beautiful flowers
-          </p>
-        </div>
-
-        {/* Back to Home */}
-        <div className="text-center">
+    <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Back Button */}
+        <div className="mb-6">
           <Link 
             href="/" 
-            className="inline-flex items-center text-sm text-pink-600 hover:text-pink-500 transition-colors"
+            className="inline-flex items-center text-gray-600 hover:text-pink-600 transition-colors duration-200 group"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
-            Back to home
+            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
+            Back to Home
           </Link>
         </div>
 
-        {/* Registration Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        {/* Register Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          {/* Header */}
+          <div className="bg-pink-500 px-8 py-6 text-center">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Flower className="h-8 w-8 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
+            <p className="text-pink-100">Join us to start shopping beautiful flowers</p>
+          </div>
+
+          {/* Form */}
+          <div className="p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* General Error */}
             {errors.general && (
@@ -164,8 +159,7 @@ const Register = () => {
             )}
 
             {/* Name Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* First Name */}
+              <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                   First Name
@@ -178,44 +172,42 @@ const Register = () => {
                     id="firstName"
                     name="firstName"
                     type="text"
-                    required
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                      errors.firstName ? 'border-red-300' : 'border-gray-300'
+                      className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                        errors.firstName 
+                          ? 'border-red-300 bg-red-50' 
+                          : 'border-gray-300 focus:border-pink-500'
                     }`}
-                    placeholder="First name"
+                      placeholder="John"
+                      disabled={isLoading}
                   />
                 </div>
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                    <p className="mt-2 text-sm text-red-600">{errors.firstName}</p>
                 )}
               </div>
 
-              {/* Last Name */}
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
                   Last Name
                 </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
                   <input
                     id="lastName"
                     name="lastName"
                     type="text"
-                    required
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                      errors.lastName ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                      errors.lastName 
+                        ? 'border-red-300 bg-red-50' 
+                        : 'border-gray-300 focus:border-pink-500'
                     }`}
-                    placeholder="Last name"
+                    placeholder="Doe"
+                    disabled={isLoading}
                   />
-                </div>
                 {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                    <p className="mt-2 text-sm text-red-600">{errors.lastName}</p>
                 )}
               </div>
             </div>
@@ -233,24 +225,26 @@ const Register = () => {
                   id="email"
                   name="email"
                   type="email"
-                  required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                      errors.email 
+                        ? 'border-red-300 bg-red-50' 
+                        : 'border-gray-300 focus:border-pink-500'
                   }`}
-                  placeholder="Enter your email"
+                    placeholder="john@example.com"
+                    disabled={isLoading}
                 />
               </div>
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.email}</p>
               )}
             </div>
 
             {/* Phone Field */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number <span className="text-gray-500">(Optional)</span>
+                  Phone Number <span className="text-gray-400">(Optional)</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -262,16 +256,18 @@ const Register = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                      errors.phone 
+                        ? 'border-red-300 bg-red-50' 
+                        : 'border-gray-300 focus:border-pink-500'
                   }`}
-                  placeholder="+250 784 586 110"
+                    placeholder="+250 123 456 789"
+                    disabled={isLoading}
                 />
               </div>
               {errors.phone && (
-                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.phone}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Use Rwanda format (e.g., +250 784 586 110)</p>
             </div>
 
             {/* Password Field */}
@@ -287,18 +283,21 @@ const Register = () => {
                   id="password"
                   name="password"
                   type={showPasswords.password ? 'text' : 'password'}
-                  required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                      errors.password 
+                        ? 'border-red-300 bg-red-50' 
+                        : 'border-gray-300 focus:border-pink-500'
                   }`}
-                  placeholder="Create a password"
+                    placeholder="Create a strong password"
+                    disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswords(prev => ({ ...prev, password: !prev.password }))}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    disabled={isLoading}
                 >
                   {showPasswords.password ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -307,13 +306,23 @@ const Register = () => {
                   )}
                 </button>
               </div>
+                {/* Password Strength Indicator */}
               {formData.password && (
-                <p className={`mt-1 text-xs ${getPasswordStrengthColor()}`}>
-                  {passwordStrength.message}
-                </p>
+                  <div className="mt-2">
+                    <div className={`flex items-center space-x-2 text-sm ${
+                      passwordStrength.isValid ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {passwordStrength.isValid ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <div className="h-4 w-4 rounded-full border-2 border-current" />
+                      )}
+                      <span>{passwordStrength.message}</span>
+                    </div>
+                  </div>
               )}
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.password}</p>
               )}
             </div>
 
@@ -330,18 +339,21 @@ const Register = () => {
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showPasswords.confirmPassword ? 'text' : 'password'}
-                  required
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-colors ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                    className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 transition-colors ${
+                      errors.confirmPassword 
+                        ? 'border-red-300 bg-red-50' 
+                        : 'border-gray-300 focus:border-pink-500'
                   }`}
                   placeholder="Confirm your password"
+                    disabled={isLoading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPasswords(prev => ({ ...prev, confirmPassword: !prev.confirmPassword }))}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    disabled={isLoading}
                 >
                   {showPasswords.confirmPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -351,7 +363,7 @@ const Register = () => {
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                  <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>
               )}
             </div>
 
@@ -359,41 +371,36 @@ const Register = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                className={`w-full py-3 px-4 rounded-lg font-medium transition-all duration-200 ${
+                  isLoading
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    : 'bg-pink-500 hover:bg-pink-600 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                }`}
             >
               {isLoading ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Creating account...</span>
+                  <div className="flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Creating account...
                 </div>
               ) : (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Create account
-                </>
+                  'Create Account'
               )}
             </button>
           </form>
 
-          {/* Sign In Link */}
+            {/* Footer */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
+              <p className="text-gray-600">
               Already have an account?{' '}
-              <Link href="/login" className="font-medium text-pink-600 hover:text-pink-500">
+                <Link
+                  href="/login"
+                  className="font-medium text-pink-600 hover:text-pink-500 transition-colors"
+                >
                 Sign in here
               </Link>
             </p>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            By creating an account, you agree to our{' '}
-            <a href="#" className="text-pink-600 hover:text-pink-500">Terms of Service</a>
-            {' '}and{' '}
-            <a href="#" className="text-pink-600 hover:text-pink-500">Privacy Policy</a>
-          </p>
         </div>
       </div>
     </div>

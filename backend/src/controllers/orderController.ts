@@ -1,42 +1,71 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { Decimal } from '@prisma/client/runtime/library'
 import { smsService } from '../utils/smsService'
+import multer from 'multer'
+import path from 'path'
+import fs from 'fs'
 
 const prisma = new PrismaClient()
 
-// Generate AKZ-001 format order number
-const generateOrderNumber = async (): Promise<string> => {
-  const lastOrder = await prisma.order.findFirst({
-    orderBy: { orderNumber: 'desc' }
-  })
-
-  if (!lastOrder) {
-    return 'AKZ-001'
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = 'uploads/payment-proofs'
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true })
+    }
+    cb(null, uploadDir)
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, 'payment-proof-' + uniqueSuffix + path.extname(file.originalname))
   }
+})
 
-  const lastNumber = parseInt(lastOrder.orderNumber.replace('AKZ-', ''))
-  const nextNumber = lastNumber + 1
-  return `AKZ-${nextNumber.toString().padStart(3, '0')}`
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true)
+    } else {
+      cb(new Error('Only image files are allowed'))
+    }
+  }
+})
+
+// Generate order number
+const generateOrderNumber = async (): Promise<string> => {
+  const count = await prisma.order.count()
+  const orderNumber = `AKZ-${String(count + 1).padStart(3, '0')}`
+  return orderNumber
 }
 
-// Calculate delivery fee based on city and order amount
-const calculateDeliveryFee = (customerCity: string, subtotal: number): number => {
-  const city = customerCity.toLowerCase()
-  
-  // Free delivery conditions
-  if (city === 'kigali') return 0
-  if (subtotal >= 50000) return 0  // Events (weddings, proposals, funerals)
-  if (subtotal >= 25000) return 0  // Large orders
-  
-  // Standard delivery fees
-  if (['butare', 'gisenyi', 'ruhengeri'].includes(city)) return 3000
+// Calculate delivery fee
+const calculateDeliveryFee = (city: string, subtotal: number): number => {
+  if (city === 'Kigali') {
+    return subtotal >= 50000 ? 0 : 2000  // Free delivery for orders over RWF 50,000
+  }
   return 5000  // Other provinces
 }
 
-// Create new order
+// Create new order with payment proof
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
   try {
+    // Handle file upload
+    upload.single('paymentProof')(req, res, async (err) => {
+      if (err) {
+        res.status(400).json({
+          success: false,
+          message: err.message || 'File upload error'
+        })
+        return
+      }
+
+      try {
+        const orderData = JSON.parse(req.body.orderData)
     const {
       customerName,
       customerEmail,
@@ -46,13 +75,22 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       items,
       paymentMethod,
       notes
-    } = req.body
+        } = orderData
 
     // Validate required fields
     if (!customerName || !customerEmail || !customerPhone || !customerAddress || !customerCity || !items || !paymentMethod) {
       res.status(400).json({
         success: false,
         message: 'Missing required fields'
+      })
+      return
+    }
+
+        // Check if payment proof was uploaded
+        if (!req.file) {
+          res.status(400).json({
+            success: false,
+            message: 'Payment proof is required'
       })
       return
     }
@@ -78,12 +116,14 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         customerPhone,
         customerAddress,
         customerCity,
-        subtotal: new Decimal(subtotal),
-        deliveryFee: new Decimal(deliveryFee),
-        totalAmount: new Decimal(totalAmount),
+        subtotal: subtotal,
+        deliveryFee: deliveryFee,
+        totalAmount: totalAmount,
         paymentMethod,
         notes,
-        userId: req.user?.id || null
+            userId: req.user?.id || null,
+            status: 'PENDING',
+            paymentStatus: 'PENDING'
       }
     })
 
@@ -98,8 +138,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             productImage: item.image,
             productSku: item.sku,
             quantity: item.quantity,
-            unitPrice: new Decimal(item.price),
-            totalPrice: new Decimal(item.price * item.quantity),
+                      unitPrice: item.price,
+          totalPrice: item.price * item.quantity,
             color: item.color,
             type: item.type
           }
@@ -107,21 +147,38 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       )
     )
 
+        // Create payment proof record
+        const paymentProof = await prisma.paymentProof.create({
+          data: {
+            orderId: order.id,
+            proofImage: req.file.filename
+          }
+        })
+
     // Send admin notification
     await smsService.sendOrderNotification(orderNumber, customerName, totalAmount)
 
     res.status(201).json({
       success: true,
-      message: 'Order created successfully',
+          message: 'Order created successfully with payment proof',
       data: {
         order: {
           ...order,
-          items: orderItems
+              items: orderItems,
+              paymentProof
         }
       }
     })
   } catch (error) {
     console.error('Error creating order:', error)
+        res.status(500).json({
+          success: false,
+          message: 'Failed to create order'
+        })
+      }
+    })
+  } catch (error) {
+    console.error('Error in createOrder:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to create order'

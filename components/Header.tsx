@@ -5,11 +5,13 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ShoppingCart, User, Search, Menu, X, Heart, Crown, Flower, LogOut, Settings, Package, ChevronDown, Phone, MapPin } from 'lucide-react'
+import { ShoppingCart, User, Search, Menu, X, Heart, Crown, Flower, LogOut, Settings, Package, ChevronDown, Phone, MapPin, CheckCircle, Instagram } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/contexts/RealAuthContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 import { realFlowerProducts } from '@/data/real-flowers'
-import { User as UserType } from '@/lib/api'
+import { User as UserType } from '@/lib/auth-api'
+import { useRouter } from 'next/navigation'
 
 // Navigation item type
 interface NavigationItem {
@@ -21,10 +23,14 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false)
+  const [showWelcomeNotification, setShowWelcomeNotification] = useState(false)
+  const [hasShownWelcome, setHasShownWelcome] = useState(false)
   
   const { state } = useCart()
   const { user, isAuthenticated, logout } = useAuth()
+  const { itemCount: wishlistCount } = useWishlist()
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,6 +39,21 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Show welcome notification when user logs in
+  useEffect(() => {
+    if (isAuthenticated && user && !hasShownWelcome) {
+      setShowWelcomeNotification(true)
+      setHasShownWelcome(true)
+      
+      // Auto-hide after 5 seconds
+      const timer = setTimeout(() => {
+        setShowWelcomeNotification(false)
+      }, 5000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [isAuthenticated, user, hasShownWelcome])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -138,9 +159,34 @@ const Header = () => {
 
   return (
     <>
+      {/* Welcome Notification */}
+      {showWelcomeNotification && (
+        <div className="fixed top-4 right-4 z-[9999] animate-bounce-in">
+          <div className="bg-green-500 text-white px-6 py-4 rounded-2xl shadow-2xl border border-green-200 max-w-sm">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-lg">Welcome back!</h4>
+                <p className="text-sm opacity-90">
+                  Great to see you again, {user?.firstName || 'User'}! 🌸
+                </p>
+              </div>
+              <button
+                onClick={() => setShowWelcomeNotification(false)}
+                className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Bar */}
-      <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white py-2">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-emerald-600 text-white py-2">
+        <div className="container-responsive">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
@@ -156,6 +202,16 @@ const Header = () => {
               <span className="hidden sm:block">Free delivery in Kigali</span>
               <span className="hidden sm:block">•</span>
               <span className="hidden sm:block">Fresh flowers daily</span>
+              <span className="hidden sm:block">•</span>
+              <a 
+                href="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 hover:text-pink-200 transition-colors duration-200"
+              >
+                <Instagram className="h-4 w-4" />
+                <span className="hidden sm:block">@akazuba_florists</span>
+              </a>
             </div>
           </div>
         </div>
@@ -167,12 +223,12 @@ const Header = () => {
           ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100' 
           : 'bg-white'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+        <div className="container-responsive">
+          <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3 group">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 via-rose-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                <div className="w-12 h-12 bg-pink-500 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
                   <Flower className="h-7 w-7 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full flex items-center justify-center">
@@ -180,7 +236,7 @@ const Header = () => {
                 </div>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent group-hover:from-pink-600 group-hover:to-rose-600 transition-all duration-300">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 group-hover:text-pink-600 transition-all duration-300">
                   Akazuba Florist
                 </h1>
                 <p className="text-sm text-gray-600 -mt-1 font-medium">Premium Floral Arrangements</p>
@@ -196,7 +252,7 @@ const Header = () => {
                   className="px-4 py-2 text-gray-700 hover:text-pink-600 font-medium transition-all duration-200 relative group rounded-lg hover:bg-pink-50 nav-link-fixed"
                 >
                   {item.name}
-                  <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-rose-500 group-hover:w-3/4 transition-all duration-300"></span>
+                  <span className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-pink-500 group-hover:w-3/4 transition-all duration-300"></span>
                 </Link>
               ))}
             </nav>
@@ -212,52 +268,123 @@ const Header = () => {
               </button>
 
               {/* Wishlist */}
-              <button className="p-3 text-gray-600 hover:text-red-500 hover:bg-red-50 transition-all duration-200 rounded-xl relative group">
+              <button 
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    router.push('/login')
+                  } else {
+                    router.push('/wishlist')
+                  }
+                }}
+                className="relative p-3 text-gray-600 hover:text-red-500 hover:bg-red-50 transition-all duration-200 rounded-xl group"
+              >
                 <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-pulse shadow-lg">
+                    {wishlistCount}
+                  </span>
+                )}
                 <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
-                  Wishlist
+                  Wishlist ({wishlistCount})
                 </span>
               </button>
 
               {/* Cart */}
-              <Link href="/cart" className="relative p-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-all duration-200 rounded-xl group">
+              <button 
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    router.push('/login')
+                  } else {
+                    router.push('/cart')
+                  }
+                }}
+                className="relative p-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-all duration-200 rounded-xl group"
+              >
                 <ShoppingCart className="h-5 w-5" />
                 {state.itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-pulse shadow-lg">
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold animate-pulse shadow-lg">
                     {state.itemCount}
                   </span>
                 )}
                 <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
                   Cart ({state.itemCount})
                 </span>
-              </Link>
+              </button>
 
               {/* User Account Dropdown */}
               <div className="relative user-dropdown">
-                <button 
-                  onClick={toggleUserDropdown}
-                  className="p-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-all duration-200 rounded-xl relative group flex items-center space-x-1"
-                >
-                  <User className="h-5 w-5" />
-                  <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
-                  <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
-                    {isAuthenticated ? 'My Account' : 'Sign In'}
-                  </span>
-                </button>
+                {!isAuthenticated ? (
+                  // Show only Sign In button for unauthenticated users
+                  <Link
+                    href="/login"
+                    className="px-4 py-2 text-pink-600 hover:text-pink-700 hover:bg-pink-50 font-medium transition-all duration-200 rounded-xl border border-pink-200 hover:border-pink-300"
+                  >
+                    Sign In
+                  </Link>
+                ) : (
+                  // Show dropdown for authenticated users
+                  <button 
+                    onClick={toggleUserDropdown}
+                    className="p-3 text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-all duration-200 rounded-xl relative group flex items-center space-x-1"
+                  >
+                    <User className="h-5 w-5" />
+                    <ChevronDown className={`h-3 w-3 transition-transform duration-200 ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
+                    <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-50">
+                      My Account
+                    </span>
+                  </button>
+                )}
 
                   {/* Dropdown Menu */}
-                  {isUserDropdownOpen && (
-                    <div className="absolute right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50">
-                      {isAuthenticated && user ? (
+                  {isUserDropdownOpen && isAuthenticated && (
+                    <div className="absolute right-0 mt-3 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 py-4 z-50 transform transition-all duration-200 ease-out animate-in slide-in-from-top-2">
+                      {user ? (
                         <>
-                          {/* Logged In User */}
-                          <div className="px-4 py-3 border-b border-gray-100">
-                            <p className="text-sm font-semibold text-gray-900">
-                              Welcome back, {(user as UserType).firstName || (user as UserType).email}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {(user as UserType).role === 'ADMIN' ? 'Administrator' : 'Customer'}
-                            </p>
+                          {/* User Profile Header */}
+                          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-12 h-12 bg-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                                <span className="text-white font-bold text-lg">
+                                  {(user as UserType).firstName?.charAt(0) || (user as UserType).email?.charAt(0) || 'U'}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                  Welcome back, {(user as UserType).firstName || (user as UserType).email}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1 flex items-center">
+                                  {(user as UserType).role === 'ADMIN' ? (
+                                    <>
+                                      <Crown className="h-3 w-3 text-yellow-500 mr-1" />
+                                      Administrator
+                                    </>
+                                  ) : (
+                                    <>
+                                      <User className="h-3 w-3 text-blue-500 mr-1" />
+                                      Customer
+                                    </>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Quick Stats */}
+                          <div className="px-6 py-3 bg-gray-50">
+                            <div className="grid grid-cols-3 gap-3 text-center">
+                              <div className="bg-white rounded-lg p-2 shadow-sm">
+                                <div className="text-lg font-bold text-pink-600">{state.itemCount}</div>
+                                <div className="text-xs text-gray-500">Cart</div>
+                              </div>
+                              <div className="bg-white rounded-lg p-2 shadow-sm">
+                                <div className="text-lg font-bold text-red-500">{wishlistCount}</div>
+                                <div className="text-xs text-gray-500">Wishlist</div>
+                              </div>
+                              <div className="bg-white rounded-lg p-2 shadow-sm">
+                                <div className="text-lg font-bold text-green-600">0</div>
+                                <div className="text-xs text-gray-500">Orders</div>
+                              </div>
+                            </div>
                           </div>
 
                           {/* Menu Items for Logged In User */}
@@ -265,96 +392,81 @@ const Header = () => {
                             {(user as UserType).role === 'ADMIN' ? (
                               <Link 
                                 href="/admin"
-                                className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 transition-colors"
+                                className="flex items-center space-x-3 px-6 py-3 text-sm text-gray-700 hover:bg-yellow-50 transition-all duration-200 group"
                                 onClick={() => setIsUserDropdownOpen(false)}
                               >
-                                <Crown className="h-4 w-4 text-yellow-500" />
-                                <span>Admin Dashboard</span>
+                                <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                  <Crown className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <span className="font-medium">Admin Dashboard</span>
+                                  <p className="text-xs text-gray-500">Manage your store</p>
+                                </div>
                               </Link>
                             ) : (
                               <>
                                 <Link 
-                                  href="/profile"
-                                  className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 transition-colors"
+                                  href="/dashboard"
+                                  className="flex items-center space-x-3 px-6 py-3 text-sm text-gray-700 hover:bg-blue-50 transition-all duration-200 group"
                                   onClick={() => setIsUserDropdownOpen(false)}
                                 >
-                                  <User className="h-4 w-4" />
-                                  <span>My Profile</span>
+                                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                    <User className="h-4 w-4 text-white" />
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">My Dashboard</span>
+                                    <p className="text-xs text-gray-500">View orders & profile</p>
+                                  </div>
                                 </Link>
                                 <Link 
                                   href="/orders"
-                                  className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 transition-colors"
+                                  className="flex items-center space-x-3 px-6 py-3 text-sm text-gray-700 hover:bg-green-50 transition-all duration-200 group"
                                   onClick={() => setIsUserDropdownOpen(false)}
                                 >
-                                  <Package className="h-4 w-4" />
-                                  <span>My Orders</span>
+                                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                    <Package className="h-4 w-4 text-white" />
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">My Orders</span>
+                                    <p className="text-xs text-gray-500">Track your deliveries</p>
+                                  </div>
                                 </Link>
                               </>
                             )}
-                            <div className="border-t border-gray-100 my-2"></div>
+                            
+                            <div className="border-t border-gray-100 my-2 mx-6"></div>
+                            
+                            <Link 
+                              href="/profile"
+                              className="flex items-center space-x-3 px-6 py-3 text-sm text-gray-700 hover:bg-purple-50 transition-all duration-200 group"
+                              onClick={() => setIsUserDropdownOpen(false)}
+                            >
+                              <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                <Settings className="h-4 w-4 text-white" />
+                              </div>
+                              <div>
+                                <span className="font-medium">Settings</span>
+                                <p className="text-xs text-gray-500">Manage your account</p>
+                              </div>
+                            </Link>
+                            
+                            <div className="border-t border-gray-100 my-2 mx-6"></div>
+                            
                             <button
                               onClick={handleLogout}
-                              className="flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left"
+                              className="flex items-center space-x-3 px-6 py-3 text-sm text-red-600 hover:bg-red-50 transition-all duration-200 w-full text-left group"
                             >
-                              <LogOut className="h-4 w-4" />
-                              <span>Sign Out</span>
+                              <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                                <LogOut className="h-4 w-4 text-white" />
+                              </div>
+                              <div>
+                                <span className="font-medium">Sign Out</span>
+                                <p className="text-xs text-gray-500">Logout from your account</p>
+                              </div>
                             </button>
                           </div>
                         </>
-                      ) : (
-                        <>
-                          {/* Guest User Options */}
-                          <div className="px-4 py-3 border-b border-gray-100">
-                            <p className="text-sm font-semibold text-gray-900">Welcome to Akazuba Florist</p>
-                            <p className="text-xs text-gray-500 mt-1">Sign in to access your account</p>
-                          </div>
-
-                          {/* Menu Items for Guest */}
-                          <div className="py-2">
-                            <Link 
-                              href="/login"
-                              className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 transition-colors"
-                              onClick={() => setIsUserDropdownOpen(false)}
-                            >
-                              <User className="h-4 w-4" />
-                              <span>Sign In</span>
-                            </Link>
-                            <Link 
-                              href="/register"
-                              className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 transition-colors"
-                              onClick={() => setIsUserDropdownOpen(false)}
-                            >
-                              <User className="h-4 w-4" />
-                              <span>Create Account</span>
-                            </Link>
-                            <div className="border-t border-gray-100 my-2"></div>
-                            <Link 
-                              href="/admin/login"
-                              className="flex items-center space-x-3 px-4 py-3 text-sm text-pink-600 hover:bg-pink-50 transition-colors"
-                              onClick={() => setIsUserDropdownOpen(false)}
-                            >
-                              <Crown className="h-4 w-4" />
-                              <span>Admin Panel</span>
-                            </Link>
-                            <Link 
-                              href="/orders"
-                              className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 transition-colors"
-                              onClick={() => setIsUserDropdownOpen(false)}
-                            >
-                              <Package className="h-4 w-4" />
-                              <span>Track Orders</span>
-                            </Link>
-                            <Link 
-                              href="/contact"
-                              className="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-pink-50 transition-colors"
-                              onClick={() => setIsUserDropdownOpen(false)}
-                            >
-                              <Settings className="h-4 w-4" />
-                              <span>Help & Support</span>
-                            </Link>
-                          </div>
-                        </>
-                      )}
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -386,6 +498,34 @@ const Header = () => {
                 
                 {/* Mobile User Actions */}
                 <div className="border-t border-gray-100 pt-4 mt-4 space-y-2">
+                  {/* Cart and Wishlist for all users */}
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      if (!isAuthenticated) {
+                        router.push('/login')
+                      } else {
+                        router.push('/cart')
+                      }
+                    }}
+                    className="block px-4 py-3 text-gray-700 hover:text-pink-600 hover:bg-pink-50 font-medium transition-all duration-200 rounded-xl w-full text-left"
+                  >
+                    Cart ({state.itemCount})
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      if (!isAuthenticated) {
+                        router.push('/login')
+                      } else {
+                        router.push('/wishlist')
+                      }
+                    }}
+                    className="block px-4 py-3 text-gray-700 hover:text-pink-600 hover:bg-pink-50 font-medium transition-all duration-200 rounded-xl w-full text-left"
+                  >
+                    Wishlist ({wishlistCount})
+                  </button>
+                  
                   {isAuthenticated && user ? (
                     <>
                       <div className="px-4 py-3 bg-gray-50 rounded-xl">
@@ -431,20 +571,6 @@ const Header = () => {
                         onClick={() => setIsMenuOpen(false)}
                       >
                         Sign In
-                      </Link>
-                      <Link
-                        href="/register"
-                        className="block px-4 py-3 text-gray-700 hover:text-pink-600 hover:bg-pink-50 font-medium transition-all duration-200 rounded-xl"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Create Account
-                      </Link>
-                      <Link
-                        href="/admin/login"
-                        className="block px-4 py-3 text-pink-600 hover:text-pink-700 hover:bg-pink-50 font-medium transition-all duration-200 rounded-xl"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Admin Panel
                       </Link>
                     </>
                   )}

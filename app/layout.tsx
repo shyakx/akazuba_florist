@@ -4,7 +4,9 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import { CartProvider } from '@/contexts/CartContext'
-import { AuthProvider } from '@/contexts/AuthContext'
+import { AuthProvider } from '@/contexts/RealAuthContext'
+import { WishlistProvider } from '@/contexts/WishlistContext'
+import { ProductsProvider } from '@/contexts/ProductsContext'
 import Header from '@/components/Header'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -31,11 +33,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <AuthProvider>
-          <CartProvider>
-            <Header />
-            {children}
-            <Toaster position="top-right" />
-          </CartProvider>
+          <ProductsProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <Header />
+                {children}
+                <Toaster position="top-right" />
+              </WishlistProvider>
+            </CartProvider>
+          </ProductsProvider>
         </AuthProvider>
       </body>
     </html>

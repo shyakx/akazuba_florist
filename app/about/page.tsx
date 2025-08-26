@@ -59,11 +59,11 @@ const AboutPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-pink-50 via-white to-rose-50 py-20">
+      <section className="bg-pink-50 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
-              About <span className="text-gradient bg-gradient-to-r from-pink-600 to-rose-600">Akazuba Florist</span>
+              About <span className="text-pink-600">Akazuba Florist</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               We are passionate about bringing the finest flowers and handcrafted arrangements to Rwanda, 
@@ -123,7 +123,7 @@ const AboutPage = () => {
                 className="w-full h-64 object-cover rounded-xl"
               />
               <img
-                src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                src="https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
                 alt="Mixed Bouquet"
                 className="w-full h-64 object-cover rounded-xl mt-8"
               />
@@ -269,7 +269,7 @@ const AboutPage = () => {
                     placeholder="Your message..."
                   ></textarea>
                 </div>
-                <button type="submit" className="w-full bg-gradient-to-r from-pink-600 to-rose-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-pink-700 hover:to-rose-700 transition-all duration-300">
+                                 <button type="submit" className="w-full bg-pink-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300">
                   Send Message
                 </button>
               </form>

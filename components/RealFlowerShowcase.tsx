@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Flower, Palette } from 'lucide-react';
-import { realFlowerProducts } from '@/data/real-flowers';
+import { useProducts } from '@/contexts/ProductsContext';
 
 // Format price function for RWF currency
 const formatPrice = (price: number) => {
@@ -21,15 +21,31 @@ const colors = [
   { name: 'Yellow', value: 'yellow', bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800' },
   { name: 'Purple', value: 'purple', bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800' },
   { name: 'Orange', value: 'orange', bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-800' },
-  { name: 'Mixed', value: 'mixed', bg: 'bg-gradient-to-r from-pink-50 to-purple-50', border: 'border-pink-200', text: 'text-purple-800' },
+  { name: 'Mixed', value: 'mixed', bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-800' },
 ];
 
 export default function RealFlowerShowcase() {
   const [selectedColor, setSelectedColor] = useState('red');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { state } = useProducts();
+  const { products, isLoading } = state;
 
-  const filteredProducts = realFlowerProducts.filter(product => product.color === selectedColor);
+  const filteredProducts = products.filter((product: any) => product.color === selectedColor);
   const currentColor = colors.find(c => c.value === selectedColor);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-pink-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading beautiful flowers...</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % filteredProducts.length);
@@ -40,7 +56,7 @@ export default function RealFlowerShowcase() {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-br from-pink-50 to-rose-50">
+    <section className="py-16 bg-pink-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <motion.div
@@ -76,7 +92,7 @@ export default function RealFlowerShowcase() {
                   : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300'
               }`}
             >
-              {color.name} ({realFlowerProducts.filter(p => p.color === color.value).length})
+              {color.name} ({products.filter((p: any) => p.color === color.value).length})
             </motion.button>
           ))}
         </div>
@@ -102,7 +118,7 @@ export default function RealFlowerShowcase() {
                     e.currentTarget.style.display = 'none'
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-black/30" />
                 
                 {/* Image Info */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -199,7 +215,7 @@ export default function RealFlowerShowcase() {
             className="text-center"
           >
             <div className="text-3xl font-bold text-pink-600 mb-2">
-              {realFlowerProducts.length}
+              {products.length}
             </div>
             <div className="text-gray-600">Total Flowers</div>
           </motion.div>
@@ -221,7 +237,7 @@ export default function RealFlowerShowcase() {
             className="text-center"
           >
             <div className="text-3xl font-bold text-pink-600 mb-2">
-              {realFlowerProducts.filter(p => p.featured).length}
+              {products.filter((p: any) => p.featured).length}
             </div>
             <div className="text-gray-600">Featured Flowers</div>
           </motion.div>
@@ -232,7 +248,7 @@ export default function RealFlowerShowcase() {
             className="text-center"
           >
             <div className="text-3xl font-bold text-pink-600 mb-2">
-              {formatPrice(Math.min(...realFlowerProducts.map(p => p.price)))}
+              {formatPrice(Math.min(...products.map((p: any) => p.price)))}
             </div>
             <div className="text-gray-600">Starting Price</div>
           </motion.div>

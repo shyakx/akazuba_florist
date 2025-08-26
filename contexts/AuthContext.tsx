@@ -10,8 +10,11 @@ interface AuthContextType {
   isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
   adminLogin: (username: string, password: string) => Promise<boolean>
+  unifiedLogin: (email: string, password: string) => Promise<{ success: boolean; user?: User; message?: string }>
   register: (data: RegisterData) => Promise<boolean>
   logout: () => void
+  clearAuth: () => void
+  clearAuthOnly: () => void
   updateProfile: (data: UpdateProfileData) => Promise<boolean>
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>
   refreshToken: () => Promise<boolean>
@@ -42,6 +45,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
+  // Debug user state changes
+  useEffect(() => {
+    console.log('🔄 User state changed:', user)
+  }, [user])
+
   // Check authentication status on mount
   useEffect(() => {
     checkAuthStatus()
@@ -55,29 +63,66 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const accessToken = apiUtils.getAccessToken()
       const storedUser = apiUtils.getStoredUser()
       
+      console.log('🔍 Auth Status Check:', {
+        hasAccessToken: !!accessToken,
+        hasStoredUser: !!storedUser,
+        storedUserRole: storedUser?.role,
+        currentPath: typeof window !== 'undefined' ? window.location.pathname : 'unknown'
+      })
+      
+      // Check if we're on an admin page
+      const isAdminPage = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')
+      
       if (accessToken && storedUser) {
-        // Verify token is still valid by making a profile request
+        // For admin pages, don't auto-authenticate - require explicit login
+        if (isAdminPage && storedUser.role !== 'ADMIN') {
+          // Clear non-admin tokens on admin pages
+          console.log('🚫 Clearing non-admin tokens on admin page')
+          apiUtils.clearTokens()
+          setUser(null)
+          return
+        }
+        
+        // In development mode, trust stored tokens without API verification
+        const isDevelopment = process.env.NODE_ENV === 'development'
+        const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        
+        if (isDevelopment && isLocalhost) {
+          console.log('🔧 Development mode: Trusting stored tokens without API verification')
+          setUser(storedUser)
+          return
+        }
+        
+        // Verify token is still valid by making a profile request (only in production)
         try {
           const response = await authAPI.getProfile()
           if (response.success && response.data) {
+            console.log('✅ Token verified, user authenticated:', response.data.user.role)
             setUser(response.data.user)
             // Update stored user data
             apiUtils.storeUser(response.data.user)
           } else {
+            console.log('❌ Token verification failed, trying refresh')
             // Token might be expired, try to refresh
             await refreshToken()
           }
         } catch (error) {
-          console.error('Token verification failed:', error)
-          // Clear invalid tokens
+          console.error('❌ Token verification failed:', error)
+          // In development, don't clear tokens on API failure
+          if (!isDevelopment) {
           apiUtils.clearTokens()
           setUser(null)
+          } else {
+            console.log('🔧 Development mode: Keeping tokens despite API failure')
+            setUser(storedUser)
+          }
         }
       } else {
+        console.log('🔓 No stored authentication found')
         setUser(null)
       }
     } catch (error) {
-      console.error('Auth status check failed:', error)
+      console.error('❌ Auth status check failed:', error)
       setUser(null)
     } finally {
       setIsLoading(false)
@@ -117,11 +162,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true)
       
+      // Use the API layer instead of direct fetch calls
       const response = await authAPI.adminLogin({ username, password })
       
       if (response.success && response.data) {
         // Store tokens and user data
-        apiUtils.storeTokens(response.data.accessToken, response.data.refreshToken)
+        apiUtils.storeTokens(response.data.accessToken, response.data.refreshToken || '')
         apiUtils.storeUser(response.data.user)
         
         // Set cookies for SSR
@@ -137,6 +183,73 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error('Admin login error:', error)
       return false
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const unifiedLogin = async (email: string, password: string): Promise<{ success: boolean; user?: User; message?: string }> => {
+    try {
+      setIsLoading(true)
+      console.log('🔐 Unified login started for:', email)
+      
+      // Try customer login first
+      try {
+        const response = await authAPI.login({ email, password })
+        
+        if (response.success && response.data) {
+          console.log('✅ Customer login successful, storing data...')
+          
+          // Store tokens and user data
+          apiUtils.storeTokens(response.data.accessToken, response.data.refreshToken)
+          apiUtils.storeUser(response.data.user)
+          
+          // Set cookies for SSR
+          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=${7 * 24 * 60 * 60}` // 7 days
+          document.cookie = `userRole=${response.data.user.role}; path=/; max-age=${7 * 24 * 60 * 60}` // 7 days
+          
+          console.log('🔐 Setting user state to:', response.data.user)
+          setUser(response.data.user)
+          
+          // Verify the state was set
+          console.log('🔐 User state should now be set. Returning success.')
+          return { success: true, user: response.data.user }
+        }
+      } catch (error) {
+        console.log('❌ Customer login failed, trying admin login...')
+      }
+      
+      // If customer login failed, try admin login
+      try {
+        const response = await authAPI.adminLogin({ username: email, password })
+        
+        if (response.success && response.data) {
+          console.log('✅ Admin login successful, storing data...')
+          
+          // Store tokens and user data
+          apiUtils.storeTokens(response.data.accessToken, response.data.refreshToken || '')
+          apiUtils.storeUser(response.data.user)
+          
+          // Set cookies for SSR
+          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=${7 * 24 * 60 * 60}` // 7 days
+          document.cookie = `userRole=${response.data.user.role}; path=/; max-age=${7 * 24 * 60 * 60}` // 7 days
+          
+          console.log('🔐 Setting user state to:', response.data.user)
+          setUser(response.data.user)
+          
+          // Verify the state was set
+          console.log('🔐 User state should now be set. Returning success.')
+          return { success: true, user: response.data.user }
+        }
+      } catch (error) {
+        console.log('❌ Admin login also failed')
+      }
+      
+      console.log('❌ Both login attempts failed')
+      return { success: false, message: 'Invalid email or password. Please try again.' }
+    } catch (error) {
+      console.error('❌ Unified login error:', error)
+      return { success: false, message: 'An unexpected error occurred during login.' }
     } finally {
       setIsLoading(false)
     }
@@ -173,12 +286,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     try {
-      // Call logout API
+      // Check if we're in development mode with mock tokens
+      const accessToken = apiUtils.getAccessToken()
+      const isDevelopment = process.env.NODE_ENV === 'development' || typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      const isMockToken = accessToken && accessToken.startsWith('mock-')
+      
+      // Skip API call if in development mode with mock tokens
+      if (isDevelopment && isMockToken) {
+        console.log('🔧 Development mode: Skipping logout API call for mock tokens')
+      } else {
+        try {
+          // Call logout API only for production or real tokens
       await authAPI.logout()
     } catch (error) {
       console.error('Logout API error:', error)
+          // Continue with logout even if API call fails
+        }
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
     } finally {
-      // Clear all auth data
+      // Clear all auth data regardless of API call success
       apiUtils.clearTokens()
       setUser(null)
       
@@ -270,17 +398,35 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
+  const clearAuth = () => {
+    apiUtils.clearTokens()
+    setUser(null)
+    document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    router.push('/')
+  }
+
+  const clearAuthOnly = () => {
+    apiUtils.clearTokens()
+    setUser(null)
+    document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+  }
+
   const value = {
     user,
     isAuthenticated: !!user,
     isLoading,
     login,
     adminLogin,
+    unifiedLogin,
     register,
     logout,
     updateProfile,
     changePassword,
-    refreshToken
+    refreshToken,
+    clearAuth,
+    clearAuthOnly
   }
 
   return (

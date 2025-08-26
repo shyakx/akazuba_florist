@@ -1,18 +1,19 @@
 import express from 'express'
-import { paymentController } from '../controllers/paymentController'
+import PaymentController from '../controllers/paymentController'
+import { verifyToken } from '../middleware/auth'
 
 const router = express.Router()
 
-// Initialize payment (MoMo or Bank Transfer)
-router.post('/initiate', paymentController.initiatePayment)
+// Get available payment methods
+router.get('/methods', PaymentController.getPaymentMethods)
 
-// Verify payment status
-router.get('/verify/:transactionId', paymentController.verifyPayment)
+// Initiate payment
+router.post('/initiate', PaymentController.initiatePayment)
 
-// Get bank transfer details
-router.get('/transfer/:transactionId', paymentController.getBankTransferDetails)
+// Check payment status
+router.get('/status/:orderId', PaymentController.checkPaymentStatus)
 
-// Webhook for payment notifications
-router.post('/webhook', paymentController.handleWebhook)
+// Update payment status (admin only)
+router.put('/status/:orderId', verifyToken, PaymentController.updatePaymentStatus)
 
 export default router 
