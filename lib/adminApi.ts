@@ -284,6 +284,66 @@ class AdminAPI {
     }
   }
 
+  // Orders
+  async getOrders(params?: {
+    page?: number
+    limit?: number
+    search?: string
+    status?: string
+    paymentStatus?: string
+    dateFrom?: string
+    dateTo?: string
+  }): Promise<{ orders: any[]; total: number; pages: number }> {
+    try {
+      const queryParams = new URLSearchParams()
+      if (params?.page) queryParams.append('page', params.page.toString())
+      if (params?.limit) queryParams.append('limit', params.limit.toString())
+      if (params?.search) queryParams.append('search', params.search)
+      if (params?.status) queryParams.append('status', params.status)
+      if (params?.paymentStatus) queryParams.append('paymentStatus', params.paymentStatus)
+      if (params?.dateFrom) queryParams.append('dateFrom', params.dateFrom)
+      if (params?.dateTo) queryParams.append('dateTo', params.dateTo)
+
+      const response = await apiRequest(`/admin/orders?${queryParams.toString()}`)
+      
+      if (response.success) {
+        return response.data as { orders: any[]; total: number; pages: number }
+      } else {
+        throw new Error(response.message || 'Failed to fetch orders')
+      }
+    } catch (error: any) {
+      console.error('Error fetching orders:', error)
+      throw new Error('Failed to fetch orders')
+    }
+  }
+
+  // Customers
+  async getCustomers(params?: {
+    page?: number
+    limit?: number
+    search?: string
+    role?: string
+  }): Promise<{ customers: any[]; total: number; pages: number }> {
+    try {
+      const queryParams = new URLSearchParams()
+      if (params?.page) queryParams.append('page', params.page.toString())
+      if (params?.limit) queryParams.append('limit', params.limit.toString())
+      if (params?.search) queryParams.append('search', params.search)
+      if (params?.role) queryParams.append('role', params.role)
+
+      const response = await apiRequest(`/admin/customers?${queryParams.toString()}`)
+      
+      if (response.success) {
+        return response.data as { customers: any[]; total: number; pages: number }
+      } else {
+        throw new Error(response.message || 'Failed to fetch customers')
+      }
+    } catch (error: any) {
+      console.error('Error fetching customers:', error)
+      throw new Error('Failed to fetch customers')
+    }
+  }
+
   // Products
   async getProducts(params?: {
     page?: number
@@ -382,6 +442,113 @@ class AdminAPI {
     } catch (error: any) {
       console.error('Error deleting product:', error)
       throw new Error('Failed to delete product')
+    }
+  }
+
+  // Additional admin methods
+  async updateOrderStatus(orderId: string, status: string): Promise<void> {
+    try {
+      const response = await apiRequest(`/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status })
+      })
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to update order status')
+      }
+    } catch (error: any) {
+      console.error('Error updating order status:', error)
+      throw new Error('Failed to update order status')
+    }
+  }
+
+  async updatePaymentStatus(orderId: string, paymentStatus: string): Promise<void> {
+    try {
+      const response = await apiRequest(`/admin/orders/${orderId}/payment-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ paymentStatus })
+      })
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to update payment status')
+      }
+    } catch (error: any) {
+      console.error('Error updating payment status:', error)
+      throw new Error('Failed to update payment status')
+    }
+  }
+
+  async downloadInvoice(orderId: string): Promise<Blob> {
+    try {
+      const response = await fetch(`${this.baseURL}/api/v1/admin/orders/${orderId}/invoice`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to download invoice')
+      }
+
+      return await response.blob()
+    } catch (error: any) {
+      console.error('Error downloading invoice:', error)
+      throw new Error('Failed to download invoice')
+    }
+  }
+
+  async getCustomerOrders(customerId: string): Promise<any[]> {
+    try {
+      const response = await apiRequest(`/admin/customers/${customerId}/orders`)
+      
+      if (response.success) {
+        return response.data as any[]
+      } else {
+        throw new Error(response.message || 'Failed to fetch customer orders')
+      }
+    } catch (error: any) {
+      console.error('Error fetching customer orders:', error)
+      throw new Error('Failed to fetch customer orders')
+    }
+  }
+
+  async deactivateCustomer(customerId: string): Promise<void> {
+    try {
+      const response = await apiRequest(`/admin/customers/${customerId}/deactivate`, {
+        method: 'PUT'
+      })
+      
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to deactivate customer')
+      }
+    } catch (error: any) {
+      console.error('Error deactivating customer:', error)
+      throw new Error('Failed to deactivate customer')
+    }
+  }
+
+  async exportCustomers(format: 'csv' | 'excel'): Promise<Blob> {
+    try {
+      const response = await fetch(`${this.baseURL}/api/v1/admin/customers/export?format=${format}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to export customers')
+      }
+
+      return await response.blob()
+    } catch (error: any) {
+      console.error('Error exporting customers:', error)
+      throw new Error('Failed to export customers')
     }
   }
 
