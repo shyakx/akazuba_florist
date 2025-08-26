@@ -235,7 +235,7 @@ class AdminAPI {
   private baseURL: string
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
   }
 
   // Dashboard

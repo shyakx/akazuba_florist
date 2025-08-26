@@ -7,6 +7,7 @@ import {
   updateProduct,
   deleteProduct
 } from '../controllers/productController'
+import { requireAdmin } from '../middleware/auth'
 
 const router = Router()
 

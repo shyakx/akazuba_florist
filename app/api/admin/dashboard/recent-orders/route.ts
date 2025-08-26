@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'No token provided' }, { status: 401 })
     }
 
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:3001'}/admin/dashboard/recent-orders`, {
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/dashboard/recent-orders`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

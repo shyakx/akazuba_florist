@@ -234,12 +234,12 @@ class ProductStorage {
     const featuredProducts = this.products.filter(p => p.isFeatured).length
     const lowStockProducts = this.products.filter(p => p.stockQuantity <= 5).length
     
-    const totalRevenue = this.products.reduce((sum, p) => sum + p.revenue, 0)
-    const totalSales = this.products.reduce((sum, p) => sum + p.sales, 0)
-    const totalViews = this.products.reduce((sum, p) => sum + p.views, 0)
+    const totalRevenue = this.products.reduce((sum, p) => sum + (p.revenue || 0), 0)
+    const totalSales = this.products.reduce((sum, p) => sum + (p.sales || 0), 0)
+    const totalViews = this.products.reduce((sum, p) => sum + (p.views || 0), 0)
     
     const avgRating = this.products.length > 0 
-      ? this.products.reduce((sum, p) => sum + p.rating, 0) / this.products.length 
+      ? this.products.reduce((sum, p) => sum + (p.rating || 0), 0) / this.products.length 
       : 0
 
     return {
@@ -260,11 +260,11 @@ class ProductStorage {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
       
       switch (operation) {
         case 'create':
-          await fetch(`${baseURL}/admin/products`, {
+          await fetch(`${baseURL}/api/v1/admin/products`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -274,7 +274,7 @@ class ProductStorage {
           })
           break
         case 'update':
-          await fetch(`${baseURL}/admin/products/${product.id}`, {
+          await fetch(`${baseURL}/api/v1/admin/products/${product.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -284,7 +284,7 @@ class ProductStorage {
           })
           break
         case 'delete':
-          await fetch(`${baseURL}/admin/products/${product.id}`, {
+          await fetch(`${baseURL}/api/v1/admin/products/${product.id}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`
@@ -303,9 +303,9 @@ class ProductStorage {
       const token = localStorage.getItem('token')
       if (!token) return
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
       
-      await fetch(`${baseURL}/admin/products/bulk`, {
+      await fetch(`${baseURL}/api/v1/admin/products/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

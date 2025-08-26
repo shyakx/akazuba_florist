@@ -750,4 +750,221 @@ router.get('/dashboard/activity', async (req, res) => {
   }
 })
 
+// Admin product management routes
+router.get('/products', async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, category, status } = req.query
+    
+    const skip = (Number(page) - 1) * Number(limit)
+    const where: any = {}
+    
+    if (search) {
+      where.OR = [
+        { name: { contains: search as string, mode: 'insensitive' } },
+        { description: { contains: search as string, mode: 'insensitive' } }
+      ]
+    }
+    
+    if (category && category !== 'all') {
+      where.categoryId = category
+    }
+    
+    if (status && status !== 'all') {
+      if (status === 'active') where.isActive = true
+      else if (status === 'inactive') where.isActive = false
+      else if (status === 'featured') where.isFeatured = true
+    }
+    
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take: Number(limit),
+        include: {
+          category: true
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.product.count({ where })
+    ])
+    
+    const pages = Math.ceil(total / Number(limit))
+    
+    res.json({
+      success: true,
+      message: 'Products retrieved successfully',
+      data: {
+        products,
+        total,
+        pages
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching products:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch products'
+    })
+  }
+})
+
+router.get('/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: true
+      }
+    })
+    
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      })
+    }
+    
+    res.json({
+      success: true,
+      message: 'Product retrieved successfully',
+      data: product
+    })
+  } catch (error) {
+    console.error('Error fetching product:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch product'
+    })
+  }
+})
+
+router.post('/products', async (req, res) => {
+  try {
+    const productData = req.body
+    
+    const product = await prisma.product.create({
+      data: productData,
+      include: {
+        category: true
+      }
+    })
+    
+    res.status(201).json({
+      success: true,
+      message: 'Product created successfully',
+      data: product
+    })
+  } catch (error) {
+    console.error('Error creating product:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create product'
+    })
+  }
+})
+
+router.put('/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const updateData = req.body
+    
+    const product = await prisma.product.update({
+      where: { id },
+      data: updateData,
+      include: {
+        category: true
+      }
+    })
+    
+    res.json({
+      success: true,
+      message: 'Product updated successfully',
+      data: product
+    })
+  } catch (error) {
+    console.error('Error updating product:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update product'
+    })
+  }
+})
+
+router.delete('/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    
+    await prisma.product.delete({
+      where: { id }
+    })
+    
+    res.json({
+      success: true,
+      message: 'Product deleted successfully'
+    })
+  } catch (error) {
+    console.error('Error deleting product:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete product'
+    })
+  }
+})
+
+router.post('/products/bulk', async (req, res) => {
+  try {
+    const { operation, productIds } = req.body
+    
+    switch (operation) {
+      case 'delete':
+        await prisma.product.deleteMany({
+          where: { id: { in: productIds } }
+        })
+        break
+      case 'activate':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isActive: true }
+        })
+        break
+      case 'deactivate':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isActive: false }
+        })
+        break
+      case 'feature':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isFeatured: true }
+        })
+        break
+      case 'unfeature':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isFeatured: false }
+        })
+        break
+      default:
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid operation'
+        })
+    }
+    
+    res.json({
+      success: true,
+      message: `Bulk ${operation} completed successfully`
+    })
+  } catch (error) {
+    console.error('Error performing bulk operation:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to perform bulk operation'
+    })
+  }
+})
+
 export default router 
