@@ -10,7 +10,7 @@ const app = express();
 process.env.DATABASE_URL = "postgresql://postgres:0123@localhost:5434/akazuba_florist";
 
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());

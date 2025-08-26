@@ -597,7 +597,7 @@ const apiRequest = async <T>(
   let API_BASE_URL_ACTUAL: string;
   if (isDevelopment) {
     // Use TypeScript backend with payment APIs
-    API_BASE_URL_ACTUAL = 'http://localhost:3001/api/v1';
+    API_BASE_URL_ACTUAL = 'http://localhost:5000/api/v1';
   } else {
     // Use the configured API URL or fallback to HTTPS backend
     API_BASE_URL_ACTUAL = process.env.NEXT_PUBLIC_API_URL || 'https://ar7fgtd32h.us-east-1.awsapprunner.com/api/v1';

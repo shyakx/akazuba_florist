@@ -42,7 +42,7 @@ export interface LoginRequest {
 // API Base URL - Use environment variable or fallback to localhost
 const getApiBaseUrl = (): string => {
   // Use local development backend
-  return 'http://localhost:3001/api/v1'
+  return 'http://localhost:5000/api/v1'
 }
 
 // Base API request function

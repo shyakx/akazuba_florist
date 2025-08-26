@@ -257,6 +257,9 @@ class ProductStorage {
   // Sync with backend database
   private async syncToBackend(product: AdminProduct, operation: 'create' | 'update' | 'delete') {
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') return
+      
       const token = localStorage.getItem('token')
       if (!token) return
 
@@ -300,6 +303,9 @@ class ProductStorage {
   // Sync bulk operations with backend
   private async syncBulkToBackend(operation: string, productIds: string[]) {
     try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') return
+      
       const token = localStorage.getItem('token')
       if (!token) return
 
@@ -321,12 +327,15 @@ class ProductStorage {
   // Load from localStorage
   private loadFromStorage() {
     try {
-      const stored = localStorage.getItem('productStorage')
-      if (stored) {
-        const data = JSON.parse(stored)
-        this.products = data.products || []
-        this.nextId = data.nextId || 1
-        this.isInitialized = data.isInitialized || false
+      // Check if we're in a browser environment
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const stored = localStorage.getItem('productStorage')
+        if (stored) {
+          const data = JSON.parse(stored)
+          this.products = data.products || []
+          this.nextId = data.nextId || 1
+          this.isInitialized = data.isInitialized || false
+        }
       }
     } catch (error) {
       console.error('Error loading from storage:', error)
@@ -336,12 +345,15 @@ class ProductStorage {
   // Save to localStorage
   private saveToStorage() {
     try {
-      const data = {
-        products: this.products,
-        nextId: this.nextId,
-        isInitialized: this.isInitialized
+      // Check if we're in a browser environment
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const data = {
+          products: this.products,
+          nextId: this.nextId,
+          isInitialized: this.isInitialized
+        }
+        localStorage.setItem('productStorage', JSON.stringify(data))
       }
-      localStorage.setItem('productStorage', JSON.stringify(data))
     } catch (error) {
       console.error('Error saving to storage:', error)
     }
