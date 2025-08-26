@@ -193,7 +193,7 @@ router.get('/analytics', async (req, res) => {
       topProducts: topProductsWithNames,
       recentOrders: recentOrders.map(o => ({
         id: o.id,
-        customer: `${o.user.firstName} ${o.user.lastName}`,
+        customer: o.user ? `${o.user.firstName} ${o.user.lastName}` : 'Guest User',
         amount: Number(o.totalAmount),
         status: o.status.toLowerCase(),
         date: o.createdAt.toISOString().split('T')[0]
@@ -302,7 +302,7 @@ router.get('/customers', async (req, res) => {
         const recentOrder = await prisma.order.findFirst({
           where: { userId: customer.id },
           orderBy: { createdAt: 'desc' },
-          select: { shippingAddress: true }
+          select: { customerAddress: true, customerCity: true }
         })
 
         return {
@@ -311,8 +311,8 @@ router.get('/customers', async (req, res) => {
           totalSpent,
           status: totalSpent > 100000 ? 'vip' : 'active',
           joinedDate: customer.createdAt.toISOString().split('T')[0],
-          address: recentOrder?.shippingAddress?.city ? 
-            `${recentOrder.shippingAddress.city}, ${recentOrder.shippingAddress.country}` : 
+          address: recentOrder ? 
+            `${recentOrder.customerCity}, ${recentOrder.customerAddress}` : 
             'Address not available',
           wishlistItems
         }
@@ -376,22 +376,25 @@ router.get('/orders', async (req, res) => {
     const formattedOrders = orders.map(order => ({
       id: order.id,
       orderNumber: order.orderNumber,
-      customerName: `${order.user.firstName} ${order.user.lastName}`,
-      customerEmail: order.user.email,
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+      customerEmail: order.user?.email || 'guest@example.com',
       status: order.status,
       subtotal: order.subtotal,
-      taxAmount: order.taxAmount,
-      shippingAmount: order.shippingAmount,
-      discountAmount: order.discountAmount,
+      taxAmount: 0, // Not in current schema
+      shippingAmount: Number(order.deliveryFee),
+      discountAmount: 0, // Not in current schema
       totalAmount: order.totalAmount,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
-      shippingAddress: order.shippingAddress,
+      shippingAddress: {
+        address: order.customerAddress,
+        city: order.customerCity
+      },
       items: order.orderItems.map(item => ({
         productName: item.product.name,
         quantity: item.quantity,
-        price: item.price,
-        productImage: item.product.images[0] || null
+        price: Number(item.unitPrice),
+        productImage: item.productImage
       })),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt
@@ -622,7 +625,7 @@ router.get('/dashboard/recent-orders', async (req, res) => {
     const formattedOrders = recentOrders.map(order => ({
       id: order.id,
       orderNumber: order.orderNumber,
-      customerName: `${order.user.firstName} ${order.user.lastName}`,
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
       totalAmount: order.totalAmount,
       status: order.status,
       createdAt: order.createdAt
@@ -697,14 +700,14 @@ router.get('/dashboard/activity', async (req, res) => {
       })
     ])
 
-    const activities = []
+    const activities: any[] = []
 
     // Add order activities
     recentOrders.forEach(order => {
       activities.push({
         type: 'order',
         title: 'New order received',
-        description: `Order #${order.orderNumber} from ${order.user.firstName} ${order.user.lastName}`,
+        description: `Order #${order.orderNumber} from ${order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User'}`,
         timestamp: order.createdAt,
         status: 'success'
       })
@@ -826,14 +829,14 @@ router.get('/products/:id', async (req, res) => {
       })
     }
     
-    res.json({
+    return res.json({
       success: true,
       message: 'Product retrieved successfully',
       data: product
     })
   } catch (error) {
     console.error('Error fetching product:', error)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to fetch product'
     })
@@ -954,13 +957,13 @@ router.post('/products/bulk', async (req, res) => {
         })
     }
     
-    res.json({
+    return res.json({
       success: true,
       message: `Bulk ${operation} completed successfully`
     })
   } catch (error) {
     console.error('Error performing bulk operation:', error)
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to perform bulk operation'
     })

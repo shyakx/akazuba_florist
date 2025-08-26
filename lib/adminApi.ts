@@ -317,6 +317,21 @@ class AdminAPI {
     }
   }
 
+  async getOrder(id: string): Promise<any> {
+    try {
+      const response = await apiRequest(`/admin/orders/${id}`)
+      
+      if (response.success) {
+        return response.data
+      } else {
+        throw new Error(response.message || 'Failed to fetch order')
+      }
+    } catch (error: any) {
+      console.error('Error fetching order:', error)
+      throw new Error('Failed to fetch order')
+    }
+  }
+
   // Customers
   async getCustomers(params?: {
     page?: number

@@ -16,14 +16,9 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  X,
   ChevronDown,
   ChevronUp,
-  FileText,
-  Phone,
-  Mail,
-  MapPin,
-  User
+  FileText
 } from 'lucide-react'
 import Link from 'next/link'
 import { adminAPI, AdminOrder } from '@/lib/adminApi'
@@ -41,8 +36,6 @@ const OrdersPage = () => {
   const [dateTo, setDateTo] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null)
-  const [showOrderModal, setShowOrderModal] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
 
   useEffect(() => {
@@ -128,8 +121,7 @@ const OrdersPage = () => {
   }
 
   const viewOrderDetails = (order: AdminOrder) => {
-    setSelectedOrder(order)
-    setShowOrderModal(true)
+    router.push(`/admin/orders/${order.id}`)
   }
 
   const formatPrice = (price: number) => {
@@ -399,157 +391,7 @@ const OrdersPage = () => {
         )}
       </div>
 
-      {/* Order Details Modal */}
-      {showOrderModal && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  Order Details - {selectedOrder.orderNumber}
-                </h2>
-                <button
-                  onClick={() => setShowOrderModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
-            </div>
 
-            <div className="p-6 space-y-6">
-              {/* Customer Information */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Customer Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2">
-                    <User className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-900">{selectedOrder.customerName}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Mail className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-900">{selectedOrder.customerEmail}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-900">{selectedOrder.customerPhone}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm text-gray-900">{selectedOrder.customerAddress}, {selectedOrder.customerCity}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Items */}
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
-                <div className="space-y-3">
-                  {selectedOrder.items.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-3 border border-gray-200 rounded-lg">
-                      <img
-                        src={item.productImage}
-                        alt={item.productName}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">{item.productName}</div>
-                        <div className="text-sm text-gray-500">
-                          {item.color} • {item.type} • Qty: {item.quantity}
-                        </div>
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {formatPrice(item.totalPrice)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Order Summary */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Order Summary</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Subtotal:</span>
-                    <span className="text-sm font-medium">{formatPrice(selectedOrder.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-gray-600">Delivery Fee:</span>
-                    <span className="text-sm font-medium">{formatPrice(selectedOrder.deliveryFee)}</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm font-medium text-gray-900">Total:</span>
-                      <span className="text-sm font-bold text-gray-900">{formatPrice(selectedOrder.totalAmount)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status Management */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Order Status</h3>
-                  <div className="space-y-2">
-                    {['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'].map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => handleStatusUpdate(selectedOrder.id, status)}
-                        disabled={updatingStatus === selectedOrder.id}
-                        className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                          selectedOrder.status === status
-                            ? 'bg-pink-100 text-pink-800 border border-pink-300'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {updatingStatus === selectedOrder.id ? 'Updating...' : status}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Status</h3>
-                  <div className="space-y-2">
-                    {['PENDING', 'PAID', 'FAILED', 'REFUNDED'].map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => handlePaymentStatusUpdate(selectedOrder.id, status)}
-                        disabled={updatingStatus === selectedOrder.id}
-                        className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                          selectedOrder.paymentStatus === status
-                            ? 'bg-pink-100 text-pink-800 border border-pink-300'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {updatingStatus === selectedOrder.id ? 'Updating...' : status}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <button
-                  onClick={() => handleDownloadInvoice(selectedOrder.id)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                >
-                  <Download className="h-4 w-4" />
-                  <span>Download Invoice</span>
-                </button>
-                <button
-                  onClick={() => setShowOrderModal(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

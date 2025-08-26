@@ -10,6 +10,7 @@ const app = express();
 process.env.DATABASE_URL = "postgresql://postgres:0123@localhost:5434/akazuba_florist";
 
 const prisma = new PrismaClient();
+
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -763,6 +764,388 @@ app.get('/api/v1/orders/my-orders', async (req, res) => {
   } catch (error) {
     console.error('Orders error:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+// Admin Authentication Middleware
+const authenticateAdmin = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
+
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Admin auth error:', error);
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+// Admin Dashboard Stats
+app.get('/api/v1/admin/dashboard/stats', authenticateAdmin, async (req, res) => {
+  try {
+    const [totalOrders, totalRevenue, totalCustomers, totalProducts] = await Promise.all([
+      prisma.order.count(),
+      prisma.order.aggregate({
+        _sum: { totalAmount: true }
+      }),
+      prisma.user.count({
+        where: { role: 'CUSTOMER' }
+      }),
+      prisma.product.count()
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalOrders,
+        totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
+        totalCustomers,
+        totalProducts,
+        newCustomers: totalCustomers,
+        uniqueCustomers: totalCustomers,
+        averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+  }
+});
+
+// Admin Recent Orders
+app.get('/api/v1/admin/dashboard/recent-orders', authenticateAdmin, async (req, res) => {
+  try {
+    const recentOrders = await prisma.order.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    const formattedOrders = recentOrders.map(order => ({
+      id: order.id,
+      orderNumber: order.orderNumber || `ORD-${order.id.slice(-6)}`,
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+      totalAmount: Number(order.totalAmount),
+      status: order.status.toUpperCase(),
+      createdAt: order.createdAt.toISOString()
+    }));
+
+    res.json({
+      success: true,
+      data: formattedOrders
+    });
+  } catch (error) {
+    console.error('Error fetching recent orders:', error);
+    res.status(500).json({ error: 'Failed to fetch recent orders' });
+  }
+});
+
+// Admin Recent Activity
+app.get('/api/v1/admin/dashboard/activity', authenticateAdmin, async (req, res) => {
+  try {
+    const recentOrders = await prisma.order.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    const activities = recentOrders.map(order => ({
+      type: 'order',
+      title: 'New order received',
+      description: `Order #${order.orderNumber || `ORD-${order.id.slice(-6)}`} from ${order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User'}`,
+      timestamp: order.createdAt,
+      status: 'success'
+    }));
+
+    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const recentActivities = activities.slice(0, 10);
+
+    res.json({
+      success: true,
+      data: recentActivities
+    });
+  } catch (error) {
+    console.error('Error fetching recent activity:', error);
+    res.status(500).json({ error: 'Failed to fetch recent activity' });
+  }
+});
+
+// Admin Customers
+app.get('/api/v1/admin/customers', authenticateAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search } = req.query;
+    const skip = (page - 1) * limit;
+
+    const whereClause = {
+      role: 'CUSTOMER',
+      ...(search && {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [customers, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereClause,
+        skip: parseInt(skip),
+        take: parseInt(limit),
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          role: true,
+          isActive: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      }),
+      prisma.user.count({ where: whereClause })
+    ]);
+
+    const customersWithStats = await Promise.all(
+      customers.map(async (customer) => {
+        const orders = await prisma.order.findMany({
+          where: { userId: customer.id }
+        });
+
+        const totalOrders = orders.length;
+        const totalSpent = orders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
+        const wishlistItems = await prisma.wishlist.count({
+          where: { userId: customer.id }
+        });
+
+        const recentOrder = await prisma.order.findFirst({
+          where: { userId: customer.id },
+          orderBy: { createdAt: 'desc' },
+          select: { customerAddress: true, customerCity: true }
+        });
+
+        return {
+          ...customer,
+          totalOrders,
+          totalSpent,
+          status: totalSpent > 100000 ? 'vip' : 'active',
+          joinedDate: customer.createdAt.toISOString().split('T')[0],
+          address: recentOrder ? 
+            `${recentOrder.customerCity}, ${recentOrder.customerAddress}` : 
+            'Address not available',
+          wishlistItems
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: {
+        customers: customersWithStats,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    res.status(500).json({ error: 'Failed to fetch customers' });
+  }
+});
+
+// Admin Orders
+app.get('/api/v1/admin/orders', authenticateAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, status, paymentStatus } = req.query;
+    const skip = (page - 1) * limit;
+
+    const whereClause = {
+      ...(search && {
+        OR: [
+          { orderNumber: { contains: search, mode: 'insensitive' } },
+          { customerName: { contains: search, mode: 'insensitive' } },
+          { customerEmail: { contains: search, mode: 'insensitive' } }
+        ]
+      }),
+      ...(status && { status }),
+      ...(paymentStatus && { paymentStatus })
+    };
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where: whereClause,
+        skip: parseInt(skip),
+        take: parseInt(limit),
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
+          orderItems: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  price: true,
+                  images: true
+                }
+              }
+            }
+          }
+        }
+      }),
+      prisma.order.count({ where: whereClause })
+    ]);
+
+    const formattedOrders = orders.map(order => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+      customerEmail: order.user?.email || 'guest@example.com',
+      status: order.status,
+      subtotal: order.subtotal,
+      taxAmount: 0,
+      shippingAmount: Number(order.deliveryFee),
+      discountAmount: 0,
+      totalAmount: order.totalAmount,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      shippingAddress: {
+        address: order.customerAddress,
+        city: order.customerCity
+      },
+      items: order.orderItems.map(item => ({
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: Number(item.unitPrice),
+        productImage: item.productImage
+      })),
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        orders: formattedOrders,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+// Admin Single Order
+app.get('/api/v1/admin/orders/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        orderItems: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                images: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const formattedOrder = {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      userId: order.userId,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      totalAmount: Number(order.totalAmount),
+      deliveryFee: Number(order.deliveryFee),
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+      customerEmail: order.user?.email || order.customerEmail || 'guest@example.com',
+      customerPhone: order.customerPhone || 'N/A',
+      customerAddress: order.customerAddress || 'N/A',
+      customerCity: order.customerCity || 'N/A',
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      items: order.orderItems.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice),
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+          images: item.product.images || [],
+          price: item.product.price
+        }
+      })),
+      user: order.user ? {
+        id: order.user.id,
+        name: `${order.user.firstName} ${order.user.lastName}`,
+        email: order.user.email
+      } : undefined
+    };
+
+    res.json({
+      success: true,
+      data: formattedOrder
+    });
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    res.status(500).json({ error: 'Failed to fetch order' });
   }
 });
 

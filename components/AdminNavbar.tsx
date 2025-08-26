@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { 
-  Home, Package, ShoppingCart, Users, Settings, BarChart3, 
+  Home, Package, ShoppingCart, Users, Settings, 
   LogOut, Menu, X, Plus, Eye, Flower, ChevronDown
 } from 'lucide-react'
 
@@ -49,11 +49,7 @@ const AdminNavbar = () => {
       href: '/admin/customers',
       icon: Users
     },
-    {
-      name: 'Analytics',
-      href: '/admin/analytics',
-      icon: BarChart3
-    },
+
     {
       name: 'Settings',
       href: '/admin/settings',
