@@ -123,4 +123,8 @@ Thumbs.db
 *.crt
 *.cert
 *.p12
-*.pfx 
+*.pfx
+
+# Specific PEM files that might be in root
+akazuba-*.pem 
+.vercel

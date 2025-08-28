@@ -1,0 +1,13 @@
+# Exclude certificate files from Vercel deployment
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+
+# Specific PEM files
+akazuba-*.pem
+
+# Temporary files
+temp-pem-files/
