@@ -36,11 +36,29 @@ interface ProductsContextType {
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined)
 
 const transformProduct = (product: any, index: number): Product => {
+  // Ensure we use the correct image path - never construct from slug
+  let imagePath = product.image || product.images?.[0]
+  
+  // If no image path provided, use a fallback based on color
+  if (!imagePath) {
+    const color = product.color || 'mixed'
+    imagePath = `/images/flowers/${color}/${color}-${(index % 2) + 1}.jpg`
+  }
+  
+  // Validate image path format
+  if (imagePath && !imagePath.startsWith('/images/flowers/') && !imagePath.startsWith('http')) {
+    // If it's not a proper path, construct one based on color
+    const color = product.color || 'mixed'
+    imagePath = `/images/flowers/${color}/${color}-1.jpg`
+  }
+  
+  console.log(`🖼️ Transform Product "${product.name}" - Image: ${imagePath}`)
+  
   return {
     id: product.id || index + 1,
     name: product.name,
     price: Number(product.price),
-    image: product.image || product.images?.[0] || `/images/flowers/mixed/mixed-${(index % 8) + 1}.jpg`,
+    image: imagePath,
     category: product.category?.name || product.category || 'Flowers',
     featured: product.featured || product.isFeatured || index < 8,
     description: product.description || `${product.name} from Akazuba Florist`,
