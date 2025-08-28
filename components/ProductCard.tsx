@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
@@ -24,6 +24,7 @@ interface ProductCardProps {
 const ProductCard = ({ product, showRating = true, className = '' }: ProductCardProps) => {
   const { addToCart } = useCart()
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist()
+  const [imageError, setImageError] = useState(false)
 
   const handleAddToCart = (product: any) => {
     addToCart({
@@ -43,6 +44,25 @@ const ProductCard = ({ product, showRating = true, className = '' }: ProductCard
     }
   }
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    console.error('❌ Image failed to load:', product.image)
+    setImageError(true)
+    
+    // Try fallback image
+    const img = e.currentTarget
+    if (img.src !== '/images/placeholder-flower.jpg') {
+      img.src = '/images/placeholder-flower.jpg'
+    } else {
+      // If fallback also fails, hide the image
+      img.style.display = 'none'
+    }
+  }
+
+  const handleImageLoad = () => {
+    setImageError(false)
+    console.log('✅ Image loaded successfully:', product.image)
+  }
+
   return (
     <div className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group ${className}`}>
       <div className="relative aspect-square overflow-hidden">
@@ -50,10 +70,8 @@ const ProductCard = ({ product, showRating = true, className = '' }: ProductCard
           src={product.image}
           alt={product.name}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-          onError={(e) => {
-            console.log('Image failed to load:', product.image)
-            e.currentTarget.style.display = 'none'
-          }}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
@@ -98,46 +116,50 @@ const ProductCard = ({ product, showRating = true, className = '' }: ProductCard
             <ShoppingCart className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Image Error Indicator */}
+        {imageError && (
+          <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+            <div className="text-center text-gray-500">
+              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">🌸</span>
+              </div>
+              <p className="text-xs">Image unavailable</p>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-gray-800 mb-2 line-clamp-1">
-          {product.name}
-        </h3>
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-          {product.description}
-        </p>
+        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
         
-        <div className="flex items-center justify-between">
-          {showRating ? (
-            <div className="flex items-center gap-1">
+        {showRating && (
+          <div className="flex items-center mb-2">
+            <div className="flex items-center">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
                   className={`w-4 h-4 ${
-                    i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                    i < (product.rating || 4) ? 'text-yellow-400 fill-current' : 'text-gray-300'
                   }`}
                 />
               ))}
-              <span className="text-sm text-gray-500 ml-1">(4.8)</span>
             </div>
-          ) : (
-            <div></div>
-          )}
-          <div className="text-right">
-            <div className="font-bold text-lg text-gray-800">
-              {formatPrice(product.price)}
-            </div>
+            <span className="text-sm text-gray-500 ml-1">({product.reviews || 12})</span>
           </div>
+        )}
+        
+        <div className="flex items-center justify-between">
+          <p className="text-pink-600 font-bold text-lg">
+            {formatPrice(product.price)}
+          </p>
+          
+          {product.salePrice && product.salePrice < product.price && (
+            <p className="text-gray-400 text-sm line-through">
+              {formatPrice(product.price)}
+            </p>
+          )}
         </div>
-
-        {/* Add to Cart Button - Consistent Pink Color */}
-        <button
-          onClick={() => handleAddToCart(product)}
-          className="w-full mt-3 bg-pink-500 text-white py-2 px-4 rounded-lg hover:bg-pink-600 transition-colors duration-200 font-medium"
-        >
-          Add to Cart
-        </button>
       </div>
     </div>
   )

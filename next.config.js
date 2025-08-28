@@ -11,6 +11,7 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    unoptimized: true, // Allow static images to be served directly
   },
   experimental: {
     optimizePackageImports: ['@headlessui/react', '@heroicons/react', 'lucide-react'],
@@ -20,6 +21,8 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
+  // Ensure static assets are properly handled
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {
       config.resolve.fallback = {

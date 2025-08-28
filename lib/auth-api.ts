@@ -39,10 +39,9 @@ export interface LoginRequest {
   password: string
 }
 
-// API Base URL - Use environment variable or fallback to localhost
+// API Base URL - Use environment variable or fallback to production backend
 const getApiBaseUrl = (): string => {
-  // Use local development backend
-  return 'http://localhost:5000/api/v1'
+  return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
 }
 
 // Base API request function
