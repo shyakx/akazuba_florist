@@ -1,14 +1,14 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, X, Flower, Heart, Calendar, Gift, Users } from 'lucide-react'
-import { realFlowerProducts } from '@/data/real-flowers'
+import { Search, X, Flower, Heart, Calendar, Gift, Users, Sparkles } from 'lucide-react'
+import { useProducts } from '@/contexts/ProductsContext'
 import { useRouter } from 'next/navigation'
 
 interface SearchSuggestion {
   id: string
   text: string
-  category: 'occasion' | 'flower-type' | 'color'
+  category: 'occasion' | 'flower-type' | 'color' | 'perfume-type'
   icon: React.ReactNode
 }
 
@@ -18,8 +18,9 @@ const SearchBar = () => {
   const [filteredProducts, setFilteredProducts] = useState<any[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const { state } = useProducts()
 
-  // Search suggestions based on occasions and flower types
+  // Search suggestions based on occasions and product types
   const searchSuggestions: SearchSuggestion[] = [
     // Occasions
     { id: 'wedding', text: 'Flowers for Wedding', category: 'occasion', icon: <Heart className="w-4 h-4" /> },
@@ -47,6 +48,12 @@ const SearchBar = () => {
     { id: 'white', text: 'White Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
     { id: 'yellow', text: 'Yellow Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
     { id: 'purple', text: 'Purple Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
+    
+    // Perfume Types
+    { id: 'mens-perfumes', text: 'Men\'s Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
+    { id: 'womens-perfumes', text: 'Women\'s Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
+    { id: 'unisex-perfumes', text: 'Unisex Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
+    { id: 'luxury-perfumes', text: 'Luxury Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
   ]
 
   // Filter suggestions based on search query
@@ -57,17 +64,18 @@ const SearchBar = () => {
   // Filter products based on search query
   useEffect(() => {
     if (searchQuery.trim()) {
-      const filtered = realFlowerProducts.filter(product =>
+      const filtered = state.products.filter((product: any) =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.color.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (product.type && product.type.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (product.color && product.color.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (product.brand && product.brand.toLowerCase().includes(searchQuery.toLowerCase()))
       )
       setFilteredProducts(filtered.slice(0, 5)) // Limit to 5 results
     } else {
       setFilteredProducts([])
     }
-  }, [searchQuery])
+  }, [searchQuery, state.products])
 
   // Handle click outside to close suggestions
   useEffect(() => {
@@ -114,8 +122,8 @@ const SearchBar = () => {
         <div className="container-wide" ref={searchRef}>
           {/* Search Title */}
           <div className="text-center mb-4 sm:mb-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Find Your Perfect Flowers</h2>
-            <p className="text-gray-600 text-sm sm:text-base">Search for flowers, occasions, or browse our collections</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Find Your Perfect Products</h2>
+            <p className="text-gray-600 text-sm sm:text-base">Search for flowers, perfumes, occasions, or browse our collections</p>
           </div>
           
           {/* Search Bar */}
