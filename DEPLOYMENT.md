@@ -58,17 +58,17 @@ CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 
 # Cloudinary (for image uploads)
 CLOUDINARY_CLOUD_NAME=akazuba-florist
-CLOUDINARY_API_KEY=<your-cloudinary-api-key>
-CLOUDINARY_API_SECRET=<your-cloudinary-api-secret>
+CLOUDINARY_API_KEY=your-cloudinary-api-key-here
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret-here
 
 # Email Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=akazuba.florist@gmail.com
-SMTP_PASS=<your-gmail-app-password>
+SMTP_PASS=your-gmail-app-password-here
 
 # Optional: Redis for caching
-REDIS_URL=<your-redis-url>
+REDIS_URL=redis://localhost:6379
 ```
 
 ### 2.3 Deploy Backend

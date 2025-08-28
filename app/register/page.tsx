@@ -232,7 +232,7 @@ const Register = () => {
                         ? 'border-red-300 bg-red-50' 
                         : 'border-gray-300 focus:border-pink-500'
                   }`}
-                    placeholder="john@example.com"
+                    placeholder="john@akazubaflorist.com"
                     disabled={isLoading}
                 />
               </div>

@@ -55,7 +55,7 @@ fi
 print_status "Checking if you have a remote repository..."
 if ! git remote get-url origin &> /dev/null; then
     print_error "No remote repository found. Please add a remote origin first."
-    echo "Example: git remote add origin https://github.com/yourusername/your-repo.git"
+    echo "Example: git remote add origin https://github.com/shyakx/akazuba_florist.git"
     exit 1
 fi
 

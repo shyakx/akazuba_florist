@@ -39,7 +39,7 @@ git push origin main
 ```bash
 NODE_ENV=production
 PORT=10000
-DATABASE_URL=<your-render-postgresql-url>
+DATABASE_URL=your-render-postgresql-url-here
 JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
 CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 ```

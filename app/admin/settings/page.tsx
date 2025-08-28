@@ -171,7 +171,7 @@ const SettingsPage = () => {
                     value={settings.storePhone}
                     onChange={(e) => handleInputChange('storePhone', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                    placeholder="+250 123 456 789"
+                    placeholder="+250 784 586 110"
                   />
                 </div>
 
