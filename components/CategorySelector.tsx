@@ -165,6 +165,13 @@ const CategorySelector = () => {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-center mt-12"
           >
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/images/logo.png" 
+                alt="Akazuba Florist Logo" 
+                className="w-16 h-16 object-contain"
+              />
+            </div>
             <p className="text-gray-600 mb-4">
               Can't decide? Browse our complete collection
             </p>

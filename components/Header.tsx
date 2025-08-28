@@ -137,14 +137,11 @@ const Header = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <div className="relative">
-              <div className="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center">
-                <div className="w-6 h-6 bg-white rounded-sm relative">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
-                  </div>
-                  <div className="absolute top-0 right-0 w-1 h-1 bg-yellow-400 rounded-full"></div>
-                </div>
-              </div>
+              <img 
+                src="/images/logo.png" 
+                alt="Akazuba Florist Logo" 
+                className="w-10 h-10 object-contain"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-800">Akazuba Florist</h1>
