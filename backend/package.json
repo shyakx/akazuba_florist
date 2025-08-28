@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon database-server.js",
-    "build": "tsc",
+    "build": "npm install && tsc",
+    "build:clean": "rm -rf dist && tsc",
     "start": "node database-server.js",
     "start:simple": "node dist/simple-server.js",
     "test": "jest",
