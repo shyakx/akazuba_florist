@@ -593,15 +593,8 @@ const apiRequest = async <T>(
     }
   }
 
-  // Determine the actual API base URL for non-mocked environments
-  let API_BASE_URL_ACTUAL: string;
-  if (isDevelopment) {
-    // Use TypeScript backend with payment APIs
-    API_BASE_URL_ACTUAL = 'http://localhost:5000/api/v1';
-  } else {
-    // Use the configured API URL or fallback to HTTPS backend
-    API_BASE_URL_ACTUAL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1';
-  }
+  // Use the configured API URL or fallback to HTTPS backend
+  let API_BASE_URL_ACTUAL: string = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1';
 
   const config: RequestInit = {
     headers: {
