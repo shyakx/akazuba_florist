@@ -32,6 +32,7 @@ import { adminAPI, AdminProduct, ProductFilters, BulkOperation, ProductAnalytics
 import { productStorage } from '@/lib/productStorage'
 import toast from 'react-hot-toast'
 import { realFlowerProducts } from '@/data/real-flowers'
+import { perfumeProducts } from '@/data/perfumes'
 
 // Components
 import ProductPreviewModal from './components/ProductPreviewModal'

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { productsAPI } from '../lib/api'
 import { realFlowerProducts } from '../data/real-flowers'
+import { perfumeProducts } from '../data/perfumes'
 
 export interface Product {
   id: string | number
@@ -12,8 +13,12 @@ export interface Product {
   category: string
   featured: boolean
   description: string
-  color: string
+  color?: string
   type: string
+  brand?: string
+  size?: string
+  concentration?: string
+  notes?: string
   salePrice?: number
   stockQuantity?: number
   tags?: string[]
@@ -22,6 +27,8 @@ export interface Product {
 interface ProductsState {
   products: Product[]
   featuredProducts: Product[]
+  flowerProducts: Product[]
+  perfumeProducts: Product[]
   isLoading: boolean
   error: string | null
 }
@@ -31,39 +38,54 @@ interface ProductsContextType {
   refreshProducts: () => Promise<void>
   getProduct: (id: string) => Product | undefined
   getBackendProductId: (frontendId: number | string) => string | undefined
+  getProductsByCategory: (category: string) => Product[]
+  getFeaturedByCategory: (category: string) => Product[]
 }
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined)
 
 const transformProduct = (product: any, index: number): Product => {
-  // Ensure we use the correct image path - never construct from slug
+  // Handle both flower and perfume products
+  const isPerfume = product.category === 'perfumes' || product.category?.name === 'perfumes'
+  
+  // Ensure we use the correct image path
   let imagePath = product.image || product.images?.[0]
   
-  // If no image path provided, use a fallback based on color
-  if (!imagePath) {
-    const color = product.color || 'mixed'
-    imagePath = `/images/flowers/${color}/${color}-${(index % 2) + 1}.jpg`
+  if (isPerfume) {
+    // For perfumes, use the provided image URL or fallback
+    if (!imagePath) {
+      imagePath = 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop'
+    }
+  } else {
+    // For flowers, use local image paths
+    if (!imagePath) {
+      const color = product.color || 'mixed'
+      imagePath = `/images/flowers/${color}/${color}-${(index % 2) + 1}.jpg`
+    }
+    
+    // Validate flower image path format
+    if (imagePath && !imagePath.startsWith('/images/flowers/') && !imagePath.startsWith('http')) {
+      const color = product.color || 'mixed'
+      imagePath = `/images/flowers/${color}/${color}-1.jpg`
+    }
   }
   
-  // Validate image path format
-  if (imagePath && !imagePath.startsWith('/images/flowers/') && !imagePath.startsWith('http')) {
-    // If it's not a proper path, construct one based on color
-    const color = product.color || 'mixed'
-    imagePath = `/images/flowers/${color}/${color}-1.jpg`
-  }
-  
-  console.log(`🖼️ Transform Product "${product.name}" - Image: ${imagePath}`)
+  console.log(`🖼️ Transform Product "${product.name}" - Category: ${isPerfume ? 'Perfume' : 'Flower'} - Image: ${imagePath}`)
   
   return {
     id: product.id || index + 1,
     name: product.name,
     price: Number(product.price),
     image: imagePath,
-    category: product.category?.name || product.category || 'Flowers',
+    category: product.category?.name || product.category || (isPerfume ? 'perfumes' : 'flowers'),
     featured: product.featured || product.isFeatured || index < 8,
     description: product.description || `${product.name} from Akazuba Florist`,
-    color: product.color || 'mixed',
-    type: product.type || 'Flower',
+    color: product.color || (isPerfume ? undefined : 'mixed'),
+    type: product.type || (isPerfume ? 'Perfume' : 'Flower'),
+    brand: product.brand,
+    size: product.size,
+    concentration: product.concentration,
+    notes: product.notes,
     salePrice: product.salePrice ? Number(product.salePrice) : undefined,
     stockQuantity: product.stockQuantity,
     tags: product.tags
@@ -74,6 +96,8 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [state, setState] = useState<ProductsState>({
     products: [],
     featuredProducts: [],
+    flowerProducts: [],
+    perfumeProducts: [],
     isLoading: true,
     error: null
   })
@@ -90,6 +114,8 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const backendProducts = response.data
         const products = backendProducts.map((product, index) => transformProduct(product, index))
         const featuredProducts = products.filter(product => product.featured)
+        const flowerProducts = products.filter(product => product.category === 'flowers')
+        const perfumeProducts = products.filter(product => product.category === 'perfumes')
         
         // Create mapping between frontend IDs and backend IDs for fallback compatibility
         const mapping = new Map<number, string>()
@@ -98,43 +124,53 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         })
         setBackendIdMapping(mapping)
         
-        console.log('🔄 ProductsContext - Backend products loaded:', backendProducts.length)
-        console.log('🔄 ProductsContext - ID mapping created:', Array.from(mapping.entries()))
-        
         setState({
           products,
           featuredProducts,
+          flowerProducts,
+          perfumeProducts,
           isLoading: false,
           error: null
         })
       } else {
-        throw new Error('Backend returned no data')
+        // Fallback to local data if backend fails
+        console.warn('Backend products fetch failed, using local data')
+        await loadLocalProducts()
       }
     } catch (error) {
-      console.error('Error fetching products from backend, using fallback data:', error)
+      console.error('Error fetching products:', error)
+      // Fallback to local data
+      await loadLocalProducts()
+    }
+  }
+
+  const loadLocalProducts = async () => {
+    try {
+      // Transform flower products
+      const flowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
       
-      // Fallback to static data when backend is not available
-      const fallbackProducts = realFlowerProducts // Load all products
-      const products = fallbackProducts.map((product, index) => ({
-        ...product,
-        id: index + 1, // Ensure sequential IDs
-        featured: index < 8 // First 8 products as featured
-      }))
-      const featuredProducts = products.filter(product => product.featured)
+      // Transform perfume products
+      const perfumeProductsList = perfumeProducts.map((product, index) => transformProduct(product, index + 100))
       
-      // Create empty mapping for fallback (no backend IDs)
-      setBackendIdMapping(new Map())
-      
-      console.log('🔄 ProductsContext - Using fallback data:', products.length, 'products')
+      // Combine all products
+      const allProducts = [...flowerProducts, ...perfumeProductsList]
+      const featuredProducts = allProducts.filter(product => product.featured)
       
       setState({
-        products,
+        products: allProducts,
         featuredProducts,
+        flowerProducts,
+        perfumeProducts: perfumeProductsList,
         isLoading: false,
         error: null
       })
-      
-      // Don't show error toast for fallback - it's expected behavior
+    } catch (error) {
+      console.error('Error loading local products:', error)
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to load products'
+      }))
     }
   }
 
@@ -147,39 +183,39 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   const getBackendProductId = (frontendId: number | string): string | undefined => {
-    // If the frontendId is already a string (backend ID), return it directly
-    if (typeof frontendId === 'string' && frontendId.length > 10) {
-      return frontendId // This is likely already a backend ID
-    }
-    
-    // If it's a number, look it up in the mapping
-    const numericId = typeof frontendId === 'string' ? parseInt(frontendId, 10) : frontendId
-    const backendId = backendIdMapping.get(numericId)
-    
-    console.log('🔍 ProductsContext - Looking up frontend ID:', frontendId, '-> Backend ID:', backendId)
-    console.log('🔍 ProductsContext - Current mapping size:', backendIdMapping.size)
-    
-    return backendId
+    const numId = typeof frontendId === 'string' ? parseInt(frontendId) : frontendId
+    return backendIdMapping.get(numId)
   }
 
-  // Load products on mount
+  const getProductsByCategory = (category: string): Product[] => {
+    return state.products.filter(product => product.category === category)
+  }
+
+  const getFeaturedByCategory = (category: string): Product[] => {
+    return state.featuredProducts.filter(product => product.category === category)
+  }
+
   useEffect(() => {
     fetchProducts()
   }, [])
 
+  const value: ProductsContextType = {
+    state,
+    refreshProducts,
+    getProduct,
+    getBackendProductId,
+    getProductsByCategory,
+    getFeaturedByCategory
+  }
+
   return (
-    <ProductsContext.Provider value={{
-      state,
-      refreshProducts,
-      getProduct,
-      getBackendProductId
-    }}>
+    <ProductsContext.Provider value={value}>
       {children}
     </ProductsContext.Provider>
   )
 }
 
-export const useProducts = () => {
+export const useProducts = (): ProductsContextType => {
   const context = useContext(ProductsContext)
   if (context === undefined) {
     throw new Error('useProducts must be used within a ProductsProvider')

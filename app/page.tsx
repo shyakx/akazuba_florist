@@ -3,6 +3,7 @@
 import React from 'react'
 import SearchBar from '@/components/SearchBar'
 import FeaturedProducts from '@/components/FeaturedProducts'
+import FeaturedPerfumes from '@/components/FeaturedPerfumes'
 import Categories from '@/components/Categories'
 import PaymentMethods from '@/components/PaymentMethods'
 import About from '@/components/About'
@@ -18,6 +19,7 @@ export default function Home() {
     <main>
       <SearchBar />
       <FeaturedProducts />
+      <FeaturedPerfumes />
       <Categories />
       <ColorBasedProducts />
       <RealFlowerShowcase />

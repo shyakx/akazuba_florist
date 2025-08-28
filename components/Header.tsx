@@ -122,6 +122,12 @@ const Header = () => {
       })
     }
 
+    // Add Perfumes category
+    navigation.push({
+      name: 'Perfumes',
+      href: '/category/perfumes'
+    })
+
     // Add static pages
     navigation.push(
       { name: 'About', href: '/about' },
@@ -141,6 +147,7 @@ const Header = () => {
     { name: 'Tulips', href: '/category/tulips' },
     { name: 'Bouquets', href: '/category/mixed' },
     { name: 'Colors', href: '/category/colors' },
+    { name: 'Perfumes', href: '/category/perfumes' },
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ]
