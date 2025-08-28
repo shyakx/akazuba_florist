@@ -41,6 +41,7 @@ import BulkOperationsPanel from './components/BulkOperationsPanel'
 import ProductAnalyticsPanel from './components/ProductAnalyticsPanel'
 import StockManagementModal from './components/StockManagementModal'
 import ImageManagementModal from './components/ImageManagementModal'
+import PerfumeImageUpload from './components/PerfumeImageUpload'
 import ExportModal from './components/ExportModal'
 
 const AdminProductsPage = () => {
@@ -62,6 +63,7 @@ const AdminProductsPage = () => {
   const [stockModal, setStockModal] = useState<{ open: boolean; product: AdminProduct | null }>({ open: false, product: null })
   const [imageModal, setImageModal] = useState<{ open: boolean; product: AdminProduct | null }>({ open: false, product: null })
   const [exportModal, setExportModal] = useState<{ open: boolean; options: ExportOptions | null }>({ open: false, options: null })
+  const [perfumeImageModal, setPerfumeImageModal] = useState<{ open: boolean; product: AdminProduct | null }>({ open: false, product: null })
   
   // Filters State
   const [filters, setFilters] = useState<ProductFilters>({
@@ -122,6 +124,37 @@ const AdminProductsPage = () => {
 
     // Return placeholder as last resort
     return '/images/placeholder-flower.jpg'
+  }
+
+  const handlePerfumeImageUpdate = async (newImagePath: string) => {
+    if (!perfumeImageModal.product) return
+    
+    try {
+      // Update the product's image in the local state
+      const updatedProducts = products.map(product => {
+        if (product.id === perfumeImageModal.product?.id) {
+          return {
+            ...product,
+            images: [newImagePath]
+          }
+        }
+        return product
+      })
+      
+      setProducts(updatedProducts)
+      setFilteredProducts(updatedProducts)
+      
+      // Here you would also update the backend
+      // await adminAPI.updateProduct({
+      //   ...perfumeImageModal.product,
+      //   images: [newImagePath]
+      // })
+      
+      toast.success('Perfume image updated successfully!')
+    } catch (error) {
+      console.error('Error updating perfume image:', error)
+      toast.error('Failed to update perfume image')
+    }
   }
 
   useEffect(() => {
@@ -705,12 +738,23 @@ const AdminProductsPage = () => {
                         >
                           <Package className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => setImageModal({ open: true, product })}
-                          className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-all duration-200"
-                        >
-                          <ImageIcon className="h-4 w-4" />
-                        </button>
+                        {product.categoryId === 'perfumes' ? (
+                          <button
+                            onClick={() => setPerfumeImageModal({ open: true, product })}
+                            className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-all duration-200"
+                            title="Manage Perfume Image"
+                          >
+                            <ImageIcon className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setImageModal({ open: true, product })}
+                            className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-all duration-200"
+                            title="Manage Images"
+                          >
+                            <ImageIcon className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                       <button
                         onClick={() => handleProductDelete(product.id)}
@@ -748,6 +792,16 @@ const AdminProductsPage = () => {
           product={imageModal.product}
           onClose={() => setImageModal({ open: false, product: null })}
           onUpdate={fetchProducts}
+        />
+      )}
+
+      {perfumeImageModal.open && perfumeImageModal.product && (
+        <PerfumeImageUpload
+          productId={perfumeImageModal.product.id}
+          productName={perfumeImageModal.product.name}
+          currentImage={perfumeImageModal.product.images[0] || '/images/perfumes/placeholder.jpg'}
+          onClose={() => setPerfumeImageModal({ open: false, product: null })}
+          onUpdate={handlePerfumeImageUpdate}
         />
       )}
 
