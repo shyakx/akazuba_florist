@@ -1748,8 +1748,106 @@ app.post('/api/v1/admin/setup', async (req, res) => {
   }
 });
 
+// Database seeding function
+async function seedDatabase() {
+  try {
+    console.log('🌱 Checking if database needs seeding...');
+    
+    // Check if products exist
+    const productCount = await prisma.product.count();
+    const categoryCount = await prisma.category.count();
+    
+    if (productCount === 0 && categoryCount === 0) {
+      console.log('🌱 Database is empty, running seed script...');
+      
+      // Import and run the seed script
+      const { execSync } = require('child_process');
+      try {
+        execSync('node prisma/seed.js', { stdio: 'inherit' });
+        console.log('✅ Database seeded successfully!');
+      } catch (seedError) {
+        console.error('❌ Error running seed script:', seedError);
+        console.log('🔄 Attempting manual seeding...');
+        
+        // Manual seeding as fallback
+        await manualSeed();
+      }
+    } else {
+      console.log(`✅ Database already has ${productCount} products and ${categoryCount} categories`);
+    }
+  } catch (error) {
+    console.error('❌ Error checking/seeding database:', error);
+  }
+}
+
+// Manual seeding function as fallback
+async function manualSeed() {
+  try {
+    console.log('🌱 Running manual database seeding...');
+    
+    // Create categories
+    const categories = await Promise.all([
+      prisma.category.create({ data: { name: 'Roses', description: 'Beautiful roses for every occasion' } }),
+      prisma.category.create({ data: { name: 'Tulips', description: 'Colorful tulips to brighten your day' } }),
+      prisma.category.create({ data: { name: 'Mixed Bouquets', description: 'Stunning mixed flower arrangements' } }),
+      prisma.category.create({ data: { name: 'Sunflowers', description: 'Bright and cheerful sunflowers' } })
+    ]);
+    
+    console.log('✅ Categories created:', categories.length);
+    
+    // Create sample products
+    const products = await Promise.all([
+      prisma.product.create({
+        data: {
+          name: 'Red Rose Bouquet',
+          description: 'A beautiful bouquet of 12 red roses',
+          price: 45.99,
+          image: '/images/flowers/red/red-1.jpg',
+          categoryId: categories[0].id,
+          color: 'red',
+          featured: true,
+          inStock: true,
+          stockQuantity: 50
+        }
+      }),
+      prisma.product.create({
+        data: {
+          name: 'Yellow Tulip Arrangement',
+          description: 'Fresh yellow tulips in a vase',
+          price: 35.99,
+          image: '/images/flowers/yellow/yellow-1.jpg',
+          categoryId: categories[1].id,
+          color: 'yellow',
+          featured: true,
+          inStock: true,
+          stockQuantity: 30
+        }
+      }),
+      prisma.product.create({
+        data: {
+          name: 'Mixed Spring Bouquet',
+          description: 'Colorful spring flowers mixed arrangement',
+          price: 55.99,
+          image: '/images/flowers/mixed/mixed-1.jpg',
+          categoryId: categories[2].id,
+          color: 'mixed',
+          featured: true,
+          inStock: true,
+          stockQuantity: 25
+        }
+      })
+    ]);
+    
+    console.log('✅ Products created:', products.length);
+    console.log('🎉 Manual seeding completed successfully!');
+    
+  } catch (error) {
+    console.error('❌ Error in manual seeding:', error);
+  }
+}
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Akazuba Backend with Database running on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/v1/auth/`);
@@ -1759,6 +1857,9 @@ app.listen(PORT, () => {
   console.log(`❤️ Wishlist: http://localhost:${PORT}/api/v1/wishlist`);
   console.log(`📋 Orders: http://localhost:${PORT}/api/v1/orders/my-orders`);
   console.log(`👨‍💼 Admin setup: http://localhost:${PORT}/api/v1/admin/setup`);
+  
+  // Run database seeding on startup
+  await seedDatabase();
 });
 
 // Graceful shutdown
