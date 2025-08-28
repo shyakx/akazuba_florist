@@ -7,7 +7,7 @@ import Link from 'next/link'
 
 const CategorySelector = () => {
   return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50">
+    <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
       <div className="container-responsive">
         <div className="container-max">
           {/* Header */}
@@ -38,7 +38,7 @@ const CategorySelector = () => {
               <Link href="/category/flowers" className="block">
                 <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-emerald-300">
                   {/* Image Section */}
-                  <div className="relative h-64 bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 overflow-hidden">
+                  <div className="relative h-64 bg-emerald-600 overflow-hidden">
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="relative">
@@ -103,7 +103,7 @@ const CategorySelector = () => {
               <Link href="/category/perfumes" className="block">
                 <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-indigo-300">
                   {/* Image Section */}
-                  <div className="relative h-64 bg-gradient-to-br from-indigo-600 via-purple-700 to-violet-800 overflow-hidden">
+                  <div className="relative h-64 bg-indigo-700 overflow-hidden">
                     <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="relative">
@@ -177,7 +177,7 @@ const CategorySelector = () => {
             </p>
             <Link 
               href="/products"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-indigo-600 text-white px-8 py-3 rounded-lg hover:from-emerald-700 hover:to-indigo-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-gray-800 text-white px-8 py-3 rounded-lg hover:bg-gray-900 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
             >
               View All Products
               <ArrowRight className="w-4 h-4" />

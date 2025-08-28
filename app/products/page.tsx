@@ -10,7 +10,7 @@ const ProductsPage = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 via-pink-600 to-purple-600 text-white py-16 sm:py-20">
+      <div className="bg-gray-800 text-white py-16 sm:py-20">
         <div className="container-responsive">
           <div className="container-max text-center">
             <motion.div
@@ -21,7 +21,7 @@ const ProductsPage = () => {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
                 Our Products
               </h1>
-              <p className="text-xl sm:text-2xl text-green-100 max-w-3xl mx-auto">
+              <p className="text-xl sm:text-2xl text-gray-200 max-w-3xl mx-auto">
                 Discover our complete collection of beautiful flowers and luxury fragrances
               </p>
             </motion.div>

@@ -86,9 +86,9 @@ const PerfumesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-16">
+      <div className="bg-indigo-700 text-white py-16">
         <div className="container-responsive">
           <div className="container-max text-center">
             <motion.div
@@ -104,8 +104,8 @@ const PerfumesPage = () => {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
                 Luxury Perfumes
               </h1>
-              <p className="text-xl sm:text-2xl text-purple-100 max-w-3xl mx-auto">
-                Discover our curated collection of premium fragrances from world-renowned brands
+              <p className="text-xl sm:text-2xl text-indigo-100 max-w-3xl mx-auto">
+                Discover our collection of premium fragrances from world-renowned brands
               </p>
             </motion.div>
           </div>

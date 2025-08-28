@@ -76,9 +76,9 @@ const FlowersPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-green-600 to-green-700 text-white py-16">
+      <div className="bg-emerald-600 text-white py-16">
         <div className="container-responsive">
           <div className="container-max text-center">
             <motion.div
@@ -94,7 +94,7 @@ const FlowersPage = () => {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4">
                 Beautiful Flowers
               </h1>
-              <p className="text-xl sm:text-2xl text-green-100 max-w-3xl mx-auto">
+              <p className="text-xl sm:text-2xl text-emerald-100 max-w-3xl mx-auto">
                 Discover our collection of fresh flowers and stunning arrangements
               </p>
             </motion.div>
