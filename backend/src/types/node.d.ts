@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
@@ -30,24 +32,13 @@ declare global {
   }
 }
 
-// Node.js globals
-declare var process: {
-  env: NodeJS.ProcessEnv
-  exit: (code?: number) => never
-  on: (event: string, listener: (...args: any[]) => void) => void
-}
-
+// Ensure Node.js globals are available
+declare var process: NodeJS.Process
 declare var __dirname: string
 declare var __filename: string
-declare var console: {
-  log: (...args: any[]) => void
-  error: (...args: any[]) => void
-  warn: (...args: any[]) => void
-  info: (...args: any[]) => void
-}
-
-declare var Buffer: any
-declare var global: any
+declare var console: Console
+declare var Buffer: typeof Buffer
+declare var global: typeof globalThis
 
 // Node.js built-in modules
 declare module 'path' {
