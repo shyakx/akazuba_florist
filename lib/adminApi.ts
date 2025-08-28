@@ -235,7 +235,7 @@ class AdminAPI {
   private baseURL: string
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
   }
 
   // Dashboard

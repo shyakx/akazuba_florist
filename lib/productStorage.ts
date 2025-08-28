@@ -110,7 +110,7 @@ class ProductStorage {
         return this.getLocalProducts(options)
       }
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
       const queryParams = new URLSearchParams()
       
       if (options?.page) queryParams.append('page', options.page.toString())
@@ -119,7 +119,7 @@ class ProductStorage {
       if (options?.category) queryParams.append('category', options.category)
       if (options?.status) queryParams.append('status', options.status)
 
-      const response = await fetch(`${baseURL}/api/v1/admin/products?${queryParams}`, {
+      const response = await fetch(`${baseURL}/admin/products?${queryParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -234,9 +234,9 @@ class ProductStorage {
         return newProduct
       }
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
       
-      const response = await fetch(`${baseURL}/api/v1/admin/products`, {
+      const response = await fetch(`${baseURL}/admin/products`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -425,11 +425,11 @@ class ProductStorage {
       const token = localStorage.getItem('accessToken')
       if (!token) return
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
       
       switch (operation) {
         case 'create':
-          await fetch(`${baseURL}/api/v1/admin/products`, {
+          await fetch(`${baseURL}/admin/products`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -439,7 +439,7 @@ class ProductStorage {
           })
           break
         case 'update':
-          await fetch(`${baseURL}/api/v1/admin/products/${product.id}`, {
+          await fetch(`${baseURL}/admin/products/${product.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -449,7 +449,7 @@ class ProductStorage {
           })
           break
         case 'delete':
-          await fetch(`${baseURL}/api/v1/admin/products/${product.id}`, {
+          await fetch(`${baseURL}/admin/products/${product.id}`, {
             method: 'DELETE',
             headers: {
               'Authorization': `Bearer ${token}`
@@ -471,9 +471,9 @@ class ProductStorage {
       const token = localStorage.getItem('accessToken')
       if (!token) return
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
       
-      await fetch(`${baseURL}/api/v1/admin/products/bulk`, {
+      await fetch(`${baseURL}/admin/products/bulk`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

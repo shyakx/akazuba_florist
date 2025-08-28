@@ -39,7 +39,7 @@ class PaymentAPI {
 
   constructor() {
     // Use our backend as proxy to avoid CORS issues
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
   }
 
   // Initialize MTN MoMo Payment

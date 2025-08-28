@@ -95,9 +95,13 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
+    'https://online-shopping-by-diane.vercel.app',
+    'https://akazuba-florist.vercel.app',
     process.env.FRONTEND_URL
   ].filter((url): url is string => Boolean(url)),
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
 }))
 app.use(compression())
 app.use(limiter)
