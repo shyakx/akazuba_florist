@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import axios from 'axios'
 
 interface SMSConfig {
