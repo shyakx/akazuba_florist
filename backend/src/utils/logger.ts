@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import winston from 'winston'
 
 const logFormat = winston.format.combine(
