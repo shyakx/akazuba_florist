@@ -2,6 +2,8 @@
 
 A modern, responsive e-commerce website for Akazuba Florist, offering beautiful flower arrangements and bouquets in Rwanda.
 
+**Latest Update**: Backend deployment fixed and image loading issues resolved.
+
 ## 🚀 Live Site
 
 **Production URL**: https://d238m8iiglcoij.cloudfront.net/
