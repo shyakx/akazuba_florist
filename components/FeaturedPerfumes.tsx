@@ -1,12 +1,20 @@
 'use client'
 
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useProducts } from '@/contexts/ProductsContext'
 import PerfumeCard from './PerfumeCard'
+import { Product } from '@/contexts/ProductsContext'
 
 const FeaturedPerfumes = () => {
   const { getFeaturedByCategory } = useProducts()
-  const featuredPerfumes = getFeaturedByCategory('perfumes')
+  const [featuredPerfumes, setFeaturedPerfumes] = useState<Product[]>([])
+
+  // Update featured perfumes when products are loaded
+  useEffect(() => {
+    const perfumes = getFeaturedByCategory('perfumes')
+    setFeaturedPerfumes(perfumes)
+  }, [getFeaturedByCategory])
 
   // Show loading state
   if (featuredPerfumes.length === 0) {

@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { productsAPI } from '../lib/api'
 import { realFlowerProducts } from '../data/real-flowers'
-import { perfumeProducts } from '../data/perfumes'
+import { perfumeProducts as perfumeData } from '../data/perfumes'
 
 export interface Product {
   id: string | number
@@ -150,7 +150,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const flowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
       
       // Transform perfume products
-      const perfumeProductsList = perfumeProducts.map((product, index) => transformProduct(product, index + 100))
+      const perfumeProductsList = perfumeData.map((product, index) => transformProduct(product, index + 100))
       
       // Combine all products
       const allProducts = [...flowerProducts, ...perfumeProductsList]

@@ -6,17 +6,24 @@ import { useProducts } from '@/contexts/ProductsContext'
 import PerfumeCard from '@/components/PerfumeCard'
 import ProductCard from '@/components/ProductCard'
 import { Filter, Search, Sparkles, Droplets, Star } from 'lucide-react'
+import { Product } from '@/contexts/ProductsContext'
 
 const PerfumesPage = () => {
   const { getProductsByCategory } = useProducts()
-  const allPerfumes = getProductsByCategory('perfumes')
-  
-  const [filteredPerfumes, setFilteredPerfumes] = useState(allPerfumes)
+  const [allPerfumes, setAllPerfumes] = useState<Product[]>([])
+  const [filteredPerfumes, setFilteredPerfumes] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedType, setSelectedType] = useState('all')
   const [selectedBrand, setSelectedBrand] = useState('all')
   const [selectedConcentration, setSelectedConcentration] = useState('all')
   const [sortBy, setSortBy] = useState('featured')
+
+  // Update allPerfumes when products are loaded
+  useEffect(() => {
+    const perfumes = getProductsByCategory('perfumes')
+    setAllPerfumes(perfumes)
+    setFilteredPerfumes(perfumes)
+  }, [getProductsByCategory])
 
   // Extract unique filters
   const types = Array.from(new Set(allPerfumes.map(p => p.type))).filter(Boolean)
