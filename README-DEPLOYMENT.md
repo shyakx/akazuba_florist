@@ -46,13 +46,13 @@ CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 
 ### Frontend (Vercel)
 ```bash
-NEXT_PUBLIC_API_URL=https://akazuba-backend.onrender.com/api/v1
+NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 ```
 
 ## Test Your Deployment
-1. Backend health: `https://akazuba-backend.onrender.com/health`
+1. Backend health: `https://akazuba-backend-api.onrender.com/health`
 2. Frontend: `https://online-shopping-by-diane.vercel.app`
-3. Admin setup: `https://akazuba-backend.onrender.com/api/v1/admin/setup`
+3. Admin setup: `https://akazuba-backend-api.onrender.com/api/v1/admin/setup`
 
 ## Admin Access
 - Email: `admin@akazubaflorist.com`

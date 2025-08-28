@@ -92,7 +92,7 @@ REDIS_URL=redis://localhost:6379
 Add these environment variables in Vercel:
 
 ```bash
-NEXT_PUBLIC_API_URL=https://akazuba-backend.onrender.com/api/v1
+NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 NEXT_PUBLIC_JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
 NEXT_PUBLIC_PAYMENT_PUBLIC_KEY=akazuba-payment-public-key-2024
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=akazuba-florist
@@ -119,7 +119,7 @@ Trigger a new deployment in Render to apply the CORS changes.
 ### 5.1 Test Backend
 Visit your backend health endpoint:
 ```
-https://akazuba-backend.onrender.com/health
+https://akazuba-backend-api.onrender.com/health
 ```
 
 ### 5.2 Test Frontend
@@ -137,7 +137,7 @@ The backend should automatically connect to the PostgreSQL database.
 ### 6.1 Create Admin Account
 Visit your backend admin setup endpoint:
 ```
-https://akazuba-backend.onrender.com/api/v1/admin/setup
+https://akazuba-backend-api.onrender.com/api/v1/admin/setup
 ```
 
 This will create an admin user with:
@@ -224,7 +224,7 @@ Consider setting up:
 Your Akazuba Florist application is now deployed and ready to serve customers!
 
 **Frontend**: https://online-shopping-by-diane.vercel.app
-**Backend**: https://akazuba-backend.onrender.com
+**Backend**: https://akazuba-backend-api.onrender.com
 **Database**: Render PostgreSQL (managed)
 
 Remember to:
