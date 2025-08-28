@@ -2,6 +2,7 @@
 
 import React from 'react'
 import SearchBar from '@/components/SearchBar'
+import CategorySelector from '@/components/CategorySelector'
 import FeaturedProducts from '@/components/FeaturedProducts'
 import FeaturedPerfumes from '@/components/FeaturedPerfumes'
 import Categories from '@/components/Categories'
@@ -18,6 +19,7 @@ export default function Home() {
   return (
     <main>
       <SearchBar />
+      <CategorySelector />
       <FeaturedProducts />
       <FeaturedPerfumes />
       <Categories />

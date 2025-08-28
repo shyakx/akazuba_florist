@@ -85,6 +85,7 @@ const Header = () => {
     // Create navigation items
     const navigation: NavigationItem[] = [
       { name: 'Home', href: '/' },
+      { name: 'Products', href: '/products' },
     ]
 
     // Add flower types that have multiple products (2+ items)
@@ -143,6 +144,7 @@ const Header = () => {
   // Fallback navigation if no real flower data
   const fallbackNavigation: NavigationItem[] = [
     { name: 'Home', href: '/' },
+    { name: 'Products', href: '/products' },
     { name: 'Roses', href: '/category/roses' },
     { name: 'Tulips', href: '/category/tulips' },
     { name: 'Bouquets', href: '/category/mixed' },
