@@ -20,6 +20,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Serve static files
+app.use('/images', express.static('public/images'));
+app.use('/uploads', express.static('uploads'));
+
 const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-super-secret-jwt-key-2024';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'akazuba-super-secret-refresh-key-2024';
 
@@ -768,6 +772,90 @@ app.get('/api/v1/orders/my-orders', async (req, res) => {
   } catch (error) {
     console.error('Orders error:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+// Create order endpoint
+app.post('/api/v1/orders', async (req, res) => {
+  try {
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerAddress,
+      customerCity,
+      items,
+      paymentMethod,
+      notes,
+      subtotal,
+      deliveryFee,
+      totalAmount
+    } = req.body;
+
+    // Validate required fields
+    if (!customerName || !customerEmail || !customerPhone || !customerAddress || !customerCity || !items || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Generate order number
+    const orderCount = await prisma.order.count();
+    const orderNumber = `AKZ-${String(orderCount + 1).padStart(3, '0')}`;
+
+    // Create order
+    const order = await prisma.order.create({
+      data: {
+        orderNumber,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerAddress,
+        customerCity,
+        subtotal: Number(subtotal),
+        deliveryFee: Number(deliveryFee),
+        totalAmount: Number(totalAmount),
+        paymentMethod,
+        notes,
+        status: 'PENDING',
+        paymentStatus: 'PENDING'
+      }
+    });
+
+    // Create order items
+    const orderItems = await Promise.all(
+      items.map((item) =>
+        prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: item.productId,
+            productName: item.productName,
+            productSku: item.productSku,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice
+          }
+        })
+      )
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Order created successfully',
+      data: {
+        order: {
+          ...order,
+          items: orderItems
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Order creation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create order'
+    });
   }
 });
 
