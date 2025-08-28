@@ -2,38 +2,65 @@ import { realFlowerProducts } from '@/data/real-flowers'
 import { AdminProduct } from './adminApi'
 
 // Transform real flower data to admin product format
-const transformToAdminProduct = (product: any, index: number): AdminProduct => ({
-  id: product.id.toString(),
-  name: product.name,
-  slug: product.name.toLowerCase().replace(/\s+/g, '-'),
-  description: product.description,
-  shortDescription: product.description.substring(0, 100) + '...',
-  price: product.price,
-  salePrice: undefined,
-  costPrice: product.price * 0.6, // Estimate cost price as 60% of selling price
-  sku: `${product.type.toUpperCase()}-${product.color.toUpperCase()}-${product.id}`,
-  stockQuantity: Math.floor(Math.random() * 50) + 10, // Random stock between 10-60
-  minStockAlert: 5,
-  categoryId: product.color, // Use color as category for now
-  categoryName: product.color.charAt(0).toUpperCase() + product.color.slice(1) + ' Flowers',
-  images: [product.image],
-  isActive: true,
-  isFeatured: product.featured,
-  weight: Math.floor(Math.random() * 2) + 1, // Random weight 1-3 kg
-  dimensions: {
-    length: Math.floor(Math.random() * 20) + 20,
-    width: Math.floor(Math.random() * 15) + 15,
-    height: Math.floor(Math.random() * 30) + 30
-  },
-  tags: [product.color, product.type.toLowerCase(), 'flowers'],
-  createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last 30 days
-  updatedAt: new Date().toISOString(),
-  views: Math.floor(Math.random() * 1000) + 100,
-  sales: Math.floor(Math.random() * 50) + 5,
-  revenue: (Math.floor(Math.random() * 50) + 5) * product.price,
-  rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // Random rating between 3.0-5.0
-  reviewCount: Math.floor(Math.random() * 20) + 1
-})
+const transformToAdminProduct = (product: any, index: number): AdminProduct => {
+  // Ensure we have a valid image path
+  let imagePath = product.image
+  if (!imagePath || imagePath === '') {
+    // Fallback to a default image based on color
+    imagePath = `/images/flowers/${product.color}/${product.color}-1.jpg`
+  }
+  
+  // If the image path doesn't start with /, add it
+  if (!imagePath.startsWith('/')) {
+    imagePath = `/${imagePath}`
+  }
+
+  // Validate image path and provide fallback if needed
+  const validateImagePath = (path: string, color: string) => {
+    // Check if the path follows the expected pattern
+    const expectedPattern = `/images/flowers/${color}/${color}-`
+    if (!path.includes(expectedPattern)) {
+      // Try to construct a valid path
+      return `/images/flowers/${color}/${color}-1.jpg`
+    }
+    return path
+  }
+
+  imagePath = validateImagePath(imagePath, product.color)
+
+  return {
+    id: product.id.toString(),
+    name: product.name,
+    slug: product.name.toLowerCase().replace(/\s+/g, '-'),
+    description: product.description,
+    shortDescription: product.description.substring(0, 100) + '...',
+    price: product.price,
+    salePrice: undefined,
+    costPrice: product.price * 0.6, // Estimate cost price as 60% of selling price
+    sku: `${product.type.toUpperCase()}-${product.color.toUpperCase()}-${product.id}`,
+    stockQuantity: Math.floor(Math.random() * 50) + 10, // Random stock between 10-60
+    minStockAlert: 5,
+    categoryId: product.color, // Use color as category for now
+    categoryName: product.color.charAt(0).toUpperCase() + product.color.slice(1) + ' Flowers',
+    images: [imagePath],
+    isActive: true,
+    isFeatured: product.featured,
+    weight: Math.floor(Math.random() * 2) + 1, // Random weight 1-3 kg
+    dimensions: {
+      length: Math.floor(Math.random() * 20) + 20,
+      width: Math.floor(Math.random() * 15) + 15,
+      height: Math.floor(Math.random() * 30) + 30
+    },
+    tags: [product.color, product.type.toLowerCase(), 'flowers'],
+    createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last 30 days
+    updatedAt: new Date().toISOString(),
+    views: Math.floor(Math.random() * 1000) + 100,
+    sales: Math.floor(Math.random() * 50) + 5,
+    revenue: (Math.floor(Math.random() * 50) + 5) * product.price,
+    rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // Random rating between 3.0-5.0
+    reviewCount: Math.floor(Math.random() * 20) + 1
+  }
+}
 
 class ProductStorage {
   private products: AdminProduct[] = []
@@ -61,15 +88,70 @@ class ProductStorage {
   }
 
   // Get products with optional filtering and pagination
-  getProducts(options?: {
+  async getProducts(options?: {
+    search?: string
+    category?: string
+    status?: string
+    page?: number
+    limit?: number
+  }): Promise<{ products: AdminProduct[]; total: number; pages: number }> {
+    try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        // Fallback to local data for SSR
+        this.initializeProducts()
+        return this.getLocalProducts(options)
+      }
+
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        // Fallback to local data if no token
+        this.initializeProducts()
+        return this.getLocalProducts(options)
+      }
+
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      const queryParams = new URLSearchParams()
+      
+      if (options?.page) queryParams.append('page', options.page.toString())
+      if (options?.limit) queryParams.append('limit', options.limit.toString())
+      if (options?.search) queryParams.append('search', options.search)
+      if (options?.category) queryParams.append('category', options.category)
+      if (options?.status) queryParams.append('status', options.status)
+
+      const response = await fetch(`${baseURL}/api/v1/admin/products?${queryParams}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          return data.data
+        }
+      }
+
+      // Fallback to local data if API fails
+      this.initializeProducts()
+      return this.getLocalProducts(options)
+    } catch (error) {
+      console.error('Error fetching products from API:', error)
+      // Fallback to local data
+      this.initializeProducts()
+      return this.getLocalProducts(options)
+    }
+  }
+
+  // Local products fallback method
+  private getLocalProducts(options?: {
     search?: string
     category?: string
     status?: string
     page?: number
     limit?: number
   }): { products: AdminProduct[]; total: number; pages: number } {
-    this.initializeProducts()
-    
     let filteredProducts = [...this.products]
 
     // Apply search filter
@@ -118,24 +200,85 @@ class ProductStorage {
   }
 
   // Add new product
-  addProduct(productData: Omit<AdminProduct, 'id' | 'createdAt' | 'updatedAt'>): AdminProduct {
-    this.initializeProducts()
-    
-    const newProduct: AdminProduct = {
-      ...productData,
-      id: this.nextId.toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+  async addProduct(productData: Omit<AdminProduct, 'id' | 'createdAt' | 'updatedAt'>): Promise<AdminProduct> {
+    try {
+      // Check if we're in a browser environment
+      if (typeof window === 'undefined') {
+        // Fallback to local storage for SSR
+        this.initializeProducts()
+        const newProduct: AdminProduct = {
+          ...productData,
+          id: this.nextId.toString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        this.products.push(newProduct)
+        this.nextId++
+        this.saveToStorage()
+        return newProduct
+      }
 
-    this.products.push(newProduct)
-    this.nextId++
-    this.saveToStorage()
-    
-    // Sync with backend
-    this.syncToBackend(newProduct, 'create')
-    
-    return newProduct
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        // Fallback to local storage if no token
+        this.initializeProducts()
+        const newProduct: AdminProduct = {
+          ...productData,
+          id: this.nextId.toString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+        this.products.push(newProduct)
+        this.nextId++
+        this.saveToStorage()
+        return newProduct
+      }
+
+      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
+      
+      const response = await fetch(`${baseURL}/api/v1/admin/products`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          return data.data
+        }
+      }
+
+      // Fallback to local storage if API fails
+      this.initializeProducts()
+      const newProduct: AdminProduct = {
+        ...productData,
+        id: this.nextId.toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      this.products.push(newProduct)
+      this.nextId++
+      this.saveToStorage()
+      return newProduct
+    } catch (error) {
+      console.error('Error creating product via API:', error)
+      // Fallback to local storage
+      this.initializeProducts()
+      const newProduct: AdminProduct = {
+        ...productData,
+        id: this.nextId.toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      this.products.push(newProduct)
+      this.nextId++
+      this.saveToStorage()
+      return newProduct
+    }
   }
 
   // Update existing product
@@ -178,7 +321,7 @@ class ProductStorage {
   }
 
   // Bulk operations
-  bulkOperation(operation: 'delete' | 'activate' | 'deactivate' | 'feature' | 'unfeature', productIds: string[]): void {
+  bulkOperation(operation: 'delete' | 'activate' | 'deactivate' | 'feature' | 'unfeature' | 'updateStock', productIds: string[], data?: any): { success: boolean; message: string } {
     this.initializeProducts()
     
     this.products = this.products.map(product => {
@@ -194,6 +337,23 @@ class ProductStorage {
             return { ...product, isFeatured: true, updatedAt: new Date().toISOString() }
           case 'unfeature':
             return { ...product, isFeatured: false, updatedAt: new Date().toISOString() }
+          case 'updateStock':
+            if (data && data.operation && data.quantity !== undefined) {
+              let newQuantity = product.stockQuantity
+              switch (data.operation) {
+                case 'add':
+                  newQuantity += data.quantity
+                  break
+                case 'subtract':
+                  newQuantity = Math.max(0, newQuantity - data.quantity)
+                  break
+                case 'set':
+                  newQuantity = data.quantity
+                  break
+              }
+              return { ...product, stockQuantity: newQuantity, updatedAt: new Date().toISOString() }
+            }
+            return product
           default:
             return product
         }
@@ -205,6 +365,8 @@ class ProductStorage {
     
     // Sync with backend
     this.syncBulkToBackend(operation, productIds)
+    
+    return { success: true, message: `Bulk operation '${operation}' completed successfully` }
   }
 
   // Get categories dynamically from products
@@ -260,7 +422,7 @@ class ProductStorage {
       // Check if we're in a browser environment
       if (typeof window === 'undefined') return
       
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('accessToken')
       if (!token) return
 
       const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'
@@ -306,7 +468,7 @@ class ProductStorage {
       // Check if we're in a browser environment
       if (typeof window === 'undefined') return
       
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('accessToken')
       if (!token) return
 
       const baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'

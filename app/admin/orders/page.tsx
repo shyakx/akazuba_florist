@@ -55,17 +55,93 @@ const OrdersPage = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const response = await adminAPI.getOrders({
-        page: currentPage,
-        limit: 10,
-        search: searchTerm,
-        status: selectedStatus,
-        paymentStatus: selectedPaymentStatus,
-        dateFrom,
-        dateTo
-      })
-      setOrders(response.orders)
-      setTotalPages(response.pages)
+      
+      // Try to fetch from backend first
+      try {
+        const response = await adminAPI.getOrders({
+          page: currentPage,
+          limit: 10,
+          search: searchTerm,
+          status: selectedStatus,
+          paymentStatus: selectedPaymentStatus,
+          dateFrom,
+          dateTo
+        })
+        setOrders(response.orders)
+        setTotalPages(response.pages)
+      } catch (backendError) {
+        console.error('Backend connection failed, using fallback data:', backendError)
+        
+        // Fallback data when backend is unavailable
+        const fallbackOrders: AdminOrder[] = [
+          {
+            id: '1',
+            orderNumber: 'ORD-001',
+            customerName: 'John Doe',
+            customerEmail: 'john@example.com',
+            customerPhone: '+250 788 123 456',
+            customerAddress: '123 Main St, Kigali',
+            customerCity: 'Kigali',
+            status: 'CONFIRMED',
+            subtotal: 25000,
+            deliveryFee: 2000,
+            totalAmount: 27000,
+            paymentMethod: 'MOMO',
+            paymentStatus: 'PAID',
+            deliveryStatus: 'PENDING',
+            items: [
+              {
+                id: '1',
+                productId: '1',
+                productName: 'Beautiful Rose Bouquet',
+                productImage: '/images/flowers/red/rose-1.jpg',
+                quantity: 1,
+                unitPrice: 25000,
+                totalPrice: 25000,
+                color: 'Red',
+                type: 'Rose'
+              }
+            ],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            id: '2',
+            orderNumber: 'ORD-002',
+            customerName: 'Jane Smith',
+            customerEmail: 'jane@example.com',
+            customerPhone: '+250 789 654 321',
+            customerAddress: '456 Oak Ave, Kigali',
+            customerCity: 'Kigali',
+            status: 'PENDING',
+            subtotal: 35000,
+            deliveryFee: 2000,
+            totalAmount: 37000,
+            paymentMethod: 'BK',
+            paymentStatus: 'PENDING',
+            deliveryStatus: 'PENDING',
+            items: [
+              {
+                id: '2',
+                productId: '2',
+                productName: 'White Lily Arrangement',
+                productImage: '/images/flowers/white/lily-1.jpg',
+                quantity: 1,
+                unitPrice: 35000,
+                totalPrice: 35000,
+                color: 'White',
+                type: 'Lily'
+              }
+            ],
+            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+          }
+        ]
+        
+        setOrders(fallbackOrders)
+        setTotalPages(1)
+        toast('Backend not available, showing demo data')
+      }
     } catch (error) {
       console.error('Error fetching orders:', error)
       toast.error('Failed to load orders')
@@ -77,8 +153,24 @@ const OrdersPage = () => {
   const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
       setUpdatingStatus(orderId)
-      await adminAPI.updateOrderStatus(orderId, newStatus)
-      toast.success('Order status updated successfully')
+      
+      // Try to update on backend first
+      try {
+        await adminAPI.updateOrderStatus(orderId, newStatus)
+        toast.success('Order status updated successfully')
+      } catch (backendError) {
+        console.error('Backend update failed, updating local state:', backendError)
+        // Update local state when backend is unavailable
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order.id === orderId 
+              ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
+              : order
+          )
+        )
+        toast.success('Order status updated (offline mode)')
+      }
+      
       fetchOrders()
     } catch (error: any) {
       console.error('Error updating order status:', error)
@@ -91,8 +183,24 @@ const OrdersPage = () => {
   const handlePaymentStatusUpdate = async (orderId: string, newPaymentStatus: string) => {
     try {
       setUpdatingStatus(orderId)
-      await adminAPI.updatePaymentStatus(orderId, newPaymentStatus)
-      toast.success('Payment status updated successfully')
+      
+      // Try to update on backend first
+      try {
+        await adminAPI.updatePaymentStatus(orderId, newPaymentStatus)
+        toast.success('Payment status updated successfully')
+      } catch (backendError) {
+        console.error('Backend update failed, updating local state:', backendError)
+        // Update local state when backend is unavailable
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order.id === orderId 
+              ? { ...order, paymentStatus: newPaymentStatus, updatedAt: new Date().toISOString() }
+              : order
+          )
+        )
+        toast.success('Payment status updated (offline mode)')
+      }
+      
       fetchOrders()
     } catch (error: any) {
       console.error('Error updating payment status:', error)
@@ -104,19 +212,45 @@ const OrdersPage = () => {
 
   const handleDownloadInvoice = async (orderId: string) => {
     try {
-      const blob = await adminAPI.downloadInvoice(orderId)
+      toast.loading('Generating invoice...', { id: 'invoice-download' })
+      
+      const response = await adminAPI.downloadInvoice(orderId)
+      
+      // Determine file type and extension
+      const isHTML = response.type === 'text/html' || response.type === 'text/html; charset=utf-8'
+      const fileExtension = isHTML ? 'html' : 'pdf'
+      const mimeType = isHTML ? 'text/html; charset=utf-8' : 'application/pdf'
+      
+      const blob = new Blob([response], { type: mimeType })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `invoice-${orderId}.pdf`
+      a.download = `invoice-${orderId}.${fileExtension}`
+      a.style.display = 'none'
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      toast.success('Invoice downloaded successfully')
-    } catch (error: any) {
+      
+      // Dismiss loading toast and show success
+      toast.dismiss('invoice-download')
+      
+      if (isHTML) {
+        toast.success('Invoice generated successfully! Open the HTML file in your browser to view it.', {
+          duration: 5000,
+          icon: '📄'
+        })
+      } else {
+        toast.success('Invoice downloaded successfully!', {
+          icon: '📄'
+        })
+      }
+    } catch (error) {
       console.error('Error downloading invoice:', error)
-      toast.error(error.message || 'Failed to download invoice')
+      toast.dismiss('invoice-download')
+      toast.error('Failed to generate invoice. Please try again.', {
+        duration: 4000
+      })
     }
   }
 
@@ -340,6 +474,21 @@ const OrdersPage = () => {
                       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
                         {order.status}
                       </span>
+                      <div className="mt-1">
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                          disabled={updatingStatus === order.id}
+                          className="text-xs border border-gray-300 rounded px-2 py-1 focus:ring-1 focus:ring-pink-500 focus:border-pink-500"
+                        >
+                          <option value="PENDING">Pending</option>
+                          <option value="CONFIRMED">Confirmed</option>
+                          <option value="PROCESSING">Processing</option>
+                          <option value="SHIPPED">Shipped</option>
+                          <option value="DELIVERED">Delivered</option>
+                          <option value="CANCELLED">Cancelled</option>
+                        </select>
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(order.createdAt).toLocaleDateString()}

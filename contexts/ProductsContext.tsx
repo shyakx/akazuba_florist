@@ -1,23 +1,23 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Product } from '@/types'
-import { productsAPI } from '@/lib/api'
-import toast from 'react-hot-toast'
-import { realFlowerProducts } from '@/data/real-flowers'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+import { productsAPI } from '../lib/api'
+import { realFlowerProducts } from '../data/real-flowers'
 
-// Transform backend product to frontend product format
-const transformProduct = (backendProduct: any, index: number): Product => ({
-  id: index + 1, // Use sequential numbers for frontend compatibility
-  name: backendProduct.name,
-  price: backendProduct.price,
-  image: backendProduct.images?.[0] || backendProduct.image || '/images/placeholder-flower.jpg',
-  category: backendProduct.category?.name || 'flowers',
-  featured: backendProduct.isFeatured || backendProduct.featured || false,
-  description: backendProduct.description || `${backendProduct.name} from Akazuba Florist`,
-  color: backendProduct.color || 'mixed',
-  type: backendProduct.type || 'Flower'
-})
+export interface Product {
+  id: string | number
+  name: string
+  price: number
+  image: string
+  category: string
+  featured: boolean
+  description: string
+  color: string
+  type: string
+  salePrice?: number
+  stockQuantity?: number
+  tags?: string[]
+}
 
 interface ProductsState {
   products: Product[]
@@ -30,18 +30,36 @@ interface ProductsContextType {
   state: ProductsState
   refreshProducts: () => Promise<void>
   getProduct: (id: string) => Product | undefined
-  getBackendProductId: (frontendId: number) => string | undefined
+  getBackendProductId: (frontendId: number | string) => string | undefined
 }
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined)
+
+const transformProduct = (product: any, index: number): Product => {
+  return {
+    id: product.id || index + 1,
+    name: product.name,
+    price: Number(product.price),
+    image: product.image || product.images?.[0] || `/images/flowers/mixed/mixed-${(index % 8) + 1}.jpg`,
+    category: product.category?.name || product.category || 'Flowers',
+    featured: product.featured || product.isFeatured || index < 8,
+    description: product.description || `${product.name} from Akazuba Florist`,
+    color: product.color || 'mixed',
+    type: product.type || 'Flower',
+    salePrice: product.salePrice ? Number(product.salePrice) : undefined,
+    stockQuantity: product.stockQuantity,
+    tags: product.tags
+  }
+}
 
 export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<ProductsState>({
     products: [],
     featuredProducts: [],
-    isLoading: false,
+    isLoading: true,
     error: null
   })
+
   const [backendIdMapping, setBackendIdMapping] = useState<Map<number, string>>(new Map())
 
   const fetchProducts = async () => {
@@ -55,7 +73,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const products = backendProducts.map((product, index) => transformProduct(product, index))
         const featuredProducts = products.filter(product => product.featured)
         
-        // Create mapping between frontend IDs and backend IDs
+        // Create mapping between frontend IDs and backend IDs for fallback compatibility
         const mapping = new Map<number, string>()
         backendProducts.forEach((product, index) => {
           mapping.set(index + 1, product.id)
@@ -110,10 +128,19 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return state.products.find(product => product.id.toString() === id)
   }
 
-  const getBackendProductId = (frontendId: number): string | undefined => {
-    const backendId = backendIdMapping.get(frontendId)
+  const getBackendProductId = (frontendId: number | string): string | undefined => {
+    // If the frontendId is already a string (backend ID), return it directly
+    if (typeof frontendId === 'string' && frontendId.length > 10) {
+      return frontendId // This is likely already a backend ID
+    }
+    
+    // If it's a number, look it up in the mapping
+    const numericId = typeof frontendId === 'string' ? parseInt(frontendId, 10) : frontendId
+    const backendId = backendIdMapping.get(numericId)
+    
     console.log('🔍 ProductsContext - Looking up frontend ID:', frontendId, '-> Backend ID:', backendId)
     console.log('🔍 ProductsContext - Current mapping size:', backendIdMapping.size)
+    
     return backendId
   }
 

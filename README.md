@@ -1,224 +1,178 @@
-# Scentiva Rwanda - Online Flower & Perfume Shop
+# 🌸 Akazuba Florist - Premium Floral Arrangements
 
-A modern, responsive e-commerce website for Scentiva Rwanda, specializing in premium flowers and luxury perfumes in Rwanda.
+A modern, responsive e-commerce website for Akazuba Florist, offering beautiful flower arrangements and bouquets in Rwanda.
 
-## 🌸 Features
+## 🚀 Live Site
 
-### Core E-commerce Features
-- **Product Catalog**: Beautiful display of flowers and perfumes with detailed descriptions
-- **Shopping Cart**: Add products to cart with quantity management
-- **Secure Payment**: MoMo (Mobile Money) and BK (Bank of Kigali) payment integration
-- **Order Management**: Complete order tracking and management system
-- **User Notifications**: Real-time notifications for successful payments and orders
+**Production URL**: https://d238m8iiglcoij.cloudfront.net/
 
-### Payment Integration
-- **MoMo Payment**: MTN Mobile Money integration with merchant code
-- **BK Payment**: Bank of Kigali direct transfer
-- **Payment Confirmation**: Automatic order processing after payment verification
-- **Owner Notifications**: Instant notifications to shop owners for new orders
+## ✨ Features
 
-### User Experience
-- **Responsive Design**: Mobile-first design that works on all devices
-- **Modern UI**: Beautiful, intuitive interface with smooth animations
-- **Product Search**: Advanced search functionality with filters
-- **Wishlist**: Save favorite products for later
-- **Customer Reviews**: Authentic customer testimonials and ratings
+### 🛍️ **E-commerce Features**
+- **Product Catalog**: Browse flowers by type, color, and occasion
+- **Search Functionality**: Find flowers by name, type, or occasion
+- **Shopping Cart**: Add items with local storage
+- **Wishlist**: Save favorite products
+- **User Authentication**: Sign in/register system
+- **Order Management**: Track orders and view history
 
-### Business Features
-- **Inventory Management**: Real-time stock tracking
-- **Order Analytics**: Sales reports and customer insights
-- **Delivery Tracking**: Real-time delivery status updates
-- **Customer Support**: Integrated chat and support system
+### 🎨 **Design & UX**
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
+- **Modern UI**: Clean, professional design with pink/rose theme
+- **Fast Loading**: Optimized for performance
+- **Accessibility**: User-friendly navigation and interactions
 
-## 🚀 Technology Stack
+### 🔧 **Technical Features**
+- **Next.js 14**: Latest React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first styling
+- **Static Export**: Deployed on AWS CloudFront for global performance
+- **Mock Data**: Works offline with local data
 
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **Styling**: Tailwind CSS, Custom CSS
-- **Icons**: Lucide React, Heroicons
-- **Animations**: Framer Motion
-- **Notifications**: React Hot Toast
-- **Payment**: Custom MoMo and BK integration
-- **Deployment**: Vercel (recommended)
+## 🏗️ **Architecture**
 
-## 📦 Installation
+### **Frontend Stack**
+- **Framework**: Next.js 14.2.31 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **State Management**: React Context API
+- **Build**: Static export for CDN deployment
 
-1. **Clone the repository**
+### **Deployment**
+- **Hosting**: AWS CloudFront + S3
+- **Domain**: CloudFront distribution
+- **Build Process**: Static export for optimal performance
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Node.js 18+ and npm
+- Git
+
+### **Installation**
    ```bash
+# Clone the repository
    git clone <repository-url>
-   cd scentiva-rwanda
-   ```
+cd akazuba-florist
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+# Install dependencies
+npm install
 
-3. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-4. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🛠️ Configuration
-
-### Environment Variables
-Create a `.env.local` file in the root directory:
-
-```env
-# Payment Configuration
-MOMO_MERCHANT_CODE=123456
-MOMO_ACCOUNT_NUMBER=0788123456
-BK_ACCOUNT_NUMBER=00040-1234567-01
-
-# Notification Settings
-OWNER_EMAIL=owner@scentivarwanda.com
-OWNER_PHONE=+250788123456
-
-# Database (if using)
-DATABASE_URL=your_database_url
+# Start development server
+npm run dev
 ```
 
-### Payment Setup
-1. **MoMo Integration**:
-   - Register with MTN Mobile Money for Business
-   - Get your merchant code and account details
-   - Update the configuration in `components/PaymentMethods.tsx`
+### **Available Scripts**
+   ```bash
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+```
 
-2. **BK Integration**:
-   - Set up business account with Bank of Kigali
-   - Configure online banking credentials
-   - Update account details in the payment component
+## 📁 **Project Structure**
 
-## 📱 Features in Detail
+```
+akazuba-florist/
+├── app/                    # Next.js App Router pages
+│   ├── (auth)/            # Authentication pages
+│   ├── admin/             # Admin dashboard
+│   ├── category/          # Product category pages
+│   └── ...
+├── components/            # Reusable React components
+├── contexts/              # React Context providers
+├── data/                  # Static data and mock data
+├── lib/                   # Utility functions and API
+├── public/                # Static assets
+└── types/                 # TypeScript type definitions
+```
 
-### Product Display
-- High-quality product images with zoom functionality
-- Detailed product descriptions and specifications
-- Price display in Rwandan Francs (RWF)
-- Stock availability indicators
-- Customer ratings and reviews
+## 🔐 **Authentication**
 
-### Payment Process
-1. **Add to Cart**: Users can add products to their shopping cart
-2. **Checkout**: Secure checkout process with delivery information
-3. **Payment Selection**: Choose between MoMo or BK payment
-4. **Payment Instructions**: Clear step-by-step payment instructions
-5. **Confirmation**: Automatic order confirmation after payment
-6. **Notifications**: Both customer and owner receive notifications
+### **User Types**
+- **Customers**: Can browse, add to cart, and place orders
+- **Admins**: Full access to admin dashboard and analytics
 
-### Customer Experience
-- **Same Day Delivery**: Available in Kigali and surrounding areas
-- **Free Delivery**: On orders above RWF 50,000
-- **Customer Support**: 24/7 support via phone and email
-- **Returns Policy**: 7-day return policy for unused items
+### **Features**
+- **Public Access**: Browse products without signing in
+- **User Registration**: Create account for full features
+- **Admin Panel**: Manage products, orders, and analytics
 
-## 🎨 Design System
+## 🛒 **Shopping Experience**
 
-### Color Palette
-- **Primary**: Pink/Rose (#ec4899)
-- **Secondary**: Green (#22c55e)
-- **Accent**: Yellow (#eab308)
-- **Neutral**: Gray scale for text and backgrounds
+### **Product Browsing**
+- **Categories**: Browse by flower type (Roses, Tulips, etc.)
+- **Colors**: Filter by color preferences
+- **Occasions**: Find flowers for specific events
+- **Search**: Quick search functionality
 
-### Typography
-- **Headings**: Inter (Bold)
-- **Body**: Inter (Regular)
-- **Display**: Playfair Display (for special headings)
+### **Cart & Checkout**
+- **Local Storage**: Cart persists across sessions
+- **Quantity Management**: Adjust item quantities
+- **Checkout Process**: Streamlined ordering
 
-### Components
-- **Cards**: Product cards with hover effects
-- **Buttons**: Primary, secondary, and outline variants
-- **Forms**: Clean, accessible form components
-- **Navigation**: Sticky header with mobile menu
+## 🎯 **Key Pages**
 
-## 📊 Business Logic
+- **Homepage**: Featured products and search
+- **Categories**: Product listings by type/color
+- **Product Details**: Individual product pages
+- **Cart**: Shopping cart management
+- **Checkout**: Order completion
+- **User Dashboard**: Order history and profile
+- **Admin Panel**: Backend management
 
-### Order Flow
-1. Customer browses products
-2. Adds items to cart
-3. Proceeds to checkout
-4. Selects payment method
-5. Completes payment via MoMo or BK
-6. System verifies payment
-7. Order is confirmed and owner is notified
-8. Customer receives confirmation
-9. Order is processed and delivered
+## 🔧 **Development**
 
-### Payment Verification
-- **MoMo**: SMS confirmation and transaction ID verification
-- **BK**: Bank transfer confirmation and reference matching
-- **Manual Verification**: Owner can manually verify payments
-- **Auto-processing**: Orders are automatically processed after verification
+### **Environment Setup**
+   ```bash
+# Copy environment example
+cp env.example .env.local
 
-## 🔧 Customization
+# Configure environment variables
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/backend
+NODE_ENV=development
+```
 
-### Adding New Products
-1. Update `data/products.ts` with new product information
-2. Add product images to the public directory
-3. Update categories if needed
-4. Test the product display
+### **Code Quality**
+- **TypeScript**: Strict type checking
+- **ESLint**: Code linting and formatting
+- **Prettier**: Code formatting
 
-### Modifying Payment Methods
-1. Edit `components/PaymentMethods.tsx`
-2. Update account details and instructions
-3. Test payment flow
-4. Update environment variables
+## 📊 **Performance**
 
-### Styling Changes
-1. Modify `tailwind.config.js` for theme changes
-2. Update `app/globals.css` for custom styles
-3. Edit component-specific styles as needed
+- **Static Export**: Pre-built HTML for fast loading
+- **CDN Deployment**: Global content delivery
+- **Optimized Images**: WebP format with fallbacks
+- **Code Splitting**: Automatic bundle optimization
 
-## 🚀 Deployment
+## 🌐 **Deployment**
 
-### Vercel (Recommended)
-1. Connect your GitHub repository to Vercel
-2. Configure environment variables
-3. Deploy automatically on push to main branch
+### **Current Setup**
+- **AWS CloudFront**: Global CDN
+- **S3 Bucket**: Static file hosting
+- **Automatic Build**: GitHub Actions (if configured)
 
-### Other Platforms
-- **Netlify**: Similar process to Vercel
-- **AWS**: Use Amplify or EC2
-- **DigitalOcean**: Deploy to App Platform or Droplet
+### **Deployment Process**
+```bash
+# Build the project
+npm run build
 
-## 📞 Support
+# Deploy to CloudFront
+./deploy-simple.ps1
+```
 
-For technical support or business inquiries:
-- **Email**: info@scentivarwanda.com
-- **Phone**: +250 788 123 456
-- **Address**: Kimihurura, KG 123 St, Kigali, Rwanda
+## 📞 **Support**
 
-## 📄 License
+For technical support or questions:
+- **Email**: info@akazuba.rw
+- **Phone**: +250 784 586 110
+- **Location**: Kigali, Rwanda
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 📄 **License**
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 🎯 Roadmap
-
-### Phase 2 Features
-- [ ] User accounts and profiles
-- [ ] Advanced search and filtering
-- [ ] Wishlist functionality
-- [ ] Loyalty program
-- [ ] Bulk ordering
-- [ ] Corporate accounts
-
-### Phase 3 Features
-- [ ] Mobile app development
-- [ ] AI-powered recommendations
-- [ ] Advanced analytics dashboard
-- [ ] Multi-language support
-- [ ] International shipping
+This project is proprietary software for Akazuba Florist.
 
 ---
 
-**Scentiva Rwanda** - Bringing beauty and elegance to Rwanda through premium flowers and luxury perfumes. 🌸✨ 
+**Built with ❤️ for beautiful flowers and happy customers** 

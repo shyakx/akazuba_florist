@@ -4,15 +4,34 @@ import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { useRouter } from 'next/navigation'
 import { 
-  Package, Plus, Search, Filter, Download, RefreshCw, Eye, Edit, Trash2,
-  AlertTriangle, Star, TrendingUp, BarChart3, Settings, Grid, List,
-  CheckCircle, LogOut, Flower, Image
+  Plus, 
+  Search, 
+  Filter, 
+  BarChart3, 
+  Grid3X3, 
+  Download, 
+  RefreshCw,
+  Package,
+  Star,
+  Eye,
+  Edit,
+  Trash2,
+  Settings,
+  Image as ImageIcon,
+  Zap,
+  Target,
+  CheckCircle,
+  AlertTriangle,
+  Crown,
+  Grid,
+  List,
+  TrendingUp
 } from 'lucide-react'
 import Link from 'next/link'
 import { adminAPI, AdminProduct, ProductFilters, BulkOperation, ProductAnalytics, ExportOptions } from '@/lib/adminApi'
 import { productStorage } from '@/lib/productStorage'
 import toast from 'react-hot-toast'
-import AdminLayout from '@/components/AdminLayout'
+import { realFlowerProducts } from '@/data/real-flowers'
 
 // Components
 import ProductPreviewModal from './components/ProductPreviewModal'
@@ -61,6 +80,49 @@ const AdminProductsPage = () => {
   const [analytics, setAnalytics] = useState<ProductAnalytics[]>([])
   const [analyticsLoading, setAnalyticsLoading] = useState(false)
 
+  // Image loading state
+  const [imageLoadingStates, setImageLoadingStates] = useState<{ [key: string]: boolean }>({})
+
+  const handleImageLoad = (productId: string) => {
+    setImageLoadingStates(prev => ({ ...prev, [productId]: false }))
+  }
+
+  const handleImageError = (productId: string, imageSrc: string) => {
+    console.warn(`Image failed to load for product ${productId}:`, imageSrc)
+    setImageLoadingStates(prev => ({ ...prev, [productId]: false }))
+  }
+
+  // Preload images to check availability
+  const preloadImage = (src: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const img = new window.Image()
+      img.onload = () => resolve(true)
+      img.onerror = () => resolve(false)
+      img.src = src
+    })
+  }
+
+  const validateImagePath = async (imagePath: string, productColor: string): Promise<string> => {
+    // Try the original path first
+    const isOriginalValid = await preloadImage(imagePath)
+    if (isOriginalValid) return imagePath
+
+    // Try fallback paths
+    const fallbackPaths = [
+      `/images/flowers/${productColor}/${productColor}-1.jpg`,
+      `/images/flowers/${productColor}/${productColor}-2.jpg`,
+      `/images/placeholder-flower.jpg`
+    ]
+
+    for (const fallbackPath of fallbackPaths) {
+      const isValid = await preloadImage(fallbackPath)
+      if (isValid) return fallbackPath
+    }
+
+    // Return placeholder as last resort
+    return '/images/placeholder-flower.jpg'
+  }
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       router.push('/admin/login')
@@ -75,19 +137,70 @@ const AdminProductsPage = () => {
     }
   }, [isAuthenticated, user?.role])
 
+  // Handle loading overlay timeouts
+  useEffect(() => {
+    if (filteredProducts.length > 0) {
+      const timeout = setTimeout(() => {
+        // Hide all loading overlays after 5 seconds
+        const overlays = document.querySelectorAll('.loading-overlay')
+        overlays.forEach((overlay) => {
+          (overlay as HTMLElement).style.display = 'none'
+        })
+      }, 5000)
+
+      return () => clearTimeout(timeout)
+    }
+  }, [filteredProducts])
+
   const fetchProducts = async () => {
     try {
       setLoading(true)
-      // Use product storage to get all real products
-      const result = productStorage.getProducts({
-        page: 1,
-        limit: 1000 // Get all products
+      
+      // Use the same data source as the home page
+      console.log('🔄 Using realFlowerProducts data (same as home page)')
+      
+      // Transform the data to match admin format
+      const transformedProducts: AdminProduct[] = realFlowerProducts.map((product, index) => ({
+        id: product.id.toString(),
+        name: product.name,
+        slug: product.name.toLowerCase().replace(/\s+/g, '-'),
+        description: product.description,
+        shortDescription: product.name,
+        price: product.price,
+        salePrice: undefined,
+        costPrice: Math.floor(product.price * 0.6), // 40% margin
+        sku: `${product.type.toUpperCase()}-${product.id}`,
+        stockQuantity: 50,
+        minStockAlert: 5,
+        categoryId: 'flowers',
+        categoryName: 'Flowers',
+        images: [product.image], // Use the correct image path from realFlowerProducts
+        isActive: true,
+        isFeatured: product.featured,
+        weight: 1.0,
+        dimensions: { width: 20, height: 40, length: 30 },
+        tags: [product.color, product.type.toLowerCase()],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        views: Math.floor(Math.random() * 100),
+        sales: Math.floor(Math.random() * 20),
+        revenue: product.price * Math.floor(Math.random() * 20),
+        rating: 4.5 + Math.random() * 0.5,
+        reviewCount: Math.floor(Math.random() * 50)
+      }))
+
+      console.log('🔍 Real flower products loaded:', transformedProducts.length)
+      transformedProducts.forEach(product => {
+        console.log(`📸 Product: ${product.name}, Images:`, product.images)
       })
-      setProducts(result.products)
-      setFilteredProducts(result.products)
+
+      setProducts(transformedProducts)
+      setFilteredProducts(transformedProducts)
     } catch (error) {
-      console.error('Error fetching products:', error)
+      console.error('❌ Error loading products:', error)
       toast.error('Failed to load products')
+      setProducts([])
+      setFilteredProducts([])
     } finally {
       setLoading(false)
     }
@@ -96,13 +209,13 @@ const AdminProductsPage = () => {
   const handleProductDelete = async (productId: string) => {
     if (confirm('Are you sure you want to delete this product?')) {
       try {
-        const success = productStorage.deleteProduct(productId)
-        if (success) {
-          toast.success('Product deleted successfully')
-          fetchProducts()
-        } else {
-          toast.error('Failed to delete product')
-        }
+              try {
+        productStorage.deleteProduct(productId)
+        toast.success('Product deleted successfully')
+        fetchProducts()
+      } catch (error) {
+        toast.error('Failed to delete product')
+      }
       } catch (error) {
         console.error('Delete error:', error)
         toast.error('Failed to delete product')
@@ -110,20 +223,20 @@ const AdminProductsPage = () => {
     }
   }
 
-  const handleBulkOperation = async (operation: BulkOperation) => {
+    const handleBulkOperation = async (operation: BulkOperation) => {
     try {
-      const result = productStorage.bulkOperation(operation)
-      if (result.success) {
-        toast.success(result.message)
-        setSelectedProducts([])
-        fetchProducts()
-      } else {
-        toast.error(result.message)
+      const result = productStorage.bulkOperation(operation.operation, selectedProducts, operation.data)
+        if (result.success) {
+          toast.success(result.message)
+          setSelectedProducts([])
+          fetchProducts()
+        } else {
+          toast.error(result.message)
+        }
+      } catch (error) {
+        console.error('Bulk operation error:', error)
+        toast.error('Bulk operation failed')
       }
-    } catch (error) {
-      console.error('Bulk operation error:', error)
-      toast.error('Bulk operation failed')
-    }
   }
 
   const handleExport = async (options: ExportOptions) => {
@@ -159,9 +272,9 @@ const AdminProductsPage = () => {
   }
 
   const getStockStatusColor = (product: AdminProduct) => {
-    if (product.stockQuantity === 0) return 'text-red-600 bg-red-50'
-    if (product.stockQuantity <= product.minStockAlert) return 'text-yellow-600 bg-yellow-50'
-    return 'text-green-600 bg-green-50'
+    if (product.stockQuantity === 0) return 'text-red-600 bg-red-50 border-red-200'
+    if (product.stockQuantity <= product.minStockAlert) return 'text-yellow-600 bg-yellow-50 border-yellow-200'
+    return 'text-green-600 bg-green-50 border-green-200'
   }
 
   const getStockStatusText = (product: AdminProduct) => {
@@ -174,7 +287,7 @@ const AdminProductsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading products...</p>
         </div>
       </div>
@@ -186,31 +299,38 @@ const AdminProductsPage = () => {
   }
 
   return (
-    <AdminLayout>
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Products Management</h1>
-              <p className="text-gray-600 mt-2">Manage your product inventory, analytics, and operations</p>
+              <div className="flex items-center space-x-3 mb-2">
+                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Package className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-4xl font-bold text-gray-900">
+                  Products Management
+                </h1>
+              </div>
+              <p className="text-gray-600 text-lg">Manage your product inventory, analytics, and operations</p>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 bg-white px-4 py-2 rounded-xl border border-gray-200">
                 {filteredProducts.length} of {products.length} products
               </div>
               <Link
                 href="/admin/products/new"
-                className="flex items-center space-x-2 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+                className="flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-5 w-5" />
                 <span>Add Product</span>
               </Link>
               <Link
                 href="/admin/products/test"
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center space-x-2 px-6 py-3 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                <Package className="h-4 w-4" />
+                <Zap className="h-5 w-5" />
                 <span>Test Components</span>
               </Link>
             </div>
@@ -219,72 +339,84 @@ const AdminProductsPage = () => {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Total Products</p>
                 <p className="text-3xl font-bold text-gray-900">{products.length}</p>
-                <p className="text-xs text-blue-600 mt-1">Active inventory</p>
+                <p className="text-xs text-blue-600 mt-1 flex items-center">
+                  <Target className="w-3 h-3 mr-1" />
+                  Active inventory
+                </p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <Package className="h-8 w-8 text-blue-600" />
+              <div className="p-3 bg-blue-600 rounded-2xl shadow-lg">
+                <Package className="h-8 w-8 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Active Products</p>
                 <p className="text-3xl font-bold text-green-600">
                   {products.filter(p => p.isActive).length}
                 </p>
-                <p className="text-xs text-green-600 mt-1">Currently available</p>
+                <p className="text-xs text-green-600 mt-1 flex items-center">
+                  <CheckCircle className="w-3 h-3 mr-1" />
+                  Currently available
+                </p>
               </div>
-              <div className="p-3 bg-green-100 rounded-xl">
-                <CheckCircle className="h-8 w-8 text-green-600" />
+              <div className="p-3 bg-green-600 rounded-2xl shadow-lg">
+                <CheckCircle className="h-8 w-8 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Low Stock</p>
                 <p className="text-3xl font-bold text-yellow-600">
                   {products.filter(p => p.stockQuantity <= p.minStockAlert && p.stockQuantity > 0).length}
                 </p>
-                <p className="text-xs text-yellow-600 mt-1">Needs attention</p>
+                <p className="text-xs text-yellow-600 mt-1 flex items-center">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  Needs attention
+                </p>
               </div>
-              <div className="p-3 bg-yellow-100 rounded-xl">
-                <AlertTriangle className="h-8 w-8 text-yellow-600" />
+              <div className="p-3 bg-yellow-600 rounded-2xl shadow-lg">
+                <AlertTriangle className="h-8 w-8 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-1">Featured</p>
                 <p className="text-3xl font-bold text-purple-600">
                   {products.filter(p => p.isFeatured).length}
                 </p>
-                <p className="text-xs text-purple-600 mt-1">Promoted products</p>
+                <p className="text-xs text-purple-600 mt-1 flex items-center">
+                  <Crown className="w-3 h-3 mr-1" />
+                  Promoted products
+                </p>
               </div>
-              <div className="p-3 bg-purple-100 rounded-xl">
-                <Star className="h-8 w-8 text-purple-600" />
+              <div className="p-3 bg-purple-600 rounded-2xl shadow-lg">
+                <Star className="h-8 w-8 text-white" />
               </div>
             </div>
           </div>
         </div>
 
         {/* Controls Bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             {/* Search and Filters */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
               <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Search products..."
@@ -297,14 +429,14 @@ const AdminProductsPage = () => {
                     )
                     setFilteredProducts(filtered)
                   }}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 />
               </div>
               
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg border transition-colors bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                  className="flex items-center space-x-2 px-4 py-3 rounded-xl border transition-all duration-200 bg-white border-gray-200 text-gray-700 hover:bg-gray-100 hover:shadow-md"
                 >
                   <Filter className="h-4 w-4" />
                   <span>Filters</span>
@@ -312,10 +444,10 @@ const AdminProductsPage = () => {
                 
                 <button
                   onClick={() => setShowAnalytics(!showAnalytics)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg border transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
                     showAnalytics 
-                      ? 'bg-blue-50 border-blue-200 text-blue-700' 
-                      : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                      ? 'bg-blue-600 text-white shadow-lg' 
+                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100 hover:shadow-md'
                   }`}
                 >
                   <BarChart3 className="h-4 w-4" />
@@ -327,19 +459,19 @@ const AdminProductsPage = () => {
             {/* View Controls and Actions */}
             <div className="flex items-center space-x-3">
               {/* View Mode Toggle */}
-              <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <div className="flex items-center bg-gray-100 rounded-xl p-1">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === 'grid' ? 'bg-white shadow-md' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <Grid className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === 'list' ? 'bg-white shadow-md' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <List className="h-4 w-4" />
@@ -350,7 +482,7 @@ const AdminProductsPage = () => {
               {selectedProducts.length > 0 && (
                 <button
                   onClick={() => setShowBulkOperations(true)}
-                  className="flex items-center space-x-2 px-3 py-2 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg hover:bg-yellow-100 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-3 bg-yellow-600 text-white border border-yellow-200 rounded-xl hover:bg-yellow-700 transition-all duration-200 shadow-lg"
                 >
                   <Settings className="h-4 w-4" />
                   <span>Bulk Actions ({selectedProducts.length})</span>
@@ -360,7 +492,7 @@ const AdminProductsPage = () => {
               {/* Export */}
               <button
                 onClick={() => setExportModal({ open: true, options: null })}
-                className="flex items-center space-x-2 px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100 transition-colors"
+                className="flex items-center space-x-2 px-4 py-3 bg-green-600 text-white border border-green-200 rounded-xl hover:bg-green-700 transition-all duration-200 shadow-lg"
               >
                 <Download className="h-4 w-4" />
                 <span>Export</span>
@@ -370,7 +502,7 @@ const AdminProductsPage = () => {
               <button
                 onClick={fetchProducts}
                 disabled={loading}
-                className="flex items-center space-x-2 px-3 py-2 bg-gray-50 text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+                className="flex items-center space-x-2 px-4 py-3 bg-white text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 shadow-md"
               >
                 <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
@@ -400,63 +532,111 @@ const AdminProductsPage = () => {
 
         {/* Products Display */}
         {loading ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
               <p className="text-gray-600">Loading products...</p>
             </div>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12">
             <div className="text-center">
               <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600 mb-6">Try adjusting your search or filters to find what you're looking for.</p>
-              <Link
-                href="/admin/products/new"
-                className="inline-flex items-center space-x-2 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Add Your First Product</span>
-              </Link>
+              <p className="text-gray-600 mb-6">
+                {localStorage.getItem('accessToken') 
+                  ? 'Try adjusting your search or filters to find what you\'re looking for.'
+                  : 'Please login as admin to view products from the backend database.'
+                }
+              </p>
+              {!localStorage.getItem('accessToken') ? (
+                <Link
+                  href="/admin/login"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <span>Login as Admin</span>
+                </Link>
+              ) : (
+                <Link
+                  href="/admin/products/new"
+                  className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span>Add Your First Product</span>
+                </Link>
+              )}
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                <div key={product.id} data-product-id={product.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105 group">
                   <div className="relative">
                     <div className="aspect-square bg-gray-100">
-                      {product.images[0] ? (
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="w-full h-full object-cover"
-                        />
+                      {product.images && product.images.length > 0 && product.images[0] ? (
+                        <div className="relative w-full h-full">
+                          <img
+                            src={product.images[0]}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              // Fallback to placeholder if image fails to load
+                              const target = e.target as HTMLImageElement
+                              target.src = '/images/placeholder-flower.jpg'
+                              target.onerror = null // Prevent infinite loop
+                              // Hide loading overlay on error
+                              const overlay = target.parentElement?.querySelector('.loading-overlay') as HTMLElement
+                              if (overlay) {
+                                overlay.style.display = 'none'
+                              }
+                            }}
+                            onLoad={(e) => {
+                              // Show image and hide loading overlay when image loads
+                              const target = e.target as HTMLImageElement
+                              target.style.opacity = '1'
+                              // Hide the loading overlay
+                              const overlay = target.parentElement?.querySelector('.loading-overlay') as HTMLElement
+                              if (overlay) {
+                                overlay.style.display = 'none'
+                              }
+                            }}
+                            loading="lazy"
+                            style={{ opacity: 0, transition: 'opacity 0.3s ease-in-out' }}
+                          />
+                          {/* Loading overlay - will be hidden when image loads */}
+                          <div className="loading-overlay absolute inset-0 flex items-center justify-center bg-gray-100">
+                            <div className="animate-pulse">
+                              <Package className="h-8 w-8 text-gray-300" />
+                            </div>
+                          </div>
+                        </div>
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Package className="h-12 w-12 text-gray-400" />
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                          <div className="text-center">
+                            <Package className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                            <p className="text-xs text-gray-500">No Image</p>
+                          </div>
                         </div>
                       )}
                     </div>
                     
                     {/* Status badges */}
-                    <div className="absolute top-2 left-2 flex flex-col space-y-1">
+                    <div className="absolute top-3 left-3 flex flex-col space-y-2">
                       {product.isFeatured && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-600 text-white shadow-lg">
                           <Star className="h-3 w-3 mr-1" />
                           Featured
                         </span>
                       )}
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStockStatusColor(product)}`}>
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStockStatusColor(product)}`}>
                         {getStockStatusText(product)}
                       </span>
                     </div>
 
                     {/* Checkbox */}
-                    <div className="absolute top-2 right-2">
+                    <div className="absolute top-3 right-3">
                       <input
                         type="checkbox"
                         checked={selectedProducts.includes(product.id)}
@@ -467,28 +647,28 @@ const AdminProductsPage = () => {
                             setSelectedProducts(prev => prev.filter(id => id !== product.id))
                           }
                         }}
-                        className="rounded border-gray-300 text-pink-600 focus:ring-pink-500"
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-5 h-5"
                       />
                     </div>
                   </div>
 
-                  <div className="p-4">
-                    <h3 className="text-sm font-medium text-gray-900 mb-1 truncate">{product.name}</h3>
-                    <p className="text-xs text-gray-500 mb-2">{product.categoryName}</p>
+                  <div className="p-5">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-2 truncate">{product.name}</h3>
+                    <p className="text-xs text-gray-500 mb-3">{product.categoryName}</p>
                     
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="text-sm font-bold text-gray-900">{formatPrice(product.price)}</div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="text-lg font-bold text-gray-900">{formatPrice(product.price)}</div>
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                         product.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
+                          ? 'bg-green-600 text-white' 
+                          : 'bg-red-600 text-white'
                       }`}>
                         {product.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </div>
 
                     {/* Analytics */}
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
                       {product.views && (
                         <div className="flex items-center">
                           <Eye className="h-3 w-3 mr-1" />
@@ -505,37 +685,37 @@ const AdminProductsPage = () => {
 
                     {/* Actions */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1">
+                      <div className="flex items-center space-x-2">
                         <button
                           onClick={() => setPreviewModal({ open: true, product })}
-                          className="p-1 text-blue-600 hover:text-blue-900"
+                          className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-all duration-200"
                         >
-                          <Eye className="h-3 w-3" />
+                          <Eye className="h-4 w-4" />
                         </button>
                         <Link
                           href={`/admin/products/${product.id}/edit`}
-                          className="p-1 text-green-600 hover:text-green-900"
+                          className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-all duration-200"
                         >
-                          <Edit className="h-3 w-3" />
+                          <Edit className="h-4 w-4" />
                         </Link>
                         <button
                           onClick={() => setStockModal({ open: true, product })}
-                          className="p-1 text-purple-600 hover:text-purple-900"
+                          className="p-2 text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded-lg transition-all duration-200"
                         >
-                          <Package className="h-3 w-3" />
+                          <Package className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setImageModal({ open: true, product })}
-                          className="p-1 text-orange-600 hover:text-orange-900"
+                          className="p-2 text-orange-600 hover:text-orange-900 hover:bg-orange-50 rounded-lg transition-all duration-200"
                         >
-                          <Image className="h-3 w-3" />
+                          <ImageIcon className="h-4 w-4" />
                         </button>
                       </div>
                       <button
                         onClick={() => handleProductDelete(product.id)}
-                        className="p-1 text-red-600 hover:text-red-900"
+                        className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-all duration-200"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -584,7 +764,7 @@ const AdminProductsPage = () => {
           onOperation={handleBulkOperation}
         />
       )}
-    </AdminLayout>
+    </div>
   )
 }
 

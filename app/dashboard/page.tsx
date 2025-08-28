@@ -234,7 +234,7 @@ const CustomerDashboard = () => {
                 </h1>
                 <p className="text-gray-600 mt-2 text-lg">
                   Welcome back, <span className="font-semibold text-pink-600">{user?.firstName || 'User'}</span>! 
-                  Here's what's happening with your account.
+                  Here&apos;s what&apos;s happening with your account.
                 </p>
               </div>
             </div>

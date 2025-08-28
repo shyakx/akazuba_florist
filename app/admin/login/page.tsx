@@ -32,16 +32,21 @@ const AdminLogin = () => {
 
     try {
       setLoading(true)
-      await login(formData.email, formData.password)
+      const success = await login({
+        email: formData.email,
+        password: formData.password
+      })
       
-      // Check if user is admin after login
-      if (user?.role === 'ADMIN') {
-        toast.success('Welcome back!')
-        router.push('/admin')
+      if (success) {
+        // Check if user is admin after login
+        if (user?.role === 'ADMIN') {
+          toast.success('Welcome back!')
+          router.push('/admin')
+        } else {
+          toast.error('Access denied. Admin privileges required.')
+        }
       } else {
-        toast.error('Access denied. Admin privileges required.')
-        // Logout non-admin users
-        // await logout()
+        toast.error('Login failed. Please check your credentials.')
       }
     } catch (error: any) {
       console.error('Login error:', error)
@@ -187,6 +192,7 @@ const AdminLogin = () => {
               <div className="text-sm text-blue-700">
                 <p className="font-medium">Secure Access</p>
                 <p>This area is restricted to authorized personnel only.</p>
+                <p className="mt-1 text-xs">Default admin: admin@akazubaflorist.com / akazuba2024</p>
               </div>
             </div>
           </div>

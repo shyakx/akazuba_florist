@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { X, Upload, Image as ImageIcon, Tag, Package, Tag as TagIcon, FileText, Save, Plus, Trash2 } from 'lucide-react'
+import { X, Upload, Image as ImageIcon, Tag, Package, FileText, Save, Plus, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 interface ProductModalProps {

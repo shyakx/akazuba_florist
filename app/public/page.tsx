@@ -77,7 +77,7 @@ export default function PublicLanding() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Get in Touch</h2>
-            <p className="text-gray-600">Have questions? We'd love to hear from you.</p>
+            <p className="text-gray-600">Have questions? We&apos;d love to hear from you.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">

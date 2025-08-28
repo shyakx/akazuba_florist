@@ -71,7 +71,7 @@ const AdminDashboard = () => {
     if (!isLoading && !isAuthenticated) {
       router.push('/admin/login')
     } else if (!isLoading && isAuthenticated && user?.role !== 'ADMIN') {
-      router.push('/')
+        router.push('/')
     }
   }, [isAuthenticated, user, isLoading, router])
 
@@ -178,20 +178,45 @@ const AdminDashboard = () => {
 
   const handleDownloadInvoice = async (orderId: string) => {
     try {
+      toast.loading('Generating invoice...', { id: 'invoice-download' })
+      
       const response = await adminAPI.downloadInvoice(orderId)
-      const blob = new Blob([response], { type: 'application/pdf' })
+      
+      // Determine file type and extension
+      const isHTML = response.type === 'text/html' || response.type === 'text/html; charset=utf-8'
+      const fileExtension = isHTML ? 'html' : 'pdf'
+      const mimeType = isHTML ? 'text/html; charset=utf-8' : 'application/pdf'
+      
+      const blob = new Blob([response], { type: mimeType })
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `invoice-${orderId}.pdf`
+      a.download = `invoice-${orderId}.${fileExtension}`
+      a.style.display = 'none'
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
-      toast.success('Invoice downloaded successfully')
+      
+      // Dismiss loading toast and show success
+      toast.dismiss('invoice-download')
+      
+      if (isHTML) {
+        toast.success('Invoice generated successfully! Open the HTML file in your browser to view it.', {
+          duration: 5000,
+          icon: '📄'
+        })
+      } else {
+        toast.success('Invoice downloaded successfully!', {
+          icon: '📄'
+        })
+      }
     } catch (error) {
       console.error('Error downloading invoice:', error)
-      toast.error('Failed to download invoice')
+      toast.dismiss('invoice-download')
+      toast.error('Failed to generate invoice. Please try again.', {
+        duration: 4000
+      })
     }
   }
 
@@ -216,10 +241,10 @@ const AdminDashboard = () => {
   }
 
   if (isLoading || loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
@@ -236,7 +261,7 @@ const AdminDashboard = () => {
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back! Here's what's happening with your store.</p>
+          <p className="text-gray-600 mt-2">Welcome back! Here&apos;s what&apos;s happening with your store.</p>
         </div>
 
         {/* Stats Grid */}
@@ -339,68 +364,68 @@ const AdminDashboard = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {recentOrders.length > 0 ? (
                   recentOrders.map((order) => (
-                    <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
+                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center mr-3">
                             <span className="text-xs font-bold text-pink-600">#{order.orderNumber?.split('-')[1] || order.id?.slice(-4) || 'N/A'}</span>
-                          </div>
+                        </div>
                           <span className="text-sm font-semibold text-gray-900">{order.orderNumber || `Order ${order.id?.slice(-8) || 'N/A'}`}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                          <User className="h-4 w-4 text-gray-600" />
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
-                            <User className="h-4 w-4 text-gray-600" />
-                          </div>
-                          <div>
+                        <div>
                             <span className="text-sm font-medium text-gray-900">{order.customerName || 'Guest Customer'}</span>
-                            <p className="text-xs text-gray-500">Customer</p>
-                          </div>
+                          <p className="text-xs text-gray-500">Customer</p>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-sm font-bold text-gray-900">
-                            {formatPrice(order.totalAmount)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                          <div className={`w-2 h-2 rounded-full mr-2 ${
-                            order.status === 'PENDING' ? 'bg-yellow-400' :
-                            order.status === 'CONFIRMED' ? 'bg-blue-400' :
-                            order.status === 'SHIPPED' ? 'bg-purple-400' :
-                            order.status === 'DELIVERED' ? 'bg-green-400' :
-                            'bg-red-400'
-                          }`}></div>
-                          {order.status}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <DollarSign className="h-4 w-4 text-green-600 mr-1" />
+                        <span className="text-sm font-bold text-gray-900">
+                          {formatPrice(order.totalAmount)}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 text-gray-400 mr-1" />
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center space-x-2">
-                          <Link
-                            href={`/admin/orders/${order.id}`}
-                            className="flex items-center space-x-1 px-3 py-1 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors"
-                          >
-                            <Eye className="h-3 w-3" />
-                            <span>View</span>
-                          </Link>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                        <div className={`w-2 h-2 rounded-full mr-2 ${
+                          order.status === 'PENDING' ? 'bg-yellow-400' :
+                          order.status === 'CONFIRMED' ? 'bg-blue-400' :
+                          order.status === 'SHIPPED' ? 'bg-purple-400' :
+                          order.status === 'DELIVERED' ? 'bg-green-400' :
+                          'bg-red-400'
+                        }`}></div>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 text-gray-400 mr-1" />
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-2">
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          className="flex items-center space-x-1 px-3 py-1 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors"
+                        >
+                          <Eye className="h-3 w-3" />
+                          <span>View</span>
+                        </Link>
                           <button 
                             onClick={() => handleDownloadInvoice(order.id)}
                             className="flex items-center space-x-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
                           >
-                            <Download className="h-3 w-3" />
-                            <span>Invoice</span>
-                          </button>
+                          <Download className="h-3 w-3" />
+                          <span>Invoice</span>
+                        </button>
                         </div>
                       </td>
                     </tr>

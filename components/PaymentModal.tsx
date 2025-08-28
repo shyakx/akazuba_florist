@@ -206,7 +206,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, amount, customerEmail, custo
                   onClick={handlePaymentSuccess}
                   className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-green-700 transition-colors"
                 >
-                  I've Completed the Payment
+                  I&apos;ve Completed the Payment
                 </button>
                 <button
                   onClick={() => setStep('form')}

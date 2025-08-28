@@ -614,7 +614,7 @@ router.get('/dashboard/recent-orders', async (req, res) => {
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
-          select: {
+      select: {
             firstName: true,
             lastName: true
           }

@@ -209,7 +209,7 @@ const Login = () => {
             {/* Footer */}
           <div className="mt-6 text-center">
               <p className="text-gray-600">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link
                   href="/register"
                   className="font-medium text-pink-600 hover:text-pink-500 transition-colors"

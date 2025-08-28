@@ -328,7 +328,7 @@ const CheckoutPage = () => {
                             <li>Upload the screenshot below</li>
                           </ol>
                           <p className="mt-2 text-xs">
-                            <strong>Alternative:</strong> Send the payment screenshot directly to Diane's WhatsApp: <strong>0784 5861 10</strong>
+                            <strong>Alternative:</strong> Send the payment screenshot directly to Diane&apos;s WhatsApp: <strong>0784 5861 10</strong>
                           </p>
                         </div>
                       ) : (
@@ -342,7 +342,7 @@ const CheckoutPage = () => {
                             <li>Reference: <strong>Your Name + Order</strong></li>
                           </ul>
                           <p className="mt-2 text-xs">
-                            <strong>Alternative:</strong> Send the transfer receipt directly to Diane's WhatsApp: <strong>0784 5861 10</strong>
+                            <strong>Alternative:</strong> Send the transfer receipt directly to Diane&apos;s WhatsApp: <strong>0784 5861 10</strong>
                           </p>
                         </div>
                       )}

@@ -16,10 +16,7 @@ const FeaturedProducts = () => {
     featured: true
   }))
 
-  // Debug logging
-  console.log('🔄 FeaturedProducts - Context products:', products.length)
-  console.log('🔄 FeaturedProducts - Is loading:', isLoading)
-  console.log('🔄 FeaturedProducts - Fallback products:', fallbackProducts.length)
+
 
   // Show loading state
   if (isLoading) {
@@ -53,7 +50,7 @@ const FeaturedProducts = () => {
   // Show products from backend or fallback data
   const displayProducts = products.length > 0 ? products.slice(0, 8) : fallbackProducts
 
-  console.log('🔄 FeaturedProducts - Display products:', displayProducts.length)
+
 
   // Ensure we always have products to display
   if (displayProducts.length === 0) {

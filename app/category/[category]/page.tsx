@@ -99,7 +99,7 @@ const CategoryPage = ({ params }: { params: { category: string } }) => {
         {filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600 mb-6">We couldn't find any products in this category.</p>
+            <p className="text-gray-600 mb-6">We couldn&apos;t find any products in this category.</p>
             <Link href="/" className="btn-primary">
               Browse All Products
             </Link>

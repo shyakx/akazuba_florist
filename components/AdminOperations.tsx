@@ -45,40 +45,7 @@ import {
   User,
   Crown,
   Gift,
-  Award,
-  Star as StarIcon,
-  Eye as EyeIcon,
-  Edit as EditIcon,
-  Trash2 as TrashIcon,
-  MoreHorizontal as MoreIcon,
-  Download as DownloadIcon,
-  Upload as UploadIcon,
-  RefreshCw as RefreshIcon,
-  Search as SearchIcon,
-  Filter as FilterIcon,
-  Settings as SettingsIcon,
-  Bell as BellIcon,
-  Calendar as CalendarIcon,
-  DollarSign as DollarIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  Star as StarIcon2,
-  Heart as HeartIcon,
-  Shield as ShieldIcon,
-  Zap as ZapIcon,
-  Target as TargetIcon,
-  Activity as ActivityIcon,
-  BarChart3 as BarChartIcon,
-  FileText as FileTextIcon,
-  CreditCard as CreditCardIcon,
-  Truck as TruckIcon,
-  MapPin as MapPinIcon,
-  Phone as PhoneIcon,
-  Mail as MailIcon,
-  User as UserIcon,
-  Crown as CrownIcon,
-  Gift as GiftIcon,
-  Award as AwardIcon
+  Award
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -188,7 +155,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
           {/* Search Section */}
           <div className="flex flex-1 gap-3 w-full lg:w-auto">
             <div className="relative flex-1 lg:w-80">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search..."
@@ -221,7 +188,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
               onClick={() => setShowFilters(!showFilters)}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
-              <FilterIcon className="h-4 w-4" />
+              <Filter className="h-4 w-4" />
               Filters
             </button>
             <button
@@ -229,7 +196,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
               disabled={isLoading}
               className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
-              <RefreshIcon className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </button>
             <div className="relative">
@@ -238,7 +205,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
                 disabled={selectedItems.length === 0}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
               >
-                <MoreIcon className="h-4 w-4" />
+                <MoreHorizontal className="h-4 w-4" />
                 Bulk Actions ({selectedItems.length})
               </button>
               
@@ -333,7 +300,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
                     disabled={isExporting}
                     className="flex-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 text-sm flex items-center justify-center gap-1"
                   >
-                    <DownloadIcon className="h-3 w-3" />
+                    <Download className="h-3 w-3" />
                     CSV
                   </button>
                   <button
@@ -341,7 +308,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
                     disabled={isExporting}
                     className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm flex items-center justify-center gap-1"
                   >
-                    <DownloadIcon className="h-3 w-3" />
+                    <Download className="h-3 w-3" />
                     Excel
                   </button>
                 </div>
@@ -455,7 +422,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
               <p className="text-2xl font-bold text-red-600">5</p>
             </div>
             <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+              <AlertCircle className="h-6 w-6 text-red-600" />
             </div>
           </div>
         </div>
@@ -463,7 +430,7 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Today's Revenue</p>
+              <p className="text-sm text-gray-600">Today&apos;s Revenue</p>
               <p className="text-2xl font-bold text-green-600">RWF 450K</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">

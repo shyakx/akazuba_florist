@@ -15,6 +15,11 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@headlessui/react', '@heroicons/react', 'lucide-react'],
   },
+  // Suppress dynamic route warnings during build
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {
       config.resolve.fallback = {

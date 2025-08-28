@@ -7,12 +7,12 @@ async function main() {
   console.log('🌱 Starting database seeding...')
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const hashedPassword = await bcrypt.hash('akazuba2024', 10)
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@akazuba.com' },
+    where: { email: 'admin@akazubaflorist.com' },
     update: {},
     create: {
-      email: 'admin@akazuba.com',
+      email: 'admin@akazubaflorist.com',
       passwordHash: hashedPassword,
       firstName: 'Admin',
       lastName: 'User',
@@ -121,7 +121,7 @@ async function main() {
         description: 'Beautiful red rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Red Rose',
         price: 45500,
-        images: ['/images/products/red-rose.jpg'],
+        images: ['/images/flowers/red/red-1.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -138,7 +138,7 @@ async function main() {
         description: 'Beautiful pink rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Pink Rose',
         price: 41600,
-        images: ['/images/products/pink-rose.jpg'],
+        images: ['/images/flowers/pink/pink-1.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -155,7 +155,7 @@ async function main() {
         description: 'Beautiful white rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'White Rose',
         price: 39000,
-        images: ['/images/products/white-rose.jpg'],
+        images: ['/images/flowers/white/white-2.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -172,7 +172,7 @@ async function main() {
         description: 'Beautiful yellow rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Yellow Rose',
         price: 36400,
-        images: ['/images/products/yellow-rose.jpg'],
+        images: ['/images/flowers/yellow/yellow-2.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         stockQuantity: 35,
@@ -190,7 +190,7 @@ async function main() {
         description: 'Beautiful red tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Red Tulip',
         price: 32500,
-        images: ['/images/products/red-tulip.jpg'],
+        images: ['/images/flowers/red/red-2.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -207,7 +207,7 @@ async function main() {
         description: 'Beautiful pink tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Pink Tulip',
         price: 41600,
-        images: ['/images/products/pink-tulip.jpg'],
+        images: ['/images/flowers/pink/pink-2.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         stockQuantity: 25,
@@ -223,7 +223,7 @@ async function main() {
         description: 'Beautiful yellow tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Yellow Tulip',
         price: 26000,
-        images: ['/images/products/yellow-tulip.jpg'],
+        images: ['/images/flowers/yellow/yellow-1.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         stockQuantity: 20,
@@ -239,7 +239,7 @@ async function main() {
         description: 'Beautiful white tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'White Tulip',
         price: 39000,
-        images: ['/images/products/white-tulip.jpg'],
+        images: ['/images/flowers/white/white-3.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         stockQuantity: 15,
@@ -257,7 +257,7 @@ async function main() {
         description: 'Beautiful white lily from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'White Lily',
         price: 39000,
-        images: ['/images/products/white-lily.jpg'],
+        images: ['/images/flowers/white/white-1.jpg'],
         categoryId: liliesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -276,7 +276,7 @@ async function main() {
         description: 'Beautiful yellow sunflower from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Yellow Sunflower',
         price: 26000,
-        images: ['/images/products/yellow-sunflower.jpg'],
+        images: ['/images/flowers/yellow/yellow-1.jpg'],
         categoryId: sunflowersCategory?.id || '',
         isActive: true,
         stockQuantity: 30,
@@ -294,7 +294,7 @@ async function main() {
         description: 'Beautiful mixed bouquet from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Bouquet',
         price: 78000,
-        images: ['/images/products/mixed-bouquet.jpg'],
+        images: ['/images/flowers/mixed/mixed-1.jpg'],
         categoryId: bouquetsCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -311,7 +311,7 @@ async function main() {
         description: 'Beautiful mixed arrangement from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Arrangement',
         price: 97500,
-        images: ['/images/products/mixed-arrangement.jpg'],
+        images: ['/images/flowers/mixed/mixed-2.jpg'],
         categoryId: bouquetsCategory?.id || '',
         isActive: true,
         stockQuantity: 15,
@@ -327,7 +327,7 @@ async function main() {
         description: 'Beautiful mixed gift set from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Gift Set',
         price: 104000,
-        images: ['/images/products/mixed-gift-set.jpg'],
+        images: ['/images/flowers/mixed/mixed-4.jpg'],
         categoryId: bouquetsCategory?.id || '',
         isActive: true,
         stockQuantity: 10,
@@ -345,7 +345,7 @@ async function main() {
         description: 'Beautiful mixed wedding bouquet from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Wedding Bouquet',
         price: 156000,
-        images: ['/images/products/mixed-wedding-bouquet.jpg'],
+        images: ['/images/flowers/mixed/mixed-5.jpg'],
         categoryId: weddingCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -429,7 +429,7 @@ async function main() {
   console.log(`   - ${categories.length} categories`)
   console.log(`   - ${products.length} products`)
   console.log(`   - ${settings.length} system settings`)
-  console.log(`   - 1 admin user (admin@akazuba.com / admin123)`)
+  console.log(`   - 1 admin user (admin@akazubaflorist.com / akazuba2024)`)
 }
 
 main()

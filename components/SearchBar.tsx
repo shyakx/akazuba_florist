@@ -220,7 +220,7 @@ const SearchBar = () => {
                 {searchQuery && filteredSuggestions.length === 0 && filteredProducts.length === 0 && (
                   <div className="p-4 text-center text-gray-500">
                     <Flower className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm sm:text-base">No results found for "{searchQuery}"</p>
+                    <p className="text-sm sm:text-base">No results found for &quot;{searchQuery}&quot;</p>
                     <p className="text-xs sm:text-sm">Try searching for a different term</p>
                   </div>
                 )}

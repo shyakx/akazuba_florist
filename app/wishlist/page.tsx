@@ -12,19 +12,7 @@ const WishlistPage = () => {
   const { items, removeFromWishlist, clearWishlist, isLoading } = useWishlist()
   const { addToCart } = useCart()
   
-  console.log('🎯 Wishlist items in page:', items)
-  
-  // Debug the first item's product structure
-  if (items.length > 0) {
-    console.log('🔍 First wishlist item:', items[0])
-    console.log('🔍 First wishlist item product structure:', items[0].product)
-    console.log('🔍 Product name:', items[0].product?.name)
-    console.log('🔍 Product price:', items[0].product?.price)
-    console.log('🔍 Product category:', items[0].product?.category)
-    console.log('🔍 Product image:', items[0].product?.image)
-    console.log('🔍 Product images:', items[0].product?.images)
-    console.log('🔍 All product properties:', Object.keys(items[0].product || {}))
-  }
+
   
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', {
