@@ -32,4 +32,12 @@ declare global {
   }
 }
 
+// Ensure Node.js globals are available
+declare var process: NodeJS.Process
+declare var __dirname: string
+declare var __filename: string
+declare var console: Console
+declare var Buffer: typeof globalThis.Buffer
+declare var global: typeof globalThis
+
 export {}
