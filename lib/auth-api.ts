@@ -39,7 +39,7 @@ export interface LoginRequest {
   password: string
 }
 
-// API Base URL - Use environment variable or fallback to production backend
+// API Base URL - Use production backend by default for immediate deployment
 const getApiBaseUrl = (): string => {
   return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
 }

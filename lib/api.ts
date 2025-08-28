@@ -593,7 +593,7 @@ const apiRequest = async <T>(
     }
   }
 
-  // Use the configured API URL or fallback to HTTPS backend
+  // Use production backend by default for immediate deployment
   let API_BASE_URL_ACTUAL: string = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1';
 
   const config: RequestInit = {
