@@ -558,7 +558,7 @@ const apiRequest = async <T>(
             } else if (customerEmail === 'claire.mutoni@email.com') {
               customerName = 'Claire'
               customerLastName = 'Mutoni'
-            } else if (customerEmail === 'customer@example.com') {
+            } else if (customerEmail === 'guest@akazubaflorist.com') {
               customerName = 'John'
               customerLastName = 'Doe'
             }
@@ -991,7 +991,7 @@ export const apiUtils = {
         // Create a basic user object from cookie data
         const user: User = {
           id: 'cookie-user',
-          email: 'admin@example.com', // Default email
+          email: 'admin@akazubaflorist.com', // Default email
           firstName: 'Admin',
           lastName: 'User',
           role: role as 'ADMIN' | 'CUSTOMER',

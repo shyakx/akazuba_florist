@@ -40,19 +40,19 @@ git push origin main
 NODE_ENV=production
 PORT=10000
 DATABASE_URL=<your-render-postgresql-url>
-JWT_SECRET=<generate-secure-random-string>
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
+JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
+CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 ```
 
 ### Frontend (Vercel)
 ```bash
-NEXT_PUBLIC_API_URL=https://your-backend-service.onrender.com/api/v1
+NEXT_PUBLIC_API_URL=https://akazuba-backend.onrender.com/api/v1
 ```
 
 ## Test Your Deployment
-1. Backend health: `https://your-backend.onrender.com/health`
-2. Frontend: `https://your-frontend.vercel.app`
-3. Admin setup: `https://your-backend.onrender.com/api/v1/admin/setup`
+1. Backend health: `https://akazuba-backend.onrender.com/health`
+2. Frontend: `https://online-shopping-by-diane.vercel.app`
+3. Admin setup: `https://akazuba-backend.onrender.com/api/v1/admin/setup`
 
 ## Admin Access
 - Email: `admin@akazubaflorist.com`

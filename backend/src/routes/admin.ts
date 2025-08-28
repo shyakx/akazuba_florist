@@ -377,7 +377,7 @@ router.get('/orders', async (req, res) => {
       id: order.id,
       orderNumber: order.orderNumber,
       customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
-      customerEmail: order.user?.email || 'guest@example.com',
+      customerEmail: order.user?.email || 'guest@akazubaflorist.com',
       status: order.status,
       subtotal: order.subtotal,
       taxAmount: 0, // Not in current schema

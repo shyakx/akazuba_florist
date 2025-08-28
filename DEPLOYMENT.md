@@ -53,19 +53,19 @@ Add these environment variables in Render:
 NODE_ENV=production
 PORT=10000
 DATABASE_URL=<your-render-postgresql-internal-url>
-JWT_SECRET=<generate-a-secure-random-string>
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
+JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
+CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 
 # Cloudinary (for image uploads)
-CLOUDINARY_CLOUD_NAME=<your-cloudinary-cloud-name>
+CLOUDINARY_CLOUD_NAME=akazuba-florist
 CLOUDINARY_API_KEY=<your-cloudinary-api-key>
 CLOUDINARY_API_SECRET=<your-cloudinary-api-secret>
 
 # Email Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=<your-email@gmail.com>
-SMTP_PASS=<your-app-password>
+SMTP_USER=akazuba.florist@gmail.com
+SMTP_PASS=<your-gmail-app-password>
 
 # Optional: Redis for caching
 REDIS_URL=<your-redis-url>
@@ -92,10 +92,10 @@ REDIS_URL=<your-redis-url>
 Add these environment variables in Vercel:
 
 ```bash
-NEXT_PUBLIC_API_URL=https://your-backend-service.onrender.com/api/v1
-NEXT_PUBLIC_JWT_SECRET=<same-jwt-secret-as-backend>
-NEXT_PUBLIC_PAYMENT_PUBLIC_KEY=<your-payment-public-key>
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=<your-cloudinary-cloud-name>
+NEXT_PUBLIC_API_URL=https://akazuba-backend.onrender.com/api/v1
+NEXT_PUBLIC_JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
+NEXT_PUBLIC_PAYMENT_PUBLIC_KEY=akazuba-payment-public-key-2024
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=akazuba-florist
 ```
 
 ### 3.3 Deploy Frontend
@@ -108,7 +108,7 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=<your-cloudinary-cloud-name>
 ### 4.1 Update Backend CORS
 In your Render backend service, update the `CORS_ORIGIN` environment variable:
 ```bash
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
+CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 ```
 
 ### 4.2 Redeploy Backend
@@ -119,7 +119,7 @@ Trigger a new deployment in Render to apply the CORS changes.
 ### 5.1 Test Backend
 Visit your backend health endpoint:
 ```
-https://your-backend-service.onrender.com/health
+https://akazuba-backend.onrender.com/health
 ```
 
 ### 5.2 Test Frontend
@@ -137,7 +137,7 @@ The backend should automatically connect to the PostgreSQL database.
 ### 6.1 Create Admin Account
 Visit your backend admin setup endpoint:
 ```
-https://your-backend-service.onrender.com/api/v1/admin/setup
+https://akazuba-backend.onrender.com/api/v1/admin/setup
 ```
 
 This will create an admin user with:
@@ -223,8 +223,8 @@ Consider setting up:
 
 Your Akazuba Florist application is now deployed and ready to serve customers!
 
-**Frontend**: https://your-frontend-domain.vercel.app
-**Backend**: https://your-backend-service.onrender.com
+**Frontend**: https://online-shopping-by-diane.vercel.app
+**Backend**: https://akazuba-backend.onrender.com
 **Database**: Render PostgreSQL (managed)
 
 Remember to:

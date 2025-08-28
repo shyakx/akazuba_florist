@@ -17,7 +17,7 @@ services:
       - key: PORT
         value: 10000
       - key: CORS_ORIGIN
-        value: https://your-frontend-domain.vercel.app
+        value: https://online-shopping-by-diane.vercel.app
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY
