@@ -171,6 +171,15 @@ const AdminProductsPage = () => {
     }
   }, [isAuthenticated, user?.role])
 
+  // Apply filters whenever filters or products change
+  useEffect(() => {
+    if (products.length > 0) {
+      applyFilters()
+    }
+  }, [filters, products])
+
+
+
   // Handle loading overlay timeouts
   useEffect(() => {
     if (filteredProducts.length > 0) {
@@ -190,11 +199,10 @@ const AdminProductsPage = () => {
     try {
       setLoading(true)
       
-      // Use the same data source as the home page
-      console.log('🔄 Using realFlowerProducts data (same as home page)')
+      console.log('🔄 Loading both flowers and perfumes data (same as home page)')
       
-      // Transform the data to match admin format
-      const transformedProducts: AdminProduct[] = realFlowerProducts.map((product, index) => ({
+      // Transform flower products to match admin format
+      const transformedFlowerProducts: AdminProduct[] = realFlowerProducts.map((product, index) => ({
         id: product.id.toString(),
         name: product.name,
         slug: product.name.toLowerCase().replace(/\s+/g, '-'),
@@ -223,13 +231,53 @@ const AdminProductsPage = () => {
         reviewCount: Math.floor(Math.random() * 50)
       }))
 
-      console.log('🔍 Real flower products loaded:', transformedProducts.length)
-      transformedProducts.forEach(product => {
-        console.log(`📸 Product: ${product.name}, Images:`, product.images)
+      // Transform perfume products to match admin format
+      const transformedPerfumeProducts: AdminProduct[] = perfumeProducts.map((product, index) => ({
+        id: (product.id + 1000).toString(), // Use different ID range for perfumes
+        name: product.name,
+        slug: product.name.toLowerCase().replace(/\s+/g, '-'),
+        description: product.description,
+        shortDescription: `${product.brand} - ${product.name}`,
+        price: product.price,
+        salePrice: undefined,
+        costPrice: Math.floor(product.price * 0.6), // 40% margin
+        sku: `${product.brand.toUpperCase()}-${product.id}`,
+        stockQuantity: 30,
+        minStockAlert: 3,
+        categoryId: 'perfumes',
+        categoryName: 'Perfumes',
+        images: [product.image],
+        isActive: true,
+        isFeatured: product.featured,
+        weight: 0.5,
+        dimensions: { width: 10, height: 15, length: 10 },
+        tags: [product.brand.toLowerCase(), product.type.toLowerCase(), product.concentration.toLowerCase()],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        views: Math.floor(Math.random() * 100),
+        sales: Math.floor(Math.random() * 15),
+        revenue: product.price * Math.floor(Math.random() * 15),
+        rating: 4.5 + Math.random() * 0.5,
+        reviewCount: Math.floor(Math.random() * 50),
+        // Perfume-specific fields
+        brand: product.brand,
+        perfumeType: product.type,
+        size: product.size,
+        concentration: product.concentration,
+        notes: product.notes
+      }))
+
+      // Combine both product types
+      const allProducts = [...transformedFlowerProducts, ...transformedPerfumeProducts]
+
+      console.log('🔍 Products loaded:', {
+        flowers: transformedFlowerProducts.length,
+        perfumes: transformedPerfumeProducts.length,
+        total: allProducts.length
       })
 
-      setProducts(transformedProducts)
-      setFilteredProducts(transformedProducts)
+      setProducts(allProducts)
+      setFilteredProducts(allProducts)
     } catch (error) {
       console.error('❌ Error loading products:', error)
       toast.error('Failed to load products')
@@ -295,6 +343,123 @@ const AdminProductsPage = () => {
     } finally {
       setAnalyticsLoading(false)
     }
+  }
+
+  const applyFilters = () => {
+    let filtered = [...products]
+
+    // Apply search filter
+    if (filters.search) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(filters.search!.toLowerCase()) ||
+        product.description.toLowerCase().includes(filters.search!.toLowerCase()) ||
+        (product.brand && product.brand.toLowerCase().includes(filters.search!.toLowerCase()))
+      )
+    }
+
+    // Apply category filter
+    if (filters.category) {
+      filtered = filtered.filter(product => product.categoryId === filters.category)
+    }
+
+    // Apply status filter
+    if (filters.status && filters.status !== 'all') {
+      filtered = filtered.filter(product => 
+        filters.status === 'active' ? product.isActive : !product.isActive
+      )
+    }
+
+    // Apply stock status filter
+    if (filters.stockStatus && filters.stockStatus !== 'all') {
+      filtered = filtered.filter(product => {
+        if (filters.stockStatus === 'outOfStock') return product.stockQuantity === 0
+        if (filters.stockStatus === 'lowStock') return product.stockQuantity <= product.minStockAlert
+        if (filters.stockStatus === 'inStock') return product.stockQuantity > product.minStockAlert
+        return true
+      })
+    }
+
+    // Apply price range filter
+    if (filters.priceRange) {
+      filtered = filtered.filter(product => {
+        const price = product.price
+        const min = filters.priceRange!.min
+        const max = filters.priceRange!.max
+        return (!min || price >= min) && (!max || price <= max)
+      })
+    }
+
+    // Apply featured filter
+    if (filters.featured !== undefined) {
+      filtered = filtered.filter(product => product.isFeatured === filters.featured)
+    }
+
+    // Apply tags filter
+    if (filters.tags && filters.tags.length > 0) {
+      filtered = filtered.filter(product =>
+        filters.tags!.some(tag => product.tags.includes(tag))
+      )
+    }
+
+    // Apply perfume-specific filters
+    if (filters.perfumeType && filters.perfumeType !== 'all') {
+      filtered = filtered.filter(product => product.perfumeType === filters.perfumeType)
+    }
+
+    if (filters.perfumeBrand) {
+      filtered = filtered.filter(product => 
+        product.brand && product.brand.toLowerCase().includes(filters.perfumeBrand!.toLowerCase())
+      )
+    }
+
+    if (filters.concentration && filters.concentration !== 'all') {
+      filtered = filtered.filter(product => product.concentration === filters.concentration)
+    }
+
+    // Apply sorting
+    if (filters.sortBy) {
+      filtered.sort((a, b) => {
+        let aValue: any
+        let bValue: any
+
+        switch (filters.sortBy) {
+          case 'name':
+            aValue = a.name.toLowerCase()
+            bValue = b.name.toLowerCase()
+            break
+          case 'price':
+            aValue = a.price
+            bValue = b.price
+            break
+          case 'stock':
+            aValue = a.stockQuantity
+            bValue = b.stockQuantity
+            break
+          case 'createdAt':
+            aValue = new Date(a.createdAt).getTime()
+            bValue = new Date(b.createdAt).getTime()
+            break
+          case 'sales':
+            aValue = a.sales || 0
+            bValue = b.sales || 0
+            break
+          case 'views':
+            aValue = a.views || 0
+            bValue = b.views || 0
+            break
+          default:
+            return 0
+        }
+
+        if (filters.sortOrder === 'asc') {
+          return aValue > bValue ? 1 : -1
+        } else {
+          return aValue < bValue ? 1 : -1
+        }
+      })
+    }
+
+    setFilteredProducts(filtered)
   }
 
   const formatPrice = (price: number) => {
@@ -457,11 +622,7 @@ const AdminProductsPage = () => {
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value)
-                    const filtered = products.filter(product =>
-                      product.name.toLowerCase().includes(e.target.value.toLowerCase()) ||
-                      product.description.toLowerCase().includes(e.target.value.toLowerCase())
-                    )
-                    setFilteredProducts(filtered)
+                    setFilters(prev => ({ ...prev, search: e.target.value }))
                   }}
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                 />
@@ -689,6 +850,23 @@ const AdminProductsPage = () => {
                   <div className="p-5">
                     <h3 className="text-sm font-semibold text-gray-900 mb-2 truncate">{product.name}</h3>
                     <p className="text-xs text-gray-500 mb-3">{product.categoryName}</p>
+                    
+                    {/* Perfume-specific information */}
+                    {product.categoryId === 'perfumes' && product.brand && (
+                      <div className="mb-3 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium text-purple-800">{product.brand}</span>
+                          <span className="text-purple-600">{product.size}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mt-1">
+                          <span className="text-purple-600">{product.perfumeType}</span>
+                          <span className="text-purple-600 font-medium">{product.concentration}</span>
+                        </div>
+                        {product.notes && (
+                          <p className="text-xs text-purple-700 mt-1 italic truncate">{product.notes}</p>
+                        )}
+                      </div>
+                    )}
                     
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-lg font-bold text-gray-900">{formatPrice(product.price)}</div>

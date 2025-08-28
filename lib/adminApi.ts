@@ -39,6 +39,12 @@ export interface AdminProduct {
   revenue?: number
   rating?: number
   reviewCount?: number
+  // Perfume-specific fields
+  brand?: string
+  perfumeType?: 'Men' | 'Women' | 'Unisex'
+  size?: string
+  concentration?: 'EDP' | 'EDT' | 'Parfum'
+  notes?: string
 }
 
 // Product Analytics Interface
@@ -74,6 +80,10 @@ export interface ProductFilters {
   sortOrder?: 'asc' | 'desc'
   tags?: string[]
   dateRange?: { from: string; to: string }
+  // Perfume-specific filters
+  perfumeType?: 'Men' | 'Women' | 'Unisex' | 'all'
+  perfumeBrand?: string
+  concentration?: 'EDP' | 'EDT' | 'Parfum' | 'all'
 }
 
 // Export Options Interface

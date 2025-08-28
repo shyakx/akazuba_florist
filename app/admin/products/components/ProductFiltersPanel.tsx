@@ -22,10 +22,12 @@ const ProductFiltersPanel: React.FC<ProductFiltersPanelProps> = ({ filters, onFi
     try {
       // This would typically come from your API
       const mockCategories: AdminCategory[] = [
-        { id: '1', name: 'Roses', slug: 'roses', isActive: true, sortOrder: 1, productCount: 8, createdAt: '', updatedAt: '' },
-        { id: '2', name: 'Tulips', slug: 'tulips', isActive: true, sortOrder: 2, productCount: 5, createdAt: '', updatedAt: '' },
-        { id: '3', name: 'Lilies', slug: 'lilies', isActive: true, sortOrder: 3, productCount: 3, createdAt: '', updatedAt: '' },
-        { id: '4', name: 'Bouquets', slug: 'bouquets', isActive: true, sortOrder: 4, productCount: 6, createdAt: '', updatedAt: '' }
+        { id: 'flowers', name: 'Flowers', slug: 'flowers', isActive: true, sortOrder: 1, productCount: 12, createdAt: '', updatedAt: '' },
+        { id: 'perfumes', name: 'Perfumes', slug: 'perfumes', isActive: true, sortOrder: 2, productCount: 12, createdAt: '', updatedAt: '' },
+        { id: 'roses', name: 'Roses', slug: 'roses', isActive: true, sortOrder: 3, productCount: 8, createdAt: '', updatedAt: '' },
+        { id: 'tulips', name: 'Tulips', slug: 'tulips', isActive: true, sortOrder: 4, productCount: 5, createdAt: '', updatedAt: '' },
+        { id: 'lilies', name: 'Lilies', slug: 'lilies', isActive: true, sortOrder: 5, productCount: 3, createdAt: '', updatedAt: '' },
+        { id: 'bouquets', name: 'Bouquets', slug: 'bouquets', isActive: true, sortOrder: 6, productCount: 6, createdAt: '', updatedAt: '' }
       ]
       setCategories(mockCategories)
     } catch (error) {
@@ -54,7 +56,10 @@ const ProductFiltersPanel: React.FC<ProductFiltersPanelProps> = ({ filters, onFi
       sortBy: 'createdAt',
       sortOrder: 'desc',
       tags: [],
-      dateRange: undefined
+      dateRange: undefined,
+      perfumeType: 'all',
+      perfumeBrand: '',
+      concentration: 'all'
     }
     setLocalFilters(clearedFilters)
     onFiltersChange(clearedFilters)
@@ -70,7 +75,10 @@ const ProductFiltersPanel: React.FC<ProductFiltersPanelProps> = ({ filters, onFi
       localFilters.priceRange ||
       localFilters.featured !== undefined ||
       (localFilters.tags && localFilters.tags.length > 0) ||
-      localFilters.dateRange
+      localFilters.dateRange ||
+      localFilters.perfumeType !== 'all' ||
+      localFilters.perfumeBrand ||
+      localFilters.concentration !== 'all'
     )
   }
 
@@ -309,6 +317,60 @@ const ProductFiltersPanel: React.FC<ProductFiltersPanelProps> = ({ filters, onFi
               {tag}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Perfume-specific filters */}
+      <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+        <h4 className="text-sm font-semibold text-purple-800 mb-4">Perfume Filters</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Perfume Type */}
+          <div>
+            <label className="block text-sm font-medium text-purple-700 mb-2">
+              Perfume Type
+            </label>
+            <select
+              value={localFilters.perfumeType || 'all'}
+              onChange={(e) => handleFilterChange('perfumeType', e.target.value)}
+              className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+            >
+              <option value="all">All Types</option>
+              <option value="Men">Men</option>
+              <option value="Women">Women</option>
+              <option value="Unisex">Unisex</option>
+            </select>
+          </div>
+
+          {/* Perfume Brand */}
+          <div>
+            <label className="block text-sm font-medium text-purple-700 mb-2">
+              Brand
+            </label>
+            <input
+              type="text"
+              placeholder="Search by brand..."
+              value={localFilters.perfumeBrand || ''}
+              onChange={(e) => handleFilterChange('perfumeBrand', e.target.value)}
+              className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+            />
+          </div>
+
+          {/* Concentration */}
+          <div>
+            <label className="block text-sm font-medium text-purple-700 mb-2">
+              Concentration
+            </label>
+            <select
+              value={localFilters.concentration || 'all'}
+              onChange={(e) => handleFilterChange('concentration', e.target.value)}
+              className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+            >
+              <option value="all">All Concentrations</option>
+              <option value="EDP">EDP</option>
+              <option value="EDT">EDT</option>
+              <option value="Parfum">Parfum</option>
+            </select>
+          </div>
         </div>
       </div>
 

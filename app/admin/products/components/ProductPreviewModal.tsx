@@ -195,6 +195,37 @@ const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ product, onCl
                   </div>
                 )}
 
+                {/* Perfume-specific information */}
+                {product.categoryId === 'perfumes' && product.brand && (
+                  <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                    <h3 className="text-sm font-medium text-purple-900 mb-3">Perfume Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-xs font-medium text-purple-700">Brand</span>
+                        <p className="text-sm font-semibold text-purple-900">{product.brand}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-purple-700">Type</span>
+                        <p className="text-sm font-semibold text-purple-900">{product.perfumeType}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-purple-700">Size</span>
+                        <p className="text-sm font-semibold text-purple-900">{product.size}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-purple-700">Concentration</span>
+                        <p className="text-sm font-semibold text-purple-900">{product.concentration}</p>
+                      </div>
+                    </div>
+                    {product.notes && (
+                      <div className="mt-3">
+                        <span className="text-xs font-medium text-purple-700">Notes</span>
+                        <p className="text-sm text-purple-800 italic">{product.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Tags */}
                 {product.tags.length > 0 && (
                   <div>
