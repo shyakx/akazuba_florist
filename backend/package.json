@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon database-server.js",
-    "build": "npm install --production=false && prisma generate && prisma migrate deploy && tsc",
+    "build": "npm install --production=false && prisma generate && prisma migrate deploy && npm run db:seed && tsc",
     "build:clean": "rm -rf dist && tsc",
     "start": "node database-server.js",
     "start:simple": "node dist/simple-server.js",
