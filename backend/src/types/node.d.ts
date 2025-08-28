@@ -1,5 +1,3 @@
-/// <reference types="node" />
-
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
@@ -33,11 +31,11 @@ declare global {
 }
 
 // Ensure Node.js globals are available
-declare var process: NodeJS.Process
+declare var process: any
 declare var __dirname: string
 declare var __filename: string
-declare var console: Console
-declare var Buffer: typeof globalThis.Buffer
-declare var global: typeof globalThis
+declare var console: any
+declare var Buffer: any
+declare var global: any
 
 export {}
