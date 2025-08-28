@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCategory = exports.updateCategory = exports.createCategory = exports.getCategoryBySlug = exports.getCategoryById = exports.getAllCategories = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
+// Get all categories
 const getAllCategories = async (req, res) => {
     try {
         const categories = await prisma.category.findMany({
@@ -39,6 +40,7 @@ const getAllCategories = async (req, res) => {
     }
 };
 exports.getAllCategories = getAllCategories;
+// Get category by ID
 const getCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -89,6 +91,7 @@ const getCategoryById = async (req, res) => {
     }
 };
 exports.getCategoryById = getCategoryById;
+// Get category by slug
 const getCategoryBySlug = async (req, res) => {
     try {
         const { slug } = req.params;
@@ -139,9 +142,11 @@ const getCategoryBySlug = async (req, res) => {
     }
 };
 exports.getCategoryBySlug = getCategoryBySlug;
+// Create category (Admin only)
 const createCategory = async (req, res) => {
     try {
         const { name, description, imageUrl, sortOrder } = req.body;
+        // Validate required fields
         if (!name) {
             res.status(400).json({
                 success: false,
@@ -149,7 +154,9 @@ const createCategory = async (req, res) => {
             });
             return;
         }
+        // Generate slug from name
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        // Check if category with same slug exists
         const existingCategory = await prisma.category.findUnique({
             where: { slug }
         });
@@ -185,10 +192,12 @@ const createCategory = async (req, res) => {
     }
 };
 exports.createCategory = createCategory;
+// Update category (Admin only)
 const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
+        // Check if category exists
         const existingCategory = await prisma.category.findUnique({
             where: { id }
         });
@@ -199,8 +208,10 @@ const updateCategory = async (req, res) => {
             });
             return;
         }
+        // Generate new slug if name changed
         if (updateData.name && updateData.name !== existingCategory.name) {
             const slug = updateData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            // Check if new slug conflicts
             const slugConflict = await prisma.category.findUnique({
                 where: { slug }
             });
@@ -213,6 +224,7 @@ const updateCategory = async (req, res) => {
             }
             updateData.slug = slug;
         }
+        // Convert numeric fields
         if (updateData.sortOrder)
             updateData.sortOrder = parseInt(updateData.sortOrder);
         const category = await prisma.category.update({
@@ -234,9 +246,11 @@ const updateCategory = async (req, res) => {
     }
 };
 exports.updateCategory = updateCategory;
+// Delete category (Admin only)
 const deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
+        // Check if category exists
         const existingCategory = await prisma.category.findUnique({
             where: { id },
             include: {
@@ -254,6 +268,7 @@ const deleteCategory = async (req, res) => {
             });
             return;
         }
+        // Check if category has products
         if (existingCategory._count.products > 0) {
             res.status(400).json({
                 success: false,
@@ -261,6 +276,7 @@ const deleteCategory = async (req, res) => {
             });
             return;
         }
+        // Soft delete by setting isActive to false
         await prisma.category.update({
             where: { id },
             data: { isActive: false }
@@ -279,4 +295,3 @@ const deleteCategory = async (req, res) => {
     }
 };
 exports.deleteCategory = deleteCategory;
-//# sourceMappingURL=categoryController.js.map

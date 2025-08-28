@@ -8,20 +8,41 @@ const client_1 = require("@prisma/client");
 const auth_1 = require("../middleware/auth");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
+// Apply authentication middleware to all admin routes
 router.use(auth_1.authenticateToken);
+/**
+ * @swagger
+ * /admin/analytics:
+ *   get:
+ *     summary: Get comprehensive analytics data
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Analytics data retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/analytics', async (req, res) => {
     try {
+        // Get real data from database
         const [totalOrders, totalRevenue, totalCustomers, totalProducts, recentOrders, topProducts, monthlyRevenue, customerGrowth] = await Promise.all([
+            // Total orders
             prisma.order.count(),
+            // Total revenue
             prisma.order.aggregate({
                 _sum: {
                     totalAmount: true
                 }
             }),
+            // Total customers
             prisma.user.count({
                 where: { role: 'CUSTOMER' }
             }),
+            // Total products
             prisma.product.count(),
+            // Recent orders (last 10)
             prisma.order.findMany({
                 take: 10,
                 orderBy: { createdAt: 'desc' },
@@ -45,6 +66,7 @@ router.get('/analytics', async (req, res) => {
                     }
                 }
             }),
+            // Top selling products
             prisma.orderItem.groupBy({
                 by: ['productId'],
                 _sum: {
@@ -57,6 +79,7 @@ router.get('/analytics', async (req, res) => {
                 },
                 take: 5
             }),
+            // Monthly revenue for last 6 months
             prisma.order.groupBy({
                 by: ['createdAt'],
                 _sum: {
@@ -68,6 +91,7 @@ router.get('/analytics', async (req, res) => {
                     }
                 }
             }),
+            // Customer growth for last 6 months
             prisma.user.groupBy({
                 by: ['createdAt'],
                 _count: {
@@ -81,8 +105,10 @@ router.get('/analytics', async (req, res) => {
                 }
             })
         ]);
+        // Calculate real analytics
         const totalRevenueAmount = totalRevenue._sum.totalAmount ? Number(totalRevenue._sum.totalAmount) : 0;
         const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenueAmount / totalOrders) : 0;
+        // Get top products with names
         const topProductsWithNames = await Promise.all(topProducts.map(async (item) => {
             const product = await prisma.product.findUnique({
                 where: { id: item.productId },
@@ -93,16 +119,19 @@ router.get('/analytics', async (req, res) => {
                 sales: item._sum.quantity || 0
             };
         }));
+        // Process monthly revenue data
         const monthlyRevenueData = monthlyRevenue.reduce((acc, item) => {
             const month = new Date(item.createdAt).getMonth();
             acc[month] = (acc[month] || 0) + Number(item._sum.totalAmount || 0);
             return acc;
         }, []);
+        // Process customer growth data
         const customerGrowthData = customerGrowth.reduce((acc, item) => {
             const month = new Date(item.createdAt).getMonth();
             acc[month] = (acc[month] || 0) + item._count.id;
             return acc;
         }, []);
+        // Calculate growth percentages (comparing current month to previous month)
         const currentMonthRevenue = monthlyRevenueData[new Date().getMonth()] || 0;
         const previousMonthRevenue = monthlyRevenueData[new Date().getMonth() - 1] || 0;
         const revenueGrowth = previousMonthRevenue > 0 ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 : 0;
@@ -125,17 +154,17 @@ router.get('/analytics', async (req, res) => {
         const analytics = {
             totalOrders,
             totalRevenue: totalRevenueAmount,
-            newCustomers: totalCustomers,
+            newCustomers: totalCustomers, // Could be calculated by date if needed
             uniqueCustomers: totalCustomers,
             totalProducts,
             avgOrderValue,
-            conversionRate: 3.2,
+            conversionRate: 3.2, // This would need to be calculated from actual visitor data
             revenueGrowth: Math.round(revenueGrowth * 100) / 100,
             orderGrowth: Math.round(orderGrowth * 100) / 100,
-            customerGrowth: 0,
-            productGrowth: 0,
-            avgOrderGrowth: 0,
-            conversionGrowth: 0,
+            customerGrowth: 0, // Would need to calculate from actual data
+            productGrowth: 0, // Would need to calculate from actual data
+            avgOrderGrowth: 0, // Would need to calculate from actual data
+            conversionGrowth: 0, // Would need to calculate from actual data
             topProducts: topProductsWithNames,
             recentOrders: recentOrders.map(o => ({
                 id: o.id,
@@ -162,6 +191,7 @@ router.get('/analytics', async (req, res) => {
         });
     }
 });
+// Helper function to get top categories
 async function getTopCategories() {
     const categorySales = await prisma.orderItem.groupBy({
         by: ['productId'],
@@ -180,6 +210,7 @@ async function getTopCategories() {
             categoryMap.set(product.categoryId, currentSales + (item._sum.quantity || 0));
         }
     }
+    // Get category names
     const categories = await prisma.category.findMany({
         where: {
             id: { in: Array.from(categoryMap.keys()) }
@@ -190,6 +221,20 @@ async function getTopCategories() {
         sales: categoryMap.get(category.id) || 0
     })).sort((a, b) => b.sales - a.sales).slice(0, 5);
 }
+/**
+ * @swagger
+ * /admin/customers:
+ *   get:
+ *     summary: Get all customers (admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Customers retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/customers', async (req, res) => {
     try {
         const customers = await prisma.user.findMany({
@@ -207,6 +252,7 @@ router.get('/customers', async (req, res) => {
                 updatedAt: true
             }
         });
+        // Get real order counts and totals for each customer
         const customersWithStats = await Promise.all(customers.map(async (customer) => {
             const orders = await prisma.order.findMany({
                 where: { userId: customer.id }
@@ -216,6 +262,7 @@ router.get('/customers', async (req, res) => {
             const wishlistItems = await prisma.wishlist.count({
                 where: { userId: customer.id }
             });
+            // Get customer's address from their most recent order
             const recentOrder = await prisma.order.findFirst({
                 where: { userId: customer.id },
                 orderBy: { createdAt: 'desc' },
@@ -247,6 +294,20 @@ router.get('/customers', async (req, res) => {
         });
     }
 });
+/**
+ * @swagger
+ * /admin/orders:
+ *   get:
+ *     summary: Get all orders (admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Orders retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/orders', async (req, res) => {
     try {
         const orders = await prisma.order.findMany({
@@ -279,9 +340,9 @@ router.get('/orders', async (req, res) => {
             customerEmail: order.user?.email || 'guest@akazubaflorist.com',
             status: order.status,
             subtotal: order.subtotal,
-            taxAmount: 0,
+            taxAmount: 0, // Not in current schema
             shippingAmount: Number(order.deliveryFee),
-            discountAmount: 0,
+            discountAmount: 0, // Not in current schema
             totalAmount: order.totalAmount,
             paymentMethod: order.paymentMethod,
             paymentStatus: order.paymentStatus,
@@ -312,6 +373,20 @@ router.get('/orders', async (req, res) => {
         });
     }
 });
+/**
+ * @swagger
+ * /admin/products:
+ *   get:
+ *     summary: Get all products (admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Products retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/products', async (req, res) => {
     try {
         const products = await prisma.product.findMany({
@@ -349,6 +424,20 @@ router.get('/products', async (req, res) => {
         });
     }
 });
+/**
+ * @swagger
+ * /admin/wishlists:
+ *   get:
+ *     summary: Get all wishlists (admin)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Wishlists retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/wishlists', async (req, res) => {
     try {
         const wishlists = await prisma.wishlist.findMany({
@@ -357,6 +446,7 @@ router.get('/wishlists', async (req, res) => {
                 product: true
             }
         });
+        // Group wishlists by user
         const wishlistsByUser = wishlists.reduce((acc, wishlist) => {
             const userId = wishlist.userId;
             if (!acc[userId]) {
@@ -369,7 +459,7 @@ router.get('/wishlists', async (req, res) => {
                     totalItems: 0,
                     totalValue: 0,
                     createdAt: wishlist.createdAt.toISOString(),
-                    updatedAt: wishlist.createdAt.toISOString()
+                    updatedAt: wishlist.createdAt.toISOString() // Use createdAt as updatedAt since wishlist doesn't have updatedAt
                 };
             }
             acc[userId].items.push({
@@ -397,14 +487,30 @@ router.get('/wishlists', async (req, res) => {
         });
     }
 });
+/**
+ * @swagger
+ * /admin/dashboard/stats:
+ *   get:
+ *     summary: Get dashboard statistics
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard stats retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/dashboard/stats', async (req, res) => {
     try {
+        // Get real counts from database
         const [totalOrders, totalProducts, totalCustomers, lowStockProducts] = await Promise.all([
             prisma.order.count(),
             prisma.product.count(),
             prisma.user.count({ where: { role: 'CUSTOMER' } }),
             prisma.product.count({ where: { stockQuantity: { lte: 10 } } })
         ]);
+        // Get new orders (orders created in the last 7 days)
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         const newOrders = await prisma.order.count({
@@ -434,6 +540,20 @@ router.get('/dashboard/stats', async (req, res) => {
         });
     }
 });
+/**
+ * @swagger
+ * /admin/dashboard/recent-orders:
+ *   get:
+ *     summary: Get recent orders for dashboard
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Recent orders retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/dashboard/recent-orders', async (req, res) => {
     try {
         const recentOrders = await prisma.order.findMany({
@@ -470,9 +590,24 @@ router.get('/dashboard/recent-orders', async (req, res) => {
         });
     }
 });
+/**
+ * @swagger
+ * /admin/dashboard/activity:
+ *   get:
+ *     summary: Get recent activity for dashboard
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Recent activity retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/dashboard/activity', async (req, res) => {
     try {
         const [recentOrders, recentCustomers, lowStockProducts] = await Promise.all([
+            // Recent orders
             prisma.order.findMany({
                 take: 3,
                 orderBy: { createdAt: 'desc' },
@@ -485,6 +620,7 @@ router.get('/dashboard/activity', async (req, res) => {
                     }
                 }
             }),
+            // Recent customers
             prisma.user.findMany({
                 where: { role: 'CUSTOMER' },
                 take: 2,
@@ -495,6 +631,7 @@ router.get('/dashboard/activity', async (req, res) => {
                     createdAt: true
                 }
             }),
+            // Low stock products
             prisma.product.findMany({
                 where: { stockQuantity: { lte: 5 } },
                 take: 2,
@@ -506,6 +643,7 @@ router.get('/dashboard/activity', async (req, res) => {
             })
         ]);
         const activities = [];
+        // Add order activities
         recentOrders.forEach(order => {
             activities.push({
                 type: 'order',
@@ -515,6 +653,7 @@ router.get('/dashboard/activity', async (req, res) => {
                 status: 'success'
             });
         });
+        // Add customer activities
         recentCustomers.forEach(customer => {
             activities.push({
                 type: 'customer',
@@ -524,6 +663,7 @@ router.get('/dashboard/activity', async (req, res) => {
                 status: 'info'
             });
         });
+        // Add low stock activities
         lowStockProducts.forEach(product => {
             activities.push({
                 type: 'stock',
@@ -533,6 +673,7 @@ router.get('/dashboard/activity', async (req, res) => {
                 status: 'warning'
             });
         });
+        // Sort by timestamp and take latest 10
         activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
         const recentActivities = activities.slice(0, 10);
         res.json({
@@ -549,6 +690,7 @@ router.get('/dashboard/activity', async (req, res) => {
         });
     }
 });
+// Admin product management routes
 router.get('/products', async (req, res) => {
     try {
         const { page = 1, limit = 10, search, category, status } = req.query;
@@ -751,4 +893,3 @@ router.post('/products/bulk', async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=admin.js.map

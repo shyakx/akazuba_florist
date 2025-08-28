@@ -3,12 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteProduct = exports.updateProduct = exports.createProduct = exports.getFeaturedProducts = exports.getProductById = exports.getAllProducts = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
+// Get all products with filtering and pagination
 const getAllProducts = async (req, res) => {
     try {
         const { page = 1, limit = 10, category, search, minPrice, maxPrice, featured, inStock } = req.query;
         const pageNum = parseInt(page);
         const limitNum = parseInt(limit);
         const skip = (pageNum - 1) * limitNum;
+        // Build where clause
         const where = {
             isActive: true
         };
@@ -39,6 +41,7 @@ const getAllProducts = async (req, res) => {
                 gt: 0
             };
         }
+        // Get products with category
         const products = await prisma.product.findMany({
             where,
             include: {
@@ -50,6 +53,7 @@ const getAllProducts = async (req, res) => {
                 createdAt: 'desc'
             }
         });
+        // Get total count for pagination
         const total = await prisma.product.count({ where });
         res.json({
             success: true,
@@ -72,6 +76,7 @@ const getAllProducts = async (req, res) => {
     }
 };
 exports.getAllProducts = getAllProducts;
+// Get product by ID
 const getProductById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -120,6 +125,7 @@ const getProductById = async (req, res) => {
     }
 };
 exports.getProductById = getProductById;
+// Get featured products
 const getFeaturedProducts = async (req, res) => {
     try {
         const { limit = 8 } = req.query;
@@ -152,9 +158,11 @@ const getFeaturedProducts = async (req, res) => {
     }
 };
 exports.getFeaturedProducts = getFeaturedProducts;
+// Create product (Admin only)
 const createProduct = async (req, res) => {
     try {
         const { name, description, shortDescription, price, salePrice, costPrice, sku, stockQuantity, minStockAlert, categoryId, images, weight, dimensions, tags, isFeatured } = req.body;
+        // Validate required fields
         if (!name || !price || !categoryId) {
             res.status(400).json({
                 success: false,
@@ -162,7 +170,9 @@ const createProduct = async (req, res) => {
             });
             return;
         }
+        // Generate slug from name
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        // Check if product with same slug exists
         const existingProduct = await prisma.product.findUnique({
             where: { slug }
         });
@@ -212,10 +222,12 @@ const createProduct = async (req, res) => {
     }
 };
 exports.createProduct = createProduct;
+// Update product (Admin only)
 const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
+        // Check if product exists
         const existingProduct = await prisma.product.findUnique({
             where: { id }
         });
@@ -226,8 +238,10 @@ const updateProduct = async (req, res) => {
             });
             return;
         }
+        // Generate new slug if name changed
         if (updateData.name && updateData.name !== existingProduct.name) {
             const slug = updateData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+            // Check if new slug conflicts
             const slugConflict = await prisma.product.findUnique({
                 where: { slug }
             });
@@ -240,6 +254,7 @@ const updateProduct = async (req, res) => {
             }
             updateData.slug = slug;
         }
+        // Convert numeric fields
         if (updateData.price)
             updateData.price = parseFloat(updateData.price);
         if (updateData.salePrice)
@@ -274,9 +289,11 @@ const updateProduct = async (req, res) => {
     }
 };
 exports.updateProduct = updateProduct;
+// Delete product (Admin only)
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
+        // Check if product exists
         const existingProduct = await prisma.product.findUnique({
             where: { id }
         });
@@ -287,6 +304,7 @@ const deleteProduct = async (req, res) => {
             });
             return;
         }
+        // Soft delete by setting isActive to false
         await prisma.product.update({
             where: { id },
             data: { isActive: false }
@@ -305,4 +323,3 @@ const deleteProduct = async (req, res) => {
     }
 };
 exports.deleteProduct = deleteProduct;
-//# sourceMappingURL=productController.js.map

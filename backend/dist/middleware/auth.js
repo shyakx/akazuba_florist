@@ -8,6 +8,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
 const logger_1 = require("../utils/logger");
 const prisma = new client_1.PrismaClient();
+// Verify JWT token
 const verifyToken = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -17,6 +18,7 @@ const verifyToken = async (req, res, next) => {
         }
         const token = authHeader.substring(7);
         const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        // Check if user still exists and is active
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
             select: {
@@ -45,8 +47,11 @@ const verifyToken = async (req, res, next) => {
     }
 };
 exports.verifyToken = verifyToken;
+// Require authentication
 exports.requireAuth = exports.verifyToken;
+// Alias for authenticateToken (used in admin routes)
 exports.authenticateToken = exports.verifyToken;
+// Require admin role
 const requireAdmin = async (req, res, next) => {
     try {
         await (0, exports.verifyToken)(req, res, () => {
@@ -64,6 +69,7 @@ const requireAdmin = async (req, res, next) => {
     }
 };
 exports.requireAdmin = requireAdmin;
+// Optional authentication (doesn't fail if no token)
 const optionalAuth = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
@@ -94,17 +100,20 @@ const optionalAuth = async (req, res, next) => {
         next();
     }
     catch (error) {
+        // Don't fail on token errors for optional auth
         next();
     }
 };
 exports.optionalAuth = optionalAuth;
+// Rate limiting configuration for auth endpoints
 exports.authRateLimit = {
-    windowMs: 15 * 60 * 1000,
-    max: 5,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
     message: { success: false, message: 'Too many requests, please try again later' },
     standardHeaders: true,
     legacyHeaders: false,
 };
+// Validation utilities
 const validatePassword = (password) => {
     if (password.length < 8) {
         return { isValid: false, message: 'Password must be at least 8 characters long' };
@@ -130,14 +139,16 @@ const validateEmail = (email) => {
 };
 exports.validateEmail = validateEmail;
 const validatePhone = (phone) => {
+    // Remove all non-digit characters
     const cleanPhone = phone.replace(/\D/g, '');
+    // Check if it's a valid Rwandan phone number (10 digits starting with 07 or 25)
     if (cleanPhone.length === 10 && (cleanPhone.startsWith('07') || cleanPhone.startsWith('25'))) {
         return true;
     }
+    // Check if it's a valid international Rwandan number (12 digits starting with 250)
     if (cleanPhone.length === 12 && cleanPhone.startsWith('250')) {
         return true;
     }
     return false;
 };
 exports.validatePhone = validatePhone;
-//# sourceMappingURL=auth.js.map

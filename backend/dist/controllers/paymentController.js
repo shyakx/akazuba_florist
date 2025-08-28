@@ -5,9 +5,11 @@ const logger_1 = require("../utils/logger");
 const prisma = new client_1.PrismaClient();
 class PaymentController {
     constructor() {
+        // Initiate Payment (Simplified - no external API calls)
         this.initiatePayment = async (req, res) => {
             try {
                 const paymentData = req.body;
+                // Validate required fields
                 if (!paymentData.orderId || !paymentData.amount || !paymentData.paymentMethod) {
                     res.status(400).json({
                         success: false,
@@ -15,6 +17,7 @@ class PaymentController {
                     });
                     return;
                 }
+                // Validate payment method
                 const validMethods = ['bank_transfer', 'cash_on_delivery', 'payment_proof'];
                 if (!validMethods.includes(paymentData.paymentMethod)) {
                     res.status(400).json({
@@ -23,6 +26,7 @@ class PaymentController {
                     });
                     return;
                 }
+                // Check if order exists
                 const order = await prisma.order.findUnique({
                     where: { id: paymentData.orderId }
                 });
@@ -33,7 +37,9 @@ class PaymentController {
                     });
                     return;
                 }
+                // Generate payment reference
                 const paymentReference = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+                // Update order with payment method and status
                 const updatedOrder = await prisma.order.update({
                     where: { id: paymentData.orderId },
                     data: {
@@ -48,6 +54,7 @@ class PaymentController {
                     method: paymentData.paymentMethod,
                     reference: paymentReference
                 });
+                // Return payment instructions based on method
                 let instructions = '';
                 switch (paymentData.paymentMethod) {
                     case 'bank_transfer':
@@ -81,6 +88,7 @@ class PaymentController {
                 });
             }
         };
+        // Check Payment Status
         this.checkPaymentStatus = async (req, res) => {
             try {
                 const { orderId } = req.params;
@@ -114,6 +122,7 @@ class PaymentController {
                 });
             }
         };
+        // Update Payment Status (for admin)
         this.updatePaymentStatus = async (req, res) => {
             try {
                 const { orderId } = req.params;
@@ -157,6 +166,7 @@ class PaymentController {
                 });
             }
         };
+        // Get Payment Methods
         this.getPaymentMethods = async (req, res) => {
             try {
                 const paymentMethods = [
@@ -195,4 +205,3 @@ class PaymentController {
     }
 }
 exports.default = new PaymentController();
-//# sourceMappingURL=paymentController.js.map

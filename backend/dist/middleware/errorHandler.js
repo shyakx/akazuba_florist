@@ -5,6 +5,7 @@ const logger_1 = require("../utils/logger");
 const errorHandler = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
+    // Log error
     logger_1.logger.error({
         message: err.message,
         stack: err.stack,
@@ -13,18 +14,22 @@ const errorHandler = (err, req, res, next) => {
         ip: req.ip,
         userAgent: req.get('User-Agent'),
     });
+    // Mongoose bad ObjectId
     if (err.name === 'CastError') {
         const message = 'Resource not found';
         error = { message, statusCode: 404 };
     }
+    // Mongoose duplicate key
     if (err.name === 'MongoError' && err.code === 11000) {
         const message = 'Duplicate field value entered';
         error = { message, statusCode: 400 };
     }
+    // Mongoose validation error
     if (err.name === 'ValidationError') {
         const message = Object.values(err.errors).map((val) => val.message).join(', ');
         error = { message, statusCode: 400 };
     }
+    // JWT errors
     if (err.name === 'JsonWebTokenError') {
         const message = 'Invalid token';
         error = { message, statusCode: 401 };
@@ -40,4 +45,3 @@ const errorHandler = (err, req, res, next) => {
     });
 };
 exports.errorHandler = errorHandler;
-//# sourceMappingURL=errorHandler.js.map

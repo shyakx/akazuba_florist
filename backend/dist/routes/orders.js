@@ -9,8 +9,10 @@ const auth_1 = require("../middleware/auth");
 const client_1 = require("@prisma/client");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
+// Public routes
 router.post('/', orderController_1.createOrder);
 router.post('/:orderId/payment-proof', orderController_1.uploadPaymentProof);
+// Customer routes (protected)
 router.get('/my-orders', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -88,6 +90,7 @@ router.get('/my-orders/:id', auth_1.verifyToken, async (req, res) => {
         return;
     }
 });
+// Admin routes (protected)
 router.get('/', auth_1.verifyToken, auth_1.requireAdmin, orderController_1.getAllOrders);
 router.get('/statistics', auth_1.verifyToken, auth_1.requireAdmin, orderController_1.getOrderStatistics);
 router.get('/:id', auth_1.verifyToken, auth_1.requireAdmin, orderController_1.getOrderById);
@@ -96,4 +99,3 @@ router.patch('/:id/delivery', auth_1.verifyToken, auth_1.requireAdmin, orderCont
 router.patch('/:id/payment', auth_1.verifyToken, auth_1.requireAdmin, orderController_1.updatePaymentStatus);
 router.delete('/:id', auth_1.verifyToken, auth_1.requireAdmin, orderController_1.deleteOrder);
 exports.default = router;
-//# sourceMappingURL=orders.js.map

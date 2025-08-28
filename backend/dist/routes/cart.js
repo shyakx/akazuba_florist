@@ -5,9 +5,24 @@ const client_1 = require("@prisma/client");
 const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 const prisma = new client_1.PrismaClient();
+/**
+ * @swagger
+ * /cart:
+ *   get:
+ *     summary: Get user cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cart retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.get('/', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
+        // Get or create cart for user
         let cart = await prisma.cart.findFirst({
             where: { userId },
             include: {
@@ -23,6 +38,7 @@ router.get('/', auth_1.verifyToken, async (req, res) => {
             }
         });
         if (!cart) {
+            // Create new cart if doesn't exist
             cart = await prisma.cart.create({
                 data: {
                     userId,
@@ -57,6 +73,34 @@ router.get('/', auth_1.verifyToken, async (req, res) => {
         });
     }
 });
+/**
+ * @swagger
+ * /cart/items:
+ *   post:
+ *     summary: Add item to cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - productId
+ *               - quantity
+ *             properties:
+ *               productId:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Item added to cart successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.post('/items', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -67,6 +111,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
                 message: 'Product ID and valid quantity are required'
             });
         }
+        // Verify product exists
         const product = await prisma.product.findUnique({
             where: { id: productId }
         });
@@ -76,6 +121,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
                 message: 'Product not found'
             });
         }
+        // Get or create cart
         let cart = await prisma.cart.findFirst({
             where: { userId }
         });
@@ -84,6 +130,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
                 data: { userId }
             });
         }
+        // Check if item already exists in cart
         const existingItem = await prisma.cartItem.findFirst({
             where: {
                 cartId: cart.id,
@@ -92,6 +139,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
         });
         let cartItem;
         if (existingItem) {
+            // Update quantity
             cartItem = await prisma.cartItem.update({
                 where: { id: existingItem.id },
                 data: { quantity: existingItem.quantity + quantity },
@@ -105,6 +153,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
             });
         }
         else {
+            // Add new item
             cartItem = await prisma.cartItem.create({
                 data: {
                     cartId: cart.id,
@@ -136,6 +185,15 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
         return;
     }
 });
+/**
+ * @swagger
+ * /cart/items/{id}:
+ *   put:
+ *     summary: Update cart item quantity
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ */
 router.put('/items/:id', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -147,6 +205,7 @@ router.put('/items/:id', auth_1.verifyToken, async (req, res) => {
                 message: 'Valid quantity is required'
             });
         }
+        // Verify cart item belongs to user
         const cartItem = await prisma.cartItem.findFirst({
             where: {
                 id,
@@ -195,10 +254,20 @@ router.put('/items/:id', auth_1.verifyToken, async (req, res) => {
         return;
     }
 });
+/**
+ * @swagger
+ * /cart/items/{id}:
+ *   delete:
+ *     summary: Remove item from cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ */
 router.delete('/items/:id', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const { id } = req.params;
+        // Verify cart item belongs to user
         const cartItem = await prisma.cartItem.findFirst({
             where: {
                 id,
@@ -231,6 +300,15 @@ router.delete('/items/:id', auth_1.verifyToken, async (req, res) => {
         return;
     }
 });
+/**
+ * @swagger
+ * /cart:
+ *   delete:
+ *     summary: Clear cart
+ *     tags: [Cart]
+ *     security:
+ *       - bearerAuth: []
+ */
 router.delete('/', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -238,9 +316,11 @@ router.delete('/', auth_1.verifyToken, async (req, res) => {
             where: { userId }
         });
         if (cart) {
+            // Delete all cart items first
             await prisma.cartItem.deleteMany({
                 where: { cartId: cart.id }
             });
+            // Delete cart
             await prisma.cart.delete({
                 where: { id: cart.id }
             });
@@ -259,4 +339,3 @@ router.delete('/', auth_1.verifyToken, async (req, res) => {
     }
 });
 exports.default = router;
-//# sourceMappingURL=cart.js.map
