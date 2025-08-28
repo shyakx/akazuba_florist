@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validatePhone = exports.validateEmail = exports.validatePassword = exports.authRateLimit = exports.optionalAuth = exports.requireAdmin = exports.requireAuth = exports.verifyToken = void 0;
+exports.validatePhone = exports.validateEmail = exports.validatePassword = exports.authRateLimit = exports.optionalAuth = exports.requireAdmin = exports.authenticateToken = exports.requireAuth = exports.verifyToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
 const logger_1 = require("../utils/logger");
@@ -46,6 +46,7 @@ const verifyToken = async (req, res, next) => {
 };
 exports.verifyToken = verifyToken;
 exports.requireAuth = exports.verifyToken;
+exports.authenticateToken = exports.verifyToken;
 const requireAdmin = async (req, res, next) => {
     try {
         await (0, exports.verifyToken)(req, res, () => {

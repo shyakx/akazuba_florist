@@ -10,7 +10,7 @@ const client_1 = require("@prisma/client");
 const logger_1 = require("../utils/logger");
 const auth_1 = require("../middleware/auth");
 const prisma = new client_1.PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-2024-development';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
 const generateTokens = (userId, role) => {

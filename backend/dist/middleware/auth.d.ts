@@ -14,6 +14,7 @@ export interface JWTPayload {
 }
 export declare const verifyToken: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 export declare const requireAuth: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+export declare const authenticateToken: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 export declare const requireAdmin: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 export declare const optionalAuth: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 export declare const authRateLimit: {
