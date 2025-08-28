@@ -37,7 +37,9 @@ export default function RootLayout({
             <CartProvider>
               <WishlistProvider>
                 <Header />
-                {children}
+                <main className="pt-32">
+                  {children}
+                </main>
                 <Toaster position="top-right" />
               </WishlistProvider>
             </CartProvider>
