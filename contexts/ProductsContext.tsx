@@ -45,33 +45,31 @@ interface ProductsContextType {
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined)
 
 const transformProduct = (product: any, index: number): Product => {
-  // Handle both flower and perfume products
   const isPerfume = product.category === 'perfumes' || product.category?.name === 'perfumes'
-  
-  // Ensure we use the correct image path
   let imagePath = product.image || product.images?.[0]
-  
+
   if (isPerfume) {
-    // For perfumes, use the provided image URL or fallback
+    // For perfumes, use perfume-specific image paths
     if (!imagePath) {
       imagePath = 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop'
     }
+    // If it's a local path, ensure it goes to perfumes directory
+    if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('/images/perfumes/')) {
+      imagePath = `/images/perfumes/perfume-${(index % 6) + 1}.jpg`
+    }
   } else {
-    // For flowers, use local image paths
+    // For flowers, use flower-specific image paths
     if (!imagePath) {
       const color = product.color || 'mixed'
       imagePath = `/images/flowers/${color}/${color}-${(index % 2) + 1}.jpg`
     }
-    
-    // Validate flower image path format
+    // Ensure flower images go to flowers directory
     if (imagePath && !imagePath.startsWith('/images/flowers/') && !imagePath.startsWith('http')) {
       const color = product.color || 'mixed'
       imagePath = `/images/flowers/${color}/${color}-1.jpg`
     }
   }
-  
-  console.log(`🖼️ Transform Product "${product.name}" - Category: ${isPerfume ? 'Perfume' : 'Flower'} - Image: ${imagePath}`)
-  
+
   return {
     id: product.id || index + 1,
     name: product.name,

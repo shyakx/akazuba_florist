@@ -1,121 +1,51 @@
 'use client'
 
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useProducts } from '@/contexts/ProductsContext'
 import ProductCard from './ProductCard'
-import { realFlowerProducts } from '@/data/real-flowers'
+import { Flower } from 'lucide-react'
+import { Product } from '@/contexts/ProductsContext'
 
 const FeaturedProducts = () => {
-  const { state } = useProducts()
-  const { products, isLoading } = state
+  const { getFeaturedByCategory } = useProducts()
+  const [featuredFlowers, setFeaturedFlowers] = useState<Product[]>([])
 
-  // Fallback data in case context fails
-  const fallbackProducts = realFlowerProducts.slice(0, 8).map((product, index) => ({
-    ...product,
-    id: index + 1,
-    featured: true
-  }))
+  // Update featured flowers when products are loaded
+  useEffect(() => {
+    const flowers = getFeaturedByCategory('flowers')
+    setFeaturedFlowers(flowers)
+  }, [getFeaturedByCategory])
 
-
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <section className="py-8 sm:py-12 lg:py-16 bg-white">
-        <div className="container-responsive">
-          <div className="container-max">
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
-                Featured Flowers
-              </h2>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                Loading beautiful flowers...
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {[...Array(8)].map((_, index) => (
-                <div key={index} className="animate-pulse">
-                  <div className="bg-gray-200 aspect-square rounded-lg mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    )
-  }
-
-  // Show products from backend or fallback data
-  const displayProducts = products.length > 0 ? products.slice(0, 8) : fallbackProducts
-
-
-
-  // Ensure we always have products to display
-  if (displayProducts.length === 0) {
-    console.error('❌ FeaturedProducts - No products available, using fallback')
-    return (
-      <section className="py-8 sm:py-12 lg:py-16 bg-white">
-        <div className="container-responsive">
-          <div className="container-max">
-            <div className="text-center mb-8 sm:mb-12">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
-                Featured Flowers
-              </h2>
-              <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                Discover our most popular and beautiful flower selections
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {fallbackProducts.map((product, index) => (
-                <div key={product.id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
-                  <div className="relative aspect-square overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        console.log('Image failed to load:', product.image)
-                        e.currentTarget.src = '/images/placeholder-flower.jpg'
-                      }}
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-2">{product.name}</h3>
-                    <p className="text-pink-600 font-bold text-lg mb-2">
-                      RWF {product.price.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-    )
+  if (featuredFlowers.length === 0) {
+    return null
   }
 
   return (
-    <section className="py-8 sm:py-12 lg:py-16 bg-white">
+    <section className="py-12 sm:py-16">
       <div className="container-responsive">
         <div className="container-max">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8 sm:mb-12"
+            className="text-center mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 sm:mb-4">
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center">
+                <Flower className="w-8 h-8 text-emerald-600" />
+              </div>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
               Featured Flowers
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-              Discover our most popular and beautiful flower selections, carefully chosen to brighten your day
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Our most popular flower arrangements and bouquets
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-            {displayProducts.map((product, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {featuredFlowers.map((product, index) => (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -133,14 +63,15 @@ const FeaturedProducts = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
             className="text-center mt-12"
           >
             <a 
-              href="/products"
-              className="inline-block bg-pink-500 text-white px-8 py-3 rounded-lg hover:bg-pink-600 transition-colors duration-200 font-medium"
+              href="/category/flowers"
+              className="inline-flex items-center gap-2 bg-emerald-600 text-white px-8 py-3 rounded-lg hover:bg-emerald-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
             >
               View All Flowers
+              <Flower className="w-4 h-4" />
             </a>
           </motion.div>
         </div>
