@@ -118,10 +118,20 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       
       if (response.success && response.data) {
         const backendProducts = response.data
-        const products = backendProducts.map((product, index) => transformProduct(product, index))
-        const featuredProducts = products.filter(product => product.featured)
-        const flowerProducts = products.filter(product => product.category === 'flowers')
-        const perfumeProducts = products.filter(product => product.category === 'perfumes')
+        const backendFlowerProducts = backendProducts.map((product, index) => transformProduct(product, index))
+        
+        // Always load local perfume data regardless of backend
+        const localPerfumeProducts = perfumeData.map((product, index) => transformProduct(product, index + 100))
+        
+        // Combine backend flowers with local perfumes
+        const allProducts = [...backendFlowerProducts, ...localPerfumeProducts]
+        const featuredProducts = allProducts.filter(product => product.featured)
+        const flowerProducts = backendFlowerProducts
+        const perfumeProducts = localPerfumeProducts
+        
+        console.log('Backend flower products:', backendFlowerProducts.length)
+        console.log('Local perfume products:', localPerfumeProducts.length)
+        console.log('Total combined products:', allProducts.length)
         
         // Create mapping between frontend IDs and backend IDs for fallback compatibility
         const mapping = new Map<number, string>()
@@ -131,7 +141,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setBackendIdMapping(mapping)
         
         setState({
-          products,
+          products: allProducts,
           featuredProducts,
           flowerProducts,
           perfumeProducts,
