@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Check if we have stored auth data
       const token = localStorage.getItem('accessToken')
       if (!token) {
+        console.log('🔒 No access token found - user not authenticated')
         setUser(null)
         setIsLoading(false)
         return
@@ -48,24 +49,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Try to get current user profile
       try {
         const response = await authAPI.getProfile()
-        if (response.success && response.data) {
+        if (response.success && response.data && response.data.user) {
+          console.log('✅ User authenticated:', response.data.user.email, 'Role:', response.data.user.role)
           setUser(response.data.user)
           // Set cookies for middleware
           if (response.data.user?.role) {
             document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
           }
         } else {
-          // Profile fetch failed, clear user (temporarily disable refresh token)
-          console.warn('Profile fetch failed, clearing user')
+          // Profile fetch failed, clear user
+          console.warn('❌ Profile fetch failed - clearing user data')
           setUser(null)
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
         }
       } catch (error) {
-        console.warn('Profile fetch failed, clearing user:', error)
+        console.warn('❌ Profile fetch failed - clearing user data:', error)
         setUser(null)
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
       }
     } catch (error) {
-      console.error('Auth status check failed:', error)
+      console.error('❌ Auth status check failed:', error)
       setUser(null)
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
     } finally {
       setIsLoading(false)
     }

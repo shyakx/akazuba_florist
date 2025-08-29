@@ -3,26 +3,21 @@ import type { NextRequest } from 'next/server'
 
 // Define protected routes
 const protectedRoutes = [
-  '/admin',
   '/profile',
   '/orders',
   '/wishlist'
 ]
 
-// Define admin-only routes (require authentication)
+// Define admin-only routes (require authentication AND admin role)
 const adminRoutes = [
   '/admin'
-]
-
-// Define admin test routes (no authentication required)
-const adminTestRoutes = [
-      '/admin'
 ]
 
 // Define auth routes (login, register)
 const authRoutes = [
   '/login',
-  '/register'
+  '/register',
+  '/admin/login'
 ]
 
 export function middleware(request: NextRequest) {
@@ -36,62 +31,51 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!accessToken
   const isAdmin = userRole === 'ADMIN'
   
+  console.log('🔒 Middleware check:', {
+    pathname,
+    isAuthenticated,
+    isAdmin,
+    hasToken: !!accessToken,
+    userRole
+  })
+  
   // Handle auth routes (login, register) - ALWAYS allow access
   if (authRoutes.some(route => pathname.startsWith(route))) {
-    // Allow access to auth routes regardless of authentication status
+    console.log('✅ Allowing access to auth route:', pathname)
     return NextResponse.next()
   }
   
-  // Handle admin routes
+  // Handle admin routes - STRICT SECURITY
   if (adminRoutes.some(route => pathname.startsWith(route))) {
+    console.log('🔐 Admin route access check:', pathname)
+    
     if (!isAuthenticated) {
-      // Not authenticated, redirect to login
-      return NextResponse.redirect(new URL('/login', request.url))
+      console.log('❌ Not authenticated - redirecting to admin login')
+      return NextResponse.redirect(new URL('/admin/login', request.url))
     }
     
     if (!isAdmin) {
-      // Not admin, redirect to home
+      console.log('❌ Not admin - redirecting to home')
       return NextResponse.redirect(new URL('/', request.url))
     }
     
-    // Admin is authenticated, allow access
-    return NextResponse.next()
-  }
-  
-  // Handle admin test routes (no authentication required)
-  if (adminTestRoutes.some(route => pathname.startsWith(route))) {
-    // Allow access to test routes without authentication
-    return NextResponse.next()
-  }
-  
-  // Handle admin routes
-  if (adminRoutes.some(route => pathname.startsWith(route))) {
-    if (!isAuthenticated) {
-      // Not authenticated, redirect to main login
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-    
-    if (!isAdmin) {
-      // Not admin, redirect to home
-      return NextResponse.redirect(new URL('/', request.url))
-    }
-    
-    // Admin is authenticated, allow access
+    console.log('✅ Admin access granted')
     return NextResponse.next()
   }
   
   // Handle other protected routes
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!isAuthenticated) {
-      // Not authenticated, redirect to login
+      console.log('❌ Not authenticated - redirecting to login')
       return NextResponse.redirect(new URL('/login', request.url))
     }
     
-    // User is authenticated, allow access
+    console.log('✅ Protected route access granted')
     return NextResponse.next()
   }
   
   // For all other routes, allow access
+  console.log('✅ Public route access granted')
   return NextResponse.next()
 }
 

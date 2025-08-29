@@ -148,32 +148,49 @@ const AdminDashboard = () => {
             ? 'http://localhost:5000/api/v1' 
             : 'https://akazuba-backend-api.onrender.com/api/v1')
 
+        console.log('🔗 Attempting to connect to backend:', API_BASE_URL)
+        console.log('🔑 Using token:', token ? 'Present' : 'Missing')
+
+        // First, test the connection with a simple health check
+        try {
+          const healthResponse = await fetch(`${API_BASE_URL.replace('/api/v1', '')}/health`)
+          console.log('🏥 Health check response:', healthResponse.status, healthResponse.statusText)
+        } catch (healthError) {
+          console.error('❌ Health check failed:', healthError)
+        }
+
         const [statsResponse, ordersResponse, activityResponse, analyticsResponse] = await Promise.all([
           fetch(`${API_BASE_URL}/admin/dashboard/stats`, {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }),
           fetch(`${API_BASE_URL}/admin/dashboard/recent-orders`, {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }),
           fetch(`${API_BASE_URL}/admin/dashboard/activity`, {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           }),
           fetch(`${API_BASE_URL}/admin/dashboard/analytics`, {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           })
         ])
+
+        console.log('📊 API Responses:')
+        console.log('  - Stats:', statsResponse.status, statsResponse.statusText)
+        console.log('  - Orders:', ordersResponse.status, ordersResponse.statusText)
+        console.log('  - Activity:', activityResponse.status, activityResponse.statusText)
+        console.log('  - Analytics:', analyticsResponse.status, analyticsResponse.statusText)
 
         // Check if any response is not ok (like 401 Unauthorized)
         if (!statsResponse.ok || !ordersResponse.ok || !activityResponse.ok || !analyticsResponse.ok) {
@@ -184,7 +201,16 @@ const AdminDashboard = () => {
             router.push('/admin/login')
             return
           }
-          throw new Error('API request failed')
+          
+          // Log specific error details
+          console.error('API request failed with status:', {
+            stats: statsResponse.status,
+            orders: ordersResponse.status,
+            activity: activityResponse.status,
+            analytics: analyticsResponse.status
+          })
+          
+          throw new Error(`API request failed: ${statsResponse.status} ${statsResponse.statusText}`)
         }
 
         const [statsData, ordersData, activityData, analyticsData] = await Promise.all([
@@ -193,6 +219,13 @@ const AdminDashboard = () => {
           activityResponse.json(),
           analyticsResponse.json()
         ])
+
+        console.log('📈 Received data:', {
+          stats: statsData.success,
+          orders: ordersData.success,
+          activity: activityData.success,
+          analytics: analyticsData.success
+        })
 
         if (statsData.success) {
           setStats(statsData.data)
@@ -231,8 +264,14 @@ const AdminDashboard = () => {
         }
 
         setLastUpdated(new Date())
-      } catch (backendError) {
+        console.log('✅ Successfully fetched real data from backend')
+      } catch (backendError: any) {
         console.error('Backend connection failed, using fallback data:', backendError)
+        console.error('Error details:', {
+          message: backendError?.message || 'Unknown error',
+          stack: backendError?.stack || 'No stack trace',
+          name: backendError?.name || 'Unknown error type'
+        })
         
         setStats({
           newOrders: 5,
@@ -383,8 +422,32 @@ const AdminDashboard = () => {
     )
   }
 
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
-    return null
+  // SECURITY: Always check authentication before rendering admin content
+  if (!isAuthenticated) {
+    // Redirect to login immediately
+    router.push('/admin/login')
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // SECURITY: Check if user is admin
+  if (!user || user.role !== 'ADMIN') {
+    // Redirect to home page if not admin
+    router.push('/')
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Access denied. Redirecting...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
