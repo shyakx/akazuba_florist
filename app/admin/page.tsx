@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { useRouter } from 'next/navigation'
 import { 
@@ -30,7 +30,13 @@ import {
   Search,
   Filter,
   Download,
-  RefreshCw
+  RefreshCw,
+  TrendingUp,
+  BarChart3,
+  FileText,
+  Zap,
+  Target,
+  Crown
 } from 'lucide-react'
 import Link from 'next/link'
 import { adminAPI } from '@/lib/adminApi'
@@ -42,6 +48,8 @@ interface DashboardStats {
   totalProducts: number
   totalCustomers: number
   lowStockProducts: number
+  totalRevenue?: number
+  averageOrderValue?: number
 }
 
 interface RecentOrder {
@@ -51,6 +59,20 @@ interface RecentOrder {
   totalAmount: number
   status: string
   createdAt: string
+}
+
+interface AnalyticsData {
+  overview: {
+    totalOrders: number
+    totalRevenue: number
+    totalCustomers: number
+    totalProducts: number
+    averageOrderValue: number
+  }
+  recentOrders: RecentOrder[]
+  topProducts: any[]
+  monthlyRevenue: any[]
+  customerGrowth: any[]
 }
 
 const AdminDashboard = () => {
@@ -64,8 +86,24 @@ const AdminDashboard = () => {
   })
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([])
   const [recentActivity, setRecentActivity] = useState<any[]>([])
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [dataFetched, setDataFetched] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    if (!autoRefresh) return
+
+    const interval = setInterval(() => {
+      if (isAuthenticated && user?.role === 'ADMIN') {
+        fetchDashboardData()
+      }
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [autoRefresh, isAuthenticated, user?.role])
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -82,26 +120,54 @@ const AdminDashboard = () => {
     }
   }, [isAuthenticated, user?.role, dataFetched])
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true)
       
+      // Check if user is authenticated and is admin
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        console.error('No access token found')
+        toast.error('Please log in as admin')
+        router.push('/admin/login')
+        return
+      }
+      
+      if (!user || user.role !== 'ADMIN') {
+        console.error('User is not admin')
+        toast.error('Admin privileges required')
+        router.push('/admin/login')
+        return
+      }
+      
       // Try to fetch real data from backend API
       try {
-        const [statsResponse, ordersResponse, activityResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/admin/dashboard/stats`, {
+        // Use the same dynamic API URL logic as the main API
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+          (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000/api/v1' 
+            : 'https://akazuba-backend-api.onrender.com/api/v1')
+
+        const [statsResponse, ordersResponse, activityResponse, analyticsResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/admin/dashboard/stats`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
               'Content-Type': 'application/json'
             }
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/admin/dashboard/recent-orders`, {
+          fetch(`${API_BASE_URL}/admin/dashboard/recent-orders`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
               'Content-Type': 'application/json'
             }
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/admin/dashboard/activity`, {
+          fetch(`${API_BASE_URL}/admin/dashboard/activity`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+              'Content-Type': 'application/json'
+            }
+          }),
+          fetch(`${API_BASE_URL}/admin/dashboard/analytics`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
               'Content-Type': 'application/json'
@@ -109,10 +175,23 @@ const AdminDashboard = () => {
           })
         ])
 
-        const [statsData, ordersData, activityData] = await Promise.all([
+        // Check if any response is not ok (like 401 Unauthorized)
+        if (!statsResponse.ok || !ordersResponse.ok || !activityResponse.ok || !analyticsResponse.ok) {
+          // If we get 401, the user might not be properly authenticated as admin
+          if (statsResponse.status === 401 || ordersResponse.status === 401 || activityResponse.status === 401 || analyticsResponse.status === 401) {
+            console.error('Admin authentication failed - redirecting to login')
+            toast.error('Admin authentication required. Please log in as admin.')
+            router.push('/admin/login')
+            return
+          }
+          throw new Error('API request failed')
+        }
+
+        const [statsData, ordersData, activityData, analyticsData] = await Promise.all([
           statsResponse.json(),
           ordersResponse.json(),
-          activityResponse.json()
+          activityResponse.json(),
+          analyticsResponse.json()
         ])
 
         if (statsData.success) {
@@ -146,6 +225,12 @@ const AdminDashboard = () => {
             { type: 'customer', title: 'New customer registered', description: 'Jane Smith joined the platform', timestamp: new Date(), status: 'info' }
           ])
         }
+
+        if (analyticsData.success) {
+          setAnalytics(analyticsData.data)
+        }
+
+        setLastUpdated(new Date())
       } catch (backendError) {
         console.error('Backend connection failed, using fallback data:', backendError)
         
@@ -174,7 +259,7 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, router])
 
   const handleDownloadInvoice = async (orderId: string) => {
     try {
@@ -220,6 +305,43 @@ const AdminDashboard = () => {
     }
   }
 
+  const handleExportData = async (type: 'orders' | 'customers' | 'products' | 'analytics') => {
+    try {
+      toast.loading(`Exporting ${type} data...`, { id: 'export-data' })
+      
+      // This would call the backend export API
+      const response = await fetch(`/api/admin/export/${type}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${type}-export-${new Date().toISOString().split('T')[0]}.csv`
+        a.style.display = 'none'
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        
+        toast.dismiss('export-data')
+        toast.success(`${type} data exported successfully!`)
+      } else {
+        throw new Error('Export failed')
+      }
+    } catch (error) {
+      console.error('Error exporting data:', error)
+      toast.dismiss('export-data')
+      toast.error(`Failed to export ${type} data`)
+    }
+  }
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', {
       style: 'currency',
@@ -238,6 +360,16 @@ const AdminDashboard = () => {
       case 'CANCELLED': return 'bg-red-100 text-red-800'
       default: return 'bg-gray-100 text-gray-800'
     }
+  }
+
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+    
+    if (diffInSeconds < 60) return `${diffInSeconds}s ago`
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+    return `${Math.floor(diffInSeconds / 86400)}d ago`
   }
 
   if (isLoading || loading) {
@@ -260,11 +392,39 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">Welcome back! Here&apos;s what&apos;s happening with your store.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 mt-2">Welcome back! Here&apos;s what&apos;s happening with your store.</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                <Clock className="h-4 w-4" />
+                <span>Last updated: {formatTimeAgo(lastUpdated)}</span>
+              </div>
+              <button
+                onClick={() => fetchDashboardData()}
+                className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <RefreshCw className="h-4 w-4" />
+                <span>Refresh</span>
+              </button>
+              <button
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors ${
+                  autoRefresh 
+                    ? 'bg-green-600 text-white hover:bg-green-700' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                <Zap className="h-4 w-4" />
+                <span>Auto-refresh {autoRefresh ? 'ON' : 'OFF'}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Enhanced Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
@@ -319,6 +479,51 @@ const AdminDashboard = () => {
           </div>
         </div>
 
+        {/* Revenue Stats */}
+        {stats.totalRevenue && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Revenue Overview</h3>
+                <TrendingUp className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Revenue</span>
+                  <span className="font-semibold text-gray-900">{formatPrice(stats.totalRevenue)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Average Order Value</span>
+                  <span className="font-semibold text-gray-900">{formatPrice(stats.averageOrderValue || 0)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                <Zap className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleExportData('analytics')}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Export Analytics</span>
+                </button>
+                <button
+                  onClick={() => handleExportData('orders')}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>Export Orders</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Recent Orders */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           <div className="px-6 py-4 border-b border-gray-200">
@@ -327,13 +532,22 @@ const AdminDashboard = () => {
                 <h2 className="text-xl font-bold text-gray-900">Recent Orders</h2>
                 <p className="text-sm text-gray-600 mt-1">Latest customer orders and their status</p>
               </div>
-              <Link
-                href="/admin/orders"
-                className="flex items-center space-x-2 px-4 py-2 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors"
-              >
-                <Eye className="h-4 w-4" />
-                <span className="font-medium">View all orders</span>
-              </Link>
+              <div className="flex items-center space-x-3">
+                <Link
+                  href="/admin/orders"
+                  className="flex items-center space-x-2 px-4 py-2 bg-pink-50 text-pink-700 rounded-lg hover:bg-pink-100 transition-colors"
+                >
+                  <Eye className="h-4 w-4" />
+                  <span className="font-medium">View all orders</span>
+                </Link>
+                <button
+                  onClick={() => handleExportData('orders')}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  <span className="font-medium">Export</span>
+                </button>
+              </div>
             </div>
           </div>
           

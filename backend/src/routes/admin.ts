@@ -572,11 +572,20 @@ router.get('/dashboard/stats', async (req, res) => {
       }
     })
 
+    // Get total revenue
+    const totalRevenue = await prisma.order.aggregate({
+      _sum: {
+        totalAmount: true
+      }
+    })
+
     const stats = {
       newOrders,
       totalProducts,
       totalCustomers,
-      lowStockProducts
+      lowStockProducts,
+      totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
+      averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0
     }
 
     res.json({
@@ -614,7 +623,7 @@ router.get('/dashboard/recent-orders', async (req, res) => {
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
-      select: {
+          select: {
             firstName: true,
             lastName: true
           }
@@ -624,11 +633,11 @@ router.get('/dashboard/recent-orders', async (req, res) => {
 
     const formattedOrders = recentOrders.map(order => ({
       id: order.id,
-      orderNumber: order.orderNumber,
+      orderNumber: order.orderNumber || `ORD-${order.id.slice(-6)}`,
       customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
-      totalAmount: order.totalAmount,
-      status: order.status,
-      createdAt: order.createdAt
+      totalAmount: Number(order.totalAmount),
+      status: order.status.toUpperCase(),
+      createdAt: order.createdAt.toISOString()
     }))
 
     res.json({
@@ -661,94 +670,212 @@ router.get('/dashboard/recent-orders', async (req, res) => {
  */
 router.get('/dashboard/activity', async (req, res) => {
   try {
-    const [recentOrders, recentCustomers, lowStockProducts] = await Promise.all([
-      // Recent orders
-      prisma.order.findMany({
-        take: 3,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: {
-            select: {
-              firstName: true,
-              lastName: true
-            }
+    // Get recent orders for activity feed
+    const recentOrders = await prisma.order.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true
           }
         }
-      }),
-      
-      // Recent customers
-      prisma.user.findMany({
-        where: { role: 'CUSTOMER' },
-        take: 2,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          firstName: true,
-          lastName: true,
-          createdAt: true
-        }
-      }),
-      
-      // Low stock products
-      prisma.product.findMany({
-        where: { stockQuantity: { lte: 5 } },
-        take: 2,
-        select: {
-          name: true,
-          stockQuantity: true,
-          updatedAt: true
-        }
-      })
-    ])
+      }
+    })
 
-    const activities: any[] = []
+    // Get recent user registrations
+    const recentUsers = await prisma.user.findMany({
+      take: 3,
+      where: { role: 'CUSTOMER' },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        firstName: true,
+        lastName: true,
+        createdAt: true
+      }
+    })
 
-    // Add order activities
-    recentOrders.forEach(order => {
-      activities.push({
+    const activities = [
+      ...recentOrders.map(order => ({
         type: 'order',
         title: 'New order received',
-        description: `Order #${order.orderNumber} from ${order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User'}`,
+        description: `Order #${order.orderNumber || `ORD-${order.id.slice(-6)}`} from ${order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User'}`,
         timestamp: order.createdAt,
         status: 'success'
-      })
-    })
-
-    // Add customer activities
-    recentCustomers.forEach(customer => {
-      activities.push({
+      })),
+      ...recentUsers.map(user => ({
         type: 'customer',
         title: 'New customer registered',
-        description: `${customer.firstName} ${customer.lastName} joined the platform`,
-        timestamp: customer.createdAt,
+        description: `${user.firstName} ${user.lastName} joined the platform`,
+        timestamp: user.createdAt,
         status: 'info'
-      })
-    })
-
-    // Add low stock activities
-    lowStockProducts.forEach(product => {
-      activities.push({
-        type: 'stock',
-        title: 'Low stock alert',
-        description: `${product.name} running low (${product.stockQuantity} units left)`,
-        timestamp: product.updatedAt,
-        status: 'warning'
-      })
-    })
-
-    // Sort by timestamp and take latest 10
-    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    const recentActivities = activities.slice(0, 10)
+      }))
+    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .slice(0, 10)
 
     res.json({
       success: true,
       message: 'Recent activity retrieved successfully',
-      data: recentActivities
+      data: activities
     })
   } catch (error) {
     console.error('Error fetching recent activity:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to fetch recent activity'
+    })
+  }
+})
+
+/**
+ * @swagger
+ * /admin/dashboard/analytics:
+ *   get:
+ *     summary: Get comprehensive analytics data
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Analytics data retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/dashboard/analytics', async (req, res) => {
+  try {
+    const [
+      totalOrders,
+      totalRevenue,
+      totalCustomers,
+      totalProducts,
+      recentOrders,
+      topProducts,
+      monthlyRevenue,
+      customerGrowth
+    ] = await Promise.all([
+      // Total orders
+      prisma.order.count(),
+      
+      // Total revenue
+      prisma.order.aggregate({
+        _sum: {
+          totalAmount: true
+        }
+      }),
+      
+      // Total customers
+      prisma.user.count({
+        where: { role: 'CUSTOMER' }
+      }),
+      
+      // Total products
+      prisma.product.count(),
+      
+      // Recent orders (last 10)
+      prisma.order.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
+          orderItems: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  price: true
+                }
+              }
+            }
+          }
+        }
+      }),
+      
+      // Top selling products
+      prisma.orderItem.groupBy({
+        by: ['productId'],
+        _sum: {
+          quantity: true
+        },
+        orderBy: {
+          _sum: {
+            quantity: 'desc'
+          }
+        },
+        take: 5
+      }),
+      
+      // Monthly revenue for last 6 months
+      prisma.order.groupBy({
+        by: ['createdAt'],
+        _sum: {
+          totalAmount: true
+        },
+        where: {
+          createdAt: {
+            gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
+          }
+        }
+      }),
+      
+      // Customer growth (new customers per month)
+      prisma.user.groupBy({
+        by: ['createdAt'],
+        _count: {
+          id: true
+        },
+        where: {
+          role: 'CUSTOMER',
+          createdAt: {
+            gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
+          }
+        }
+      })
+    ])
+
+    const analytics = {
+      overview: {
+        totalOrders,
+        totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
+        totalCustomers,
+        totalProducts,
+        averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0
+      },
+      recentOrders: recentOrders.map(order => ({
+        id: order.id,
+        orderNumber: order.orderNumber || `ORD-${order.id.slice(-6)}`,
+        customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+        totalAmount: Number(order.totalAmount),
+        status: order.status,
+        createdAt: order.createdAt
+      })),
+      topProducts,
+      monthlyRevenue: monthlyRevenue.map(item => ({
+        month: item.createdAt,
+        revenue: Number(item._sum.totalAmount)
+      })),
+      customerGrowth: customerGrowth.map(item => ({
+        month: item.createdAt,
+        newCustomers: item._count.id
+      }))
+    }
+
+    res.json({
+      success: true,
+      message: 'Analytics data retrieved successfully',
+      data: analytics
+    })
+  } catch (error) {
+    console.error('Error fetching analytics:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch analytics data'
     })
   }
 })
@@ -916,40 +1043,153 @@ router.delete('/products/:id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /admin/products/bulk:
+ *   post:
+ *     summary: Perform bulk operations on products
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               operation:
+ *                 type: string
+ *                 enum: [delete, activate, deactivate, feature, unfeature, updateStock]
+ *               data:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Bulk operation completed successfully
+ *       401:
+ *         description: Unauthorized
+ */
 router.post('/products/bulk', async (req, res) => {
   try {
-    const { operation, productIds } = req.body
+    const { productIds, operation, data } = req.body
+    
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product IDs are required'
+      })
+    }
+    
+    if (!operation) {
+      return res.status(400).json({
+        success: false,
+        message: 'Operation is required'
+      })
+    }
+    
+    let result: any
     
     switch (operation) {
       case 'delete':
-        await prisma.product.deleteMany({
-          where: { id: { in: productIds } }
+        result = await prisma.product.deleteMany({
+          where: {
+            id: { in: productIds }
+          }
         })
         break
+        
       case 'activate':
-        await prisma.product.updateMany({
-          where: { id: { in: productIds } },
-          data: { isActive: true }
+        result = await prisma.product.updateMany({
+          where: {
+            id: { in: productIds }
+          },
+          data: {
+            isActive: true
+          }
         })
         break
+        
       case 'deactivate':
-        await prisma.product.updateMany({
-          where: { id: { in: productIds } },
-          data: { isActive: false }
+        result = await prisma.product.updateMany({
+          where: {
+            id: { in: productIds }
+          },
+          data: {
+            isActive: false
+          }
         })
         break
+        
       case 'feature':
-        await prisma.product.updateMany({
-          where: { id: { in: productIds } },
-          data: { isFeatured: true }
+        result = await prisma.product.updateMany({
+          where: {
+            id: { in: productIds }
+          },
+          data: {
+            isFeatured: true
+          }
         })
         break
+        
       case 'unfeature':
-        await prisma.product.updateMany({
-          where: { id: { in: productIds } },
-          data: { isFeatured: false }
+        result = await prisma.product.updateMany({
+          where: {
+            id: { in: productIds }
+          },
+          data: {
+            isFeatured: false
+          }
         })
         break
+        
+      case 'updateStock':
+        if (!data || !data.operation || !data.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: 'Stock operation and quantity are required'
+          })
+        }
+        
+        const products = await prisma.product.findMany({
+          where: {
+            id: { in: productIds }
+          },
+          select: {
+            id: true,
+            stockQuantity: true
+          }
+        })
+        
+        const updatePromises = products.map(product => {
+          let newQuantity: number
+          
+          switch (data.operation) {
+            case 'add':
+              newQuantity = product.stockQuantity + data.quantity
+              break
+            case 'subtract':
+              newQuantity = Math.max(0, product.stockQuantity - data.quantity)
+              break
+            case 'set':
+              newQuantity = Math.max(0, data.quantity)
+              break
+            default:
+              throw new Error('Invalid stock operation')
+          }
+          
+          return prisma.product.update({
+            where: { id: product.id },
+            data: { stockQuantity: newQuantity }
+          })
+        })
+        
+        result = await Promise.all(updatePromises)
+        break
+        
       default:
         return res.status(400).json({
           success: false,
@@ -957,15 +1197,204 @@ router.post('/products/bulk', async (req, res) => {
         })
     }
     
-    return res.json({
+    res.json({
       success: true,
-      message: `Bulk ${operation} completed successfully`
+      message: `Bulk operation '${operation}' completed successfully`,
+      data: result
     })
   } catch (error) {
     console.error('Error performing bulk operation:', error)
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'Failed to perform bulk operation'
+    })
+  }
+})
+
+/**
+ * @swagger
+ * /admin/export/{type}:
+ *   post:
+ *     summary: Export data as CSV
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [orders, customers, products, analytics]
+ *     responses:
+ *       200:
+ *         description: Data exported successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/export/:type', async (req, res) => {
+  try {
+    const { type } = req.params
+    
+    let data: any[] = []
+    let headers: string[] = []
+    
+    switch (type) {
+      case 'orders':
+        const orders = await prisma.order.findMany({
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true
+              }
+            },
+            orderItems: {
+              include: {
+                product: {
+                  select: {
+                    name: true,
+                    price: true
+                  }
+                }
+              }
+            }
+          },
+          orderBy: { createdAt: 'desc' }
+        })
+        
+        headers = ['Order ID', 'Order Number', 'Customer Name', 'Customer Email', 'Status', 'Total Amount', 'Payment Method', 'Payment Status', 'Created Date']
+        data = orders.map(order => [
+          order.id,
+          order.orderNumber || `ORD-${order.id.slice(-6)}`,
+          order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+          order.user?.email || 'guest@akazubaflorist.com',
+          order.status,
+          order.totalAmount,
+          order.paymentMethod,
+          order.paymentStatus,
+          order.createdAt.toISOString()
+        ])
+        break
+        
+      case 'customers':
+        const customers = await prisma.user.findMany({
+          where: { role: 'CUSTOMER' },
+          orderBy: { createdAt: 'desc' }
+        })
+        
+        headers = ['Customer ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Registration Date', 'Total Orders', 'Total Spent']
+        data = await Promise.all(customers.map(async (customer) => {
+          const customerOrders = await prisma.order.findMany({
+            where: { userId: customer.id }
+          })
+          const totalSpent = customerOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0)
+          
+          return [
+            customer.id,
+            customer.firstName,
+            customer.lastName,
+            customer.email,
+            customer.phone || 'N/A',
+            customer.createdAt.toISOString(),
+            customerOrders.length,
+            totalSpent
+          ]
+        }))
+        break
+        
+      case 'products':
+        const products = await prisma.product.findMany({
+          include: {
+            category: true
+          },
+          orderBy: { createdAt: 'desc' }
+        })
+        
+        headers = ['Product ID', 'Name', 'Category', 'Price', 'Stock Quantity', 'Status', 'Created Date']
+        data = products.map(product => [
+          product.id,
+          product.name,
+          product.category?.name || 'Uncategorized',
+          product.price,
+          product.stockQuantity,
+          product.isActive ? 'Active' : 'Inactive',
+          product.createdAt.toISOString()
+        ])
+        break
+        
+      case 'analytics':
+        const [
+          totalOrders,
+          totalRevenue,
+          totalCustomers,
+          totalProducts,
+          monthlyRevenue,
+          customerGrowth
+        ] = await Promise.all([
+          prisma.order.count(),
+          prisma.order.aggregate({
+            _sum: { totalAmount: true }
+          }),
+          prisma.user.count({ where: { role: 'CUSTOMER' } }),
+          prisma.product.count(),
+          prisma.order.groupBy({
+            by: ['createdAt'],
+            _sum: { totalAmount: true },
+            where: {
+              createdAt: {
+                gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
+              }
+            }
+          }),
+          prisma.user.groupBy({
+            by: ['createdAt'],
+            _count: { id: true },
+            where: {
+              role: 'CUSTOMER',
+              createdAt: {
+                gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
+              }
+            }
+          })
+        ])
+        
+        headers = ['Metric', 'Value', 'Date']
+        data = [
+          ['Total Orders', totalOrders, new Date().toISOString()],
+          ['Total Revenue', Number(totalRevenue._sum.totalAmount || 0), new Date().toISOString()],
+          ['Total Customers', totalCustomers, new Date().toISOString()],
+          ['Total Products', totalProducts, new Date().toISOString()],
+          ['Average Order Value', totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0, new Date().toISOString()],
+          ...monthlyRevenue.map(item => ['Monthly Revenue', Number(item._sum.totalAmount), item.createdAt.toISOString()]),
+          ...customerGrowth.map(item => ['New Customers', item._count.id, item.createdAt.toISOString()])
+        ]
+        break
+        
+      default:
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid export type'
+        })
+    }
+    
+    // Generate CSV content
+    const csvContent = [
+      headers.join(','),
+      ...data.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n')
+    
+    // Set response headers for CSV download
+    res.setHeader('Content-Type', 'text/csv')
+    res.setHeader('Content-Disposition', `attachment; filename="${type}-export-${new Date().toISOString().split('T')[0]}.csv"`)
+    
+    res.send(csvContent)
+  } catch (error) {
+    console.error('Error exporting data:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to export data'
     })
   }
 })

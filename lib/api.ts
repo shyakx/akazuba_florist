@@ -151,8 +151,11 @@ const apiRequest = async <T>(
 ): Promise<ApiResponse<T>> => {
   const token = getAuthToken()
   
-  // Use consistent backend URL - always point to the deployed backend
-  const API_BASE_URL_ACTUAL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+  // Use local backend for development, deployed backend for production
+  const API_BASE_URL_ACTUAL = process.env.NEXT_PUBLIC_API_URL || 
+    (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+      ? 'http://localhost:5000/api/v1' 
+      : 'https://akazuba-backend-api.onrender.com/api/v1')
 
   const config: RequestInit = {
     headers: {

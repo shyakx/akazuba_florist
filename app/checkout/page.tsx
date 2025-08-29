@@ -107,7 +107,13 @@ const CheckoutPage = () => {
       // Add payment proof file
       orderFormData.append('paymentProof', paymentProof)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/orders`, {
+      // Use the same dynamic API URL logic as the main API
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+        (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+          ? 'http://localhost:5000/api/v1' 
+          : 'https://akazuba-backend-api.onrender.com/api/v1')
+
+      const response = await fetch(`${API_BASE_URL}/orders`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
