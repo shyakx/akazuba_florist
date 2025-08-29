@@ -229,6 +229,20 @@ app.post('/api/v1/auth/refresh', async (req, res) => {
   }
 });
 
+// Logout endpoint
+app.post('/api/v1/auth/logout', async (req, res) => {
+  try {
+    // For JWT-based auth, we don't need to do anything server-side
+    // The client should clear the tokens
+    res.json({
+      message: 'Logout successful'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ error: 'Logout failed' });
+  }
+});
+
 // Get products endpoint
 app.get('/api/v1/products', async (req, res) => {
   try {
