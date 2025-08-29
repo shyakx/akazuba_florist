@@ -11,17 +11,61 @@ const prisma = new PrismaClient();
 
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors({
-  origin: [
-    process.env.CORS_ORIGIN || 'http://localhost:3000',
-    'https://online-shopping-by-diane.vercel.app',
-    'https://online-shopping-by-diane-git-main-steven-shyakas-projects.vercel.app'
-  ],
+// CORS configuration - Production and Development
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
+    
+    // Define allowed origins based on environment
+    const productionOrigins = [
+      'https://online-shopping-by-diane.vercel.app',
+      'https://akazuba-florist.vercel.app',
+      process.env.FRONTEND_URL
+    ].filter((url) => Boolean(url))
+    
+    const developmentOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002'
+    ]
+    
+    // Use production origins only in production, allow development origins in other environments
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? productionOrigins 
+      : [...productionOrigins, ...developmentOrigins]
+    
+    console.log('🔍 CORS Check:')
+    console.log('  - Origin:', origin)
+    console.log('  - Environment:', process.env.NODE_ENV || 'development')
+    console.log('  - Allowed origins:', allowedOrigins)
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('✅ CORS allowed for:', origin)
+      callback(null, true)
+    } else {
+      console.log('🚫 CORS blocked origin:', origin)
+      console.log('✅ Allowed origins:', allowedOrigins)
+      console.log('🌍 Environment:', process.env.NODE_ENV || 'development')
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-}));
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}
+
+app.use(cors(corsOptions))
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions))
 app.use(express.json());
 
 // Serve static files
@@ -33,7 +77,25 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'akazuba-super-secr
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Akazuba Backend with Database is running! - Updated with refresh token support' });
+  res.status(200).json({
+    status: 'OK',
+    message: 'Akazuba Backend - CORS FIXED - Development Mode Enabled!',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    database: 'connected',
+    cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
+    version: '2.0.1',
+    corsEnabled: true
+  });
+});
+
+// CORS test endpoint
+app.get('/cors-test', (req, res) => {
+  res.status(200).json({
+    message: 'CORS is working!',
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Register endpoint
@@ -126,7 +188,7 @@ app.post('/api/v1/auth/login', async (req, res) => {
     );
 
     res.json({
-      message: 'Login successful',
+      message: 'Login successful - Updated',
       user: {
         id: user.id,
         email: user.email,
