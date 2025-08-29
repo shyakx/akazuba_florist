@@ -203,6 +203,9 @@ const apiRequest = async <T>(
           user: data.user
         }
       } as ApiResponse<T>
+    } else if (data.success && data.data) {
+      // Backend already returns { success: true, data: [...] } format
+      return data as ApiResponse<T>
     } else {
       // Other responses
       return {
