@@ -148,6 +148,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
+      
+      // Add a small delay to ensure token is available
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       const response = await cartAPI.getCart()
       
       if (response.success && response.data) {
@@ -156,11 +160,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         dispatch({ type: 'LOAD_CART', payload: [] })
       }
-      } catch (error) {
+    } catch (error: any) {
       console.error('Error loading cart:', error)
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load cart' })
+      // Don't show error for 401 (unauthorized) - user just needs to login
+      if (error.message !== 'No token provided') {
+        dispatch({ type: 'SET_ERROR', payload: 'Failed to load cart' })
       }
+      dispatch({ type: 'LOAD_CART', payload: [] })
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
+  }
 
   const addToCart = async (product: Product) => {
     if (!isAuthenticated) {
