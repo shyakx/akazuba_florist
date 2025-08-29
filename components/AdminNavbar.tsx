@@ -265,10 +265,6 @@ const AdminNavbar = () => {
         )}
       </nav>
 
-      {/* Spacer for fixed header */}
-      <div className="h-16 lg:block hidden"></div>
-      <div className="h-14 lg:hidden block"></div>
-
       {/* Click outside to close dropdowns */}
       {isProductsDropdownOpen && (
         <div

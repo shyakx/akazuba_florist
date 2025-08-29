@@ -12,7 +12,7 @@ export default function AdminLayout({
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
         <AdminNavbar />
-        <main className="pt-4">
+        <main className="pt-14 lg:pt-16">
           {children}
         </main>
       </div>

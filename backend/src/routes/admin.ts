@@ -623,7 +623,7 @@ router.get('/dashboard/recent-orders', async (req, res) => {
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
-          select: {
+      select: {
             firstName: true,
             lastName: true
           }
@@ -673,27 +673,27 @@ router.get('/dashboard/activity', async (req, res) => {
     // Get recent orders for activity feed
     const recentOrders = await prisma.order.findMany({
       take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: {
-            firstName: true,
-            lastName: true
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true
+            }
           }
         }
-      }
     })
-
+      
     // Get recent user registrations
     const recentUsers = await prisma.user.findMany({
       take: 3,
-      where: { role: 'CUSTOMER' },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        firstName: true,
-        lastName: true,
-        createdAt: true
-      }
+        where: { role: 'CUSTOMER' },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          firstName: true,
+          lastName: true,
+          createdAt: true
+        }
     })
 
     const activities = [
@@ -1176,7 +1176,7 @@ router.post('/products/bulk', async (req, res) => {
               break
             case 'set':
               newQuantity = Math.max(0, data.quantity)
-              break
+        break
             default:
               throw new Error('Invalid stock operation')
           }
