@@ -126,7 +126,7 @@ app.post('/api/v1/auth/login', async (req, res) => {
     );
 
     res.json({
-      message: 'Login successful',
+      message: 'Login successful - Updated',
       user: {
         id: user.id,
         email: user.email,
