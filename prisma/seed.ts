@@ -7,12 +7,12 @@ async function main() {
   console.log('🌱 Starting database seeding...')
 
   // Create admin user
-  const hashedPassword = await bcrypt.hash('admin123', 10)
+  const hashedPassword = await bcrypt.hash('akazuba2024', 10)
   const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@akazuba.com' },
+    where: { email: 'admin@akazubaflorist.com' },
     update: {},
     create: {
-      email: 'admin@akazuba.com',
+      email: 'admin@akazubaflorist.com',
       passwordHash: hashedPassword,
       firstName: 'Admin',
       lastName: 'User',
@@ -98,6 +98,54 @@ async function main() {
         isActive: true,
       },
     }),
+    prisma.category.upsert({
+      where: { slug: 'perfumes' },
+      update: {},
+      create: {
+        name: 'Perfumes',
+        slug: 'perfumes',
+        description: 'Luxury fragrances from world-renowned brands',
+        imageUrl: '/images/categories/perfumes.jpg',
+        sortOrder: 7,
+        isActive: true,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'men-perfumes' },
+      update: {},
+      create: {
+        name: 'Men Perfumes',
+        slug: 'men-perfumes',
+        description: 'Sophisticated fragrances for men',
+        imageUrl: '/images/categories/men-perfumes.jpg',
+        sortOrder: 8,
+        isActive: true,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'women-perfumes' },
+      update: {},
+      create: {
+        name: 'Women Perfumes',
+        slug: 'women-perfumes',
+        description: 'Elegant fragrances for women',
+        imageUrl: '/images/categories/women-perfumes.jpg',
+        sortOrder: 9,
+        isActive: true,
+      },
+    }),
+    prisma.category.upsert({
+      where: { slug: 'unisex-perfumes' },
+      update: {},
+      create: {
+        name: 'Unisex Perfumes',
+        slug: 'unisex-perfumes',
+        description: 'Versatile fragrances for everyone',
+        imageUrl: '/images/categories/unisex-perfumes.jpg',
+        sortOrder: 10,
+        isActive: true,
+      },
+    }),
   ])
   console.log('✅ Categories created:', categories.length)
 
@@ -108,6 +156,10 @@ async function main() {
   const sunflowersCategory = await prisma.category.findUnique({ where: { slug: 'sunflowers' } })
   const bouquetsCategory = await prisma.category.findUnique({ where: { slug: 'bouquets' } })
   const weddingCategory = await prisma.category.findUnique({ where: { slug: 'wedding-flowers' } })
+  const perfumesCategory = await prisma.category.findUnique({ where: { slug: 'perfumes' } })
+  const menPerfumesCategory = await prisma.category.findUnique({ where: { slug: 'men-perfumes' } })
+  const womenPerfumesCategory = await prisma.category.findUnique({ where: { slug: 'women-perfumes' } })
+  const unisexPerfumesCategory = await prisma.category.findUnique({ where: { slug: 'unisex-perfumes' } })
 
   // Create products
   const products = await Promise.all([
@@ -121,7 +173,7 @@ async function main() {
         description: 'Beautiful red rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Red Rose',
         price: 45500,
-        images: ['/images/products/red-rose.jpg'],
+        images: ['/images/flowers/red/red-1.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -138,7 +190,7 @@ async function main() {
         description: 'Beautiful pink rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Pink Rose',
         price: 41600,
-        images: ['/images/products/pink-rose.jpg'],
+        images: ['/images/flowers/pink/pink-1.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -155,7 +207,7 @@ async function main() {
         description: 'Beautiful white rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'White Rose',
         price: 39000,
-        images: ['/images/products/white-rose.jpg'],
+        images: ['/images/flowers/white/white-2.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -172,7 +224,7 @@ async function main() {
         description: 'Beautiful yellow rose from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Yellow Rose',
         price: 36400,
-        images: ['/images/products/yellow-rose.jpg'],
+        images: ['/images/flowers/yellow/yellow-2.jpg'],
         categoryId: rosesCategory?.id || '',
         isActive: true,
         stockQuantity: 35,
@@ -190,7 +242,7 @@ async function main() {
         description: 'Beautiful red tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Red Tulip',
         price: 32500,
-        images: ['/images/products/red-tulip.jpg'],
+        images: ['/images/flowers/red/red-2.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -207,7 +259,7 @@ async function main() {
         description: 'Beautiful pink tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Pink Tulip',
         price: 41600,
-        images: ['/images/products/pink-tulip.jpg'],
+        images: ['/images/flowers/pink/pink-2.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         stockQuantity: 25,
@@ -223,7 +275,7 @@ async function main() {
         description: 'Beautiful yellow tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Yellow Tulip',
         price: 26000,
-        images: ['/images/products/yellow-tulip.jpg'],
+        images: ['/images/flowers/yellow/yellow-1.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         stockQuantity: 20,
@@ -239,7 +291,7 @@ async function main() {
         description: 'Beautiful white tulip from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'White Tulip',
         price: 39000,
-        images: ['/images/products/white-tulip.jpg'],
+        images: ['/images/flowers/white/white-3.jpg'],
         categoryId: tulipsCategory?.id || '',
         isActive: true,
         stockQuantity: 15,
@@ -257,7 +309,7 @@ async function main() {
         description: 'Beautiful white lily from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'White Lily',
         price: 39000,
-        images: ['/images/products/white-lily.jpg'],
+        images: ['/images/flowers/white/white-1.jpg'],
         categoryId: liliesCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -276,7 +328,7 @@ async function main() {
         description: 'Beautiful yellow sunflower from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Yellow Sunflower',
         price: 26000,
-        images: ['/images/products/yellow-sunflower.jpg'],
+        images: ['/images/flowers/yellow/yellow-1.jpg'],
         categoryId: sunflowersCategory?.id || '',
         isActive: true,
         stockQuantity: 30,
@@ -294,7 +346,7 @@ async function main() {
         description: 'Beautiful mixed bouquet from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Bouquet',
         price: 78000,
-        images: ['/images/products/mixed-bouquet.jpg'],
+        images: ['/images/flowers/mixed/mixed-1.jpg'],
         categoryId: bouquetsCategory?.id || '',
         isActive: true,
         isFeatured: true,
@@ -311,7 +363,7 @@ async function main() {
         description: 'Beautiful mixed arrangement from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Arrangement',
         price: 97500,
-        images: ['/images/products/mixed-arrangement.jpg'],
+        images: ['/images/flowers/mixed/mixed-2.jpg'],
         categoryId: bouquetsCategory?.id || '',
         isActive: true,
         stockQuantity: 15,
@@ -327,7 +379,7 @@ async function main() {
         description: 'Beautiful mixed gift set from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Gift Set',
         price: 104000,
-        images: ['/images/products/mixed-gift-set.jpg'],
+        images: ['/images/flowers/mixed/mixed-4.jpg'],
         categoryId: bouquetsCategory?.id || '',
         isActive: true,
         stockQuantity: 10,
@@ -345,12 +397,116 @@ async function main() {
         description: 'Beautiful mixed wedding bouquet from Akazuba Florist. Perfect for any occasion.',
         shortDescription: 'Mixed Wedding Bouquet',
         price: 156000,
-        images: ['/images/products/mixed-wedding-bouquet.jpg'],
+        images: ['/images/flowers/mixed/mixed-5.jpg'],
         categoryId: weddingCategory?.id || '',
         isActive: true,
         isFeatured: true,
         stockQuantity: 5,
         tags: ['mixed', 'wedding', 'premium'],
+      },
+    }),
+
+    // Perfumes
+    prisma.product.upsert({
+      where: { slug: 'bleu-de-chanel' },
+      update: {},
+      create: {
+        name: 'Bleu de Chanel',
+        slug: 'bleu-de-chanel',
+        description: 'A sophisticated woody aromatic fragrance for the modern gentleman.',
+        shortDescription: 'Bleu de Chanel - Men',
+        price: 250000,
+        images: ['/images/perfumes/perfume-1.jpg'],
+        categoryId: menPerfumesCategory?.id || perfumesCategory?.id || '',
+        isActive: true,
+        isFeatured: true,
+        stockQuantity: 15,
+        tags: ['men', 'woody', 'aromatic', 'fresh'],
+      },
+    }),
+    prisma.product.upsert({
+      where: { slug: 'miss-dior' },
+      update: {},
+      create: {
+        name: 'Miss Dior',
+        slug: 'miss-dior',
+        description: 'A romantic floral fragrance that captures the essence of love.',
+        shortDescription: 'Miss Dior - Women',
+        price: 180000,
+        images: ['/images/perfumes/perfume-2.jpg'],
+        categoryId: womenPerfumesCategory?.id || perfumesCategory?.id || '',
+        isActive: true,
+        isFeatured: true,
+        stockQuantity: 20,
+        tags: ['women', 'floral', 'fruity', 'fresh'],
+      },
+    }),
+    prisma.product.upsert({
+      where: { slug: 'acqua-di-gio' },
+      update: {},
+      create: {
+        name: 'Acqua di Gio',
+        slug: 'acqua-di-gio',
+        description: 'A refreshing aquatic fragrance inspired by the Mediterranean.',
+        shortDescription: 'Acqua di Gio - Men',
+        price: 165000,
+        images: ['/images/perfumes/perfume-3.jpg'],
+        categoryId: menPerfumesCategory?.id || perfumesCategory?.id || '',
+        isActive: true,
+        isFeatured: true,
+        stockQuantity: 18,
+        tags: ['men', 'aquatic', 'fresh', 'citrus'],
+      },
+    }),
+    prisma.product.upsert({
+      where: { slug: 'black-opium' },
+      update: {},
+      create: {
+        name: 'Black Opium',
+        slug: 'black-opium',
+        description: 'An addictive oriental fragrance with coffee and vanilla notes.',
+        shortDescription: 'Black Opium - Women',
+        price: 220000,
+        images: ['/images/perfumes/perfume-4.jpg'],
+        categoryId: womenPerfumesCategory?.id || perfumesCategory?.id || '',
+        isActive: true,
+        isFeatured: true,
+        stockQuantity: 12,
+        tags: ['women', 'oriental', 'vanilla', 'coffee'],
+      },
+    }),
+    prisma.product.upsert({
+      where: { slug: 'sauvage' },
+      update: {},
+      create: {
+        name: 'Sauvage',
+        slug: 'sauvage',
+        description: 'A powerful and fresh fragrance for the confident man.',
+        shortDescription: 'Sauvage - Men',
+        price: 200000,
+        images: ['/images/perfumes/perfume-5.jpg'],
+        categoryId: menPerfumesCategory?.id || perfumesCategory?.id || '',
+        isActive: true,
+        isFeatured: true,
+        stockQuantity: 16,
+        tags: ['men', 'fresh', 'spicy', 'woody'],
+      },
+    }),
+    prisma.product.upsert({
+      where: { slug: 'good-girl' },
+      update: {},
+      create: {
+        name: 'Good Girl',
+        slug: 'good-girl',
+        description: 'A seductive fragrance that celebrates the duality of women.',
+        shortDescription: 'Good Girl - Women',
+        price: 190000,
+        images: ['/images/perfumes/perfume-6.jpg'],
+        categoryId: womenPerfumesCategory?.id || perfumesCategory?.id || '',
+        isActive: true,
+        isFeatured: true,
+        stockQuantity: 14,
+        tags: ['women', 'floral', 'oriental', 'vanilla'],
       },
     }),
   ])
@@ -429,7 +585,7 @@ async function main() {
   console.log(`   - ${categories.length} categories`)
   console.log(`   - ${products.length} products`)
   console.log(`   - ${settings.length} system settings`)
-  console.log(`   - 1 admin user (admin@akazuba.com / admin123)`)
+  console.log(`   - 1 admin user (admin@akazubaflorist.com / akazuba2024)`)
 }
 
 main()

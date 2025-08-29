@@ -30,7 +30,7 @@ class SMSService {
       console.log('💬 Message:', message)
       console.log('⏰ Time:', new Date().toISOString())
       
-      // TODO: Implement actual MTN SMS API call
+      // TODO: Implement actual MTN SMS API call when MTN API credentials are available
       // This would require proper MTN API credentials and setup
       
       return true

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
@@ -89,15 +90,43 @@ const limiter = rateLimit({
 
 // Middleware
 app.use(helmet())
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    process.env.FRONTEND_URL
-  ].filter((url): url is string => Boolean(url)),
+
+// Enhanced CORS configuration
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'https://online-shopping-by-diane.vercel.app',
+      'https://akazuba-florist.vercel.app',
+      process.env.FRONTEND_URL
+    ].filter((url): url is string => Boolean(url))
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      console.log('CORS blocked origin:', origin)
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true,
-}))
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}
+
+app.use(cors(corsOptions))
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions))
+
 app.use(compression())
 app.use(limiter)
 app.use(express.json({ limit: '10mb' }))
@@ -166,4 +195,4 @@ process.on('SIGINT', async () => {
 })
 
 // Start the server
-startServer() 
+startServer()

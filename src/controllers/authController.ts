@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
@@ -8,7 +9,7 @@ import { validateEmail, validatePassword, validatePhone } from '../middleware/au
 const prisma = new PrismaClient()
 
 // JWT Configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-2024-development'
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d'
 

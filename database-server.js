@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -6,17 +7,29 @@ const { PrismaClient } = require('@prisma/client');
 
 const app = express();
 
-// Set the database URL directly since .env file is not accessible
-process.env.DATABASE_URL = "postgresql://postgres:0123@localhost:5434/akazuba_florist";
-
 const prisma = new PrismaClient();
-const PORT = process.env.PORT || 3001;
+
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    process.env.CORS_ORIGIN || 'http://localhost:3000',
+    'https://online-shopping-by-diane.vercel.app',
+    'https://online-shopping-by-diane-git-main-steven-shyakas-projects.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 app.use(express.json());
 
+// Serve static files
+app.use('/images', express.static('public/images'));
+app.use('/uploads', express.static('uploads'));
+
 const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-super-secret-jwt-key-2024';
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'akazuba-super-secret-refresh-key-2024';
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -766,8 +779,1079 @@ app.get('/api/v1/orders/my-orders', async (req, res) => {
   }
 });
 
+// Create order endpoint
+app.post('/api/v1/orders', async (req, res) => {
+  try {
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      customerAddress,
+      customerCity,
+      items,
+      paymentMethod,
+      notes,
+      subtotal,
+      deliveryFee,
+      totalAmount
+    } = req.body;
+
+    // Validate required fields
+    if (!customerName || !customerEmail || !customerPhone || !customerAddress || !customerCity || !items || !paymentMethod) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields'
+      });
+    }
+
+    // Generate order number
+    const orderCount = await prisma.order.count();
+    const orderNumber = `AKZ-${String(orderCount + 1).padStart(3, '0')}`;
+
+    // Create order
+    const order = await prisma.order.create({
+      data: {
+        orderNumber,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerAddress,
+        customerCity,
+        subtotal: Number(subtotal),
+        deliveryFee: Number(deliveryFee),
+        totalAmount: Number(totalAmount),
+        paymentMethod,
+        notes,
+        status: 'PENDING',
+        paymentStatus: 'PENDING'
+      }
+    });
+
+    // Create order items
+    const orderItems = await Promise.all(
+      items.map((item) =>
+        prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: item.productId,
+            productName: item.productName,
+            productSku: item.productSku,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice
+          }
+        })
+      )
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Order created successfully',
+      data: {
+        order: {
+          ...order,
+          items: orderItems
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Order creation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create order'
+    });
+  }
+});
+
+// Admin Authentication Middleware
+const authenticateAdmin = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
+
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Admin auth error:', error);
+    res.status(401).json({ error: 'Invalid token' });
+  }
+};
+
+// Admin Dashboard Stats
+app.get('/api/v1/admin/dashboard/stats', authenticateAdmin, async (req, res) => {
+  try {
+    const [totalOrders, totalRevenue, totalCustomers, totalProducts] = await Promise.all([
+      prisma.order.count(),
+      prisma.order.aggregate({
+        _sum: { totalAmount: true }
+      }),
+      prisma.user.count({
+        where: { role: 'CUSTOMER' }
+      }),
+      prisma.product.count()
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        totalOrders,
+        totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
+        totalCustomers,
+        totalProducts,
+        newCustomers: totalCustomers,
+        uniqueCustomers: totalCustomers,
+        averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+  }
+});
+
+// Admin Recent Orders
+app.get('/api/v1/admin/dashboard/recent-orders', authenticateAdmin, async (req, res) => {
+  try {
+    const recentOrders = await prisma.order.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    const formattedOrders = recentOrders.map(order => ({
+      id: order.id,
+      orderNumber: order.orderNumber || `ORD-${order.id.slice(-6)}`,
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+      totalAmount: Number(order.totalAmount),
+      status: order.status.toUpperCase(),
+      createdAt: order.createdAt.toISOString()
+    }));
+
+    res.json({
+      success: true,
+      data: formattedOrders
+    });
+  } catch (error) {
+    console.error('Error fetching recent orders:', error);
+    res.status(500).json({ error: 'Failed to fetch recent orders' });
+  }
+});
+
+// Admin Recent Activity
+app.get('/api/v1/admin/dashboard/activity', authenticateAdmin, async (req, res) => {
+  try {
+    const recentOrders = await prisma.order.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    });
+
+    const activities = recentOrders.map(order => ({
+      type: 'order',
+      title: 'New order received',
+      description: `Order #${order.orderNumber || `ORD-${order.id.slice(-6)}`} from ${order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User'}`,
+      timestamp: order.createdAt,
+      status: 'success'
+    }));
+
+    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const recentActivities = activities.slice(0, 10);
+
+    res.json({
+      success: true,
+      data: recentActivities
+    });
+  } catch (error) {
+    console.error('Error fetching recent activity:', error);
+    res.status(500).json({ error: 'Failed to fetch recent activity' });
+  }
+});
+
+// Admin Customers
+app.get('/api/v1/admin/customers', authenticateAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search } = req.query;
+    const skip = (page - 1) * limit;
+
+    const whereClause = {
+      role: 'CUSTOMER',
+      ...(search && {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [customers, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereClause,
+        skip: parseInt(skip),
+        take: parseInt(limit),
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          phone: true,
+          role: true,
+          isActive: true,
+          emailVerified: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      }),
+      prisma.user.count({ where: whereClause })
+    ]);
+
+    const customersWithStats = await Promise.all(
+      customers.map(async (customer) => {
+        const orders = await prisma.order.findMany({
+          where: { userId: customer.id }
+        });
+
+        const totalOrders = orders.length;
+        const totalSpent = orders.reduce((sum, order) => sum + Number(order.totalAmount), 0);
+        const wishlistItems = await prisma.wishlist.count({
+          where: { userId: customer.id }
+        });
+
+        const recentOrder = await prisma.order.findFirst({
+          where: { userId: customer.id },
+          orderBy: { createdAt: 'desc' },
+          select: { customerAddress: true, customerCity: true }
+        });
+
+        return {
+          ...customer,
+          totalOrders,
+          totalSpent,
+          status: totalSpent > 100000 ? 'vip' : 'active',
+          joinedDate: customer.createdAt.toISOString().split('T')[0],
+          address: recentOrder ? 
+            `${recentOrder.customerCity}, ${recentOrder.customerAddress}` : 
+            'Address not available',
+          wishlistItems
+        };
+      })
+    );
+
+    res.json({
+      success: true,
+      data: {
+        customers: customersWithStats,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching customers:', error);
+    res.status(500).json({ error: 'Failed to fetch customers' });
+  }
+});
+
+// Admin Orders
+app.get('/api/v1/admin/orders', authenticateAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, status, paymentStatus } = req.query;
+    const skip = (page - 1) * limit;
+
+    const whereClause = {
+      ...(search && {
+        OR: [
+          { orderNumber: { contains: search, mode: 'insensitive' } },
+          { customerName: { contains: search, mode: 'insensitive' } },
+          { customerEmail: { contains: search, mode: 'insensitive' } }
+        ]
+      }),
+      ...(status && { status }),
+      ...(paymentStatus && { paymentStatus })
+    };
+
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        where: whereClause,
+        skip: parseInt(skip),
+        take: parseInt(limit),
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: {
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
+          orderItems: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  price: true,
+                  images: true
+                }
+              }
+            }
+          }
+        }
+      }),
+      prisma.order.count({ where: whereClause })
+    ]);
+
+    const formattedOrders = orders.map(order => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+      customerEmail: order.user?.email || 'guest@akazubaflorist.com',
+      status: order.status,
+      subtotal: order.subtotal,
+      taxAmount: 0,
+      shippingAmount: Number(order.deliveryFee),
+      discountAmount: 0,
+      totalAmount: order.totalAmount,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      shippingAddress: {
+        address: order.customerAddress,
+        city: order.customerCity
+      },
+      items: order.orderItems.map(item => ({
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: Number(item.unitPrice),
+        productImage: item.productImage
+      })),
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        orders: formattedOrders,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+// Admin Single Order
+app.get('/api/v1/admin/orders/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        orderItems: {
+          include: {
+            product: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                images: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const formattedOrder = {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      userId: order.userId,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      totalAmount: Number(order.totalAmount),
+      deliveryFee: Number(order.deliveryFee),
+      customerName: order.user ? `${order.user.firstName} ${order.user.lastName}` : 'Guest User',
+      customerEmail: order.user?.email || order.customerEmail || 'guest@akazubaflorist.com',
+      customerPhone: order.customerPhone || 'N/A',
+      customerAddress: order.customerAddress || 'N/A',
+      customerCity: order.customerCity || 'N/A',
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      items: order.orderItems.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: Number(item.unitPrice),
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+          images: item.product.images || [],
+          price: item.product.price
+        }
+      })),
+      user: order.user ? {
+        id: order.user.id,
+        name: `${order.user.firstName} ${order.user.lastName}`,
+        email: order.user.email
+      } : undefined
+    };
+
+    res.json({
+      success: true,
+      data: formattedOrder
+    });
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    res.status(500).json({ error: 'Failed to fetch order' });
+  }
+});
+
+// Admin Products Management
+app.get('/api/v1/admin/products', authenticateAdmin, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, search, category, status } = req.query;
+    const skip = (page - 1) * limit;
+
+    const whereClause = {
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ]
+      }),
+      ...(category && category !== 'all' && { categoryId: category }),
+      ...(status && status !== 'all' && {
+        isActive: status === 'active'
+      })
+    };
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where: whereClause,
+        skip: parseInt(skip),
+        take: parseInt(limit),
+        include: {
+          category: {
+            select: {
+              name: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.product.count({ where: whereClause })
+    ]);
+
+    const formattedProducts = products.map(product => ({
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      shortDescription: product.shortDescription,
+      price: Number(product.price),
+      salePrice: product.salePrice ? Number(product.salePrice) : undefined,
+      costPrice: product.costPrice ? Number(product.costPrice) : undefined,
+      sku: product.sku,
+      stockQuantity: product.stockQuantity,
+      minStockAlert: product.minStockAlert,
+      categoryId: product.categoryId,
+      categoryName: product.category?.name || 'Uncategorized',
+      images: product.images || [],
+      isActive: product.isActive,
+      isFeatured: product.isFeatured,
+      weight: product.weight ? Number(product.weight) : undefined,
+      dimensions: product.dimensions || {},
+      tags: product.tags || [],
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+      views: 0, // Placeholder
+      sales: 0, // Placeholder
+      revenue: 0, // Placeholder
+      rating: 0, // Placeholder
+      reviewCount: 0 // Placeholder
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        products: formattedProducts,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+app.post('/api/v1/admin/products', authenticateAdmin, async (req, res) => {
+  try {
+    const productData = req.body;
+    
+    // Create or find category
+    let categoryId = productData.categoryId;
+    if (productData.categoryName && !categoryId) {
+      const category = await prisma.category.upsert({
+        where: { name: productData.categoryName },
+        update: {},
+        create: {
+          name: productData.categoryName,
+          slug: productData.categoryName.toLowerCase().replace(/\s+/g, '-'),
+          description: `${productData.categoryName} category`
+        }
+      });
+      categoryId = category.id;
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name: productData.name,
+        slug: productData.slug,
+        description: productData.description,
+        shortDescription: productData.shortDescription,
+        price: productData.price,
+        salePrice: productData.salePrice,
+        costPrice: productData.costPrice,
+        sku: productData.sku,
+        stockQuantity: productData.stockQuantity || 0,
+        minStockAlert: productData.minStockAlert || 5,
+        categoryId: categoryId,
+        images: productData.images || [],
+        isActive: productData.isActive !== undefined ? productData.isActive : true,
+        isFeatured: productData.isFeatured || false,
+        weight: productData.weight,
+        dimensions: productData.dimensions || {},
+        tags: productData.tags || []
+      },
+      include: {
+        category: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    const formattedProduct = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      shortDescription: product.shortDescription,
+      price: Number(product.price),
+      salePrice: product.salePrice ? Number(product.salePrice) : undefined,
+      costPrice: product.costPrice ? Number(product.costPrice) : undefined,
+      sku: product.sku,
+      stockQuantity: product.stockQuantity,
+      minStockAlert: product.minStockAlert,
+      categoryId: product.categoryId,
+      categoryName: product.category?.name || 'Uncategorized',
+      images: product.images || [],
+      isActive: product.isActive,
+      isFeatured: product.isFeatured,
+      weight: product.weight ? Number(product.weight) : undefined,
+      dimensions: product.dimensions || {},
+      tags: product.tags || [],
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+      views: 0,
+      sales: 0,
+      revenue: 0,
+      rating: 0,
+      reviewCount: 0
+    };
+
+    res.status(201).json({
+      success: true,
+      data: formattedProduct
+    });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+app.put('/api/v1/admin/products/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const productData = req.body;
+
+    // Create or find category if categoryName is provided
+    let categoryId = productData.categoryId;
+    if (productData.categoryName && !categoryId) {
+      const category = await prisma.category.upsert({
+        where: { name: productData.categoryName },
+        update: {},
+        create: {
+          name: productData.categoryName,
+          slug: productData.categoryName.toLowerCase().replace(/\s+/g, '-'),
+          description: `${productData.categoryName} category`
+        }
+      });
+      categoryId = category.id;
+    }
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        name: productData.name,
+        slug: productData.slug,
+        description: productData.description,
+        shortDescription: productData.shortDescription,
+        price: productData.price,
+        salePrice: productData.salePrice,
+        costPrice: productData.costPrice,
+        sku: productData.sku,
+        stockQuantity: productData.stockQuantity,
+        minStockAlert: productData.minStockAlert,
+        categoryId: categoryId,
+        images: productData.images,
+        isActive: productData.isActive,
+        isFeatured: productData.isFeatured,
+        weight: productData.weight,
+        dimensions: productData.dimensions,
+        tags: productData.tags
+      },
+      include: {
+        category: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    const formattedProduct = {
+      id: product.id,
+      name: product.name,
+      slug: product.slug,
+      description: product.description,
+      shortDescription: product.shortDescription,
+      price: Number(product.price),
+      salePrice: product.salePrice ? Number(product.salePrice) : undefined,
+      costPrice: product.costPrice ? Number(product.costPrice) : undefined,
+      sku: product.sku,
+      stockQuantity: product.stockQuantity,
+      minStockAlert: product.minStockAlert,
+      categoryId: product.categoryId,
+      categoryName: product.category?.name || 'Uncategorized',
+      images: product.images || [],
+      isActive: product.isActive,
+      isFeatured: product.isFeatured,
+      weight: product.weight ? Number(product.weight) : undefined,
+      dimensions: product.dimensions || {},
+      tags: product.tags || [],
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+      views: 0,
+      sales: 0,
+      revenue: 0,
+      rating: 0,
+      reviewCount: 0
+    };
+
+    res.json({
+      success: true,
+      data: formattedProduct
+    });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+app.delete('/api/v1/admin/products/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await prisma.product.delete({
+      where: { id }
+    });
+
+    res.json({
+      success: true,
+      message: 'Product deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
+app.post('/api/v1/admin/products/bulk', authenticateAdmin, async (req, res) => {
+  try {
+    const { operation, productIds, data } = req.body;
+
+    switch (operation) {
+      case 'delete':
+        await prisma.product.deleteMany({
+          where: { id: { in: productIds } }
+        });
+        break;
+      case 'activate':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isActive: true }
+        });
+        break;
+      case 'deactivate':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isActive: false }
+        });
+        break;
+      case 'feature':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isFeatured: true }
+        });
+        break;
+      case 'unfeature':
+        await prisma.product.updateMany({
+          where: { id: { in: productIds } },
+          data: { isFeatured: false }
+        });
+        break;
+      case 'updateStock':
+        if (data && data.operation && data.quantity !== undefined) {
+          const products = await prisma.product.findMany({
+            where: { id: { in: productIds } }
+          });
+
+          for (const product of products) {
+            let newQuantity = product.stockQuantity;
+            switch (data.operation) {
+              case 'add':
+                newQuantity += data.quantity;
+                break;
+              case 'subtract':
+                newQuantity = Math.max(0, newQuantity - data.quantity);
+                break;
+              case 'set':
+                newQuantity = data.quantity;
+                break;
+            }
+            
+            await prisma.product.update({
+              where: { id: product.id },
+              data: { stockQuantity: newQuantity }
+            });
+          }
+        }
+        break;
+      default:
+        return res.status(400).json({ error: 'Invalid operation' });
+    }
+
+    res.json({
+      success: true,
+      message: `Bulk operation '${operation}' completed successfully`
+    });
+  } catch (error) {
+    console.error('Error performing bulk operation:', error);
+    res.status(500).json({ error: 'Failed to perform bulk operation' });
+  }
+});
+
+// Admin Order Status Updates
+app.put('/api/v1/admin/orders/:id/status', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const order = await prisma.order.update({
+      where: { id },
+      data: { status }
+    });
+
+    res.json({
+      success: true,
+      data: order
+    });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+});
+
+app.put('/api/v1/admin/orders/:id/payment-status', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { paymentStatus } = req.body;
+
+    const order = await prisma.order.update({
+      where: { id },
+      data: { paymentStatus }
+    });
+
+    res.json({
+      success: true,
+      data: order
+    });
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    res.status(500).json({ error: 'Failed to update payment status' });
+  }
+});
+
+// Admin Customer Management
+app.put('/api/v1/admin/customers/:id/deactivate', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const customer = await prisma.user.update({
+      where: { id },
+      data: { isActive: false }
+    });
+
+    res.json({
+      success: true,
+      data: customer
+    });
+  } catch (error) {
+    console.error('Error deactivating customer:', error);
+    res.status(500).json({ error: 'Failed to deactivate customer' });
+  }
+});
+
+app.get('/api/v1/admin/customers/:id/orders', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const orders = await prisma.order.findMany({
+      where: { userId: id },
+      include: {
+        orderItems: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                price: true,
+                images: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedOrders = orders.map(order => ({
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      totalAmount: Number(order.totalAmount),
+      createdAt: order.createdAt.toISOString(),
+      items: order.orderItems.map(item => ({
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: Number(item.unitPrice)
+      }))
+    }));
+
+    res.json({
+      success: true,
+      data: formattedOrders
+    });
+  } catch (error) {
+    console.error('Error fetching customer orders:', error);
+    res.status(500).json({ error: 'Failed to fetch customer orders' });
+  }
+});
+
+// Create admin user if it doesn't exist
+app.post('/api/v1/admin/setup', async (req, res) => {
+  try {
+    const adminEmail = 'admin@akazubaflorist.com';
+    const adminPassword = 'akazuba2024';
+    
+    // Check if admin already exists
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: adminEmail }
+    });
+
+    if (existingAdmin) {
+      return res.json({ 
+        message: 'Admin user already exists',
+        email: adminEmail,
+        password: adminPassword
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+
+    // Create admin user
+    const adminUser = await prisma.user.create({
+      data: {
+        email: adminEmail,
+        passwordHash: hashedPassword,
+        firstName: 'Admin',
+        lastName: 'User',
+        phone: '+250700000000',
+        role: 'ADMIN',
+        isActive: true,
+        emailVerified: true,
+      }
+    });
+
+    res.status(201).json({
+      message: 'Admin user created successfully',
+      email: adminEmail,
+      password: adminPassword,
+      user: {
+        id: adminUser.id,
+        email: adminUser.email,
+        role: adminUser.role
+      }
+    });
+  } catch (error) {
+    console.error('Error creating admin user:', error);
+    res.status(500).json({ error: 'Failed to create admin user' });
+  }
+});
+
+// Database seeding function
+async function seedDatabase() {
+  try {
+    console.log('🌱 Checking if database needs seeding...');
+    
+    // Check if products exist
+    const productCount = await prisma.product.count();
+    const categoryCount = await prisma.category.count();
+    
+    if (productCount === 0 && categoryCount === 0) {
+      console.log('🌱 Database is empty, running seed script...');
+      
+      // Import and run the seed script
+      const { execSync } = require('child_process');
+      try {
+        execSync('node prisma/seed.js', { stdio: 'inherit' });
+        console.log('✅ Database seeded successfully!');
+      } catch (seedError) {
+        console.error('❌ Error running seed script:', seedError);
+        console.log('🔄 Attempting manual seeding...');
+        
+        // Manual seeding as fallback
+        await manualSeed();
+      }
+    } else {
+      console.log(`✅ Database already has ${productCount} products and ${categoryCount} categories`);
+    }
+  } catch (error) {
+    console.error('❌ Error checking/seeding database:', error);
+  }
+}
+
+// Manual seeding function as fallback
+async function manualSeed() {
+  try {
+    console.log('🌱 Running manual database seeding...');
+    
+    // Create categories
+    const categories = await Promise.all([
+      prisma.category.create({ data: { name: 'Roses', description: 'Beautiful roses for every occasion' } }),
+      prisma.category.create({ data: { name: 'Tulips', description: 'Colorful tulips to brighten your day' } }),
+      prisma.category.create({ data: { name: 'Mixed Bouquets', description: 'Stunning mixed flower arrangements' } }),
+      prisma.category.create({ data: { name: 'Sunflowers', description: 'Bright and cheerful sunflowers' } })
+    ]);
+    
+    console.log('✅ Categories created:', categories.length);
+    
+    // Create sample products
+    const products = await Promise.all([
+      prisma.product.create({
+        data: {
+          name: 'Red Rose Bouquet',
+          description: 'A beautiful bouquet of 12 red roses',
+          price: 45.99,
+          image: '/images/flowers/red/red-1.jpg',
+          categoryId: categories[0].id,
+          color: 'red',
+          featured: true,
+          inStock: true,
+          stockQuantity: 50
+        }
+      }),
+      prisma.product.create({
+        data: {
+          name: 'Yellow Tulip Arrangement',
+          description: 'Fresh yellow tulips in a vase',
+          price: 35.99,
+          image: '/images/flowers/yellow/yellow-1.jpg',
+          categoryId: categories[1].id,
+          color: 'yellow',
+          featured: true,
+          inStock: true,
+          stockQuantity: 30
+        }
+      }),
+      prisma.product.create({
+        data: {
+          name: 'Mixed Spring Bouquet',
+          description: 'Colorful spring flowers mixed arrangement',
+          price: 55.99,
+          image: '/images/flowers/mixed/mixed-1.jpg',
+          categoryId: categories[2].id,
+          color: 'mixed',
+          featured: true,
+          inStock: true,
+          stockQuantity: 25
+        }
+      })
+    ]);
+    
+    console.log('✅ Products created:', products.length);
+    console.log('🎉 Manual seeding completed successfully!');
+    
+  } catch (error) {
+    console.error('❌ Error in manual seeding:', error);
+  }
+}
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Akazuba Backend with Database running on port ${PORT}`);
   console.log(`📍 Health check: http://localhost:${PORT}/health`);
   console.log(`🔐 Auth endpoints: http://localhost:${PORT}/api/v1/auth/`);
@@ -776,6 +1860,10 @@ app.listen(PORT, () => {
   console.log(`🛒 Cart: http://localhost:${PORT}/api/v1/cart`);
   console.log(`❤️ Wishlist: http://localhost:${PORT}/api/v1/wishlist`);
   console.log(`📋 Orders: http://localhost:${PORT}/api/v1/orders/my-orders`);
+  console.log(`👨‍💼 Admin setup: http://localhost:${PORT}/api/v1/admin/setup`);
+  
+  // Run database seeding on startup
+  await seedDatabase();
 });
 
 // Graceful shutdown

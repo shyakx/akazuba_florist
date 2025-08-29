@@ -66,6 +66,9 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
 // Require authentication
 export const requireAuth = verifyToken
 
+// Alias for authenticateToken (used in admin routes)
+export const authenticateToken = verifyToken
+
 // Require admin role
 export const requireAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {

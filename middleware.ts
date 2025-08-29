@@ -17,7 +17,7 @@ const adminRoutes = [
 // Define admin test routes (no authentication required)
 const adminTestRoutes = [
   '/admin/test-simple',
-  '/admin/enhanced'
+      '/admin'
 ]
 
 // Define auth routes (login, register)
