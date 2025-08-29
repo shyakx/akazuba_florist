@@ -25,16 +25,8 @@ const Footer = () => {
               <span className="ml-3 text-2xl font-bold">Akazuba Florist</span>
             </div>
             <p className="text-gray-300 text-sm mb-4">
-              Rwanda&apos;s premier floral destination, crafting exquisite arrangements that tell your story.
+              Premium flowers and perfumes delivered fresh to your door.
             </p>
-            <div className="flex items-center space-x-1 mb-4">
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <Star className="h-4 w-4 text-yellow-400 fill-current" />
-              <span className="text-gray-400 text-sm ml-2">500+ happy customers</span>
-            </div>
             <div className="flex space-x-4">
               {[
                 { icon: Facebook, href: "#", label: "Facebook" },
@@ -138,18 +130,17 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Additional Links */}
+          {/* Shopping Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4 text-white">
-              More About Us
+              Shopping
             </h3>
             <ul className="space-y-3">
               {[
-                { name: "About Our Story", href: "/about", desc: "The passion behind our petals" },
-                { name: "Get in Touch", href: "/contact", desc: "Let's create something beautiful" },
-                { name: "Our Services", href: "/services", desc: "What we offer" },
+                { name: "Get in Touch", href: "/contact", desc: "Customer support" },
                 { name: "Delivery Info", href: "/delivery", desc: "How we deliver" },
-                { name: "Privacy Policy", href: "/privacy", desc: "Your privacy matters" }
+                { name: "Privacy Policy", href: "/privacy", desc: "Your privacy matters" },
+                { name: "Terms of Service", href: "/terms", desc: "Terms and conditions" }
               ].map((link, index) => (
                 <li key={index}>
                   <Link
@@ -167,42 +158,20 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright & Made with Love */}
+        {/* Copyright */}
         <div className="border-t border-gray-800 pt-6 mb-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm mb-2 md:mb-0">
-              © 2024 Akazuba Florist. Crafting beauty, one bloom at a time.
+              © 2024 Akazuba Florist. All rights reserved.
             </p>
             <div className="flex items-center space-x-2">
-              <span className="text-gray-400 text-sm">Made with</span>
-              <Heart className="h-4 w-4 text-pink-400 fill-current" />
-              <span className="text-gray-400 text-sm">in the heart of Rwanda</span>
+              <span className="text-gray-400 text-sm">Secure shopping</span>
+              <span className="text-green-400">✓</span>
             </div>
           </div>
         </div>
 
-        {/* Cloud Sync Attribution */}
-        <div className="border-t border-gray-800 pt-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-3 mb-2 md:mb-0">
-              <span className="text-gray-400 text-sm">Powered by</span>
-              <div className="flex items-center">
-                <div className="flex items-center space-x-3 bg-black rounded-lg px-3 py-1 shadow-lg border border-gray-700">
-                  <div className="flex items-center space-x-1">
-                    <div className="relative">
-                      <div className="w-5 h-1 bg-orange-500 transform rotate-45 origin-center"></div>
-                      <div className="w-3 h-1 bg-orange-500 transform rotate-45 -mt-1 ml-1 origin-center"></div>
-                    </div>
-                  </div>
-                  <span className="text-white text-sm font-medium ml-2">Cloud Sync</span>
-                </div>
-              </div>
-            </div>
-            <div className="text-gray-400 text-xs">
-              E-commerce platform developed by Cloud Sync
-            </div>
-          </div>
-        </div>
+
       </div>
     </footer>
   )

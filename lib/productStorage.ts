@@ -1,6 +1,18 @@
 import { realFlowerProducts } from '@/data/real-flowers'
 import { AdminProduct } from './adminApi'
 
+// Helper function to get API base URL
+const getApiBaseUrl = (): string => {
+  const isDevelopment = process.env.NODE_ENV === 'development'
+  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  
+  if (isDevelopment || isLocalhost) {
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+  } else {
+    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+  }
+}
+
 // Transform real flower data to admin product format
 const transformToAdminProduct = (product: any, index: number): AdminProduct => {
   // Ensure we have a valid image path
@@ -110,7 +122,7 @@ class ProductStorage {
         return this.getLocalProducts(options)
       }
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+      const baseURL = getApiBaseUrl()
       const queryParams = new URLSearchParams()
       
       if (options?.page) queryParams.append('page', options.page.toString())
@@ -234,7 +246,7 @@ class ProductStorage {
         return newProduct
       }
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+      const baseURL = getApiBaseUrl()
       
       const response = await fetch(`${baseURL}/admin/products`, {
         method: 'POST',
@@ -425,7 +437,7 @@ class ProductStorage {
       const token = localStorage.getItem('accessToken')
       if (!token) return
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+      const baseURL = getApiBaseUrl()
       
       switch (operation) {
         case 'create':
@@ -471,7 +483,7 @@ class ProductStorage {
       const token = localStorage.getItem('accessToken')
       if (!token) return
 
-      const baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+      const baseURL = getApiBaseUrl()
       
       await fetch(`${baseURL}/admin/products/bulk`, {
         method: 'POST',

@@ -10,6 +10,13 @@ const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 // Apply rate limiting to auth endpoints
 const authLimiter = (0, express_rate_limit_1.default)(auth_1.authRateLimit);
+// Handle preflight requests for CORS
+router.options('*', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    res.status(200).end();
+});
 /**
  * @swagger
  * /auth/register:

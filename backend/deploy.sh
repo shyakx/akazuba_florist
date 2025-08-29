@@ -1,31 +1,29 @@
 #!/bin/bash
 
-echo "🚀 Starting Akazuba Backend Deployment..."
+echo "🚀 Starting Akazuba Florist Backend Deployment..."
 
-# Check if we're in production
-if [ "$NODE_ENV" = "production" ]; then
-    echo "📦 Production deployment detected"
-    
-    # Install dependencies
-    echo "📥 Installing dependencies..."
-    npm install --production
-    
-    # Build the project
-    echo "🔨 Building project..."
-    npm run build
-    
-    # Run database migrations
-    echo "🗄️ Running database migrations..."
-    npx prisma migrate deploy
-    
-    # Generate Prisma client
-    echo "⚙️ Generating Prisma client..."
-    npx prisma generate
-    
-    # Start the server
-    echo "🚀 Starting server..."
-    npm start
-else
-    echo "🛠️ Development mode detected"
-    npm run dev
+# Check if we're in the backend directory
+if [ ! -f "package.json" ]; then
+    echo "❌ Error: Please run this script from the backend directory"
+    exit 1
 fi
+
+# Install dependencies
+echo "📦 Installing dependencies..."
+npm install
+
+# Build the project
+echo "🔨 Building the project..."
+npm run build
+
+# Run database migrations
+echo "🗄️ Running database migrations..."
+npx prisma migrate deploy
+
+# Seed the database with categories and products
+echo "🌱 Seeding database with categories and products..."
+npx prisma db seed
+
+# Start the server
+echo "🚀 Starting the server..."
+npm start

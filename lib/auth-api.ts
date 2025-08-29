@@ -39,8 +39,9 @@ export interface LoginRequest {
   password: string
 }
 
-// API Base URL - Use production backend by default for immediate deployment
+// Production-only API Base URL
 const getApiBaseUrl = (): string => {
+  // Always use production backend - no development fallback
   return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
 }
 
@@ -69,6 +70,9 @@ const apiRequest = async <T>(
       ...defaultHeaders,
       ...options.headers,
     },
+    // Add CORS mode for cross-origin requests
+    mode: 'cors',
+    credentials: 'include',
   }
   
   try {

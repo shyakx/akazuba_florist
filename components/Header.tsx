@@ -73,9 +73,8 @@ const Header = () => {
       href: '/category/perfumes'
     })
 
-    // Add static pages
+    // Add essential pages only
     navigation.push(
-      { name: 'About', href: '/about' },
       { name: 'Contact', href: '/contact' }
     )
 
@@ -94,7 +93,6 @@ const Header = () => {
     { name: 'Bouquets', href: '/category/mixed' },
     { name: 'Colors', href: '/category/colors' },
     { name: 'Perfumes', href: '/category/perfumes' },
-    { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ]
 
@@ -116,17 +114,16 @@ const Header = () => {
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm'
     }`}>
-      {/* Top Info Bar */}
+      {/* Top Info Bar - Shopping Focused */}
       <div className="bg-green-600 text-white py-2 px-4 text-sm">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <span>📞 +250 784 586 110</span>
-            <span>📍 Kigali, Rwanda</span>
-          </div>
-          <div className="hidden sm:flex items-center space-x-4">
             <span>🚚 Free delivery in Kigali</span>
             <span>🌸 Fresh flowers daily</span>
-            <span>📸 @akazuba_florists</span>
+          </div>
+          <div className="hidden sm:flex items-center space-x-4">
+            <span>📞 +250 784 586 110</span>
+            <span>💳 Secure payment</span>
           </div>
         </div>
       </div>

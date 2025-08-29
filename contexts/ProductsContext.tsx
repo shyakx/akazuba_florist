@@ -186,7 +186,25 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   const getProductsByCategory = (category: string): Product[] => {
-    return state.products.filter(product => product.category === category)
+    // Handle both singular and plural category names
+    const categoryMap: { [key: string]: string[] } = {
+      'flowers': ['flowers', 'flower'],
+      'perfumes': ['perfumes', 'perfume'],
+      'roses': ['roses', 'rose'],
+      'tulips': ['tulips', 'tulip'],
+      'lilies': ['lilies', 'lily'],
+      'sunflowers': ['sunflowers', 'sunflower'],
+      'bouquets': ['bouquets', 'bouquet'],
+      'wedding-flowers': ['wedding-flowers', 'wedding', 'wedding flowers'],
+      'men-perfumes': ['men-perfumes', 'men', 'men perfume'],
+      'women-perfumes': ['women-perfumes', 'women', 'women perfume'],
+      'unisex-perfumes': ['unisex-perfumes', 'unisex', 'unisex perfume']
+    }
+    
+    const validCategories = categoryMap[category] || [category]
+    return state.products.filter(product => 
+      validCategories.includes(product.category.toLowerCase())
+    )
   }
 
   const getFeaturedByCategory = (category: string): Product[] => {

@@ -26,7 +26,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Woody, Aromatic, Fresh',
     price: 250000,
     description: 'A sophisticated woody aromatic fragrance for the modern gentleman.',
-    image: '/images/perfumes/perfume-1.jpg',
+    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
     featured: true
   },
   {
@@ -39,7 +39,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Floral, Fruity, Fresh',
     price: 180000,
     description: 'A romantic floral fragrance that captures the essence of love.',
-    image: '/images/perfumes/perfume-2.jpg',
+    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
     featured: true
   },
   {
@@ -52,7 +52,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Aquatic, Fresh, Citrus',
     price: 165000,
     description: 'A refreshing aquatic fragrance inspired by the Mediterranean.',
-    image: '/images/perfumes/perfume-3.jpg',
+    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
     featured: true
   },
   {
@@ -65,7 +65,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Oriental, Vanilla, Coffee',
     price: 220000,
     description: 'An addictive oriental fragrance with coffee and vanilla notes.',
-    image: '/images/perfumes/perfume-4.jpg',
+    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
     featured: true
   },
   {
@@ -78,7 +78,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Fresh, Spicy, Woody',
     price: 200000,
     description: 'A powerful and fresh fragrance for the confident man.',
-    image: '/images/perfumes/perfume-5.jpg',
+    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
     featured: true
   },
   {
@@ -91,7 +91,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Floral, Oriental, Vanilla',
     price: 190000,
     description: 'A seductive fragrance that celebrates the duality of women.',
-    image: '/images/perfumes/perfume-6.jpg',
+    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
     featured: true
   },
   {
@@ -104,7 +104,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Fresh, Citrus, Floral',
     price: 140000,
     description: 'A fresh and light fragrance perfect for everyday wear.',
-    image: '/images/perfumes/perfume-7.jpg',
+    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
     featured: false
   },
   {
@@ -117,7 +117,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Fresh, Oriental, Woody',
     price: 160000,
     description: 'A passionate and seductive fragrance for the modern man.',
-    image: '/images/perfumes/perfume-8.jpg',
+    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
     featured: false
   },
   {
@@ -130,7 +130,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Floral, Fruity, Gourmand',
     price: 175000,
     description: 'A joyful fragrance that celebrates the beauty of life.',
-    image: '/images/perfumes/perfume-9.jpg',
+    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
     featured: false
   },
   {
@@ -143,7 +143,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Fresh, Oriental, Spicy',
     price: 180000,
     description: 'A bold and luxurious fragrance for the confident man.',
-    image: '/images/perfumes/perfume-10.jpg',
+    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
     featured: false
   },
   {
@@ -156,7 +156,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Floral, Vanilla, White Musk',
     price: 170000,
     description: 'A personal and intimate fragrance that tells your story.',
-    image: '/images/perfumes/perfume-11.jpg',
+    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
     featured: false
   },
   {
@@ -169,7 +169,7 @@ export const perfumeProducts: PerfumeProduct[] = [
     notes: 'Amber, Saffron, Jasmine',
     price: 450000,
     description: 'An exclusive and luxurious fragrance with precious ingredients.',
-    image: '/images/perfumes/perfume-12.jpg',
+    image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
     featured: false
   }
 ]

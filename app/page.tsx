@@ -6,8 +6,6 @@ import CategorySelector from '@/components/CategorySelector'
 import FeaturedProducts from '@/components/FeaturedProducts'
 import FeaturedPerfumes from '@/components/FeaturedPerfumes'
 import PaymentMethods from '@/components/PaymentMethods'
-import About from '@/components/About'
-import Testimonials from '@/components/Testimonials'
 import Footer from '@/components/Footer'
 
 export default function Home() {
@@ -18,8 +16,6 @@ export default function Home() {
       <FeaturedProducts />
       <FeaturedPerfumes />
       <PaymentMethods />
-      <About />
-      <Testimonials />
       <Footer />
     </main>
   )

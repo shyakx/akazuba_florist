@@ -47,8 +47,17 @@ const PerfumeCard = ({ product, showRating = true, className = '' }: PerfumeCard
     
     // Try fallback image
     const img = e.currentTarget
-    if (img.src !== 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop') {
-      img.src = 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop'
+    const fallbackImages = [
+      'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
+      'https://images.unsplash.com/photo-1592945403244-b3faa74b2c98?w=400&h=400&fit=crop'
+    ]
+    
+    const currentIndex = fallbackImages.indexOf(img.src)
+    const nextIndex = (currentIndex + 1) % fallbackImages.length
+    
+    if (currentIndex === -1 || currentIndex < fallbackImages.length - 1) {
+      img.src = fallbackImages[nextIndex]
     } else {
       img.style.display = 'none'
     }

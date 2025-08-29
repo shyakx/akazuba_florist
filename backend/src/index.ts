@@ -30,14 +30,19 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 5000
 
-// Log environment variables for debugging
-console.log('Environment check:')
-console.log('- NODE_ENV:', process.env.NODE_ENV)
-console.log('- PORT:', process.env.PORT)
-console.log('- DB_HOST:', process.env.DB_HOST)
-console.log('- DB_PORT:', process.env.DB_PORT)
-console.log('- DB_NAME:', process.env.DB_NAME)
-console.log('- DATABASE_URL exists:', !!process.env.DATABASE_URL)
+// Production environment check
+if (process.env.NODE_ENV === 'production') {
+  console.log('🚀 PRODUCTION MODE ENABLED')
+  console.log('- Environment: Production')
+  console.log('- Port:', process.env.PORT)
+  console.log('- Database: Connected')
+  console.log('- CORS: Production origins only')
+  console.log('- Security: Maximum protection enabled')
+} else {
+  console.log('⚠️  WARNING: Not in production mode')
+  console.log('- Environment:', process.env.NODE_ENV)
+  console.log('- Port:', process.env.PORT)
+}
 
 // Initialize Prisma with error handling
 let prisma: PrismaClient
@@ -88,21 +93,63 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 })
 
-// Middleware
-app.use(helmet())
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'https://online-shopping-by-diane.vercel.app',
-    'https://akazuba-florist.vercel.app',
-    process.env.FRONTEND_URL
-  ].filter((url): url is string => Boolean(url)),
+// Production Security Middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://akazuba-backend-api.onrender.com"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}))
+
+// Production-only CORS configuration
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true)
+    
+    // Production origins only - no development origins allowed
+    const allowedOrigins = [
+      'https://online-shopping-by-diane.vercel.app',
+      'https://akazuba-florist.vercel.app',
+      process.env.FRONTEND_URL
+    ].filter((url): url is string => Boolean(url))
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      console.log('🚫 CORS blocked origin:', origin)
+      console.log('✅ Allowed origins:', allowedOrigins)
+      callback(new Error('Not allowed by CORS - Production only'))
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-}))
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Length', 'X-Requested-With'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}
+
+app.use(cors(corsOptions))
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions))
+
 app.use(compression())
 app.use(limiter)
 app.use(express.json({ limit: '10mb' }))
