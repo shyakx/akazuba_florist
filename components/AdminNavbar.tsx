@@ -89,7 +89,7 @@ const AdminNavbar = () => {
                     <div className="relative">
                       <button
                         onClick={() => setIsProductsDropdownOpen(!isProductsDropdownOpen)}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                           isActive(item.href)
                             ? 'bg-blue-50 text-blue-700 border border-blue-200'
                             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -126,7 +126,7 @@ const AdminNavbar = () => {
                   ) : (
                     <Link
                       href={item.href}
-                      className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                         isActive(item.href)
                           ? 'bg-blue-50 text-blue-700 border border-blue-200'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -142,8 +142,8 @@ const AdminNavbar = () => {
 
             {/* User Menu */}
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
-                <User className="w-4 h-4 text-white" />
+              <div className="w-6 h-6 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
+                <User className="w-3 h-3 text-white" />
               </div>
               <div className="hidden md:block">
                 <div className="text-sm font-medium text-gray-900">
@@ -156,7 +156,7 @@ const AdminNavbar = () => {
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                className="flex items-center space-x-2 px-2 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden md:block">Logout</span>
@@ -172,10 +172,10 @@ const AdminNavbar = () => {
           <div className="flex justify-between items-center h-14">
             {/* Logo */}
             <Link href="/admin" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
-                <Flower className="w-4 h-4 text-white" />
+              <div className="w-6 h-6 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
+                <Flower className="w-3 h-3 text-white" />
               </div>
-              <span className="text-base font-semibold text-gray-900">
+              <span className="text-sm font-semibold text-gray-900">
                 Admin
               </span>
             </Link>
