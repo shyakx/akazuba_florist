@@ -19,7 +19,7 @@ const corsOptions = {
     
     // Define allowed origins based on environment
     const productionOrigins = [
-      'https://online-shopping-by-diane.vercel.app',
+    'https://online-shopping-by-diane.vercel.app',
       'https://akazuba-florist.vercel.app',
       process.env.FRONTEND_URL
     ].filter((url) => Boolean(url))
