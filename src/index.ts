@@ -144,8 +144,14 @@ const corsOptions = {
       ? productionOrigins 
       : [...productionOrigins, ...developmentOrigins]
     
+    console.log('🔍 CORS Check:')
+    console.log('  - Origin:', origin)
+    console.log('  - Environment:', process.env.NODE_ENV || 'development')
+    console.log('  - Allowed origins:', allowedOrigins)
+    
     // Check if origin is in allowed list
     if (allowedOrigins.indexOf(origin) !== -1) {
+      console.log('✅ CORS allowed for:', origin)
       callback(null, true)
     } else {
       console.log('🚫 CORS blocked origin:', origin)
@@ -182,10 +188,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Florist API is running',
+    message: 'Akazuba Backend with Database is running!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    database: 'connected', // We'll update this based on actual connection status
+    database: 'connected',
+    cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed'
   })
 })
 
