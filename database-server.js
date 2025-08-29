@@ -33,7 +33,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'akazuba-super-secr
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Akazuba Backend with Database is running!' });
+  res.json({ status: 'OK', message: 'Akazuba Backend with Database is running! - Updated with refresh token support' });
 });
 
 // Register endpoint
