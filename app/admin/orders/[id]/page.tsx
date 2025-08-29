@@ -63,48 +63,9 @@ const OrderDetailsPage = () => {
         setOrder(orderData)
         setEditData(orderData)
       } catch (backendError) {
-        console.error('Backend connection failed, using fallback data:', backendError)
-        
-        // Fallback data when backend is unavailable
-        const fallbackOrder: AdminOrder = {
-          id: orderId,
-          orderNumber: `ORD-${orderId.slice(-3).toUpperCase()}`,
-          customerName: 'John Doe',
-          customerEmail: 'john@example.com',
-          customerPhone: '+250 788 123 456',
-          customerAddress: '123 Main St, Kigali',
-          customerCity: 'Kigali',
-          status: 'CONFIRMED',
-          subtotal: 25000,
-          deliveryFee: 2000,
-          totalAmount: 27000,
-          paymentMethod: 'MOMO',
-          paymentStatus: 'PAID',
-          deliveryStatus: 'PENDING',
-          trackingNumber: 'TRK123456789',
-          estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          notes: 'Customer requested delivery in the afternoon',
-          adminNotes: 'Order confirmed and ready for processing',
-          items: [
-            {
-              id: '1',
-              productId: '1',
-              productName: 'Beautiful Rose Bouquet',
-              productImage: '/images/flowers/red/rose-1.jpg',
-              quantity: 1,
-              unitPrice: 25000,
-              totalPrice: 25000,
-              color: 'Red',
-              type: 'Rose'
-            }
-          ],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-        
-        setOrder(fallbackOrder)
-        setEditData(fallbackOrder)
-        toast('Backend not available, showing demo data')
+        console.error('Backend connection failed:', backendError)
+        toast.error('Failed to connect to backend. Please check your connection.')
+        throw backendError
       }
     } catch (error) {
       console.error('Error fetching order details:', error)
@@ -119,16 +80,8 @@ const OrderDetailsPage = () => {
     
     try {
       setUpdating(true)
-      
-      // Try to update on backend first
-      try {
-        await adminAPI.updateOrderStatus(order.id, newStatus)
-        toast.success('Order status updated successfully')
-      } catch (backendError) {
-        console.error('Backend update failed, updating local state:', backendError)
-        setOrder(prev => prev ? { ...prev, status: newStatus, updatedAt: new Date().toISOString() } : null)
-        toast.success('Order status updated (offline mode)')
-      }
+      await adminAPI.updateOrderStatus(order.id, newStatus)
+      toast.success('Order status updated successfully')
     } catch (error: any) {
       console.error('Error updating order status:', error)
       toast.error(error.message || 'Failed to update order status')
@@ -142,16 +95,8 @@ const OrderDetailsPage = () => {
     
     try {
       setUpdating(true)
-      
-      // Try to update on backend first
-      try {
-        await adminAPI.updatePaymentStatus(order.id, newPaymentStatus)
-        toast.success('Payment status updated successfully')
-      } catch (backendError) {
-        console.error('Backend update failed, updating local state:', backendError)
-        setOrder(prev => prev ? { ...prev, paymentStatus: newPaymentStatus, updatedAt: new Date().toISOString() } : null)
-        toast.success('Payment status updated (offline mode)')
-      }
+      await adminAPI.updatePaymentStatus(order.id, newPaymentStatus)
+      toast.success('Payment status updated successfully')
     } catch (error: any) {
       console.error('Error updating payment status:', error)
       toast.error(error.message || 'Failed to update payment status')

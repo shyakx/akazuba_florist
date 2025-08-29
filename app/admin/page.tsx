@@ -213,105 +213,101 @@ const AdminDashboard = () => {
         console.log('  - Activity:', activityResponse.status, activityResponse.statusText)
         console.log('  - Analytics:', analyticsResponse.status, analyticsResponse.statusText)
 
-        // Check if any response is not ok (like 401 Unauthorized)
-        if (!statsResponse.ok || !ordersResponse.ok || !activityResponse.ok || !analyticsResponse.ok) {
-          // If we get 401, the user might not be properly authenticated as admin
-          if (statsResponse.status === 401 || ordersResponse.status === 401 || activityResponse.status === 401 || analyticsResponse.status === 401) {
-            console.error('Admin authentication failed - redirecting to login')
-            toast.error('Admin authentication required. Please log in as admin.')
-            router.push('/admin/login')
-            return
+        // Check for authentication errors first
+        if (statsResponse.status === 401 || ordersResponse.status === 401 || activityResponse.status === 401 || analyticsResponse.status === 401) {
+          console.error('Admin authentication failed - redirecting to login')
+          toast.error('Admin authentication required. Please log in as admin.')
+          router.push('/admin/login')
+          return
+        }
+
+        // Process each response individually, allowing some to fail
+        let hasData = false
+
+        // Process stats
+        if (statsResponse.ok) {
+          try {
+            const statsData = await statsResponse.json()
+            if (statsData.success) {
+              setStats(statsData.data)
+              hasData = true
+            } else {
+              console.error('Failed to fetch stats:', statsData.message)
+            }
+          } catch (error) {
+            console.error('Error parsing stats response:', error)
           }
-          
-          // Log specific error details
-          console.error('API request failed with status:', {
-            stats: statsResponse.status,
-            orders: ordersResponse.status,
-            activity: activityResponse.status,
-            analytics: analyticsResponse.status
-          })
-          
-          throw new Error(`API request failed: ${statsResponse.status} ${statsResponse.statusText}`)
-        }
-
-        const [statsData, ordersData, activityData, analyticsData] = await Promise.all([
-          statsResponse.json(),
-          ordersResponse.json(),
-          activityResponse.json(),
-          analyticsResponse.json()
-        ])
-
-        console.log('📈 Received data:', {
-          stats: statsData.success,
-          orders: ordersData.success,
-          activity: activityData.success,
-          analytics: analyticsData.success
-        })
-
-        if (statsData.success) {
-          setStats(statsData.data)
         } else {
-          console.error('Failed to fetch stats:', statsData.message)
-          setStats({
-            newOrders: 5,
-            totalProducts: 24,
-            totalCustomers: 12,
-            lowStockProducts: 3
-          })
+          console.error('Stats endpoint failed:', statsResponse.status, statsResponse.statusText)
         }
 
-        if (ordersData.success) {
-          setRecentOrders(ordersData.data)
+        // Process orders
+        if (ordersResponse.ok) {
+          try {
+            const ordersData = await ordersResponse.json()
+            if (ordersData.success) {
+              setRecentOrders(ordersData.data)
+              hasData = true
+            } else {
+              console.error('Failed to fetch orders:', ordersData.message)
+            }
+          } catch (error) {
+            console.error('Error parsing orders response:', error)
+          }
         } else {
-          console.error('Failed to fetch orders:', ordersData.message)
-          setRecentOrders([
-            { id: '1', orderNumber: 'ORD-001', customerName: 'John Doe', totalAmount: 25000, status: 'PENDING', createdAt: new Date().toISOString() },
-            { id: '2', orderNumber: 'ORD-002', customerName: 'Jane Smith', totalAmount: 35000, status: 'CONFIRMED', createdAt: new Date().toISOString() }
-          ])
+          console.error('Orders endpoint failed:', ordersResponse.status, ordersResponse.statusText)
         }
 
-        if (activityData.success) {
-          setRecentActivity(activityData.data)
+        // Process activity
+        if (activityResponse.ok) {
+          try {
+            const activityData = await activityResponse.json()
+            if (activityData.success) {
+              setRecentActivity(activityData.data)
+              hasData = true
+            } else {
+              console.error('Failed to fetch activity:', activityData.message)
+            }
+          } catch (error) {
+            console.error('Error parsing activity response:', error)
+          }
         } else {
-          console.error('Failed to fetch activity:', activityData.message)
-          setRecentActivity([
-            { type: 'order', title: 'New order received', description: 'Order #ORD-001 from John Doe', timestamp: new Date(), status: 'success' },
-            { type: 'customer', title: 'New customer registered', description: 'Jane Smith joined the platform', timestamp: new Date(), status: 'info' }
-          ])
+          console.error('Activity endpoint failed:', activityResponse.status, activityResponse.statusText)
         }
 
-        if (analyticsData.success) {
-          setAnalytics(analyticsData.data)
+        // Process analytics (optional)
+        if (analyticsResponse.ok) {
+          try {
+            const analyticsData = await analyticsResponse.json()
+            if (analyticsData.success) {
+              setAnalytics(analyticsData.data)
+              hasData = true
+            } else {
+              console.error('Failed to fetch analytics:', analyticsData.message)
+            }
+          } catch (error) {
+            console.error('Error parsing analytics response:', error)
+          }
+        } else {
+          console.error('Analytics endpoint failed:', analyticsResponse.status, analyticsResponse.statusText)
         }
 
-        setLastUpdated(new Date())
-        console.log('✅ Successfully fetched real data from backend')
+        if (hasData) {
+          setLastUpdated(new Date())
+          console.log('✅ Successfully fetched data from backend')
+        } else {
+          throw new Error('All dashboard endpoints failed')
+        }
       } catch (backendError: any) {
-        console.error('Backend connection failed, using fallback data:', backendError)
+        console.error('Backend connection failed:', backendError)
         console.error('Error details:', {
           message: backendError?.message || 'Unknown error',
           stack: backendError?.stack || 'No stack trace',
           name: backendError?.name || 'Unknown error type'
         })
         
-        setStats({
-          newOrders: 5,
-          totalProducts: 24,
-          totalCustomers: 12,
-          lowStockProducts: 3
-        })
-        
-        setRecentOrders([
-          { id: '1', orderNumber: 'ORD-001', customerName: 'John Doe', totalAmount: 25000, status: 'PENDING', createdAt: new Date().toISOString() },
-          { id: '2', orderNumber: 'ORD-002', customerName: 'Jane Smith', totalAmount: 35000, status: 'CONFIRMED', createdAt: new Date().toISOString() }
-        ])
-        
-        setRecentActivity([
-          { type: 'order', title: 'New order received', description: 'Order #ORD-001 from John Doe', timestamp: new Date(), status: 'success' },
-          { type: 'customer', title: 'New customer registered', description: 'Jane Smith joined the platform', timestamp: new Date(), status: 'info' }
-        ])
-        
-        toast('Backend not available, showing demo data')
+        toast.error('Failed to connect to backend. Please check your connection.')
+        throw backendError
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error)
@@ -748,4 +744,4 @@ const AdminDashboard = () => {
   )
 }
 
-export default AdminDashboard 
+export default AdminDashboard

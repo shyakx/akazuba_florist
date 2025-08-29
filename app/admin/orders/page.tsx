@@ -70,77 +70,9 @@ const OrdersPage = () => {
         setOrders(response.orders)
         setTotalPages(response.pages)
       } catch (backendError) {
-        console.error('Backend connection failed, using fallback data:', backendError)
-        
-        // Fallback data when backend is unavailable
-        const fallbackOrders: AdminOrder[] = [
-          {
-            id: '1',
-            orderNumber: 'ORD-001',
-            customerName: 'John Doe',
-            customerEmail: 'john@example.com',
-            customerPhone: '+250 788 123 456',
-            customerAddress: '123 Main St, Kigali',
-            customerCity: 'Kigali',
-            status: 'CONFIRMED',
-            subtotal: 25000,
-            deliveryFee: 2000,
-            totalAmount: 27000,
-            paymentMethod: 'MOMO',
-            paymentStatus: 'PAID',
-            deliveryStatus: 'PENDING',
-            items: [
-              {
-                id: '1',
-                productId: '1',
-                productName: 'Beautiful Rose Bouquet',
-                productImage: '/images/flowers/red/rose-1.jpg',
-                quantity: 1,
-                unitPrice: 25000,
-                totalPrice: 25000,
-                color: 'Red',
-                type: 'Rose'
-              }
-            ],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            id: '2',
-            orderNumber: 'ORD-002',
-            customerName: 'Jane Smith',
-            customerEmail: 'jane@example.com',
-            customerPhone: '+250 789 654 321',
-            customerAddress: '456 Oak Ave, Kigali',
-            customerCity: 'Kigali',
-            status: 'PENDING',
-            subtotal: 35000,
-            deliveryFee: 2000,
-            totalAmount: 37000,
-            paymentMethod: 'BK',
-            paymentStatus: 'PENDING',
-            deliveryStatus: 'PENDING',
-            items: [
-              {
-                id: '2',
-                productId: '2',
-                productName: 'White Lily Arrangement',
-                productImage: '/images/flowers/white/lily-1.jpg',
-                quantity: 1,
-                unitPrice: 35000,
-                totalPrice: 35000,
-                color: 'White',
-                type: 'Lily'
-              }
-            ],
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-          }
-        ]
-        
-        setOrders(fallbackOrders)
-        setTotalPages(1)
-        toast('Backend not available, showing demo data')
+        console.error('Backend connection failed:', backendError)
+        toast.error('Failed to connect to backend. Please check your connection.')
+        throw backendError
       }
     } catch (error) {
       console.error('Error fetching orders:', error)
@@ -154,23 +86,8 @@ const OrdersPage = () => {
     try {
       setUpdatingStatus(orderId)
       
-      // Try to update on backend first
-      try {
-        await adminAPI.updateOrderStatus(orderId, newStatus)
-        toast.success('Order status updated successfully')
-      } catch (backendError) {
-        console.error('Backend update failed, updating local state:', backendError)
-        // Update local state when backend is unavailable
-        setOrders(prevOrders => 
-          prevOrders.map(order => 
-            order.id === orderId 
-              ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
-              : order
-          )
-        )
-        toast.success('Order status updated (offline mode)')
-      }
-      
+      await adminAPI.updateOrderStatus(orderId, newStatus)
+      toast.success('Order status updated successfully')
       fetchOrders()
     } catch (error: any) {
       console.error('Error updating order status:', error)
@@ -184,23 +101,8 @@ const OrdersPage = () => {
     try {
       setUpdatingStatus(orderId)
       
-      // Try to update on backend first
-      try {
-        await adminAPI.updatePaymentStatus(orderId, newPaymentStatus)
-        toast.success('Payment status updated successfully')
-      } catch (backendError) {
-        console.error('Backend update failed, updating local state:', backendError)
-        // Update local state when backend is unavailable
-        setOrders(prevOrders => 
-          prevOrders.map(order => 
-            order.id === orderId 
-              ? { ...order, paymentStatus: newPaymentStatus, updatedAt: new Date().toISOString() }
-              : order
-          )
-        )
-        toast.success('Payment status updated (offline mode)')
-      }
-      
+      await adminAPI.updatePaymentStatus(orderId, newPaymentStatus)
+      toast.success('Payment status updated successfully')
       fetchOrders()
     } catch (error: any) {
       console.error('Error updating payment status:', error)
