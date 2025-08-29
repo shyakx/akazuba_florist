@@ -78,6 +78,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await authAPI.login(data)
       
       if (response.success && response.data) {
+        // Store tokens
+        if (response.data.accessToken) {
+          localStorage.setItem('accessToken', response.data.accessToken)
+        }
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken)
+        }
+        
         setUser(response.data.user)
         return true
       }
@@ -97,6 +105,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await authAPI.register(data)
       
       if (response.success && response.data) {
+        // Store tokens
+        if (response.data.accessToken) {
+          localStorage.setItem('accessToken', response.data.accessToken)
+        }
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken)
+        }
+        
         setUser(response.data.user)
         return true
       }
@@ -160,6 +176,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await authAPI.refreshToken(refreshToken)
       
       if (response.success && response.data) {
+        // Store new tokens
+        if (response.data.accessToken) {
+          localStorage.setItem('accessToken', response.data.accessToken)
+        }
+        if (response.data.refreshToken) {
+          localStorage.setItem('refreshToken', response.data.refreshToken)
+        }
+        
         setUser(response.data.user)
         return true
       }

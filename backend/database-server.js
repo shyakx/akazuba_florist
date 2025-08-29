@@ -83,7 +83,7 @@ app.post('/api/v1/auth/register', async (req, res) => {
         lastName: user.lastName,
         role: user.role
       },
-      token
+      accessToken: token
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -118,6 +118,13 @@ app.post('/api/v1/auth/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    // Generate refresh token
+    const refreshToken = jwt.sign(
+      { userId: user.id },
+      JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
+
     res.json({
       message: 'Login successful',
       user: {
@@ -127,7 +134,8 @@ app.post('/api/v1/auth/login', async (req, res) => {
         lastName: user.lastName,
         role: user.role
       },
-      token
+      accessToken: token,
+      refreshToken
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -165,6 +173,59 @@ app.get('/api/v1/auth/profile', async (req, res) => {
   } catch (error) {
     console.error('Profile error:', error);
     res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+// Refresh token endpoint
+app.post('/api/v1/auth/refresh', async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'Refresh token is required' });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+    
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate new access token
+    const newToken = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    // Generate new refresh token
+    const newRefreshToken = jwt.sign(
+      { userId: user.id },
+      JWT_REFRESH_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.json({
+      message: 'Token refreshed successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role
+      },
+      accessToken: newToken,
+      refreshToken: newRefreshToken
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error);
+    res.status(401).json({ error: 'Invalid refresh token' });
   }
 });
 
