@@ -45,7 +45,15 @@ interface ProductsContextType {
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined)
 
 const transformProduct = (product: any, index: number): Product => {
-  const isPerfume = product.category === 'perfumes' || product.category?.name === 'perfumes'
+  // Check if it's a perfume based on multiple criteria
+  const isPerfume = product.category === 'perfumes' || 
+                   product.category?.name === 'perfumes' || 
+                   product.brand || 
+                   product.concentration ||
+                   product.type === 'Men' || 
+                   product.type === 'Women' || 
+                   product.type === 'Unisex'
+  
   let imagePath = product.image || product.images?.[0]
 
   if (isPerfume) {
@@ -144,15 +152,24 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const loadLocalProducts = async () => {
     try {
+      console.log('Loading local products...')
+      console.log('Perfume data:', perfumeData.length, 'items')
+      
       // Transform flower products
       const flowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
       
       // Transform perfume products
       const perfumeProductsList = perfumeData.map((product, index) => transformProduct(product, index + 100))
       
+      console.log('Transformed perfume products:', perfumeProductsList.length, 'items')
+      console.log('Sample perfume product:', perfumeProductsList[0])
+      
       // Combine all products
       const allProducts = [...flowerProducts, ...perfumeProductsList]
       const featuredProducts = allProducts.filter(product => product.featured)
+      
+      console.log('Total products:', allProducts.length)
+      console.log('Perfume products in state:', perfumeProductsList.length)
       
       setState({
         products: allProducts,
@@ -186,6 +203,10 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   const getProductsByCategory = (category: string): Product[] => {
+    console.log('getProductsByCategory called with:', category)
+    console.log('Total products in state:', state.products.length)
+    console.log('Product categories:', state.products.map(p => p.category))
+    
     // Handle both singular and plural category names
     const categoryMap: { [key: string]: string[] } = {
       'flowers': ['flowers', 'flower'],
@@ -202,9 +223,14 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     
     const validCategories = categoryMap[category] || [category]
-    return state.products.filter(product => 
+    console.log('Valid categories for', category, ':', validCategories)
+    
+    const filteredProducts = state.products.filter(product => 
       validCategories.includes(product.category.toLowerCase())
     )
+    
+    console.log('Filtered products for', category, ':', filteredProducts.length)
+    return filteredProducts
   }
 
   const getFeaturedByCategory = (category: string): Product[] => {
