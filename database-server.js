@@ -79,13 +79,14 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'akazuba-super-secr
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Backend - CORS FIXED - Development Mode Enabled!',
+    message: 'Akazuba Backend - CORS FIXED - FORCE REDEPLOY - Version 2.0.2',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     database: 'connected',
     cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
-    version: '2.0.1',
-    corsEnabled: true
+    version: '2.0.2',
+    corsEnabled: true,
+    deployment: 'forced-redeploy'
   });
 });
 
