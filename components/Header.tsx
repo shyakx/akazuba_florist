@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, Heart, ShoppingCart, User, Menu, X } from 'lucide-react'
+import { Search, Heart, ShoppingCart, User, Menu, X, LogOut, Settings } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { useWishlist } from '@/contexts/WishlistContext'
@@ -19,6 +19,7 @@ const Header = () => {
   const { itemCount: wishlistItemCount } = useWishlist()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
   // Generate dynamic navigation based on real flower data
   const generateNavigation = (): NavigationItem[] => {
@@ -108,6 +109,24 @@ const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (!target.closest('.profile-dropdown')) {
+        setIsProfileDropdownOpen(false)
+      }
+    }
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isProfileDropdownOpen])
+
   const cartItemCount = cartState.itemCount
 
   return (
@@ -188,11 +207,56 @@ const Header = () => {
 
             {/* User Account */}
             {isAuthenticated ? (
-              <div className="relative">
-                <button className="p-2 text-gray-600 hover:text-pink-600 transition-colors duration-200">
+              <div className="relative profile-dropdown">
+                <button 
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="p-2 text-gray-600 hover:text-pink-600 transition-colors duration-200"
+                >
                   <User className="w-5 h-5" />
                 </button>
-                {/* Add dropdown menu here if needed */}
+                
+                {/* Profile Dropdown Menu */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="py-2">
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">
+                          {user?.firstName ? `${user.firstName} ${user.lastName || ''}` : user?.email}
+                        </p>
+                        <p className="text-xs text-gray-500">{user?.email}</p>
+                      </div>
+                      
+                      <Link
+                        href="/profile"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        Profile
+                      </Link>
+                      
+                      <Link
+                        href="/orders"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        My Orders
+                      </Link>
+                      
+                      <button
+                        onClick={() => {
+                          logout()
+                          setIsProfileDropdownOpen(false)
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <Link

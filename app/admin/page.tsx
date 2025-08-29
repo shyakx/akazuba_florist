@@ -89,19 +89,19 @@ const AdminDashboard = () => {
       // Try to fetch real data from backend API
       try {
         const [statsResponse, ordersResponse, activityResponse] = await Promise.all([
-          fetch('/api/admin/dashboard/stats', {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/admin/dashboard/stats`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
               'Content-Type': 'application/json'
             }
           }),
-          fetch('/api/admin/dashboard/recent-orders', {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/admin/dashboard/recent-orders`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
               'Content-Type': 'application/json'
             }
           }),
-          fetch('/api/admin/dashboard/activity', {
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/admin/dashboard/activity`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
               'Content-Type': 'application/json'

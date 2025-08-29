@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { authAPI, User, RegisterRequest, LoginRequest } from '@/lib/auth-api'
+import { authAPI, User, RegisterRequest, LoginRequest } from '@/lib/api'
 
 interface AuthContextType {
   user: User | null
@@ -35,10 +35,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsLoading(true)
       
       // Check if we have stored auth data
-      if (!authAPI.isAuthenticated()) {
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
         setUser(null)
+        setIsLoading(false)
         return
       }
+      
+      // Add a small delay to prevent rapid state changes
+      await new Promise(resolve => setTimeout(resolve, 100))
       
       // Try to get current user profile
       try {
@@ -108,14 +113,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async (): Promise<void> => {
     try {
       setIsLoading(true)
-      await authAPI.logout()
+      
+      // Clear all local storage first
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+      
+      // Clear cookies
+      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      
+      // Clear user state
       setUser(null)
-      router.push('/')
+      
+      // Try to call logout API (but don't wait for it)
+      try {
+        await authAPI.logout()
+      } catch (apiError) {
+        console.warn('API logout failed, but local logout successful:', apiError)
+      }
+      
+      // Add delay before redirect to prevent rapid navigation
+      setTimeout(() => {
+        router.push('/')
+      }, 500)
+      
     } catch (error) {
       console.error('Logout failed:', error)
       // Even if logout fails, clear local state
       setUser(null)
-      router.push('/')
+      setTimeout(() => {
+        router.push('/')
+      }, 500)
     } finally {
       setIsLoading(false)
     }
@@ -123,7 +152,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const refreshToken = async (): Promise<boolean> => {
     try {
-      const response = await authAPI.refreshToken()
+      const refreshToken = localStorage.getItem('refreshToken')
+      if (!refreshToken) {
+        return false
+      }
+      
+      const response = await authAPI.refreshToken(refreshToken)
       
       if (response.success && response.data) {
         setUser(response.data.user)

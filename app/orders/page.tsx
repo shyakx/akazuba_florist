@@ -4,6 +4,9 @@ import React, { useState, useEffect } from 'react'
 import { Package, Clock, CheckCircle, XCircle, Truck, MapPin, Calendar, Tag, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import Footer from '@/components/Footer'
+import { useAuth } from '@/contexts/RealAuthContext'
+import { ordersAPI } from '@/lib/api'
+import toast from 'react-hot-toast'
 
 interface Order {
   id: string
@@ -23,73 +26,56 @@ interface Order {
 }
 
 const OrdersPage = () => {
+  const { isAuthenticated, user } = useAuth()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Mock data for demonstration
+  // Fetch real orders from API
   useEffect(() => {
-    const mockOrders: Order[] = [
-      {
-        id: '1',
-        orderNumber: 'ORD-2024-001',
-        status: 'delivered',
-        items: [
-          {
-            id: '1',
-            name: 'Red Rose Bouquet',
-            quantity: 1,
-            price: 25000,
-            image: '/placeholder-flower.jpg'
-          }
-        ],
-        total: 25000,
-        createdAt: '2024-01-15T10:30:00Z',
-        estimatedDelivery: '2024-01-17T14:00:00Z',
-        shippingAddress: 'Kigali, Rwanda'
-      },
-      {
-        id: '2',
-        orderNumber: 'ORD-2024-002',
-        status: 'shipped',
-        items: [
-          {
-            id: '2',
-            name: 'Mixed Tulip Arrangement',
-            quantity: 2,
-            price: 18000,
-            image: '/placeholder-flower.jpg'
-          }
-        ],
-        total: 36000,
-        createdAt: '2024-01-16T09:15:00Z',
-        estimatedDelivery: '2024-01-18T16:00:00Z',
-        shippingAddress: 'Kigali, Rwanda'
-      },
-      {
-        id: '3',
-        orderNumber: 'ORD-2024-003',
-        status: 'processing',
-        items: [
-          {
-            id: '3',
-            name: 'Wedding Flower Package',
-            quantity: 1,
-            price: 75000,
-            image: '/placeholder-flower.jpg'
-          }
-        ],
-        total: 75000,
-        createdAt: '2024-01-17T14:20:00Z',
-        shippingAddress: 'Kigali, Rwanda'
+    const fetchOrders = async () => {
+      if (!isAuthenticated) {
+        setLoading(false)
+        return
       }
-    ]
 
-    setTimeout(() => {
-      setOrders(mockOrders)
-      setLoading(false)
-    }, 1000)
-  }, [])
+      try {
+        setLoading(true)
+        const response = await ordersAPI.getUserOrders()
+        
+        if (response.success && response.data) {
+          // Transform backend orders to frontend format
+          const transformedOrders: Order[] = response.data.map((order: any) => ({
+            id: order.id,
+            orderNumber: order.orderNumber,
+            status: order.status.toLowerCase(),
+            items: order.orderItems?.map((item: any) => ({
+              id: item.id,
+              name: item.productName,
+              quantity: item.quantity,
+              price: item.unitPrice,
+              image: item.product?.images?.[0] || '/placeholder-flower.jpg'
+            })) || [],
+            total: order.totalAmount,
+            createdAt: order.createdAt,
+            estimatedDelivery: order.estimatedDelivery,
+            shippingAddress: order.shippingAddress?.address || 'Kigali, Rwanda'
+          }))
+          setOrders(transformedOrders)
+        } else {
+          setError('Failed to load orders')
+        }
+      } catch (error) {
+        console.error('Error fetching orders:', error)
+        setError('Failed to load orders')
+        toast.error('Failed to load orders')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchOrders()
+  }, [isAuthenticated])
 
   const getStatusIcon = (status: Order['status']) => {
     switch (status) {

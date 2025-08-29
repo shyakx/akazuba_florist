@@ -150,16 +150,9 @@ const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
   const token = getAuthToken()
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-
-  // Use localhost backend in development, production backend otherwise
-  let API_BASE_URL_ACTUAL: string;
-  if (isDevelopment || isLocalhost) {
-    API_BASE_URL_ACTUAL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
-  } else {
-    API_BASE_URL_ACTUAL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1';
-  }
+  
+  // Use consistent backend URL - always point to the deployed backend
+  const API_BASE_URL_ACTUAL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
 
   const config: RequestInit = {
     headers: {
@@ -173,15 +166,9 @@ const apiRequest = async <T>(
   try {
     console.log('🌐 Making API request to:', `${API_BASE_URL_ACTUAL}${endpoint}`)
     console.log('🔑 Token:', token ? 'Present' : 'Missing')
-    console.log('📤 Request config:', {
-      method: config.method || 'GET',
-      headers: config.headers,
-      body: config.body
-    })
     
     const response = await fetch(`${API_BASE_URL_ACTUAL}${endpoint}`, config)
     console.log('📡 Response status:', response.status)
-    console.log('📡 Response headers:', response.headers)
     
     const data = await response.json()
     console.log('📥 Response data:', data)
@@ -629,4 +616,4 @@ export default {
 }
 
 // Export apiRequest function for use in other modules
-export { apiRequest } 
+export { apiRequest }

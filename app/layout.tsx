@@ -8,6 +8,7 @@ import { AuthProvider } from '@/contexts/RealAuthContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import { ProductsProvider } from '@/contexts/ProductsContext'
 import Header from '@/components/Header'
+import ConditionalHeader from '@/components/ConditionalHeader'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -36,7 +37,7 @@ export default function RootLayout({
           <ProductsProvider>
             <CartProvider>
               <WishlistProvider>
-                <Header />
+                <ConditionalHeader />
                 <main className="pt-32">
                   {children}
                 </main>

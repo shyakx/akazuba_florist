@@ -36,24 +36,25 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!accessToken
   const isAdmin = userRole === 'ADMIN'
   
-  // Redirect admin login attempts to main login page
-  if (pathname.startsWith('/admin/login')) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // Handle auth routes (login, register) - ALWAYS allow access
+  if (authRoutes.some(route => pathname.startsWith(route))) {
+    // Allow access to auth routes regardless of authentication status
+    return NextResponse.next()
   }
   
-  // Handle auth routes (login, register)
-  if (authRoutes.some(route => pathname.startsWith(route))) {
-    // If user is already authenticated, redirect appropriately
-    if (isAuthenticated) {
-      if (isAdmin) {
-        // Admin is logged in, redirect to admin dashboard
-        return NextResponse.redirect(new URL('/admin', request.url))
-      } else {
-        // Customer is logged in, redirect to home
-        return NextResponse.redirect(new URL('/', request.url))
-      }
+  // Handle admin routes
+  if (adminRoutes.some(route => pathname.startsWith(route))) {
+    if (!isAuthenticated) {
+      // Not authenticated, redirect to login
+      return NextResponse.redirect(new URL('/login', request.url))
     }
-    // Allow access to auth routes for unauthenticated users
+    
+    if (!isAdmin) {
+      // Not admin, redirect to home
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    
+    // Admin is authenticated, allow access
     return NextResponse.next()
   }
   

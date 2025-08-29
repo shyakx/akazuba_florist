@@ -17,8 +17,14 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
+    // Only redirect if user is authenticated, not loading, and is admin
     if (!isLoading && isAuthenticated && user?.role === 'ADMIN') {
-      router.push('/admin')
+      // Add a small delay to prevent rapid redirects
+      const timer = setTimeout(() => {
+        router.push('/admin')
+      }, 1000)
+      
+      return () => clearTimeout(timer)
     }
   }, [isAuthenticated, user, isLoading, router])
 
@@ -41,7 +47,10 @@ const AdminLogin = () => {
         // Check if user is admin after login
         if (user?.role === 'ADMIN') {
           toast.success('Welcome back!')
-          router.push('/admin')
+          // Add delay before redirect
+          setTimeout(() => {
+            router.push('/admin')
+          }, 1500)
         } else {
           toast.error('Access denied. Admin privileges required.')
         }
@@ -63,27 +72,19 @@ const AdminLogin = () => {
     })
   }
 
+  // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-pink-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">Loading authentication...</p>
         </div>
       </div>
     )
   }
 
-  if (isAuthenticated && user?.role === 'ADMIN') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Redirecting to dashboard...</p>
-        </div>
-      </div>
-    )
-  }
+  // Remove this conflicting redirect - let the useEffect handle it
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-pink-50 to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

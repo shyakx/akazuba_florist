@@ -26,8 +26,14 @@ export interface CartItem extends Product {
 export interface User {
   id: string;
   email: string;
-  name: string;
-  role: 'customer' | 'admin';
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  role: 'CUSTOMER' | 'ADMIN';
+  isActive: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Order {

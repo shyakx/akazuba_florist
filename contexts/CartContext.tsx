@@ -4,6 +4,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import { useRouter } from 'next/navigation'
 import { Product } from '@/types'
 import { CartItem } from '@/lib/api'
+import { apiUtils } from '@/lib/api'
 import { useAuth } from './RealAuthContext'
 import { useProducts } from './ProductsContext'
 import { cartAPI } from '@/lib/api'
@@ -168,26 +169,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return
     }
     
-
-    
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       
-      // Get the backend product ID for cart operations
-      const backendProductId = getBackendProductId(product.id)
-      if (!backendProductId) {
-        toast.error('Product not found')
-        return
-      }
-      
+      // Use the product ID directly since backend mapping is unreliable
       const response = await cartAPI.addItem({
-        productId: backendProductId,
+        productId: product.id.toString(),
         quantity: 1
       })
       
       if (response.success && response.data) {
         dispatch({ type: 'ADD_ITEM', payload: response.data })
-    toast.success(`${product.name} added to cart!`)
+        toast.success(`${product.name} added to cart!`)
       } else {
         toast.error('Failed to add item to cart')
       }

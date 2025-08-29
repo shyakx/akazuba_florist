@@ -20,13 +20,18 @@ const Login = () => {
 
   // Monitor authentication state changes
   useEffect(() => {
-    // If user is already authenticated, redirect them to appropriate page
+    // Only redirect if user is authenticated and not loading
     if (!isLoading && isAuthenticated && user) {
-      if (user.role === 'ADMIN') {
-        router.push('/admin')
-      } else {
-        router.push('/dashboard')
-      }
+      // Add a small delay to prevent rapid redirects
+      const timer = setTimeout(() => {
+        if (user.role === 'ADMIN') {
+          router.push('/admin')
+        } else {
+          router.push('/dashboard')
+        }
+      }, 1000)
+      
+      return () => clearTimeout(timer)
     }
   }, [isAuthenticated, user, isLoading, router])
 
@@ -78,6 +83,18 @@ const Login = () => {
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({ ...prev, [name]: undefined }))
     }
+  }
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
