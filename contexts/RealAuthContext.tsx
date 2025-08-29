@@ -51,18 +51,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (response.success && response.data) {
           setUser(response.data.user)
         } else {
-          // Profile fetch failed, try to refresh token
-          const refreshSuccess = await refreshToken()
-          if (!refreshSuccess) {
-            setUser(null)
-          }
-        }
-      } catch (error) {
-        console.warn('Profile fetch failed, trying token refresh:', error)
-        const refreshSuccess = await refreshToken()
-        if (!refreshSuccess) {
+          // Profile fetch failed, clear user (temporarily disable refresh token)
+          console.warn('Profile fetch failed, clearing user')
           setUser(null)
         }
+      } catch (error) {
+        console.warn('Profile fetch failed, clearing user:', error)
+        setUser(null)
       }
     } catch (error) {
       console.error('Auth status check failed:', error)
