@@ -150,13 +150,34 @@ const AdminDashboard = () => {
 
         console.log('🔗 Attempting to connect to backend:', API_BASE_URL)
         console.log('🔑 Using token:', token ? 'Present' : 'Missing')
+        console.log('🌐 Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server-side')
+        console.log('🔧 Environment:', process.env.NODE_ENV)
+        console.log('📡 NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL)
 
         // First, test the connection with a simple health check
         try {
           const healthResponse = await fetch(`${API_BASE_URL.replace('/api/v1', '')}/health`)
           console.log('🏥 Health check response:', healthResponse.status, healthResponse.statusText)
-        } catch (healthError) {
+          
+          if (healthResponse.ok) {
+            const healthData = await healthResponse.json()
+            console.log('🏥 Health data:', healthData)
+          }
+        } catch (healthError: any) {
           console.error('❌ Health check failed:', healthError)
+        }
+
+        // Test CORS
+        try {
+          const corsResponse = await fetch(`${API_BASE_URL.replace('/api/v1', '')}/cors-test`)
+          console.log('🌐 CORS test response:', corsResponse.status, corsResponse.statusText)
+          
+          if (corsResponse.ok) {
+            const corsData = await corsResponse.json()
+            console.log('🌐 CORS data:', corsData)
+          }
+        } catch (corsError: any) {
+          console.error('❌ CORS test failed:', corsError)
         }
 
         const [statsResponse, ordersResponse, activityResponse, analyticsResponse] = await Promise.all([
