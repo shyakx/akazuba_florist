@@ -138,6 +138,11 @@ const AdminNavbar = () => {
       icon: Users
     },
     {
+      name: 'Notifications',
+      href: '/admin/notifications',
+      icon: Bell
+    },
+    {
       name: 'Settings',
       href: '/admin/settings',
       icon: Settings
