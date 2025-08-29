@@ -50,6 +50,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const response = await authAPI.getProfile()
         if (response.success && response.data) {
           setUser(response.data.user)
+          // Set cookies for middleware
+          if (response.data.user?.role) {
+            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; secure; samesite=strict`
+          }
         } else {
           // Profile fetch failed, clear user (temporarily disable refresh token)
           console.warn('Profile fetch failed, clearing user')
@@ -76,9 +80,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Store tokens
         if (response.data.accessToken) {
           localStorage.setItem('accessToken', response.data.accessToken)
+          // Also set cookie for middleware
+          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; secure; samesite=strict`
         }
         if (response.data.refreshToken) {
           localStorage.setItem('refreshToken', response.data.refreshToken)
+        }
+        if (response.data.user?.role) {
+          // Set user role cookie for middleware
+          document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; secure; samesite=strict`
         }
         
         setUser(response.data.user)
@@ -103,9 +113,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Store tokens
         if (response.data.accessToken) {
           localStorage.setItem('accessToken', response.data.accessToken)
+          // Also set cookie for middleware
+          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; secure; samesite=strict`
         }
         if (response.data.refreshToken) {
           localStorage.setItem('refreshToken', response.data.refreshToken)
+        }
+        if (response.data.user?.role) {
+          // Set user role cookie for middleware
+          document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; secure; samesite=strict`
         }
         
         setUser(response.data.user)
