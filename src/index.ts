@@ -97,14 +97,24 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
     
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
+    // Production origins only
+    const productionOrigins = [
       'https://online-shopping-by-diane.vercel.app',
       'https://akazuba-florist.vercel.app',
       process.env.FRONTEND_URL
     ].filter((url): url is string => Boolean(url))
+    
+    // Development origins (only in development)
+    const developmentOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002'
+    ]
+    
+    // Combine origins based on environment
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? productionOrigins 
+      : [...productionOrigins, ...developmentOrigins]
     
     // Check if origin is in allowed list
     if (allowedOrigins.indexOf(origin) !== -1) {
