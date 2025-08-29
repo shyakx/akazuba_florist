@@ -188,11 +188,22 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Backend with Database is running!',
+    message: 'Akazuba Backend - CORS FIXED - Development Mode Enabled!',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     database: 'connected',
-    cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed'
+    cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
+    version: '2.0.1',
+    corsEnabled: true
+  })
+})
+
+// CORS test endpoint
+app.get('/cors-test', (req, res) => {
+  res.status(200).json({
+    message: 'CORS is working!',
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString()
   })
 })
 
