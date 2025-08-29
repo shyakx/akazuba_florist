@@ -20,18 +20,43 @@ const ProductFiltersPanel: React.FC<ProductFiltersPanelProps> = ({ filters, onFi
 
   const fetchCategories = async () => {
     try {
-      // This would typically come from your API
-      const mockCategories: AdminCategory[] = [
-        { id: 'flowers', name: 'Flowers', slug: 'flowers', isActive: true, sortOrder: 1, productCount: 12, createdAt: '', updatedAt: '' },
-        { id: 'perfumes', name: 'Perfumes', slug: 'perfumes', isActive: true, sortOrder: 2, productCount: 12, createdAt: '', updatedAt: '' },
-        { id: 'roses', name: 'Roses', slug: 'roses', isActive: true, sortOrder: 3, productCount: 8, createdAt: '', updatedAt: '' },
-        { id: 'tulips', name: 'Tulips', slug: 'tulips', isActive: true, sortOrder: 4, productCount: 5, createdAt: '', updatedAt: '' },
-        { id: 'lilies', name: 'Lilies', slug: 'lilies', isActive: true, sortOrder: 5, productCount: 3, createdAt: '', updatedAt: '' },
-        { id: 'bouquets', name: 'Bouquets', slug: 'bouquets', isActive: true, sortOrder: 6, productCount: 6, createdAt: '', updatedAt: '' }
-      ]
-      setCategories(mockCategories)
+      // Fetch real categories from backend API
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+        (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+          ? 'http://localhost:5000/api/v1' 
+          : 'https://akazuba-backend-api.onrender.com/api/v1')
+
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        console.error('No access token found')
+        return
+      }
+
+      const response = await fetch(`${API_BASE_URL}/admin/categories`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setCategories(data.data)
+        } else {
+          console.error('Failed to fetch categories:', data.message)
+          // Fallback to empty array if API fails
+          setCategories([])
+        }
+      } else {
+        console.error('Failed to fetch categories:', response.status, response.statusText)
+        // Fallback to empty array if API fails
+        setCategories([])
+      }
     } catch (error) {
       console.error('Error fetching categories:', error)
+      // Fallback to empty array if API fails
+      setCategories([])
     }
   }
 

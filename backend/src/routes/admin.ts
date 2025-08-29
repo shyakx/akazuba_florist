@@ -1213,6 +1213,61 @@ router.post('/products/bulk', async (req, res) => {
 
 /**
  * @swagger
+ * /admin/categories:
+ *   get:
+ *     summary: Get all categories with product counts
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Categories retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/categories', async (req, res) => {
+  try {
+    // Get all categories with product counts
+    const categories = await prisma.category.findMany({
+      include: {
+        _count: {
+          select: {
+            products: true
+          }
+        }
+      },
+      orderBy: {
+        sortOrder: 'asc'
+      }
+    })
+
+    const formattedCategories = categories.map(category => ({
+      id: category.id,
+      name: category.name,
+      slug: category.slug,
+      isActive: category.isActive,
+      sortOrder: category.sortOrder,
+      productCount: category._count.products,
+      createdAt: category.createdAt.toISOString(),
+      updatedAt: category.updatedAt.toISOString()
+    }))
+
+    res.json({
+      success: true,
+      message: 'Categories retrieved successfully',
+      data: formattedCategories
+    })
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch categories'
+    })
+  }
+})
+
+/**
+ * @swagger
  * /admin/export/{type}:
  *   post:
  *     summary: Export data as CSV

@@ -31,8 +31,6 @@ import Link from 'next/link'
 import { adminAPI, AdminProduct, ProductFilters, BulkOperation, ProductAnalytics, ExportOptions } from '@/lib/adminApi'
 import { productStorage } from '@/lib/productStorage'
 import toast from 'react-hot-toast'
-import { realFlowerProducts } from '@/data/real-flowers'
-import { perfumeProducts } from '@/data/perfumes'
 
 // Components
 import ProductPreviewModal from './components/ProductPreviewModal'
@@ -199,85 +197,87 @@ const AdminProductsPage = () => {
     try {
       setLoading(true)
       
-      console.log('🔄 Loading both flowers and perfumes data (same as home page)')
+      console.log('🔄 Fetching products from backend API')
       
-      // Transform flower products to match admin format
-      const transformedFlowerProducts: AdminProduct[] = realFlowerProducts.map((product, index) => ({
-        id: product.id.toString(),
-        name: product.name,
-        slug: product.name.toLowerCase().replace(/\s+/g, '-'),
-        description: product.description,
-        shortDescription: product.name,
-        price: product.price,
-        salePrice: undefined,
-        costPrice: Math.floor(product.price * 0.6), // 40% margin
-        sku: `${product.type.toUpperCase()}-${product.id}`,
-        stockQuantity: 50,
-        minStockAlert: 5,
-        categoryId: 'flowers',
-        categoryName: 'Flowers',
-        images: [product.image], // Use the correct image path from realFlowerProducts
-        isActive: true,
-        isFeatured: product.featured,
-        weight: 1.0,
-        dimensions: { width: 20, height: 40, length: 30 },
-        tags: [product.color, product.type.toLowerCase()],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        views: Math.floor(Math.random() * 100),
-        sales: Math.floor(Math.random() * 20),
-        revenue: product.price * Math.floor(Math.random() * 20),
-        rating: 4.5 + Math.random() * 0.5,
-        reviewCount: Math.floor(Math.random() * 50)
-      }))
+      // Fetch real products from backend API
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+        (typeof window !== 'undefined' && window.location.hostname === 'localhost' 
+          ? 'http://localhost:5000/api/v1' 
+          : 'https://akazuba-backend-api.onrender.com/api/v1')
 
-      // Transform perfume products to match admin format
-      const transformedPerfumeProducts: AdminProduct[] = perfumeProducts.map((product, index) => ({
-        id: (product.id + 1000).toString(), // Use different ID range for perfumes
-        name: product.name,
-        slug: product.name.toLowerCase().replace(/\s+/g, '-'),
-        description: product.description,
-        shortDescription: `${product.brand} - ${product.name}`,
-        price: product.price,
-        salePrice: undefined,
-        costPrice: Math.floor(product.price * 0.6), // 40% margin
-        sku: `${product.brand.toUpperCase()}-${product.id}`,
-        stockQuantity: 30,
-        minStockAlert: 3,
-        categoryId: 'perfumes',
-        categoryName: 'Perfumes',
-        images: [product.image],
-        isActive: true,
-        isFeatured: product.featured,
-        weight: 0.5,
-        dimensions: { width: 10, height: 15, length: 10 },
-        tags: [product.brand.toLowerCase(), product.type.toLowerCase(), product.concentration.toLowerCase()],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        views: Math.floor(Math.random() * 100),
-        sales: Math.floor(Math.random() * 15),
-        revenue: product.price * Math.floor(Math.random() * 15),
-        rating: 4.5 + Math.random() * 0.5,
-        reviewCount: Math.floor(Math.random() * 50),
-        // Perfume-specific fields
-        brand: product.brand,
-        perfumeType: product.type,
-        size: product.size,
-        concentration: product.concentration,
-        notes: product.notes
-      }))
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        console.error('No access token found')
+        toast.error('Please log in as admin')
+        router.push('/admin/login')
+        return
+      }
 
-      // Combine both product types
-      const allProducts = [...transformedFlowerProducts, ...transformedPerfumeProducts]
-
-      console.log('🔍 Products loaded:', {
-        flowers: transformedFlowerProducts.length,
-        perfumes: transformedPerfumeProducts.length,
-        total: allProducts.length
+      const response = await fetch(`${API_BASE_URL}/admin/products`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       })
 
-      setProducts(allProducts)
-      setFilteredProducts(allProducts)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          console.log('✅ Products loaded from backend:', {
+            total: data.data.products.length,
+            pages: data.data.pages
+          })
+          
+          // Transform backend products to match AdminProduct format
+          const transformedProducts: AdminProduct[] = data.data.products.map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            slug: product.slug || product.name.toLowerCase().replace(/\s+/g, '-'),
+            description: product.description,
+            shortDescription: product.shortDescription || product.name,
+            price: Number(product.price),
+            salePrice: product.salePrice ? Number(product.salePrice) : undefined,
+            costPrice: product.costPrice ? Number(product.costPrice) : Math.floor(Number(product.price) * 0.6),
+            sku: product.sku || `${product.category?.name?.toUpperCase() || 'PROD'}-${product.id}`,
+            stockQuantity: product.stockQuantity || 0,
+            minStockAlert: product.minStockAlert || 5,
+            categoryId: product.categoryId,
+            categoryName: product.category?.name || 'Uncategorized',
+            images: product.images || [],
+            isActive: product.isActive !== undefined ? product.isActive : true,
+            isFeatured: product.isFeatured || false,
+            weight: product.weight || 1.0,
+            dimensions: product.dimensions || { width: 20, height: 40, length: 30 },
+            tags: product.tags || [],
+            createdAt: product.createdAt,
+            updatedAt: product.updatedAt,
+            views: product.views || 0,
+            sales: product.sales || 0,
+            revenue: product.revenue || 0,
+            rating: product.rating || 0,
+            reviewCount: product.reviewCount || 0,
+            // Perfume-specific fields
+            brand: product.brand,
+            perfumeType: product.perfumeType,
+            size: product.size,
+            concentration: product.concentration,
+            notes: product.notes
+          }))
+
+          setProducts(transformedProducts)
+          setFilteredProducts(transformedProducts)
+        } else {
+          console.error('Failed to fetch products:', data.message)
+          toast.error('Failed to load products from backend')
+          setProducts([])
+          setFilteredProducts([])
+        }
+      } else {
+        console.error('Failed to fetch products:', response.status, response.statusText)
+        toast.error('Failed to connect to backend')
+        setProducts([])
+        setFilteredProducts([])
+      }
     } catch (error) {
       console.error('❌ Error loading products:', error)
       toast.error('Failed to load products')
