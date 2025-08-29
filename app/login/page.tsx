@@ -5,7 +5,7 @@ import { Eye, EyeOff, Lock, User, Flower, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/RealAuthContext'
-import { authAPI } from '@/lib/auth-api'
+import { apiUtils } from '@/lib/api'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -41,7 +41,7 @@ const Login = () => {
     // Validate email
     if (!formData.email) {
       newErrors.email = 'Email is required'
-    } else if (!authAPI.utils.validateEmail(formData.email)) {
+    } else if (!apiUtils.validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address'
     }
 

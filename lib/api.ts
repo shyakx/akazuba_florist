@@ -182,7 +182,35 @@ const apiRequest = async <T>(
       throw new Error(data.message || data.error || 'API request failed')
     }
 
-    return data
+    // Transform backend response to match frontend expectations
+    if (data.user && data.accessToken) {
+      // Login/Register response
+      return {
+        success: true,
+        message: data.message || 'Success',
+        data: {
+          user: data.user,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken
+        }
+      } as ApiResponse<T>
+    } else if (data.user && !data.accessToken) {
+      // Profile response
+      return {
+        success: true,
+        message: 'Profile retrieved successfully',
+        data: {
+          user: data.user
+        }
+      } as ApiResponse<T>
+    } else {
+      // Other responses
+      return {
+        success: true,
+        message: data.message || 'Success',
+        data: data
+      } as ApiResponse<T>
+    }
   } catch (error: any) {
     console.error('API Error:', error)
 
