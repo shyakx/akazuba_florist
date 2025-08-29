@@ -30,7 +30,7 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 5000
 
-// Production environment check
+// Environment check
 if (process.env.NODE_ENV === 'production') {
   console.log('🚀 PRODUCTION MODE ENABLED')
   console.log('- Environment: Production')
@@ -39,9 +39,11 @@ if (process.env.NODE_ENV === 'production') {
   console.log('- CORS: Production origins only')
   console.log('- Security: Maximum protection enabled')
 } else {
-  console.log('⚠️  WARNING: Not in production mode')
-  console.log('- Environment:', process.env.NODE_ENV)
+  console.log('🔧 DEVELOPMENT MODE')
+  console.log('- Environment:', process.env.NODE_ENV || 'development')
   console.log('- Port:', process.env.PORT)
+  console.log('- CORS: Development origins allowed')
+  console.log('- Security: Standard protection')
 }
 
 // Initialize Prisma with error handling
@@ -115,18 +117,32 @@ app.use(helmet({
   }
 }))
 
-// Production-only CORS configuration
+// CORS configuration - Production and Development
 const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
     
-    // Production origins only - no development origins allowed
-    const allowedOrigins = [
+    // Define allowed origins based on environment
+    const productionOrigins = [
       'https://online-shopping-by-diane.vercel.app',
       'https://akazuba-florist.vercel.app',
       process.env.FRONTEND_URL
     ].filter((url): url is string => Boolean(url))
+    
+    const developmentOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:3001',
+      'http://127.0.0.1:3002'
+    ]
+    
+    // Use production origins only in production, allow development origins in other environments
+    const allowedOrigins = process.env.NODE_ENV === 'production' 
+      ? productionOrigins 
+      : [...productionOrigins, ...developmentOrigins]
     
     // Check if origin is in allowed list
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -134,7 +150,8 @@ const corsOptions = {
     } else {
       console.log('🚫 CORS blocked origin:', origin)
       console.log('✅ Allowed origins:', allowedOrigins)
-      callback(new Error('Not allowed by CORS - Production only'))
+      console.log('🌍 Environment:', process.env.NODE_ENV || 'development')
+      callback(new Error('Not allowed by CORS'))
     }
   },
   credentials: true,
