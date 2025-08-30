@@ -213,7 +213,7 @@ const AdminProductsPage = () => {
         return
       }
 
-      const response = await fetch(`${API_BASE_URL}/admin/products`, {
+      const response = await fetch(`${API_BASE_URL}/admin/products?limit=50`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -222,11 +222,23 @@ const AdminProductsPage = () => {
 
       if (response.ok) {
         const data = await response.json()
+        console.log('🔍 Raw API response:', data)
+        
         if (data.success) {
           console.log('✅ Products loaded from backend:', {
             total: data.data.products.length,
-            pages: data.data.pages
+            pages: data.data.pages,
+            totalInDatabase: data.data.total
           })
+          
+          // Log each product for debugging
+          console.log('📦 Individual products:', data.data.products.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            isActive: p.isActive,
+            categoryId: p.categoryId,
+            categoryName: p.category?.name
+          })))
           
           // Transform backend products to match AdminProduct format
           const transformedProducts: AdminProduct[] = data.data.products.map((product: any) => ({
@@ -264,6 +276,7 @@ const AdminProductsPage = () => {
             notes: product.notes
           }))
 
+          console.log('🔄 Transformed products:', transformedProducts.length)
           setProducts(transformedProducts)
           setFilteredProducts(transformedProducts)
         } else {
@@ -346,30 +359,32 @@ const AdminProductsPage = () => {
   }
 
   const applyFilters = () => {
+    console.log('🔍 Applying filters:', filters)
+    console.log('📦 Starting with products:', products.length)
+    
     let filtered = [...products]
 
-    // Apply search filter
     if (filters.search) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(filters.search!.toLowerCase()) ||
         product.description.toLowerCase().includes(filters.search!.toLowerCase()) ||
         (product.brand && product.brand.toLowerCase().includes(filters.search!.toLowerCase()))
       )
+      console.log('🔍 After search filter:', filtered.length)
     }
 
-    // Apply category filter
     if (filters.category) {
       filtered = filtered.filter(product => product.categoryId === filters.category)
+      console.log('🔍 After category filter:', filtered.length)
     }
 
-    // Apply status filter
     if (filters.status && filters.status !== 'all') {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         filters.status === 'active' ? product.isActive : !product.isActive
       )
+      console.log('🔍 After status filter:', filtered.length)
     }
 
-    // Apply stock status filter
     if (filters.stockStatus && filters.stockStatus !== 'all') {
       filtered = filtered.filter(product => {
         if (filters.stockStatus === 'outOfStock') return product.stockQuantity === 0
@@ -377,43 +392,46 @@ const AdminProductsPage = () => {
         if (filters.stockStatus === 'inStock') return product.stockQuantity > product.minStockAlert
         return true
       })
+      console.log('🔍 After stock status filter:', filtered.length)
     }
 
-    // Apply price range filter
     if (filters.priceRange) {
       filtered = filtered.filter(product => {
-        const price = product.price
         const min = filters.priceRange!.min
         const max = filters.priceRange!.max
-        return (!min || price >= min) && (!max || price <= max)
+        return product.price >= min && product.price <= max
       })
+      console.log('🔍 After price range filter:', filtered.length)
     }
 
-    // Apply featured filter
     if (filters.featured !== undefined) {
       filtered = filtered.filter(product => product.isFeatured === filters.featured)
+      console.log('🔍 After featured filter:', filtered.length)
     }
 
-    // Apply tags filter
     if (filters.tags && filters.tags.length > 0) {
       filtered = filtered.filter(product =>
         filters.tags!.some(tag => product.tags.includes(tag))
       )
+      console.log('🔍 After tags filter:', filtered.length)
     }
 
     // Apply perfume-specific filters
     if (filters.perfumeType && filters.perfumeType !== 'all') {
       filtered = filtered.filter(product => product.perfumeType === filters.perfumeType)
+      console.log('🔍 After perfume type filter:', filtered.length)
     }
 
     if (filters.perfumeBrand) {
-      filtered = filtered.filter(product => 
+      filtered = filtered.filter(product =>
         product.brand && product.brand.toLowerCase().includes(filters.perfumeBrand!.toLowerCase())
       )
+      console.log('🔍 After perfume brand filter:', filtered.length)
     }
 
     if (filters.concentration && filters.concentration !== 'all') {
       filtered = filtered.filter(product => product.concentration === filters.concentration)
+      console.log('🔍 After concentration filter:', filtered.length)
     }
 
     // Apply sorting
@@ -459,6 +477,7 @@ const AdminProductsPage = () => {
       })
     }
 
+    console.log('🔍 Final filtered products:', filtered.length)
     setFilteredProducts(filtered)
   }
 
