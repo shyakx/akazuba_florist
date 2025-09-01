@@ -160,15 +160,28 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const loadLocalProducts = async () => {
     try {
+      console.log('🔄 Loading local products as fallback...')
+      console.log('📦 Real flower products available:', realFlowerProducts.length)
+      console.log('🌸 Perfume products available:', perfumeData.length)
+      
       // Transform flower products
       const flowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
+      console.log('✅ Transformed flower products:', flowerProducts.length)
       
       // Transform perfume products
       const perfumeProductsList = perfumeData.map((product, index) => transformProduct(product, index + 100))
+      console.log('✅ Transformed perfume products:', perfumeProductsList.length)
       
       // Combine all products
       const allProducts = [...flowerProducts, ...perfumeProductsList]
       const featuredProducts = allProducts.filter(product => product.featured)
+      
+      console.log('🎉 Final local products loaded:', {
+        total: allProducts.length,
+        flowers: flowerProducts.length,
+        perfumes: perfumeProductsList.length,
+        featured: featuredProducts.length
+      })
       
       setState({
         products: allProducts,
@@ -179,7 +192,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         error: null
       })
     } catch (error) {
-      console.error('Error loading local products:', error)
+      console.error('❌ Error loading local products:', error)
       setState(prev => ({
         ...prev,
         isLoading: false,
@@ -202,6 +215,10 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }
 
   const getProductsByCategory = (category: string): Product[] => {
+    console.log('🔍 getProductsByCategory called with category:', category)
+    console.log('📦 Total products available:', state.products.length)
+    console.log('🌸 Flower products available:', state.flowerProducts.length)
+    
     // Handle both singular and plural category names
     const categoryMap: { [key: string]: string[] } = {
       'flowers': ['flowers', 'flower'],
@@ -218,10 +235,14 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     
     const validCategories = categoryMap[category] || [category]
+    console.log('🎯 Valid categories for', category, ':', validCategories)
     
     const filteredProducts = state.products.filter(product => 
       validCategories.includes(product.category.toLowerCase())
     )
+    
+    console.log('✅ Found', filteredProducts.length, 'products for category', category)
+    console.log('📋 Products:', filteredProducts.map(p => ({ id: p.id, name: p.name, category: p.category })))
     
     return filteredProducts
   }
