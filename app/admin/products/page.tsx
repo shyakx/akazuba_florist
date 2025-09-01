@@ -379,7 +379,7 @@ const AdminProductsPage = () => {
     }
 
     if (filters.status && filters.status !== 'all') {
-      filtered = filtered.filter(product =>
+      filtered = filtered.filter(product => 
         filters.status === 'active' ? product.isActive : !product.isActive
       )
       console.log('🔍 After status filter:', filtered.length)
@@ -423,7 +423,7 @@ const AdminProductsPage = () => {
     }
 
     if (filters.perfumeBrand) {
-      filtered = filtered.filter(product =>
+      filtered = filtered.filter(product => 
         product.brand && product.brand.toLowerCase().includes(filters.perfumeBrand!.toLowerCase())
       )
       console.log('🔍 After perfume brand filter:', filtered.length)
