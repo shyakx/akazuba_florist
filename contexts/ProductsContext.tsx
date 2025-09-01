@@ -114,9 +114,17 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }))
       
-      const response = await productsAPI.getAll()
+      // FORCE LOCAL DATA FOR NOW - Comment out this line to re-enable backend API
+      console.log('🔄 FORCING LOCAL DATA LOAD (backend API temporarily disabled)')
+      await loadLocalProducts()
+      return
       
-      if (response.success && response.data) {
+      console.log('🔄 Attempting to fetch products from backend API...')
+      const response = await productsAPI.getAll()
+      console.log('📡 Backend API response:', response)
+      
+      if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
+        console.log('✅ Backend products fetched successfully:', response.data.length, 'products')
         const backendProducts = response.data
         const backendFlowerProducts = backendProducts.map((product, index) => transformProduct(product, index))
         
@@ -128,8 +136,6 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const featuredProducts = allProducts.filter(product => product.featured)
         const flowerProducts = backendFlowerProducts
         const perfumeProducts = localPerfumeProducts
-        
-
         
         // Create mapping between frontend IDs and backend IDs for fallback compatibility
         const mapping = new Map<number, string>()
@@ -147,12 +153,14 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           error: null
         })
       } else {
-        // Fallback to local data if backend fails
-        console.warn('Backend products fetch failed, using local data')
+        // Fallback to local data if backend fails or returns empty
+        console.warn('⚠️ Backend products fetch failed or returned empty, using local data fallback')
+        console.warn('Response:', response)
         await loadLocalProducts()
       }
     } catch (error) {
-      console.error('Error fetching products:', error)
+      console.error('❌ Error fetching products from backend:', error)
+      console.log('🔄 Falling back to local data...')
       // Fallback to local data
       await loadLocalProducts()
     }
