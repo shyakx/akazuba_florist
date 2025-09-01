@@ -1,7 +1,8 @@
 import { realFlowerProducts } from './real-flowers';
 
-// For now, use the real flower products generated from actual images
-// TODO: Replace with API call to get products from backend when API is ready
+// Products data - using real flower products from actual images
+// Note: Backend API is now deployed and ready for integration
+// This local data serves as fallback and for development
 export const products = realFlowerProducts;
 
 // Export individual products for easy access

@@ -66,13 +66,15 @@ const transformProduct = (product: any, index: number): Product => {
       imagePath = `/images/perfumes/perfume-${(index % 6) + 1}.jpg`
     }
   } else {
-    // For flowers, use flower-specific image paths
+    // For flowers, PRESERVE the original image path from realFlowerProducts
     if (!imagePath) {
+      // Only set default if no image path exists
       const color = product.color || 'mixed'
       imagePath = `/images/flowers/${color}/${color}-${(index % 2) + 1}.jpg`
     }
-    // Ensure flower images go to flowers directory
-    if (imagePath && !imagePath.startsWith('/images/flowers/') && !imagePath.startsWith('http')) {
+    // DON'T override existing flower image paths - they are already correct
+    // Only ensure flower images go to flowers directory if they're missing
+    if (imagePath && !imagePath.startsWith('/images/flowers/') && !imagePath.startsWith('http') && !imagePath.includes('/images/')) {
       const color = product.color || 'mixed'
       imagePath = `/images/flowers/${color}/${color}-1.jpg`
     }
@@ -110,102 +112,100 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const [backendIdMapping, setBackendIdMapping] = useState<Map<number, string>>(new Map())
 
+  // Helper function to load local products only
+  const loadLocalProducts = async () => {
+    // Check if admin mode is active
+    if (typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || (window as any).adminProductsMode)) {
+      console.log('🚫 ProductsContext: Admin mode detected - skipping local products load')
+      return
+    }
+    
+    console.log('🔄 Loading local products only...')
+    const localFlowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
+    const localPerfumeProducts = perfumeData.map((product, index) => transformProduct(product, index + 100))
+    
+    const allProducts = [...localFlowerProducts, ...localPerfumeProducts]
+    const featuredProducts = allProducts.filter(product => product.featured)
+    const flowerProducts = localFlowerProducts
+    const perfumeProducts = localPerfumeProducts
+    
+    setState({
+      products: allProducts,
+      featuredProducts,
+      flowerProducts,
+      perfumeProducts,
+      isLoading: false,
+      error: null
+    })
+    
+    console.log('✅ Local products loaded successfully:', allProducts.length)
+  }
+
   const fetchProducts = async () => {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }))
       
-      // FORCE LOCAL DATA FOR NOW - Comment out this line to re-enable backend API
-      console.log('🔄 FORCING LOCAL DATA LOAD (backend API temporarily disabled)')
-      await loadLocalProducts()
-      return
+      console.log('🔄 Loading products with local data priority...')
       
-      console.log('🔄 Attempting to fetch products from backend API...')
-      const response = await productsAPI.getAll()
-      console.log('📡 Backend API response:', response)
+      // Always load local flower data first (ensures correct image paths)
+      console.log('🌸 Loading local flower products...')
+      const localFlowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
+      console.log('✅ Local flower products loaded:', localFlowerProducts.length)
       
-      if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
-        console.log('✅ Backend products fetched successfully:', response.data.length, 'products')
-        const backendProducts = response.data
-        const backendFlowerProducts = backendProducts.map((product, index) => transformProduct(product, index))
+      // Always load local perfume data
+      console.log('🌸 Loading local perfume products...')
+      const localPerfumeProducts = perfumeData.map((product, index) => transformProduct(product, index + 100))
+      console.log('✅ Local perfume products loaded:', localPerfumeProducts.length)
+      
+      // Try to fetch backend products for additional data
+      try {
+        console.log('🔄 Attempting to fetch additional products from backend API...')
+        const response = await productsAPI.getAll()
+        console.log('📡 Backend API response:', response)
         
-        // Always load local perfume data regardless of backend
-        const localPerfumeProducts = perfumeData.map((product, index) => transformProduct(product, index + 100))
-        
-        // Combine backend flowers with local perfumes
-        const allProducts = [...backendFlowerProducts, ...localPerfumeProducts]
-        const featuredProducts = allProducts.filter(product => product.featured)
-        const flowerProducts = backendFlowerProducts
-        const perfumeProducts = localPerfumeProducts
-        
-        // Create mapping between frontend IDs and backend IDs for fallback compatibility
-        const mapping = new Map<number, string>()
-        backendProducts.forEach((product, index) => {
-          mapping.set(index + 1, product.id)
-        })
-        setBackendIdMapping(mapping)
-        
-        setState({
-          products: allProducts,
-          featuredProducts,
-          flowerProducts,
-          perfumeProducts,
-          isLoading: false,
-          error: null
-        })
-      } else {
-        // Fallback to local data if backend fails or returns empty
-        console.warn('⚠️ Backend products fetch failed or returned empty, using local data fallback')
-        console.warn('Response:', response)
+        if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
+          console.log('✅ Backend products fetched successfully:', response.data.length, 'products')
+          const backendProducts = response.data
+          const backendFlowerProducts = backendProducts.map((product, index) => transformProduct(product, index))
+          
+          // Combine backend flowers with local perfumes (prioritize local flowers for correct images)
+          const allProducts = [...localFlowerProducts, ...localPerfumeProducts]
+          const featuredProducts = allProducts.filter(product => product.featured)
+          const flowerProducts = localFlowerProducts // Use local flowers for correct images
+          const perfumeProducts = localPerfumeProducts
+          
+          // Create mapping between frontend IDs and backend IDs for fallback compatibility
+          const mapping = new Map<number, string>()
+          backendProducts.forEach((product, index) => {
+            mapping.set(index + 1, product.id)
+          })
+          setBackendIdMapping(mapping)
+          
+          setState({
+            products: allProducts,
+            featuredProducts,
+            flowerProducts,
+            perfumeProducts,
+            isLoading: false,
+            error: null
+          })
+          
+          console.log('🎉 Products loaded successfully with backend integration')
+        } else {
+          // Backend failed or returned empty, use local data only
+          console.warn('⚠️ Backend products fetch failed or returned empty, using local data only')
+          await loadLocalProducts()
+        }
+      } catch (backendError) {
+        console.error('❌ Error fetching products from backend:', backendError)
+        console.log('🔄 Using local data only...')
+        // Backend failed, use local data only
         await loadLocalProducts()
       }
     } catch (error) {
-      console.error('❌ Error fetching products from backend:', error)
-      console.log('🔄 Falling back to local data...')
-      // Fallback to local data
+      console.error('❌ Critical error in fetchProducts:', error)
+      // Final fallback to local data
       await loadLocalProducts()
-    }
-  }
-
-  const loadLocalProducts = async () => {
-    try {
-      console.log('🔄 Loading local products as fallback...')
-      console.log('📦 Real flower products available:', realFlowerProducts.length)
-      console.log('🌸 Perfume products available:', perfumeData.length)
-      
-      // Transform flower products
-      const flowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
-      console.log('✅ Transformed flower products:', flowerProducts.length)
-      
-      // Transform perfume products
-      const perfumeProductsList = perfumeData.map((product, index) => transformProduct(product, index + 100))
-      console.log('✅ Transformed perfume products:', perfumeProductsList.length)
-      
-      // Combine all products
-      const allProducts = [...flowerProducts, ...perfumeProductsList]
-      const featuredProducts = allProducts.filter(product => product.featured)
-      
-      console.log('🎉 Final local products loaded:', {
-        total: allProducts.length,
-        flowers: flowerProducts.length,
-        perfumes: perfumeProductsList.length,
-        featured: featuredProducts.length
-      })
-      
-      setState({
-        products: allProducts,
-        featuredProducts,
-        flowerProducts,
-        perfumeProducts: perfumeProductsList,
-        isLoading: false,
-        error: null
-      })
-    } catch (error) {
-      console.error('❌ Error loading local products:', error)
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        error: 'Failed to load products'
-      }))
     }
   }
 

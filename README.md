@@ -29,8 +29,8 @@ A modern, responsive e-commerce website for Akazuba Florist, offering beautiful 
 - **Next.js 14**: Latest React framework with App Router
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling
-- **Static Export**: Deployed on AWS CloudFront for global performance
-- **Mock Data**: Works offline with local data
+- **Static Export**: Optimized for Vercel deployment
+- **Backend API**: Full backend integration with Render deployment
 
 ## 🏗️ **Architecture**
 
@@ -40,12 +40,13 @@ A modern, responsive e-commerce website for Akazuba Florist, offering beautiful 
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **State Management**: React Context API
-- **Build**: Static export for CDN deployment
+- **Build**: Optimized for Vercel deployment
 
 ### **Deployment**
-- **Hosting**: AWS CloudFront + S3
-- **Domain**: CloudFront distribution
-- **Build Process**: Static export for optimal performance
+- **Frontend**: Vercel (Next.js hosting)
+- **Backend**: Render (Node.js API)
+- **Database**: Render PostgreSQL
+- **Build Process**: Automatic deployment via GitHub
 
 ## 🚀 **Quick Start**
 
@@ -85,7 +86,7 @@ akazuba-florist/
 │   └── ...
 ├── components/            # Reusable React components
 ├── contexts/              # React Context providers
-├── data/                  # Static data and mock data
+├── data/                  # Static data and API fallback data
 ├── lib/                   # Utility functions and API
 ├── public/                # Static assets
 └── types/                 # TypeScript type definitions
@@ -152,18 +153,22 @@ NODE_ENV=development
 ## 🌐 **Deployment**
 
 ### **Current Setup**
-- **AWS CloudFront**: Global CDN
-- **S3 Bucket**: Static file hosting
-- **Automatic Build**: GitHub Actions (if configured)
+- **Frontend**: Vercel (Next.js hosting)
+- **Backend**: Render (Node.js API)
+- **Database**: Render PostgreSQL
+- **Automatic Build**: GitHub integration
 
 ### **Deployment Process**
 ```bash
 # Build the project
 npm run build
 
-# Deploy to CloudFront
-./deploy-simple.ps1
+# Deploy automatically via GitHub push
+# Frontend: Vercel auto-deploys from main branch
+# Backend: Render auto-deploys from main branch
 ```
+
+For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ## 📞 **Support**
 

@@ -1266,6 +1266,71 @@ router.get('/categories', async (req, res) => {
   }
 })
 
+// Settings routes
+router.get('/settings', authenticateToken, async (req, res) => {
+  try {
+    // For now, return default settings
+    // In a real application, you would store settings in the database
+    const settings = {
+      storeName: 'Akazuba Florist',
+      storeEmail: 'info@akazubaflorist.com',
+      storePhone: '+250 784 586 110',
+      storeAddress: 'Kigali, Rwanda',
+      minOrderAmount: 5000,
+      deliveryFee: 1000,
+      freeDeliveryThreshold: 50000,
+      businessHours: '8:00 AM - 6:00 PM',
+      currency: 'RWF',
+      taxRate: 0.18,
+      autoOrderApproval: true,
+      lowStockThreshold: 5,
+      emailNotifications: true,
+      smsNotifications: true
+    }
+
+    res.json({
+      success: true,
+      data: settings
+    })
+  } catch (error) {
+    console.error('Error fetching settings:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch settings'
+    })
+  }
+})
+
+router.put('/settings', authenticateToken, async (req, res) => {
+  try {
+    const settings = req.body
+
+    // Validate required fields
+    if (!settings.storeName || !settings.storeEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Store name and email are required'
+      })
+    }
+
+    // In a real application, you would save settings to the database
+    // For now, we'll just return success
+    console.log('Settings updated:', settings)
+
+    res.json({
+      success: true,
+      message: 'Settings updated successfully',
+      data: settings
+    })
+  } catch (error) {
+    console.error('Error updating settings:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update settings'
+    })
+  }
+})
+
 /**
  * @swagger
  * /admin/export/{type}:
@@ -1437,7 +1502,7 @@ router.post('/export/:type', async (req, res) => {
     // Generate CSV content
     const csvContent = [
       headers.join(','),
-      ...data.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...data.map(row => row.map((cell: any) => `"${cell}"`).join(','))
     ].join('\n')
     
     // Set response headers for CSV download

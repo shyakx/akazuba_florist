@@ -38,7 +38,7 @@ export default function RootLayout({
             <CartProvider>
               <WishlistProvider>
                 <ConditionalHeader />
-                <main className="pt-32">
+                <main className="pt-32 admin-padding">
                   {children}
                 </main>
                 <Toaster position="top-right" />

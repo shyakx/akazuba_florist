@@ -1,3 +1,0 @@
-[33m75e4fd7b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix API URL and CORS configuration for production deployment
-[33m8a48f835[m Add explicit Vercel build configuration
-[33m79564bf6[m Simplify Vercel configuration to fix root directory issue

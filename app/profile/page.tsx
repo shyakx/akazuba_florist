@@ -49,10 +49,45 @@ const Profile = () => {
     setIsLoading(true)
     
     try {
-      // TODO: Implement profile update with real API
+      // Implement profile update with real API
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        toast.error('Authentication required')
+        return
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/users/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          email: profileData.email,
+          phone: profileData.phone
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile')
+      }
+
+      const result = await response.json()
+      
+      // Update local user data
+      if (user) {
+        user.firstName = profileData.firstName
+        user.lastName = profileData.lastName
+        user.email = profileData.email
+        user.phone = profileData.phone
+      }
+      
       toast.success('Profile updated successfully!')
       setIsEditing(false)
     } catch (error) {
+      console.error('Profile update error:', error)
       toast.error('Failed to update profile')
     } finally {
       setIsLoading(false)
@@ -70,7 +105,30 @@ const Profile = () => {
     setIsLoading(true)
     
     try {
-      // TODO: Implement password change with real API
+      // Implement password change with real API
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        toast.error('Authentication required')
+        return
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'}/users/change-password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to change password')
+      }
+
       toast.success('Password changed successfully!')
       setPasswordData({
         currentPassword: '',
@@ -78,7 +136,8 @@ const Profile = () => {
         confirmPassword: ''
       })
     } catch (error) {
-      toast.error('Failed to change password')
+      console.error('Password change error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to change password')
     } finally {
       setIsLoading(false)
     }

@@ -3,13 +3,25 @@ import { AdminProduct } from './adminApi'
 
 // Helper function to get API base URL
 const getApiBaseUrl = (): string => {
-  const isDevelopment = process.env.NODE_ENV === 'development'
-  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  
-  if (isDevelopment || isLocalhost) {
+  // Check if we're in the browser
+  if (typeof window === 'undefined') {
+    // Server-side rendering - use environment variable
     return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+  }
+
+  // Client-side - check current hostname
+  const hostname = window.location.hostname
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  
+  if (isLocalhost) {
+    // Development - use localhost
+    console.log('🔧 Product Storage: Using localhost for development')
+    return 'http://localhost:5000/api/v1'
   } else {
-    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+    // Production - use environment variable or production URL
+    const productionUrl = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+    console.log('🔧 Product Storage: Using production API:', productionUrl)
+    return productionUrl
   }
 }
 
@@ -17,6 +29,8 @@ const getApiBaseUrl = (): string => {
 const transformToAdminProduct = (product: any, index: number): AdminProduct => {
   // Ensure we have a valid image path
   let imagePath = product.image
+  
+  // Validate and fix image path
   if (!imagePath || imagePath === '') {
     // Fallback to a default image based on color
     imagePath = `/images/flowers/${product.color}/${product.color}-1.jpg`
@@ -39,6 +53,9 @@ const transformToAdminProduct = (product: any, index: number): AdminProduct => {
   }
 
   imagePath = validateImagePath(imagePath, product.color)
+  
+  // Log the image path for debugging
+  console.log(`Product ${product.name}: Image path set to:`, imagePath)
 
   return {
     id: product.id.toString(),
@@ -317,7 +334,7 @@ class ProductStorage {
   }
 
   // Delete product
-  deleteProduct(id: string): void {
+  async deleteProduct(id: string): Promise<void> {
     this.initializeProducts()
     
     const index = this.products.findIndex(p => p.id === id)
@@ -329,11 +346,11 @@ class ProductStorage {
     this.saveToStorage()
     
     // Sync with backend
-    this.syncToBackend({ id } as AdminProduct, 'delete')
+    await this.syncToBackend({ id } as AdminProduct, 'delete')
   }
 
   // Bulk operations
-  bulkOperation(operation: 'delete' | 'activate' | 'deactivate' | 'feature' | 'unfeature' | 'updateStock', productIds: string[], data?: any): { success: boolean; message: string } {
+  async bulkOperation(operation: 'delete' | 'activate' | 'deactivate' | 'feature' | 'unfeature' | 'updateStock', productIds: string[], data?: any): Promise<{ success: boolean; message: string }> {
     this.initializeProducts()
     
     this.products = this.products.map(product => {
@@ -376,7 +393,7 @@ class ProductStorage {
     this.saveToStorage()
     
     // Sync with backend
-    this.syncBulkToBackend(operation, productIds)
+    await this.syncBulkToBackend(operation, productIds)
     
     return { success: true, message: `Bulk operation '${operation}' completed successfully` }
   }
@@ -531,6 +548,17 @@ class ProductStorage {
     } catch (error) {
       console.error('Error saving to storage:', error)
     }
+  }
+
+  // Clear storage and reinitialize (useful for fixing corrupted data)
+  clearAndReinitialize() {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('productStorage')
+    }
+    this.isInitialized = false
+    this.products = []
+    this.nextId = 1
+    this.initializeProducts()
   }
 }
 

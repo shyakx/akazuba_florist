@@ -31,31 +31,31 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!accessToken
   const isAdmin = userRole === 'ADMIN'
   
-  console.log('🔒 Middleware check:', {
-    pathname,
-    isAuthenticated,
-    isAdmin,
-    hasToken: !!accessToken,
-    userRole
-  })
+  // Only log important middleware checks (not every request)
+  if (pathname.startsWith('/admin') || pathname.startsWith('/profile') || pathname.startsWith('/orders')) {
+    console.log('🔒 Middleware check:', {
+      pathname,
+      isAuthenticated,
+      isAdmin,
+      hasToken: !!accessToken,
+      userRole
+    })
+  }
   
   // Handle auth routes (login, register) - ALWAYS allow access
   if (authRoutes.some(route => pathname.startsWith(route))) {
-    console.log('✅ Allowing access to auth route:', pathname)
     return NextResponse.next()
   }
   
   // Handle admin routes - STRICT SECURITY
   if (adminRoutes.some(route => pathname.startsWith(route))) {
-    console.log('🔐 Admin route access check:', pathname)
-    
     if (!isAuthenticated) {
-      console.log('❌ Not authenticated - redirecting to admin login')
+      console.log('❌ Admin access denied - not authenticated')
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
     
     if (!isAdmin) {
-      console.log('❌ Not admin - redirecting to home')
+      console.log('❌ Admin access denied - not admin role')
       return NextResponse.redirect(new URL('/', request.url))
     }
     
@@ -66,16 +66,14 @@ export function middleware(request: NextRequest) {
   // Handle other protected routes
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!isAuthenticated) {
-      console.log('❌ Not authenticated - redirecting to login')
+      console.log('❌ Protected route access denied - redirecting to login')
       return NextResponse.redirect(new URL('/login', request.url))
     }
     
-    console.log('✅ Protected route access granted')
     return NextResponse.next()
   }
   
   // For all other routes, allow access
-  console.log('✅ Public route access granted')
   return NextResponse.next()
 }
 
@@ -87,8 +85,9 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - images (image files)
      * - public folder
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|images|public).*)',
   ],
 } 

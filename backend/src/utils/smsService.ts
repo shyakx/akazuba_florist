@@ -30,8 +30,23 @@ class SMSService {
       console.log('💬 Message:', message)
       console.log('⏰ Time:', new Date().toISOString())
       
-      // TODO: Implement actual MTN SMS API call when MTN API credentials are available
-      // This would require proper MTN API credentials and setup
+      // Note: MTN SMS API integration requires:
+      // 1. Valid MTN API credentials (MOMO_API_KEY, MOMO_API_USER)
+      // 2. Production environment setup
+      // 3. Proper API endpoint configuration
+      // 4. SMS service activation with MTN
+      
+      // Implementation example when credentials are available:
+      // const response = await axios.post(`${this.config.apiUrl}/sms/send`, {
+      //   recipient: adminPhone,
+      //   message: message,
+      //   sender: 'Akazuba'
+      // }, {
+      //   headers: {
+      //     'Authorization': `Bearer ${this.config.apiKey}`,
+      //     'X-User': this.config.apiUser
+      //   }
+      // })
       
       return true
     } catch (error) {

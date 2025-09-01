@@ -41,8 +41,32 @@ export interface LoginRequest {
 
 // Production-only API Base URL
 const getApiBaseUrl = (): string => {
-  // Always use production backend - no development fallback
-  return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+  // Check if we're in the browser
+  if (typeof window === 'undefined') {
+    // Server-side rendering - use environment variable
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+  }
+
+  // Client-side - check current hostname
+  const hostname = window.location.hostname
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  
+  console.log('🔧 API Base URL Check:')
+  console.log('  - Current hostname:', hostname)
+  console.log('  - Is localhost:', isLocalhost)
+  console.log('  - NODE_ENV:', process.env.NODE_ENV)
+  console.log('  - NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL)
+  
+  if (isLocalhost) {
+    // Development - use localhost
+    console.log('🔧 Using localhost API for development')
+    return 'http://localhost:5000/api/v1'
+  } else {
+    // Production - use environment variable or production URL
+    const productionUrl = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+    console.log('🔧 Using production API:', productionUrl)
+    return productionUrl
+  }
 }
 
 // Base API request function
@@ -52,6 +76,12 @@ const apiRequest = async <T>(
 ): Promise<T> => {
   const baseUrl = getApiBaseUrl()
   const url = `${baseUrl}${endpoint}`
+  
+  console.log('🔍 API Request Debug:')
+  console.log('  - Hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server-side')
+  console.log('  - Base URL:', baseUrl)
+  console.log('  - Endpoint:', endpoint)
+  console.log('  - Full URL:', url)
   
   // Default headers
   const defaultHeaders: Record<string, string> = {
@@ -163,7 +193,7 @@ export const authAPI = {
       const response = await apiRequest<{
         message: string
         user: User
-        token: string
+        accessToken: string
       }>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -175,8 +205,8 @@ export const authAPI = {
         message: response.message,
         data: {
           user: response.user,
-          accessToken: response.token,
-          refreshToken: response.token // Backend doesn't provide refresh token yet
+          accessToken: response.accessToken,
+          refreshToken: response.accessToken // Backend doesn't provide refresh token for registration yet
         }
       }
       
@@ -217,7 +247,8 @@ export const authAPI = {
       const response = await apiRequest<{
         message: string
         user: User
-        token: string
+        accessToken: string
+        refreshToken: string
       }>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(data),
@@ -231,8 +262,8 @@ export const authAPI = {
         message: response.message,
         data: {
           user: response.user,
-          accessToken: response.token,
-          refreshToken: response.token // Backend doesn't provide refresh token yet
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken
         }
       }
       
@@ -253,6 +284,68 @@ export const authAPI = {
           errorMessage = 'Invalid email or password. Please check your credentials and try again.'
         } else if (error.message.includes('User not found')) {
           errorMessage = 'Account not found. Please check your email address or create a new account.'
+        } else if (error.message.includes('Network error') || error.message.includes('Failed to fetch')) {
+          errorMessage = 'Connection error. Please check your internet connection and try again.'
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Server error. Please try again in a few moments.'
+        } else {
+          errorMessage = error.message
+        }
+      }
+      
+      toast.error(errorMessage)
+      throw error
+    }
+  },
+
+  // Admin login (uses same endpoint as regular login)
+  adminLogin: async (data: { username: string; password: string }): Promise<AuthResponse> => {
+    try {
+      const response = await apiRequest<{
+        message: string
+        user: User
+        accessToken: string
+        refreshToken: string
+      }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: data.username, password: data.password }),
+      })
+      
+      console.log('🔍 Admin login backend response:', response)
+      
+      // Check if user is admin
+      if (response.user.role !== 'ADMIN') {
+        throw new Error('Access denied. Admin privileges required.')
+      }
+      
+      // Transform backend response to match expected format
+      const transformedResponse: AuthResponse = {
+        success: true,
+        message: response.message,
+        data: {
+          user: response.user,
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken
+        }
+      }
+      
+      console.log('🔄 Admin login transformed response:', transformedResponse)
+      
+      // Store tokens and user data
+      storeTokens(transformedResponse.data!.accessToken, transformedResponse.data!.refreshToken)
+      storeUser(transformedResponse.data!.user)
+      toast.success('Admin login successful!')
+      
+      return transformedResponse
+    } catch (error: any) {
+      // Provide professional error messages
+      let errorMessage = 'Admin login failed'
+      
+      if (error.message) {
+        if (error.message.includes('Invalid credentials') || error.message.includes('401')) {
+          errorMessage = 'Invalid username or password. Please check your credentials and try again.'
+        } else if (error.message.includes('Access denied')) {
+          errorMessage = 'Access denied. Admin privileges required.'
         } else if (error.message.includes('Network error') || error.message.includes('Failed to fetch')) {
           errorMessage = 'Connection error. Please check your internet connection and try again.'
         } else if (error.message.includes('500')) {

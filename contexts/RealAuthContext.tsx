@@ -33,9 +33,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const checkAuthStatus = async () => {
     try {
       setIsLoading(true)
+      console.log('🔍 Starting authentication status check...')
       
       // Check if we have stored auth data
       const token = localStorage.getItem('accessToken')
+      console.log('🔑 Access token found:', token ? 'Yes' : 'No')
+      
       if (!token) {
         console.log('🔒 No access token found - user not authenticated')
         setUser(null)
@@ -48,17 +51,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       // Try to get current user profile
       try {
+        console.log('🔄 Attempting to fetch user profile...')
         const response = await authAPI.getProfile()
+        console.log('📡 Profile API response:', response)
+        
         if (response.success && response.data && response.data.user) {
           console.log('✅ User authenticated:', response.data.user.email, 'Role:', response.data.user.role)
           setUser(response.data.user)
           // Set cookies for middleware
           if (response.data.user?.role) {
             document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+            console.log('🍪 Set user role cookie:', response.data.user.role)
           }
         } else {
           // Profile fetch failed, clear user
           console.warn('❌ Profile fetch failed - clearing user data')
+          console.warn('Response:', response)
           setUser(null)
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
@@ -75,6 +83,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
     } finally {
+      console.log('🏁 Authentication check completed, setting isLoading to false')
       setIsLoading(false)
     }
   }
