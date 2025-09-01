@@ -255,6 +255,17 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetchProducts()
   }, [])
 
+  // Debug logging for state changes
+  useEffect(() => {
+    console.log('🔄 ProductsContext state changed:', {
+      totalProducts: state.products.length,
+      flowerProducts: state.flowerProducts.length,
+      perfumeProducts: state.perfumeProducts.length,
+      isLoading: state.isLoading,
+      error: state.error
+    })
+  }, [state])
+
   const value: ProductsContextType = {
     state,
     refreshProducts,
