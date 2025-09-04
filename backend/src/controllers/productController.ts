@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// Get all productss with filtering and pagination
+// Get all products with filtering and pagination
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
@@ -18,7 +18,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     } = req.query
 
     const pageNum = parseInt(page as string) || 1
-    // If no limit specified or limit is invalid, get all productss
+    // If no limit specified or limit is invalid, get all products
     const limitNum = limit ? (parseInt(limit as string) || 1000) : 1000
     const skip = (pageNum - 1) * limitNum
 
@@ -57,12 +57,12 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       }
     }
 
-    // Get productss with categories
-    const productss = await prisma.products.findMany({
+    // Get products with categories
+    const products = await prisma.product.findMany({
       where,
       include: { categories: true
       },
-      skip: limitNum === 1000 ? 0 : skip, // Skip pagination if getting all productss
+      skip: limitNum === 1000 ? 0 : skip, // Skip pagination if getting all products
       take: limitNum,
       orderBy: {
         createdAt: 'desc'
@@ -70,12 +70,12 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     })
 
     // Get total count for pagination
-    const total = await prisma.products.count({ where })
+    const total = await prisma.product.count({ where })
 
     res.json({
       success: true,
       message: 'Products retrieved successfully',
-      data: productss,
+      data: products,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -84,7 +84,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       }
     })
   } catch (error) {
-    console.error('Get productss error:', error)
+    console.error('Get products error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -97,11 +97,11 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
   try {
     const { id } = req.params
 
-    const products = await prisma.products.findUnique({
+    const products = await prisma.product.findUnique({
       where: { id },
       include: { categories: true,
         reviews: {
-          include: { userss: {
+          include: { users: {
               select: {
                 id: true,
                 firstName: true,
@@ -141,13 +141,13 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
   }
 }
 
-// Get featured productss
+// Get featured products
 export const getFeaturedProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { limit = 8 } = req.query
     const limitNum = parseInt(limit as string)
 
-    const productss = await prisma.products.findMany({
+    const products = await prisma.product.findMany({
       where: {
         isActive: true,
         isFeatured: true
@@ -162,11 +162,11 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
 
     res.json({
       success: true,
-      message: 'Featured productss retrieved successfully',
-      data: productss
+      message: 'Featured products retrieved successfully',
+      data: products
     })
   } catch (error) {
-    console.error('Get featured productss error:', error)
+    console.error('Get featured products error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -208,7 +208,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
     // Check if products with same slug exists
-    const existingProduct = await prisma.products.findUnique({
+    const existingProduct = await prisma.product.findUnique({
       where: { slug }
     })
 
@@ -220,7 +220,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       return
     }
 
-    const products = await prisma.products.create({
+    const products = await prisma.product.create({
       data: {
         name,
         slug,
@@ -265,7 +265,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     const updateData = req.body
 
     // Check if products exists
-    const existingProduct = await prisma.products.findUnique({
+    const existingProduct = await prisma.product.findUnique({
       where: { id }
     })
 
@@ -282,7 +282,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       const slug = updateData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       
       // Check if new slug conflicts
-      const slugConflict = await prisma.products.findUnique({
+      const slugConflict = await prisma.product.findUnique({
         where: { slug }
       })
 
@@ -305,7 +305,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     if (updateData.minStockAlert) updateData.minStockAlert = parseInt(updateData.minStockAlert)
     if (updateData.weight) updateData.weight = parseFloat(updateData.weight)
 
-    const products = await prisma.products.update({
+    const products = await prisma.product.update({
       where: { id },
       data: updateData,
       include: { categories: true
@@ -332,7 +332,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     const { id } = req.params
 
     // Check if products exists
-    const existingProduct = await prisma.products.findUnique({
+    const existingProduct = await prisma.product.findUnique({
       where: { id }
     })
 
@@ -345,7 +345,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     }
 
     // Soft delete by setting isActive to false
-    await prisma.products.update({
+    await prisma.product.update({
       where: { id },
       data: { isActive: false }
     })

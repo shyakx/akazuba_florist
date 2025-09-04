@@ -39,7 +39,7 @@ const upload = multer({
 
 // Generate order number
 const generateOrderNumber = async (): Promise<string> => {
-  const count = await prisma.orderss.count()
+  const count = await prisma.orders.count()
   const orderNumber = `AKZ-${String(count + 1).padStart(3, '0')}`
   return orderNumber
 }
@@ -109,7 +109,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     const orderNumber = await generateOrderNumber()
 
     // Create order
-    const order = await prisma.orderss.create({
+    const order = await prisma.orders.create({
       data: {
         orderNumber,
         customerName,
@@ -122,7 +122,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         totalAmount: totalAmount,
         paymentMethod,
         notes,
-            usersId: req.users?.id || null,
+            userId: req.user?.id || null,
             status: 'PENDING',
             paymentStatus: 'PENDING'
       }
@@ -131,10 +131,10 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     // Create order items
     const order_items = await Promise.all(
       items.map((item: any) =>
-        prisma.orders_items.create({
+        prisma.order_items.create({
           data: {
             orderId: order.id,
-            productsId: item.productsId,
+            productId: item.productId,
             productsName: item.name,
             productsImage: item.image,
             productsSku: item.sku,
@@ -207,11 +207,11 @@ export const getAllOrders = async (req: Request, res: Response) => {
     }
 
     const [orders, total] = await Promise.all([
-      prisma.orderss.findMany({
+      prisma.orders.findMany({
         where,
         include: {
           order_items: {
-            include: { productss: true
+            include: { products: true
             }
           },
           paymentProofs: true,
@@ -228,7 +228,7 @@ export const getAllOrders = async (req: Request, res: Response) => {
         skip,
         take: Number(limit)
       }),
-      prisma.orderss.count({ where })
+      prisma.orders.count({ where })
     ])
 
     res.json({
@@ -257,11 +257,11 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
   try {
     const { id } = req.params
 
-    const order = await prisma.orderss.findUnique({
+    const order = await prisma.orders.findUnique({
       where: { id },
       include: {
         order_items: {
-          include: { productss: true
+          include: { products: true
           }
         },
         paymentProofs: true,
@@ -303,7 +303,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     const { id } = req.params
     const { status, adminNotes } = req.body
 
-    const order = await prisma.orderss.update({
+    const order = await prisma.orders.update({
       where: { id },
       data: {
         status,
@@ -341,7 +341,7 @@ export const updateDeliveryStatus = async (req: Request, res: Response) => {
     if (estimatedDelivery) updateData.estimatedDelivery = new Date(estimatedDelivery)
     if (deliveryStatus === 'DELIVERED') updateData.deliveredAt = new Date()
 
-    const order = await prisma.orderss.update({
+    const order = await prisma.orders.update({
       where: { id },
       data: updateData
     })
@@ -366,7 +366,7 @@ export const updatePaymentStatus = async (req: Request, res: Response) => {
     const { id } = req.params
     const { paymentStatus } = req.body
 
-    const order = await prisma.orderss.update({
+    const order = await prisma.orders.update({
       where: { id },
       data: {
         paymentStatus,
@@ -434,15 +434,15 @@ export const getOrderStatistics = async (req: Request, res: Response) => {
       totalRevenue,
       monthlyRevenue
     ] = await Promise.all([
-      prisma.orderss.count(),
-      prisma.orderss.count({ where: { status: 'PENDING' } }),
-      prisma.orderss.count({ where: { status: 'PROCESSING' } }),
-      prisma.orderss.count({ where: { status: 'DELIVERED' } }),
-      prisma.orderss.aggregate({
+      prisma.orders.count(),
+      prisma.orders.count({ where: { status: 'PENDING' } }),
+      prisma.orders.count({ where: { status: 'PROCESSING' } }),
+      prisma.orders.count({ where: { status: 'DELIVERED' } }),
+      prisma.orders.aggregate({
         where: { paymentStatus: 'PAID' },
         _sum: { totalAmount: true }
       }),
-      prisma.orderss.aggregate({
+      prisma.orders.aggregate({
         where: {
           paymentStatus: 'PAID',
           createdAt: {
@@ -478,7 +478,7 @@ export const deleteOrder = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
 
-    await prisma.orderss.delete({
+    await prisma.orders.delete({
       where: { id }
     })
 
