@@ -135,7 +135,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
           data: {
             orderId: order.id,
             productId: item.productId,
-            productsName: item.name,
+            productName: item.name,
             productsImage: item.image,
             productsSku: item.sku,
             quantity: item.quantity,
@@ -164,7 +164,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
           message: 'Order created successfully with payment proof',
       data: {
         order: {
-          ...orders,
+          ...order,
               items: order_items,
               paymentProof
         }
@@ -214,7 +214,7 @@ export const getAllOrders = async (req: Request, res: Response) => {
             include: { products: true
             }
           },
-          paymentProofs: true,
+          payment_proofs: true,
           users: {
             select: {
               id: true,
@@ -264,7 +264,7 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
           include: { products: true
           }
         },
-        paymentProofs: true,
+        payment_proofs: true,
         users: {
           select: {
             id: true,

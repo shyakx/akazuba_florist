@@ -44,7 +44,7 @@ router.get('/my-orders', verifyToken, async (req, res) => {
     res.json({
       success: true,
       message: 'Orders retrieved successfully',
-      data: orders
+      data: order
     })
   } catch (error) {
     console.error('Error getting users orders:', error)

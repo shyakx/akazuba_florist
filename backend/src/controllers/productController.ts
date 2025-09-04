@@ -187,7 +187,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       sku,
       stockQuantity,
       minStockAlert,
-      categoriesId,
+      categoryId,
       images,
       weight,
       dimensions,
@@ -196,7 +196,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     } = req.body
 
     // Validate required fields
-    if (!name || !price || !categoriesId) {
+    if (!name || !price || !categoryId) {
       res.status(400).json({
         success: false,
         message: 'Name, price, and categories are required'
@@ -232,7 +232,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         sku,
         stockQuantity: parseInt(stockQuantity) || 0,
         minStockAlert: parseInt(minStockAlert) || 5,
-        categoriesId,
+        categoryId,
         images: images || [],
         weight: weight ? parseFloat(weight) : null,
         dimensions: dimensions || null,

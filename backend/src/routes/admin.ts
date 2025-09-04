@@ -229,12 +229,12 @@ async function getTopCategories() {
   for (const item of categoriesSales) {
     const products = await prisma.product.findUnique({
       where: { id: item.productId },
-      select: { categoriesId: true }
+      select: { categoryId: true }
     })
     
-    if (products?.categoriesId) {
-      const currentSales = categoriesMap.get(products.categoriesId) || 0
-      categoriesMap.set(products.categoriesId, currentSales + (item._sum.quantity || 0))
+    if (products?.categoryId) {
+      const currentSales = categoriesMap.get(products.categoryId) || 0
+      categoriesMap.set(products.categoryId, currentSales + (item._sum.quantity || 0))
     }
   }
 
@@ -290,8 +290,8 @@ router.get('/customers', async (req, res) => {
           where: { userId: customer.id }
         })
 
-        const totalOrders = orders.length
-        const totalSpent = orders.reduce((sum, order) => sum + Number(order.totalAmount), 0)
+        const totalOrders = order.length
+        const totalSpent = order.reduce((sum, orderItem) => sum + Number(orderItem.totalAmount), 0)
         const wishlistItems = await prisma.wishlist.count({
           where: { userId: customer.id }
         })
@@ -369,25 +369,25 @@ router.get('/orders', async (req, res) => {
       orderBy: { createdAt: 'desc' }
     })
 
-    const formattedOrders = orders.map(order => ({
-      id: order.id,
-      orderNumber: order.orderNumber,
-      customerName: order.users ? `${order.users.firstName} ${order.users.lastName}` : 'Guest User',
-      customerEmail: order.users?.email || 'guest@akazubaflorist.com',
-      status: order.status,
-      subtotal: order.subtotal,
+    const formattedOrders = order.map(orderItem => ({
+      id: orderItem.id,
+      orderNumber: orderItem.orderNumber,
+      customerName: orderItem.users ? `${orderItem.users.firstName} ${orderItem.users.lastName}` : 'Guest User',
+      customerEmail: orderItem.users?.email || 'guest@akazubaflorist.com',
+      status: orderItem.status,
+      subtotal: orderItem.subtotal,
       taxAmount: 0, // Not in current schema
-      shippingAmount: Number(order.deliveryFee),
+      shippingAmount: Number(orderItem.deliveryFee),
       discountAmount: 0, // Not in current schema
-      totalAmount: order.totalAmount,
-      paymentMethod: order.paymentMethod,
-      paymentStatus: order.paymentStatus,
+      totalAmount: orderItem.totalAmount,
+      paymentMethod: orderItem.paymentMethod,
+      paymentStatus: orderItem.paymentStatus,
       shippingAddress: {
-        address: order.customerAddress,
-        city: order.customerCity
+        address: orderItem.customerAddress,
+        city: orderItem.customerCity
       },
-      items: order.order_items.map(item => ({
-        productsName: item.products.name,
+      items: orderItem.order_items.map(item => ({
+        productName: item.products.name,
         quantity: item.quantity,
         price: Number(item.unitPrice),
         productsImage: item.productsImage
@@ -438,7 +438,7 @@ router.get('/products', async (req, res) => {
       description: products.description || '',
       price: Number(products.price),
       stockQuantity: products.stockQuantity,
-      categoriesId: products.categoriesId,
+      categoryId: products.categoryId,
       categories: products.categories.name,
       isActive: products.isActive,
       isFeatured: products.isFeatured,
@@ -503,7 +503,7 @@ router.get('/wishlists', async (req, res) => {
 
       acc[userId].items.push({
         productId: wishlist.productId,
-        productsName: wishlist.products.name,
+        productName: wishlist.products.name,
         price: Number(wishlist.products.price),
         addedAt: wishlist.createdAt.toISOString()
       })
@@ -886,7 +886,7 @@ router.get('/products', async (req, res) => {
     }
     
     if (categories && categories !== 'all') {
-      where.categoriesId = categories
+      where.categoryId = categories
     }
     
     if (status && status !== 'all') {
@@ -1369,16 +1369,16 @@ router.post('/export/:type', async (req, res) => {
         })
         
         headers = ['Order ID', 'Order Number', 'Customer Name', 'Customer Email', 'Status', 'Total Amount', 'Payment Method', 'Payment Status', 'Created Date']
-        data = orders.map(order => [
-          order.id,
-          order.orderNumber || `ORD-${order.id.slice(-6)}`,
-          order.users ? `${order.users.firstName} ${order.users.lastName}` : 'Guest User',
-          order.users?.email || 'guest@akazubaflorist.com',
-          order.status,
-          order.totalAmount,
-          order.paymentMethod,
-          order.paymentStatus,
-          order.createdAt.toISOString()
+        data = order.map(orderItem => [
+          orderItem.id,
+          orderItem.orderNumber || `ORD-${orderItem.id.slice(-6)}`,
+          orderItem.users ? `${orderItem.users.firstName} ${orderItem.users.lastName}` : 'Guest User',
+          orderItem.users?.email || 'guest@akazubaflorist.com',
+          orderItem.status,
+          orderItem.totalAmount,
+          orderItem.paymentMethod,
+          orderItem.paymentStatus,
+          orderItem.createdAt.toISOString()
         ])
         break
         
