@@ -499,7 +499,9 @@ app.get('/api/v1/cart', async (req, res) => {
       // Create new cart if doesn't exist
       cart = await prisma.cart.create({
         data: {
-          userId
+          id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          userId,
+          updatedAt: new Date()
         },
         include: {
           cart_items: {
@@ -561,7 +563,11 @@ app.post('/api/v1/cart/items', async (req, res) => {
 
     if (!cart) {
       cart = await prisma.cart.create({
-        data: { userId }
+        data: { 
+          id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          userId,
+          updatedAt: new Date()
+        }
       });
     }
 
@@ -1378,66 +1384,61 @@ app.get('/api/v1/admin/products/public', async (req, res) => {
       'Content-Type': 'application/json'
     });
     
-    // For now, return mock data to ensure the admin panel works
-    // TODO: Re-enable database queries once production database is stable
-    const mockProducts = [
-      {
-        id: '1',
-        name: 'Red Roses Bouquet',
-        price: 25000,
-        category: 'Flowers',
-        stock: 15,
-        status: 'active',
-        createdAt: '2024-01-15',
-        sales: 8,
-        rating: 4.5,
-        description: 'Beautiful red roses perfect for any occasion'
-      },
-      {
-        id: '2',
-        name: 'White Lilies',
-        price: 18000,
-        category: 'Flowers',
-        stock: 12,
-        status: 'active',
-        createdAt: '2024-01-14',
-        sales: 5,
-        rating: 4.2,
-        description: 'Elegant white lilies for special moments'
-      },
-      {
-        id: '3',
-        name: 'Chanel No. 5',
-        price: 45000,
-        category: 'Perfumes',
-        stock: 8,
-        status: 'active',
-        createdAt: '2024-01-13',
-        sales: 3,
-        rating: 4.8,
-        description: 'Classic luxury perfume'
-      },
-      {
-        id: '4',
-        name: 'Mixed Tulips',
-        price: 22000,
-        category: 'Flowers',
-        stock: 20,
-        status: 'active',
-        createdAt: '2024-01-12',
-        sales: 12,
-        rating: 4.3,
-        description: 'Colorful mixed tulips bouquet'
-      }
-    ];
+    // Get real data from database
+    const { page = 1, limit = 20, search, category, status } = req.query;
+    const offset = (page - 1) * limit;
     
-    console.log('Returning mock products for admin panel');
+    const whereClause = {
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { description: { contains: search, mode: 'insensitive' } }
+        ]
+      }),
+      ...(category && category !== 'all' && { 
+        categories: { name: { equals: category, mode: 'insensitive' } }
+      }),
+      ...(status && status !== 'all' && { isActive: status === 'active' })
+    };
+
+    const [products, total] = await Promise.all([
+      prisma.product.findMany({
+        where: whereClause,
+        skip: offset,
+        take: parseInt(limit),
+        orderBy: { createdAt: 'desc' },
+        include: {
+          categories: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }),
+      prisma.product.count({ where: whereClause })
+    ]);
+
+    const formattedProducts = products.map(product => ({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.categories?.name || 'Uncategorized',
+      stock: product.stockQuantity,
+      status: product.isActive ? 'active' : 'inactive',
+      createdAt: product.createdAt.toISOString().split('T')[0],
+      sales: 0, // TODO: Calculate from order_items
+      rating: 4.5, // TODO: Calculate from reviews
+      description: product.description
+    }));
+    
+    console.log('✅ Returning real products for admin panel');
     res.json({
       success: true,
       data: {
-        products: mockProducts,
-        total: mockProducts.length,
-        pages: 1
+        products: formattedProducts,
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit)
       }
     });
     
@@ -1548,13 +1549,13 @@ app.get('/api/v1/admin/orders/public', async (req, res) => {
     };
 
     const [orders, total] = await Promise.all([
-      prisma.order.findMany({
+      prisma.orders.findMany({
         where: whereClause,
         skip: offset,
         take: parseInt(limit),
         orderBy: { createdAt: 'desc' },
         include: {
-          user: {
+          users: {
             select: {
               firstName: true,
               lastName: true,
@@ -1566,7 +1567,7 @@ app.get('/api/v1/admin/orders/public', async (req, res) => {
           }
         }
       }),
-      prisma.order.count({ where: whereClause })
+      prisma.orders.count({ where: whereClause })
     ]);
 
     const formattedOrders = orders.map(order => ({
@@ -1604,48 +1605,59 @@ app.get('/api/v1/admin/customers/public', async (req, res) => {
       'Content-Type': 'application/json'
     });
     
-    // For now, return mock data to ensure the admin panel works
-    // TODO: Re-enable database queries once production database is stable
-    const mockCustomers = [
-      {
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-        phone: '+250 788 123 456',
-        orders: 3,
-        totalSpent: 75000,
-        status: 'active',
-        joinedDate: '2024-01-15'
-      },
-      {
-        id: '2',
-        name: 'Jane Smith',
-        email: 'jane@example.com',
-        phone: '+250 789 234 567',
-        orders: 2,
-        totalSpent: 45000,
-        status: 'active',
-        joinedDate: '2024-01-14'
-      },
-      {
-        id: '3',
-        name: 'Mike Johnson',
-        email: 'mike@example.com',
-        phone: '+250 790 345 678',
-        orders: 1,
-        totalSpent: 25000,
-        status: 'active',
-        joinedDate: '2024-01-13'
-      }
-    ];
+    // Get real data from database
+    const { page = 1, limit = 20, search } = req.query;
+    const offset = (page - 1) * limit;
     
-    console.log('Returning mock customers for admin panel');
+    const whereClause = {
+      role: 'CUSTOMER',
+      ...(search && {
+        OR: [
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } }
+        ]
+      })
+    };
+
+    const [customers, total] = await Promise.all([
+      prisma.user.findMany({
+        where: whereClause,
+        skip: offset,
+        take: parseInt(limit),
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          isActive: true,
+          createdAt: true
+        }
+      }),
+      prisma.user.count({ where: whereClause })
+    ]);
+
+    const formattedCustomers = customers.map(customer => ({
+      id: customer.id,
+      name: `${customer.firstName} ${customer.lastName}`,
+      email: customer.email,
+      phone: customer.phone || '',
+      orders: 0, // TODO: Calculate from orders
+      totalSpent: 0, // TODO: Calculate from orders
+      status: customer.isActive ? 'active' : 'inactive',
+      joinedDate: customer.createdAt.toISOString().split('T')[0]
+    }));
+    
+    console.log('✅ Returning real customers for admin panel');
     res.json({
       success: true,
       data: {
-        customers: mockCustomers,
-        total: mockCustomers.length,
-        pages: 1
+        customers: formattedCustomers,
+        total,
+        page: parseInt(page),
+        pages: Math.ceil(total / limit)
       }
     });
   } catch (error) {
@@ -1662,47 +1674,31 @@ app.get('/api/v1/admin/categories/public', async (req, res) => {
       'Content-Type': 'application/json'
     });
     
-    // For now, return mock data to ensure the admin panel works
-    // TODO: Re-enable database queries once production database is stable
-    const mockCategories = [
-      {
-        id: '1',
-        name: 'Flowers',
-        description: 'Beautiful flower arrangements for all occasions',
-        productCount: 8,
-        status: 'active',
-        createdAt: '2024-01-15'
-      },
-      {
-        id: '2',
-        name: 'Perfumes',
-        description: 'Luxury fragrances and scents',
-        productCount: 4,
-        status: 'active',
-        createdAt: '2024-01-14'
-      },
-      {
-        id: '3',
-        name: 'Wedding',
-        description: 'Special wedding flower arrangements',
-        productCount: 3,
-        status: 'active',
-        createdAt: '2024-01-13'
-      },
-      {
-        id: '4',
-        name: 'Funeral',
-        description: 'Respectful funeral flower arrangements',
-        productCount: 2,
-        status: 'active',
-        createdAt: '2024-01-12'
+    // Get real data from database
+    const categories = await prisma.category.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        _count: {
+          select: {
+            products: true
+          }
+        }
       }
-    ];
+    });
+
+    const formattedCategories = categories.map(category => ({
+      id: category.id,
+      name: category.name,
+      description: category.description || '',
+      productCount: category._count.products,
+      status: category.isActive ? 'active' : 'inactive',
+      createdAt: category.createdAt.toISOString().split('T')[0]
+    }));
     
-    console.log('Returning mock categories for admin panel');
+    console.log('✅ Returning real categories for admin panel');
     res.json({
       success: true,
-      data: mockCategories
+      data: formattedCategories
     });
   } catch (error) {
     console.error('Error fetching public categories:', error);
@@ -2275,7 +2271,7 @@ app.get('/api/v1/admin/orders', authenticateAdmin, async (req, res) => {
           }
         }
       }),
-      prisma.order.count({ where: whereClause })
+      prisma.orders.count({ where: whereClause })
     ]);
 
     const formattedOrders = orders.map(order => ({
