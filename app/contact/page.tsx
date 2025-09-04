@@ -36,19 +36,32 @@ const ContactPage = () => {
     setIsSubmitting(true)
     
     try {
-      // Simulate form submission (replace with actual API call)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Send form data to API endpoint
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send message')
+      }
       
-      toast.success('Message sent successfully! We\'ll get back to you soon.')
+      toast.success(result.message || 'Message sent successfully! We\'ll get back to you soon.')
       setIsSubmitted(true)
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: ''
-    })
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      })
     } catch (error) {
+      console.error('Contact form error:', error)
       toast.error('Failed to send message. Please try again.')
     } finally {
       setIsSubmitting(false)
@@ -173,7 +186,7 @@ const ContactPage = () => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="+250 788 123 456"
+                    placeholder="+250 784 586 110"
                     required
                   />
                 </div>
@@ -242,6 +255,8 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Phone</h3>
+                      <p className="text-gray-600">+250 784 586 110</p>
+                      <p className="text-gray-600">+250 788 123 456</p>
                       <p className="text-gray-600">WhatsApp: +250 784 586 110</p>
                 </div>
               </div>
@@ -252,7 +267,8 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600">info.akazubaflorist@gmail.com</p>
+                      <p className="text-gray-600">info@akazuba.com</p>
+                      <p className="text-gray-600">support@akazuba.com</p>
                     </div>
                   </div>
 
