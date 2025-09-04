@@ -1163,7 +1163,7 @@ app.get('/api/v1/admin/dashboard/stats/public', async (req, res) => {
       'Content-Type': 'application/json'
     });
     
-    // Get real data from database
+    // Get real data from database with better error handling
     const [
       categoriesCount,
       productsCount,
@@ -1171,13 +1171,13 @@ app.get('/api/v1/admin/dashboard/stats/public', async (req, res) => {
       revenueData,
       customersCount
     ] = await Promise.all([
-      prisma.category.count({ where: { isActive: true } }),
-      prisma.product.count({ where: { isActive: true } }),
-      prisma.order.count(),
+      prisma.category.count({ where: { isActive: true } }).catch(() => 0),
+      prisma.product.count({ where: { isActive: true } }).catch(() => 0),
+      prisma.order.count().catch(() => 0),
       prisma.order.aggregate({
         _sum: { totalAmount: true }
-      }),
-      prisma.user.count({ where: { role: 'CUSTOMER' } })
+      }).catch(() => ({ _sum: { totalAmount: 0 } })),
+      prisma.user.count({ where: { role: 'CUSTOMER' } }).catch(() => 0)
     ]);
     
     const stats = {
@@ -1805,58 +1805,64 @@ app.get('/api/v1/admin/support-tickets/public', async (req, res) => {
       'Content-Type': 'application/json'
     });
     
-    const { page = 1, limit = 20, search, status, priority } = req.query;
-    const offset = (page - 1) * limit;
-    
-    const whereClause = {
-      ...(search && {
-        OR: [
-          { customerName: { contains: search, mode: 'insensitive' } },
-          { customerEmail: { contains: search, mode: 'insensitive' } },
-          { subject: { contains: search, mode: 'insensitive' } }
-        ]
-      }),
-      ...(status && status !== 'all' && { status: status.toUpperCase() }),
-      ...(priority && priority !== 'all' && { priority: priority.toUpperCase() })
-    };
+    // Check if support_tickets table exists, if not return mock data
+    try {
+      const { page = 1, limit = 20, search, status, priority } = req.query;
+      const offset = (page - 1) * limit;
+      
+      const whereClause = {
+        ...(search && {
+          OR: [
+            { customerName: { contains: search, mode: 'insensitive' } },
+            { customerEmail: { contains: search, mode: 'insensitive' } },
+            { subject: { contains: search, mode: 'insensitive' } }
+          ]
+        }),
+        ...(status && status !== 'all' && { status: status.toUpperCase() }),
+        ...(priority && priority !== 'all' && { priority: priority.toUpperCase() })
+      };
 
-    const [tickets, total] = await Promise.all([
-      prisma.support_tickets.findMany({
-        where: whereClause,
-        skip: offset,
-        take: parseInt(limit),
-        orderBy: { createdAt: 'desc' }
-      }),
-      prisma.support_tickets.count({ where: whereClause })
-    ]);
+      const [tickets, total] = await Promise.all([
+        prisma.support_tickets.findMany({
+          where: whereClause,
+          skip: offset,
+          take: parseInt(limit),
+          orderBy: { createdAt: 'desc' }
+        }),
+        prisma.support_tickets.count({ where: whereClause })
+      ]);
 
-    const formattedTickets = tickets.map(ticket => ({
-      id: ticket.id,
-      customerName: ticket.customerName,
-      customerEmail: ticket.customerEmail,
-      subject: ticket.subject,
-      message: ticket.message,
-      status: ticket.status.toLowerCase(),
-      priority: ticket.priority.toLowerCase(),
-      assignedTo: ticket.assignedTo || 'Unassigned',
-      orderId: ticket.orderId,
-      createdAt: ticket.createdAt.toISOString().split('T')[0],
-      updatedAt: ticket.updatedAt.toISOString().split('T')[0],
-      resolvedAt: ticket.resolvedAt ? ticket.resolvedAt.toISOString().split('T')[0] : null,
-      adminNotes: ticket.adminNotes
-    }));
+      const formattedTickets = tickets.map(ticket => ({
+        id: ticket.id,
+        customerName: ticket.customerName,
+        customerEmail: ticket.customerEmail,
+        subject: ticket.subject,
+        message: ticket.message,
+        status: ticket.status.toLowerCase(),
+        priority: ticket.priority.toLowerCase(),
+        assignedTo: ticket.assignedTo || 'Unassigned',
+        orderId: ticket.orderId,
+        createdAt: ticket.createdAt.toISOString().split('T')[0],
+        updatedAt: ticket.updatedAt.toISOString().split('T')[0],
+        resolvedAt: ticket.resolvedAt ? ticket.resolvedAt.toISOString().split('T')[0] : null,
+        adminNotes: ticket.adminNotes
+      }));
 
-    res.json({
-      success: true,
-      data: {
-        tickets: formattedTickets,
-        total,
-        pages: Math.ceil(total / limit)
-      }
-    });
+      res.json({
+        success: true,
+        data: {
+          tickets: formattedTickets,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      });
+    } catch (dbError) {
+      console.log('Support tickets table not found, using mock data:', dbError.message);
+      throw dbError; // This will trigger the fallback below
+    }
   } catch (error) {
     console.error('Error fetching public support tickets:', error);
-    // Fallback to mock data if database fails
+    // Fallback to mock data if database fails or table doesn't exist
     const mockTickets = [
       {
         id: '1',
@@ -1908,17 +1914,7 @@ app.get('/api/v1/admin/settings/public', async (req, res) => {
       'Content-Type': 'application/json'
     });
     
-    const settings = await prisma.settings.findMany({
-      orderBy: { key: 'asc' }
-    });
-
-    // Convert array of key-value pairs to object
-    const settingsObject = settings.reduce((acc, setting) => {
-      acc[setting.key] = setting.value;
-      return acc;
-    }, {});
-
-    // Default settings if none exist
+    // Default settings
     const defaultSettings = {
       businessName: 'Akazuba Florist',
       businessEmail: 'admin@akazubaflorist.com',
@@ -1939,12 +1935,30 @@ app.get('/api/v1/admin/settings/public', async (req, res) => {
       maintenanceMode: 'false'
     };
 
-    const finalSettings = { ...defaultSettings, ...settingsObject };
+    try {
+      const settings = await prisma.settings.findMany({
+        orderBy: { key: 'asc' }
+      });
 
-    res.json({
-      success: true,
-      data: finalSettings
-    });
+      // Convert array of key-value pairs to object
+      const settingsObject = settings.reduce((acc, setting) => {
+        acc[setting.key] = setting.value;
+        return acc;
+      }, {});
+
+      const finalSettings = { ...defaultSettings, ...settingsObject };
+
+      res.json({
+        success: true,
+        data: finalSettings
+      });
+    } catch (dbError) {
+      console.log('Settings table not found, using default settings:', dbError.message);
+      res.json({
+        success: true,
+        data: defaultSettings
+      });
+    }
   } catch (error) {
     console.error('Error fetching public settings:', error);
     // Fallback to default settings
