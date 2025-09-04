@@ -113,7 +113,7 @@ export default function HomePage() {
                 <div key={product.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                   <div className="relative h-40 bg-gray-100">
                     <Image
-                      src={product.images[0] || '/images/placeholder.jpg'}
+                      src={product.images[0] || '/images/placeholder-flower.jpg'}
                       alt={product.name}
                       fill
                       className="object-cover"

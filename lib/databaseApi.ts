@@ -64,7 +64,7 @@ const convertDatabaseProductToProduct = (dbProduct: DatabaseProduct): Product =>
       price: 0,
       salePrice: null,
       stockQuantity: 0,
-      images: ['/images/placeholder.jpg'],
+      images: ['/images/placeholder-flower.jpg'],
       categoryName: 'Unknown',
       size: 'Standard',
       isActive: false,
@@ -84,7 +84,7 @@ const convertDatabaseProductToProduct = (dbProduct: DatabaseProduct): Product =>
     ? dbProduct.images 
     : dbProduct.image 
       ? [dbProduct.image] 
-      : ['/images/placeholder.jpg']
+      : ['/images/placeholder-flower.jpg']
   
   return {
     id: dbProduct.id || `product-${Date.now()}`,

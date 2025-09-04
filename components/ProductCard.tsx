@@ -29,7 +29,7 @@ const formatPrice = (price: number) => {
       {/* Image */}
       <div className="relative h-48 bg-gray-100">
         <Image
-          src={product.images[0] || '/images/placeholder.jpg'}
+          src={product.images[0] || '/images/placeholder-flower.jpg'}
           alt={product.name}
           fill
           className="object-cover"
