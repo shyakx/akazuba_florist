@@ -109,16 +109,32 @@ export default function CategoriesPage() {
                 </div>
                   </div>
               <div className="flex items-center space-x-1">
-                <button className="p-1 text-gray-400 hover:text-blue-600">
+                <button 
+                  className="p-1 text-gray-400 hover:text-blue-600"
+                  onClick={() => {
+                    // TODO: View category details
+                    console.log('View category:', category.id)
+                  }}
+                >
                   <Eye className="w-4 h-4" />
-                    </button>
-                <button className="p-1 text-gray-400 hover:text-green-600">
-                  <Edit className="w-4 h-4" />
-                    </button>
-                <button className="p-1 text-gray-400 hover:text-red-600">
+                </button>
+                <Link href={`/admin/categories/edit/${category.id}`}>
+                  <button className="p-1 text-gray-400 hover:text-green-600">
+                    <Edit className="w-4 h-4" />
+                  </button>
+                </Link>
+                <button 
+                  className="p-1 text-gray-400 hover:text-red-600"
+                  onClick={() => {
+                    // TODO: Delete category
+                    if (confirm('Are you sure you want to delete this category?')) {
+                      console.log('Delete category:', category.id)
+                    }
+                  }}
+                >
                   <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                </button>
+              </div>
                 </div>
             
             <p className="text-gray-600 text-sm mb-4">{category.description}</p>

@@ -203,11 +203,23 @@ export default function OrdersPage() {
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center space-x-4">
-          <button className="btn btn-primary bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg">
+          <button 
+            className="btn btn-primary bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
+            onClick={() => {
+              // TODO: Implement export functionality
+              console.log('Export orders data')
+            }}
+          >
             <Download className="w-5 h-5 mr-2" />
             Export Orders
           </button>
-          <button className="btn btn-secondary">
+          <button 
+            className="btn btn-secondary"
+            onClick={() => {
+              // Navigate to analytics page
+              window.location.href = '/admin/analytics'
+            }}
+          >
             <BarChart3 className="w-4 h-4 mr-2" />
             View Analytics
           </button>
@@ -242,7 +254,13 @@ export default function OrdersPage() {
               <option value="delivered">Delivered</option>
               <option value="cancelled">Cancelled</option>
             </select>
-            <button className="btn btn-secondary px-6 py-3">
+            <button 
+              className="btn btn-secondary px-6 py-3"
+              onClick={() => {
+                // TODO: Implement advanced filters
+                console.log('Open advanced filters')
+              }}
+            >
               <Filter className="w-4 h-4 mr-2" />
               More Filters
             </button>
@@ -305,13 +323,33 @@ export default function OrdersPage() {
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
+                    <button 
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // Navigate to order details
+                        window.location.href = `/admin/orders/${order.id}`
+                      }}
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200">
+                    <button 
+                      className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // TODO: Mark as completed
+                        if (confirm('Mark this order as completed?')) {
+                          console.log('Complete order:', order.id)
+                        }
+                      }}
+                    >
                       <CheckCircle className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200">
+                    <button 
+                      className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // TODO: Update shipping status
+                        console.log('Update shipping for order:', order.id)
+                      }}
+                    >
                       <Truck className="w-4 h-4" />
                     </button>
                   </div>

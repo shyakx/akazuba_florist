@@ -194,7 +194,13 @@ export default function ProductsPage() {
             <Plus className="w-5 h-5 mr-2" />
             Add New Product
           </Link>
-          <button className="btn btn-secondary">
+          <button 
+            className="btn btn-secondary"
+            onClick={() => {
+              // TODO: Implement export functionality
+              console.log('Export products data')
+            }}
+          >
             <Download className="w-4 h-4 mr-2" />
             Export Data
           </button>
@@ -226,7 +232,13 @@ export default function ProductsPage() {
               <option value="active">Active Only</option>
               <option value="inactive">Inactive Only</option>
             </select>
-            <button className="btn btn-secondary px-6 py-3">
+            <button 
+              className="btn btn-secondary px-6 py-3"
+              onClick={() => {
+                // TODO: Implement advanced filters
+                console.log('Open advanced filters')
+              }}
+            >
               <Filter className="w-4 h-4 mr-2" />
               More Filters
             </button>
@@ -301,13 +313,29 @@ export default function ProductsPage() {
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
+                    <button 
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // TODO: Navigate to product details
+                        console.log('View product:', product.id)
+                      }}
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200">
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200">
+                    <Link href={`/admin/products/edit/${product.id}`}>
+                      <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200">
+                        <Edit className="w-4 h-4" />
+                      </button>
+                    </Link>
+                    <button 
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // TODO: Implement delete functionality
+                        if (confirm('Are you sure you want to delete this product?')) {
+                          console.log('Delete product:', product.id)
+                        }
+                      }}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

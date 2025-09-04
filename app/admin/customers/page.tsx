@@ -187,11 +187,23 @@ export default function CustomersPage() {
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center space-x-4">
-          <button className="btn btn-primary bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg">
+          <button 
+            className="btn btn-primary bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg"
+            onClick={() => {
+              // TODO: Implement export functionality
+              console.log('Export customers data')
+            }}
+          >
             <Download className="w-5 h-5 mr-2" />
             Export Customers
           </button>
-          <button className="btn btn-secondary">
+          <button 
+            className="btn btn-secondary"
+            onClick={() => {
+              // Navigate to analytics page
+              window.location.href = '/admin/analytics'
+            }}
+          >
             <BarChart3 className="w-4 h-4 mr-2" />
             View Analytics
           </button>
@@ -214,7 +226,13 @@ export default function CustomersPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button className="btn btn-secondary px-6 py-3">
+            <button 
+              className="btn btn-secondary px-6 py-3"
+              onClick={() => {
+                // TODO: Implement advanced filters
+                console.log('Open advanced filters')
+              }}
+            >
               <Filter className="w-4 h-4 mr-2" />
               More Filters
             </button>
@@ -283,13 +301,31 @@ export default function CustomersPage() {
               <div className="mt-6 pt-4 border-t border-gray-100">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
+                    <button 
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // Navigate to customer details
+                        window.location.href = `/admin/customers/${customer.id}`
+                      }}
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200">
+                    <button 
+                      className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // TODO: Send email to customer
+                        window.open(`mailto:${customer.email}`)
+                      }}
+                    >
                       <Mail className="w-4 h-4" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200">
+                    <button 
+                      className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
+                      onClick={() => {
+                        // TODO: Call customer
+                        window.open(`tel:${customer.phone}`)
+                      }}
+                    >
                       <Phone className="w-4 h-4" />
                     </button>
                   </div>

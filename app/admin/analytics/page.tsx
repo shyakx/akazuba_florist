@@ -123,7 +123,13 @@ export default function AnalyticsPage() {
           <option value="90d">Last 90 days</option>
           <option value="1y">Last year</option>
         </select>
-        <button className="btn btn-secondary">
+        <button 
+          className="btn btn-secondary"
+          onClick={() => {
+            // TODO: Implement export functionality
+            console.log('Export analytics data')
+          }}
+        >
           <Download className="w-4 h-4 mr-2" />
           Export
         </button>
