@@ -32,12 +32,20 @@ export default function ProductViewPage() {
     const loadProduct = async () => {
       try {
         setLoading(true)
+        console.log('🔍 Loading product with ID:', productId)
+        
         const response = await fetch(`/api/admin/products/public`)
         if (!response.ok) throw new Error('Failed to fetch products')
 
         const result = await response.json()
-        if (result.success && result.data) {
+        console.log('📊 API Response:', result)
+        
+        if (result.success && result.data && result.data.products) {
+          console.log('📦 Available products:', result.data.products.map((p: any) => ({ id: p.id, name: p.name })))
+          
           const foundProduct = result.data.products.find((p: any) => p.id === productId)
+          console.log('🎯 Found product:', foundProduct)
+          
           if (foundProduct) {
             setProduct(foundProduct)
           } else {
@@ -47,7 +55,7 @@ export default function ProductViewPage() {
           throw new Error('Failed to fetch product data')
         }
       } catch (error) {
-        console.error('Error loading product:', error)
+        console.error('❌ Error loading product:', error)
         setProduct(null)
       } finally {
         setLoading(false)
@@ -78,9 +86,12 @@ export default function ProductViewPage() {
 
   if (loading) {
     return (
-      <div className="loading">
-        <div className="spinner"></div>
-        <p className="mt-4 text-gray-600">Loading product...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product details...</p>
+          <p className="text-sm text-gray-500 mt-2">Product ID: {productId}</p>
+        </div>
       </div>
     )
   }
