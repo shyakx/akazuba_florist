@@ -21,6 +21,15 @@ interface DashboardStats {
   customers: number
 }
 
+interface AnalyticsData {
+  totalRevenue: number
+  totalOrders: number
+  totalCustomers: number
+  totalProducts: number
+  topProducts: Array<{ name: string; sales: number }>
+  recentOrders: Array<{ id: string; orderNumber: string; customerName: string; total: number; status: string; createdAt: string }>
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     categories: 0,
@@ -29,6 +38,7 @@ export default function AdminDashboard() {
     revenue: 0,
     customers: 0
   })
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -37,17 +47,29 @@ export default function AdminDashboard() {
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('/api/admin/dashboard/stats')
-      if (!response.ok) throw new Error('Failed to fetch stats')
+      // Fetch both dashboard stats and analytics data
+      const [statsResponse, analyticsResponse] = await Promise.all([
+        fetch('/api/admin/dashboard/stats'),
+        fetch('/api/admin/analytics/public')
+      ])
       
-      const data = await response.json()
+      if (!statsResponse.ok) throw new Error('Failed to fetch stats')
+      if (!analyticsResponse.ok) throw new Error('Failed to fetch analytics')
+      
+      const statsData = await statsResponse.json()
+      const analyticsData = await analyticsResponse.json()
+      
       setStats({
-        categories: data.categories || 0,
-        products: data.products || 0,
-        orders: data.orders || 0,
-        revenue: data.revenue || 0,
-        customers: data.customers || 0
+        categories: statsData.categories || 0,
+        products: statsData.products || 0,
+        orders: statsData.orders || 0,
+        revenue: statsData.revenue || 0,
+        customers: statsData.customers || 0
       })
+      
+      if (analyticsData.success) {
+        setAnalytics(analyticsData)
+      }
     } catch (error) {
       console.error('Error fetching stats:', error)
       setError('Failed to load dashboard data')
@@ -170,38 +192,26 @@ export default function AdminDashboard() {
 
         {/* Recent Activity */}
         <div className="card">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Orders</h2>
           <div className="space-y-3">
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <ShoppingCart className="w-4 h-4 text-green-600" />
+            {analytics?.recentOrders?.length > 0 ? (
+              analytics.recentOrders.slice(0, 3).map((order, index) => (
+                <div key={order.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <ShoppingCart className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">Order {order.orderNumber}</p>
+                    <p className="text-xs text-gray-500">{order.customerName} - RWF {order.total.toLocaleString()}</p>
+                  </div>
+                  <span className="text-xs text-gray-400">{order.createdAt}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">No recent orders</p>
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">New order received</p>
-                <p className="text-xs text-gray-500">Order #ORD-005 from John Doe</p>
-              </div>
-              <span className="text-xs text-gray-400">2 min ago</span>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <Package className="w-4 h-4 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Product updated</p>
-                <p className="text-xs text-gray-500">Rose Bouquet stock updated</p>
-              </div>
-              <span className="text-xs text-gray-400">15 min ago</span>
-            </div>
-            <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                <Users className="w-4 h-4 text-purple-600" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">New customer registered</p>
-                <p className="text-xs text-gray-500">Jane Smith joined</p>
-              </div>
-              <span className="text-xs text-gray-400">1 hour ago</span>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -213,16 +223,22 @@ export default function AdminDashboard() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales Performance</h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Today's Sales</span>
-              <span className="text-lg font-bold text-green-600">RWF 45,000</span>
+              <span className="text-sm text-gray-600">Total Revenue</span>
+              <span className="text-lg font-bold text-green-600">
+                RWF {analytics?.totalRevenue?.toLocaleString() || '0'}
+              </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">This Week</span>
-              <span className="text-lg font-bold text-blue-600">RWF 125,000</span>
+              <span className="text-sm text-gray-600">Total Orders</span>
+              <span className="text-lg font-bold text-blue-600">
+                {analytics?.totalOrders || '0'}
+              </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">This Month</span>
-              <span className="text-lg font-bold text-purple-600">RWF 450,000</span>
+              <span className="text-sm text-gray-600">Total Customers</span>
+              <span className="text-lg font-bold text-purple-600">
+                {analytics?.totalCustomers || '0'}
+              </span>
             </div>
           </div>
         </div>
@@ -231,33 +247,27 @@ export default function AdminDashboard() {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Products</h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
-                  <Package className="w-3 h-3 text-blue-600" />
-                </div>
-                <span className="text-sm text-gray-900">Rose Bouquet</span>
+            {analytics?.topProducts?.length > 0 ? (
+              analytics.topProducts.slice(0, 3).map((product, index) => {
+                const colors = ['bg-blue-100', 'bg-green-100', 'bg-yellow-100']
+                const textColors = ['text-blue-600', 'text-green-600', 'text-yellow-600']
+                return (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-6 h-6 ${colors[index]} rounded flex items-center justify-center`}>
+                        <Package className={`w-3 h-3 ${textColors[index]}`} />
+                      </div>
+                      <span className="text-sm text-gray-900">{product.name}</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-600">{product.sales} sales</span>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-sm text-gray-500">No sales data available</p>
               </div>
-              <span className="text-sm font-medium text-gray-600">25 sales</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
-                  <Package className="w-3 h-3 text-green-600" />
-                </div>
-                <span className="text-sm text-gray-900">Wedding Arrangement</span>
-              </div>
-              <span className="text-sm font-medium text-gray-600">18 sales</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-6 h-6 bg-yellow-100 rounded flex items-center justify-center">
-                  <Package className="w-3 h-3 text-yellow-600" />
-                </div>
-                <span className="text-sm text-gray-900">Lily Bouquet</span>
-              </div>
-              <span className="text-sm font-medium text-gray-600">15 sales</span>
-            </div>
+            )}
           </div>
         </div>
 
@@ -280,12 +290,12 @@ export default function AdminDashboard() {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Last Backup</span>
-              <span className="text-sm text-gray-600">2 hours ago</span>
+              <span className="text-sm text-gray-600">Total Products</span>
+              <span className="text-sm text-gray-600">{analytics?.totalProducts || '0'}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Storage Used</span>
-              <span className="text-sm text-gray-600">2.4 GB / 10 GB</span>
+              <span className="text-sm text-gray-600">Total Orders</span>
+              <span className="text-sm text-gray-600">{analytics?.totalOrders || '0'}</span>
             </div>
           </div>
         </div>
