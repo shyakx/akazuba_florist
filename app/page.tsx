@@ -92,7 +92,7 @@ export default function HomePage() {
               <div className="text-gray-600">Perfumes</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">17</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{flowerCategories.length + perfumeCategories.length}</div>
               <div className="text-gray-600">Categories</div>
             </div>
           </div>
