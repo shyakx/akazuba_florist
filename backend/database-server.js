@@ -134,12 +134,12 @@ app.get('/health', (req, res) => {
     .finally(() => {
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Backend - Admin Panel Enhanced - Version 2.1.0',
+    message: 'Akazuba Backend - Admin Panel Enhanced - Version 2.1.2 - Prisma Schema Fixed',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
         database: dbStatus,
     cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
-    version: '2.1.0',
+    version: '2.1.2',
     corsEnabled: true,
     deployment: 'forced-redeploy'
       });

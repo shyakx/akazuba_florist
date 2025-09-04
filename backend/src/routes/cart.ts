@@ -21,17 +21,14 @@ const prisma = new PrismaClient()
  */
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.users.id
 
     // Get or create cart for user
     let cart = await prisma.cart.findFirst({
       where: { userId },
-      include: {
-        cartItems: {
-          include: {
-            product: {
-              include: {
-                category: true
+      include: { cart_items: {
+          include: { products: {
+              include: { categories: true
               }
             }
           }
@@ -48,12 +45,9 @@ router.get('/', verifyToken, async (req, res) => {
             create: []
           }
         },
-        include: {
-          cartItems: {
-            include: {
-              product: {
-                include: {
-                  category: true
+        include: { cart_items: {
+            include: { products: {
+                include: { categories: true
                 }
               }
             }
@@ -106,7 +100,7 @@ router.get('/', verifyToken, async (req, res) => {
  */
 router.post('/items', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.users.id
     const { productId, quantity } = req.body
 
     if (!productId || !quantity || quantity <= 0) {
@@ -117,7 +111,7 @@ router.post('/items', verifyToken, async (req, res) => {
     }
 
     // Verify product exists
-    const product = await prisma.product.findUnique({
+    const product = await prisma.products.findUnique({
       where: { id: productId }
     })
 
@@ -140,7 +134,7 @@ router.post('/items', verifyToken, async (req, res) => {
     }
 
     // Check if item already exists in cart
-    const existingItem = await prisma.cartItem.findFirst({
+    const existingItem = await prisma.cart_items.findFirst({
       where: {
         cartId: cart.id,
         productId
@@ -150,29 +144,25 @@ router.post('/items', verifyToken, async (req, res) => {
     let cartItem
     if (existingItem) {
       // Update quantity
-      cartItem = await prisma.cartItem.update({
+      cartItem = await prisma.cart_items.update({
         where: { id: existingItem.id },
         data: { quantity: existingItem.quantity + quantity },
-        include: {
-          product: {
-            include: {
-              category: true
+        include: { products: {
+            include: { categories: true
             }
           }
         }
       })
     } else {
       // Add new item
-      cartItem = await prisma.cartItem.create({
+      cartItem = await prisma.cart_items.create({
         data: {
           cartId: cart.id,
           productId,
           quantity
         },
-        include: {
-          product: {
-            include: {
-              category: true
+        include: { products: {
+            include: { categories: true
             }
           }
         }
@@ -206,7 +196,7 @@ router.post('/items', verifyToken, async (req, res) => {
  */
 router.put('/items/:id', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.users.id
     const { id } = req.params
     const { quantity } = req.body
 
@@ -218,17 +208,15 @@ router.put('/items/:id', verifyToken, async (req, res) => {
     }
 
     // Verify cart item belongs to user
-    const cartItem = await prisma.cartItem.findFirst({
+    const cartItem = await prisma.cart_items.findFirst({
       where: {
         id,
         cart: {
           userId
         }
       },
-      include: {
-        product: {
-          include: {
-            category: true
+      include: { products: {
+          include: { categories: true
           }
         }
       }
@@ -241,13 +229,11 @@ router.put('/items/:id', verifyToken, async (req, res) => {
       })
     }
 
-    const updatedItem = await prisma.cartItem.update({
+    const updatedItem = await prisma.cart_items.update({
       where: { id },
       data: { quantity },
-      include: {
-        product: {
-          include: {
-            category: true
+      include: { products: {
+          include: { categories: true
           }
         }
       }
@@ -280,11 +266,11 @@ router.put('/items/:id', verifyToken, async (req, res) => {
  */
 router.delete('/items/:id', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.users.id
     const { id } = req.params
 
     // Verify cart item belongs to user
-    const cartItem = await prisma.cartItem.findFirst({
+    const cartItem = await prisma.cart_items.findFirst({
       where: {
         id,
         cart: {
@@ -300,7 +286,7 @@ router.delete('/items/:id', verifyToken, async (req, res) => {
       })
     }
 
-    await prisma.cartItem.delete({
+    await prisma.cart_items.delete({
       where: { id }
     })
 
@@ -330,7 +316,7 @@ router.delete('/items/:id', verifyToken, async (req, res) => {
  */
 router.delete('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.users.id
 
     const cart = await prisma.cart.findFirst({
       where: { userId }
@@ -338,7 +324,7 @@ router.delete('/', verifyToken, async (req, res) => {
 
     if (cart) {
       // Delete all cart items first
-      await prisma.cartItem.deleteMany({
+      await prisma.cart_items.deleteMany({
         where: { cartId: cart.id }
       })
 

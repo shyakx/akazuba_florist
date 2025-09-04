@@ -23,16 +23,14 @@ router.post('/:orderId/payment-proof', uploadPaymentProof)
 // Customer routes (protected)
 router.get('/my-orders', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.users.id
 
-    const orders = await prisma.order.findMany({
+    const orders = await prisma.orders.findMany({
       where: { userId },
       include: {
         orderItems: {
-          include: {
-            product: {
-              include: {
-                category: true
+          include: { products: {
+              include: { categories: true
               }
             }
           }
@@ -59,20 +57,18 @@ router.get('/my-orders', verifyToken, async (req, res) => {
 
 router.get('/my-orders/:id', verifyToken, async (req, res) => {
   try {
-    const userId = req.user.id
+    const userId = req.users.id
     const { id } = req.params
 
-    const order = await prisma.order.findFirst({
+    const order = await prisma.orders.findFirst({
       where: {
         id,
         userId
       },
       include: {
         orderItems: {
-          include: {
-            product: {
-              include: {
-                category: true
+          include: { products: {
+              include: { categories: true
               }
             }
           }

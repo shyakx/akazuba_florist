@@ -28,7 +28,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     }
 
     if (category) {
-      where.category = {
+      where.categories = {
         slug: category
       }
     }
@@ -58,10 +58,9 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     }
 
     // Get products with category
-    const products = await prisma.product.findMany({
+    const products = await prisma.products.findMany({
       where,
-      include: {
-        category: true
+      include: { categories: true
       },
       skip: limitNum === 1000 ? 0 : skip, // Skip pagination if getting all products
       take: limitNum,
@@ -71,7 +70,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     })
 
     // Get total count for pagination
-    const total = await prisma.product.count({ where })
+    const total = await prisma.products.count({ where })
 
     res.json({
       success: true,
@@ -98,13 +97,11 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
   try {
     const { id } = req.params
 
-    const product = await prisma.product.findUnique({
+    const product = await prisma.products.findUnique({
       where: { id },
-      include: {
-        category: true,
+      include: { categories: true,
         reviews: {
-          include: {
-            user: {
+          include: { users: {
               select: {
                 id: true,
                 firstName: true,
@@ -150,13 +147,12 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
     const { limit = 8 } = req.query
     const limitNum = parseInt(limit as string)
 
-    const products = await prisma.product.findMany({
+    const products = await prisma.products.findMany({
       where: {
         isActive: true,
         isFeatured: true
       },
-      include: {
-        category: true
+      include: { categories: true
       },
       take: limitNum,
       orderBy: {
@@ -212,7 +208,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
     // Check if product with same slug exists
-    const existingProduct = await prisma.product.findUnique({
+    const existingProduct = await prisma.products.findUnique({
       where: { slug }
     })
 
@@ -224,7 +220,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       return
     }
 
-    const product = await prisma.product.create({
+    const product = await prisma.products.create({
       data: {
         name,
         slug,
@@ -244,8 +240,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         isFeatured: isFeatured || false,
         isActive: true
       },
-      include: {
-        category: true
+      include: { categories: true
       }
     })
 
@@ -270,7 +265,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     const updateData = req.body
 
     // Check if product exists
-    const existingProduct = await prisma.product.findUnique({
+    const existingProduct = await prisma.products.findUnique({
       where: { id }
     })
 
@@ -287,7 +282,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       const slug = updateData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       
       // Check if new slug conflicts
-      const slugConflict = await prisma.product.findUnique({
+      const slugConflict = await prisma.products.findUnique({
         where: { slug }
       })
 
@@ -310,11 +305,10 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     if (updateData.minStockAlert) updateData.minStockAlert = parseInt(updateData.minStockAlert)
     if (updateData.weight) updateData.weight = parseFloat(updateData.weight)
 
-    const product = await prisma.product.update({
+    const product = await prisma.products.update({
       where: { id },
       data: updateData,
-      include: {
-        category: true
+      include: { categories: true
       }
     })
 
@@ -338,7 +332,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     const { id } = req.params
 
     // Check if product exists
-    const existingProduct = await prisma.product.findUnique({
+    const existingProduct = await prisma.products.findUnique({
       where: { id }
     })
 
@@ -351,7 +345,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     }
 
     // Soft delete by setting isActive to false
-    await prisma.product.update({
+    await prisma.products.update({
       where: { id },
       data: { isActive: false }
     })

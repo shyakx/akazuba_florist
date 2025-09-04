@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 // Get all categories
 export const getAllCategories = async (req: Request, res: Response): Promise<void> => {
   try {
-    const categories = await prisma.category.findMany({
+    const categories = await prisma.categories.findMany({
       where: {
         isActive: true
       },
@@ -45,15 +45,14 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
   try {
     const { id } = req.params
 
-    const category = await prisma.category.findUnique({
+    const category = await prisma.categories.findUnique({
       where: { id },
       include: {
         products: {
           where: {
             isActive: true
           },
-          include: {
-            category: true
+          include: { categories: true
           },
           orderBy: {
             createdAt: 'desc'
@@ -98,15 +97,14 @@ export const getCategoryBySlug = async (req: Request, res: Response): Promise<vo
   try {
     const { slug } = req.params
 
-    const category = await prisma.category.findUnique({
+    const category = await prisma.categories.findUnique({
       where: { slug },
       include: {
         products: {
           where: {
             isActive: true
           },
-          include: {
-            category: true
+          include: { categories: true
           },
           orderBy: {
             createdAt: 'desc'
@@ -164,7 +162,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
     // Check if category with same slug exists
-    const existingCategory = await prisma.category.findUnique({
+    const existingCategory = await prisma.categories.findUnique({
       where: { slug }
     })
 
@@ -176,7 +174,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
       return
     }
 
-    const category = await prisma.category.create({
+    const category = await prisma.categories.create({
       data: {
         name,
         slug,
@@ -208,7 +206,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
     const updateData = req.body
 
     // Check if category exists
-    const existingCategory = await prisma.category.findUnique({
+    const existingCategory = await prisma.categories.findUnique({
       where: { id }
     })
 
@@ -225,7 +223,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
       const slug = updateData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       
       // Check if new slug conflicts
-      const slugConflict = await prisma.category.findUnique({
+      const slugConflict = await prisma.categories.findUnique({
         where: { slug }
       })
 
@@ -243,7 +241,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
     // Convert numeric fields
     if (updateData.sortOrder) updateData.sortOrder = parseInt(updateData.sortOrder)
 
-    const category = await prisma.category.update({
+    const category = await prisma.categories.update({
       where: { id },
       data: updateData
     })
@@ -268,7 +266,7 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
     const { id } = req.params
 
     // Check if category exists
-    const existingCategory = await prisma.category.findUnique({
+    const existingCategory = await prisma.categories.findUnique({
       where: { id },
       include: {
         _count: {
@@ -297,7 +295,7 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
     }
 
     // Soft delete by setting isActive to false
-    await prisma.category.update({
+    await prisma.categories.update({
       where: { id },
       data: { isActive: false }
     })
