@@ -155,13 +155,13 @@ app.get('/cors-test', (req, res) => {
   });
 });
 
-// Simple test endpoint
+// Simple test endpoint for debugging
 app.get('/api/test', (req, res) => {
-  res.status(200).json({
-    message: 'Backend is working!',
+  console.log('🧪 Test endpoint called');
+  res.json({
+    message: 'Backend server is working!',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-    cors: 'enabled'
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -1157,6 +1157,8 @@ app.get('/api/v1/admin/dashboard/activity', authenticateAdmin, async (req, res) 
 // Public Admin Dashboard Stats (for frontend admin panel) - Optimized
 app.get('/api/v1/admin/dashboard/stats/public', async (req, res) => {
   try {
+    console.log('📊 Dashboard stats endpoint called');
+    
     // Set cache headers for better performance
     res.set({
       'Cache-Control': 'public, max-age=300', // Cache for 5 minutes
@@ -1174,7 +1176,7 @@ app.get('/api/v1/admin/dashboard/stats/public', async (req, res) => {
       customers: 15
     };
     
-    console.log('Returning mock dashboard stats for admin panel');
+    console.log('✅ Returning mock dashboard stats for admin panel:', stats);
     res.json(stats);
     
     /* 
@@ -1220,7 +1222,10 @@ app.get('/api/v1/admin/dashboard/stats/public', async (req, res) => {
     }
     */
   } catch (error) {
-    console.error('Error fetching public dashboard stats:', error);
+    console.error('❌ Error fetching public dashboard stats:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    
     // Fallback to mock data if database fails
     const stats = {
       success: true,
@@ -1230,6 +1235,8 @@ app.get('/api/v1/admin/dashboard/stats/public', async (req, res) => {
       revenue: 125000,
       customers: 15
     };
+    
+    console.log('🔄 Returning fallback stats due to error');
     res.json(stats);
   }
 });
