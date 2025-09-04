@@ -20,6 +20,7 @@ import {
   BarChart3
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Product {
   id: string
@@ -29,6 +30,7 @@ interface Product {
   stock: number
   status: 'active' | 'inactive'
   image?: string
+  images?: string[]
   createdAt: string
   sales?: number
   rating?: number
@@ -250,11 +252,22 @@ export default function ProductsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProducts.map((product) => (
           <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
-            {/* Product Image/Icon */}
-            <div className="h-48 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center relative">
-              <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                <Package className="w-10 h-10 text-blue-600" />
-              </div>
+            {/* Product Image */}
+            <div className="h-48 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center relative overflow-hidden">
+              {product.images && product.images.length > 0 ? (
+                <Image
+                  src={product.images[0]}
+                  alt={product.name}
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+              ) : (
+                <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                  <Package className="w-10 h-10 text-blue-600" />
+                </div>
+              )}
               <div className="absolute top-4 right-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                   product.status === 'active' 
