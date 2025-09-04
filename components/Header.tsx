@@ -145,8 +145,18 @@ const Header = () => {
       <div className="bg-green-600 text-white py-2 px-4 text-sm">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <span>📞 0784586110</span>
-            <span>📷 @akazuba_florists</span>
+            <a href="tel:+250784586110" className="flex items-center space-x-1 hover:text-green-200 transition-colors">
+              <span>📞</span>
+              <span>+250 784 586 110</span>
+            </a>
+            <a href="https://wa.me/250784586110" className="flex items-center space-x-1 hover:text-green-200 transition-colors">
+              <span>💬</span>
+              <span>WhatsApp</span>
+            </a>
+            <a href="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:text-green-200 transition-colors">
+              <span>📷</span>
+              <span>@akazuba_florists</span>
+            </a>
           </div>
           <div className="hidden sm:flex items-center space-x-4">
             <span>🚚 Free delivery in Kigali</span>

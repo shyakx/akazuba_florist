@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
 
     // Email configuration
     const emailData = {
-      to: 'info@akazuba.com', // Akazuba Florist email
-      from: 'noreply@akazuba.com',
+      to: 'info.akazubaflorist@gmail.com', // Akazuba Florist email
+      from: 'info.akazubaflorist@gmail.com',
       subject: `Contact Form: ${subject}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

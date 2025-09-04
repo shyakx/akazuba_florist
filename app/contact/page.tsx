@@ -256,7 +256,6 @@ const ContactPage = () => {
                     <div>
                       <h3 className="font-semibold text-gray-900">Phone</h3>
                       <p className="text-gray-600">+250 784 586 110</p>
-                      <p className="text-gray-600">+250 788 123 456</p>
                       <p className="text-gray-600">WhatsApp: +250 784 586 110</p>
                 </div>
               </div>
@@ -267,8 +266,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600">info@akazuba.com</p>
-                      <p className="text-gray-600">support@akazuba.com</p>
+                      <p className="text-gray-600">info.akazubaflorist@gmail.com</p>
                     </div>
                   </div>
 
