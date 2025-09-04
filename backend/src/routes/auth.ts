@@ -8,7 +8,9 @@ import {
   refreshToken,
   getProfile,
   updateProfile,
-  changePassword
+  changePassword,
+  forgotPassword,
+  resetPassword
 } from '../controllers/authController'
 import { requireAuth, requireAdmin, authRateLimit } from '../middleware/auth'
 
@@ -245,5 +247,62 @@ router.put('/profile', requireAuth, updateProfile)
  *         description: Current password incorrect
  */
 router.post('/change-password', requireAuth, changePassword)
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Password reset link sent (if email exists)
+ *       400:
+ *         description: Bad request - email required
+ */
+router.post('/forgot-password', authLimiter, forgotPassword)
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Bad request - validation error
+ *       401:
+ *         description: Invalid or expired token
+ */
+router.post('/reset-password', authLimiter, resetPassword)
 
 export default router 

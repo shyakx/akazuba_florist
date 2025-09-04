@@ -242,6 +242,16 @@ const Login = () => {
                   'Sign In'
               )}
             </button>
+
+            {/* Forgot Password Link */}
+            <div className="text-center">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-pink-600 hover:text-pink-500 transition-colors"
+              >
+                Forgot your password?
+              </Link>
+            </div>
           </form>
 
             {/* Footer */}

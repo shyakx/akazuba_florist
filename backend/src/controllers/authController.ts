@@ -529,6 +529,153 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
   }
 }
 
+// Forgot password
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body
+
+    // Validation
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      })
+      return
+    }
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true
+      }
+    })
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      res.status(200).json({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      })
+      return
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign(
+      { userId: user.id, type: 'password_reset' },
+      JWT_SECRET,
+      { expiresIn: '1h' }
+    )
+
+    // Store reset token in database (you might want to create a separate table for this)
+    // For now, we'll use a simple approach
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`
+
+    // TODO: Send email with reset link
+    // For now, we'll just log it (in production, use a service like SendGrid, Nodemailer, etc.)
+    console.log(`Password reset link for ${user.email}: ${resetLink}`)
+
+    res.status(200).json({
+      success: true,
+      message: 'If an account with that email exists, a password reset link has been sent.',
+      // In development, include the reset link for testing
+      ...(process.env.NODE_ENV === 'development' && { resetLink })
+    })
+  } catch (error) {
+    logger.error('Forgot password error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    })
+  }
+}
+
+// Reset password
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, newPassword } = req.body
+
+    // Validation
+    if (!token || !newPassword) {
+      res.status(400).json({
+        success: false,
+        message: 'Token and new password are required'
+      })
+      return
+    }
+
+    const passwordValidation = validatePassword(newPassword)
+    if (!passwordValidation.isValid) {
+      res.status(400).json({
+        success: false,
+        message: passwordValidation.message
+      })
+      return
+    }
+
+    // Verify reset token
+    const decoded = jwt.verify(token, JWT_SECRET) as any
+    
+    if (decoded.type !== 'password_reset') {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid reset token'
+      })
+      return
+    }
+
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId }
+    })
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found'
+      })
+      return
+    }
+
+    // Hash new password
+    const saltRounds = 12
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds)
+
+    // Update password
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: hashedNewPassword }
+    })
+
+    // Invalidate all refresh tokens
+    await prisma.refresh_tokens.deleteMany({
+      where: { userId: user.id }
+    })
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully'
+    })
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      })
+      return
+    }
+
+    logger.error('Reset password error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    })
+  }
+}
+
 // Change password
 export const changePassword = async (req: Request, res: Response): Promise<void> => {
   try {

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { Eye, EyeOff, Lock, User, Flower2, Shield } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -164,6 +165,16 @@ export default function AdminLoginPage() {
                   'Sign In'
                 )}
               </button>
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="text-center mt-4">
+              <Link
+                href="/admin/forgot-password"
+                className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
+              >
+                Forgot your password?
+              </Link>
             </div>
           </form>
 
