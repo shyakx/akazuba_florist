@@ -3,7 +3,7 @@ services:
     name: akazuba-backend
     env: node
     plan: starter
-    branch: backend
+    branch: main
     buildCommand: npm run build
     startCommand: npm start
     envVars:
