@@ -110,7 +110,7 @@ const rwandanProducts = [
     stockQuantity: 20,
     isActive: true,
     isFeatured: true,
-    images: ['/images/flowers/wedding-bouquet.jpg']
+    images: ['/images/flowers/white/white-1.jpg']
   },
   {
     name: 'Graduation Arrangement',
@@ -120,7 +120,7 @@ const rwandanProducts = [
     stockQuantity: 15,
     isActive: true,
     isFeatured: true,
-    images: ['/images/flowers/graduation-arrangement.jpg']
+    images: ['/images/flowers/mixed/mixed-1.jpg']
   },
   {
     name: 'Anniversary Roses',
@@ -130,7 +130,7 @@ const rwandanProducts = [
     stockQuantity: 25,
     isActive: true,
     isFeatured: true,
-    images: ['/images/flowers/anniversary-roses.jpg']
+    images: ['/images/flowers/red/red-1.jpg']
   },
   {
     name: 'Funeral Wreath',
@@ -140,7 +140,7 @@ const rwandanProducts = [
     stockQuantity: 10,
     isActive: true,
     isFeatured: false,
-    images: ['/images/flowers/funeral-wreath.jpg']
+    images: ['/images/flowers/white/white-2.jpg']
   },
   {
     name: 'Mother\'s Day Special',
@@ -150,7 +150,7 @@ const rwandanProducts = [
     stockQuantity: 30,
     isActive: true,
     isFeatured: true,
-    images: ['/images/flowers/mothers-day-special.jpg']
+    images: ['/images/flowers/pink/pink-1.jpg']
   },
   {
     name: 'Birthday Celebration',
@@ -160,7 +160,7 @@ const rwandanProducts = [
     stockQuantity: 35,
     isActive: true,
     isFeatured: false,
-    images: ['/images/flowers/birthday-celebration.jpg']
+    images: ['/images/flowers/mixed/mixed-2.jpg']
   },
   // Perfume products
   {
@@ -171,7 +171,7 @@ const rwandanProducts = [
     stockQuantity: 12,
     isActive: true,
     isFeatured: true,
-    images: ['/images/perfumes/date-night-perfume.jpg']
+    images: ['/images/perfumes/perfume-1.jpg']
   },
   {
     name: 'Female Elegance',
@@ -181,7 +181,7 @@ const rwandanProducts = [
     stockQuantity: 18,
     isActive: true,
     isFeatured: true,
-    images: ['/images/perfumes/female-elegance.jpg']
+    images: ['/images/perfumes/perfume-2.jpg']
   },
   {
     name: 'Soft Scent Collection',
@@ -191,7 +191,7 @@ const rwandanProducts = [
     stockQuantity: 22,
     isActive: true,
     isFeatured: false,
-    images: ['/images/perfumes/soft-scent-collection.jpg']
+    images: ['/images/perfumes/perfume-3.png']
   },
   {
     name: 'Male Confidence',
@@ -201,7 +201,7 @@ const rwandanProducts = [
     stockQuantity: 15,
     isActive: true,
     isFeatured: true,
-    images: ['/images/perfumes/male-confidence.jpg']
+    images: ['/images/perfumes/perfume-4.jpeg']
   },
   {
     name: 'Strong Scent Premium',
@@ -211,7 +211,7 @@ const rwandanProducts = [
     stockQuantity: 8,
     isActive: true,
     isFeatured: true,
-    images: ['/images/perfumes/strong-scent-premium.jpg']
+    images: ['/images/perfumes/perfume-5.png']
   },
   {
     name: 'Casual Everyday',
@@ -221,7 +221,7 @@ const rwandanProducts = [
     stockQuantity: 25,
     isActive: true,
     isFeatured: false,
-    images: ['/images/perfumes/casual-everyday.jpg']
+    images: ['/images/perfumes/perfume-6.jpg']
   }
 ];
 
@@ -381,7 +381,7 @@ async function seedDatabase() {
             unitPrice: randomProduct.price,
             totalPrice: randomProduct.price * quantity,
             color: 'Mixed',
-            productImage: randomProduct.images[0] || '/images/placeholder.jpg',
+            productImage: randomProduct.images[0] || '/images/placeholder-flower.jpg',
             type: 'Standard'
           }
         });
