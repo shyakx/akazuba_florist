@@ -6,53 +6,53 @@ import Link from 'next/link'
 
 const AboutPage = () => {
   const stats = [
-    { icon: Users, value: '500+', label: 'Happy Customers' },
-    { icon: Award, value: '4.9★', label: 'Average Rating' },
-    { icon: Truck, value: '1000+', label: 'Bouquets Delivered' },
-    { icon: Heart, value: '3+', label: 'Years of Excellence' },
+    { icon: Users, value: '2,500+', label: 'Happy Customers' },
+    { icon: Award, value: '4.8★', label: 'Customer Rating' },
+    { icon: Truck, value: '5,000+', label: 'Orders Delivered' },
+    { icon: Heart, value: '5+', label: 'Years of Excellence' },
   ]
 
   const values = [
     {
       icon: Heart,
-      title: 'Passion for Flowers',
-      description: 'We are passionate about creating beautiful floral arrangements that bring joy and beauty to every occasion.'
+      title: 'Passion for Beauty',
+      description: 'We believe flowers have the power to transform moments into memories. Every arrangement is crafted with love and attention to detail.'
     },
     {
       icon: Shield,
-      title: 'Trust & Reliability',
-      description: 'Building lasting relationships through transparent pricing, secure payments, and reliable delivery services.'
+      title: 'Trust & Quality',
+      description: 'From premium flowers to exquisite perfumes, we guarantee fresh, high-quality products delivered with care and reliability.'
     },
     {
       icon: Star,
-      title: 'Excellence in Service',
-      description: 'Providing exceptional customer service with attention to detail and personalized care for every order.'
+      title: 'Customer Excellence',
+      description: 'Your satisfaction is our priority. We provide personalized service and go the extra mile to make your experience special.'
     },
     {
       icon: Truck,
-      title: 'Local Commitment',
-      description: 'Supporting local communities and promoting sustainable practices in our flower business.'
+      title: 'Rwanda Pride',
+      description: 'Proudly serving Rwanda with local expertise, supporting our community, and bringing international quality to your doorstep.'
     }
   ]
 
   const team = [
     {
-      name: 'Akazuba Team',
+      name: 'Diane Akazuba',
       role: 'Founder & Creative Director',
-      image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-      bio: 'Passionate about bringing beauty and elegance to Rwanda through premium floral arrangements and creative designs.'
+      image: '/images/team/diane-akazuba.jpg',
+      bio: 'Visionary founder with 8+ years in floral design. Passionate about bringing international-quality flowers and perfumes to Rwanda while supporting local communities.'
     },
     {
       name: 'Jean Pierre',
-      role: 'Head of Operations',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-      bio: 'Ensuring smooth operations and exceptional customer experiences across all touchpoints.'
+      role: 'Operations Manager',
+      image: '/images/team/jean-pierre.jpg',
+      bio: 'Expert in logistics and customer service with 5+ years experience. Ensures every order is delivered fresh and on time across Rwanda.'
     },
     {
       name: 'Marie Claire',
       role: 'Senior Florist',
-      image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80',
-      bio: 'Creating stunning floral arrangements and curating the perfect flower collections for every occasion.'
+      image: '/images/team/marie-claire.jpg',
+      bio: 'Master florist with international training. Specializes in wedding arrangements, corporate events, and custom bouquets that exceed expectations.'
     }
   ]
 
@@ -66,8 +66,8 @@ const AboutPage = () => {
               About <span className="text-pink-600">Akazuba Florist</span>
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We are passionate about bringing the finest flowers and handcrafted arrangements to Rwanda, 
-              creating moments of beauty and elegance in your everyday life.
+              Rwanda's premier destination for premium flowers and luxury perfumes. We bring you the world's finest 
+              floral arrangements and exquisite fragrances, delivered fresh to your door with love and care.
             </p>
           </div>
         </div>
@@ -100,31 +100,35 @@ const AboutPage = () => {
               </h2>
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Founded in 2021, Akazuba Florist began with a simple vision: to bring the world&apos;s finest flowers 
-                  and handcrafted arrangements to the beautiful country of Rwanda. What started as a small passion project 
-                  has grown into a trusted destination for premium floral arrangements and creative designs.
+                  Founded in 2019 by Diane Akazuba, our journey began with a vision to bring world-class flowers 
+                  and luxury perfumes to Rwanda. What started as a small boutique has grown into Rwanda's most 
+                  trusted floral and fragrance destination, serving over 2,500 satisfied customers.
                 </p>
                 <p>
-                  Our journey began when our founder discovered her love for flowers while studying 
-                  abroad. She was inspired by the way flowers could transform spaces and lift spirits, and wanted 
-                  to share this beauty with her homeland.
+                  Diane's passion for flowers was ignited during her studies in Europe, where she discovered 
+                  the transformative power of premium floral arrangements. Returning to Rwanda, she was determined 
+                  to share this beauty with her homeland, combining international quality with local expertise.
                 </p>
                 <p>
-                  Today, we serve customers across Rwanda, delivering not just products, but experiences that 
-                  create lasting memories. From romantic bouquets to wedding arrangements, every item in our 
-                  collection is carefully selected and handcrafted to meet the highest standards of quality and beauty.
+                  Today, we offer an extensive collection of fresh flowers, elegant bouquets, and luxury perfumes. 
+                  From intimate birthday celebrations to grand weddings, corporate events to romantic gestures, 
+                  we create memorable experiences that celebrate life's most precious moments.
+                </p>
+                <p>
+                  Our commitment extends beyond products - we support local communities, promote sustainable practices, 
+                  and ensure every customer receives personalized service that exceeds expectations.
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <img
-                src="https://images.unsplash.com/photo-1562690868-60bbe7293e94?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Luxury Roses"
+                src="/images/flowers/red/red-rose-1.jpg"
+                alt="Premium Red Roses"
                 className="w-full h-64 object-cover rounded-xl"
               />
               <img
-                src="https://images.unsplash.com/photo-1519378058457-4c29a0a2efac?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
-                alt="Mixed Bouquet"
+                src="/images/flowers/mixed/mixed-bouquet-1.jpg"
+                alt="Elegant Mixed Bouquet"
                 className="w-full h-64 object-cover rounded-xl mt-8"
               />
             </div>
@@ -158,8 +162,72 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Team Section */}
+      {/* Services Section */}
       <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Our Services & Specialties
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              From intimate celebrations to grand events, we provide comprehensive floral and fragrance solutions.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-pink-50 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="h-8 w-8 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Wedding Arrangements</h3>
+              <p className="text-gray-600">Bridal bouquets, centerpieces, ceremony decorations, and complete wedding floral design services.</p>
+            </div>
+            
+            <div className="bg-pink-50 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Star className="h-8 w-8 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Corporate Events</h3>
+              <p className="text-gray-600">Professional floral arrangements for conferences, meetings, and corporate celebrations.</p>
+            </div>
+            
+            <div className="bg-pink-50 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Truck className="h-8 w-8 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Same-Day Delivery</h3>
+              <p className="text-gray-600">Fresh flowers delivered across Kigali and surrounding areas within hours of ordering.</p>
+            </div>
+            
+            <div className="bg-pink-50 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="h-8 w-8 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Luxury Perfumes</h3>
+              <p className="text-gray-600">Curated collection of premium fragrances from international and local brands.</p>
+            </div>
+            
+            <div className="bg-pink-50 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Custom Arrangements</h3>
+              <p className="text-gray-600">Personalized floral designs tailored to your specific needs and preferences.</p>
+            </div>
+            
+            <div className="bg-pink-50 rounded-xl p-6 text-center">
+              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-8 w-8 text-pink-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Event Planning</h3>
+              <p className="text-gray-600">Complete event coordination services for weddings, parties, and special occasions.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
@@ -207,6 +275,7 @@ const AboutPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900">Address</h3>
                     <p className="text-gray-600">Kigali, Rwanda</p>
+                    <p className="text-gray-600">Kimihurura, KG 123 St</p>
                   </div>
                 </div>
                 
@@ -216,7 +285,8 @@ const AboutPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Phone</h3>
-                    <p className="text-gray-600">0784586110</p>
+                    <p className="text-gray-600">+250 788 123 456</p>
+                    <p className="text-gray-600">+250 789 123 456</p>
                   </div>
                 </div>
                 
@@ -226,7 +296,8 @@ const AboutPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-600">info.akazubaflorist@gmail.com</p>
+                    <p className="text-gray-600">info@akazuba.com</p>
+                    <p className="text-gray-600">support@akazuba.com</p>
                   </div>
                 </div>
                 
@@ -236,7 +307,9 @@ const AboutPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Business Hours</h3>
-                    <p className="text-gray-600">Mon - Sat: 8:00 AM - 8:00 PM</p>
+                    <p className="text-gray-600">Monday - Friday: 8:00 AM - 6:00 PM</p>
+                    <p className="text-gray-600">Saturday: 9:00 AM - 4:00 PM</p>
+                    <p className="text-gray-600">Sunday: Closed</p>
                   </div>
                 </div>
               </div>

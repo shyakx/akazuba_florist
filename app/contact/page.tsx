@@ -242,8 +242,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Phone</h3>
-                      <p className="text-gray-600">+250 788 123 456</p>
-                      <p className="text-gray-600">+250 789 123 456</p>
+                      <p className="text-gray-600">WhatsApp: +250 784 586 110</p>
                 </div>
               </div>
 
@@ -253,8 +252,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">Email</h3>
-                      <p className="text-gray-600">info@akazuba.com</p>
-                      <p className="text-gray-600">support@akazuba.com</p>
+                      <p className="text-gray-600">info.akazubaflorist@gmail.com</p>
                     </div>
                   </div>
 
@@ -266,7 +264,8 @@ const ContactPage = () => {
                       <h3 className="font-semibold text-gray-900">Address</h3>
                       <p className="text-gray-600">
                         Kigali, Rwanda<br />
-                        Kimihurura, KG 123 St
+                        Kimihurura, KG 123 St<br />
+                        Near Kigali Convention Centre
                       </p>
                   </div>
                 </div>
@@ -280,6 +279,7 @@ const ContactPage = () => {
                       <p className="text-gray-600">Monday - Friday: 8:00 AM - 6:00 PM</p>
                       <p className="text-gray-600">Saturday: 9:00 AM - 4:00 PM</p>
                       <p className="text-gray-600">Sunday: Closed</p>
+                      <p className="text-gray-600 text-sm mt-2">Emergency orders: Available 24/7</p>
               </div>
             </div>
           </div>
