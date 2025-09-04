@@ -40,7 +40,7 @@ const AboutPage = () => {
       name: 'Diane Akazuba',
       role: 'Founder & Creative Director',
       image: '/images/team/diane-akazuba.jpg',
-      bio: 'Visionary founder with 8+ years in floral design. Passionate about bringing international-quality flowers and perfumes to Rwanda while supporting local communities.'
+      bio: 'Visionary founder with 8+ years in floral design. Born and raised in Rwanda, Diane combines her natural talent for floral arrangements with a deep commitment to serving her community and showcasing the beauty of Rwanda.'
     },
     {
       name: 'Jean Pierre',
@@ -93,44 +93,33 @@ const AboutPage = () => {
       {/* Story Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
-                Our Story
-              </h2>
-              <div className="space-y-4 text-gray-600">
-                <p>
-                  Founded in 2019 by Diane Akazuba, our journey began with a vision to bring world-class flowers 
-                  and luxury perfumes to Rwanda. What started as a small boutique has grown into Rwanda's most 
-                  trusted floral and fragrance destination, serving over 2,500 satisfied customers.
-                </p>
-                <p>
-                  Diane's passion for flowers was ignited during her studies in Europe, where she discovered 
-                  the transformative power of premium floral arrangements. Returning to Rwanda, she was determined 
-                  to share this beauty with her homeland, combining international quality with local expertise.
-                </p>
-                <p>
-                  Today, we offer an extensive collection of fresh flowers, elegant bouquets, and luxury perfumes. 
-                  From intimate birthday celebrations to grand weddings, corporate events to romantic gestures, 
-                  we create memorable experiences that celebrate life's most precious moments.
-                </p>
-                <p>
-                  Our commitment extends beyond products - we support local communities, promote sustainable practices, 
-                  and ensure every customer receives personalized service that exceeds expectations.
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <img
-                src="/images/flowers/red/red-rose-1.jpg"
-                alt="Premium Red Roses"
-                className="w-full h-64 object-cover rounded-xl"
-              />
-              <img
-                src="/images/flowers/mixed/mixed-bouquet-1.jpg"
-                alt="Elegant Mixed Bouquet"
-                className="w-full h-64 object-cover rounded-xl mt-8"
-              />
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">
+              Our Story
+            </h2>
+            <div className="space-y-4 text-gray-600 text-lg">
+              <p>
+                Founded in 2019 by Diane Akazuba, our journey began with a simple dream: to bring the beauty 
+                of fresh flowers and luxury fragrances to every corner of Rwanda. What started as a small 
+                home-based business in Kigali has grown into Rwanda's most trusted floral and fragrance 
+                destination, serving over 2,500 satisfied customers across the country.
+              </p>
+              <p>
+                Diane's love for flowers was born from her childhood in the hills of Rwanda, where she spent 
+                countless hours admiring the natural beauty of her homeland. Her passion for creating beautiful 
+                arrangements began when she started making bouquets for family celebrations and local events. 
+                Word of her talent spread quickly through the community.
+              </p>
+              <p>
+                Today, we offer an extensive collection of fresh flowers, elegant bouquets, and luxury perfumes. 
+                From intimate birthday celebrations to grand weddings, corporate events to romantic gestures, 
+                we create memorable experiences that celebrate life's most precious moments right here in Rwanda.
+              </p>
+              <p>
+                Our commitment extends beyond products - we work directly with local flower growers, support 
+                Rwandan communities, and ensure every customer receives personalized service that reflects 
+                the warmth and hospitality of our beautiful country.
+              </p>
             </div>
           </div>
         </div>

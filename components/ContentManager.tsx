@@ -63,6 +63,42 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
     whatsapp: '0784586110'
   })
 
+  // About Page Content
+  const [aboutPageContent, setAboutPageContent] = useState({
+    heroTitle: 'About Akazuba Florist',
+    heroSubtitle: 'Rwanda\'s premier destination for premium flowers and luxury perfumes. We bring you the world\'s finest floral arrangements and exquisite fragrances, delivered fresh to your door with love and care.',
+    storyTitle: 'Our Story',
+    storyParagraph1: 'Founded in 2019 by Diane Akazuba, our journey began with a simple dream: to bring the beauty of fresh flowers and luxury fragrances to every corner of Rwanda. What started as a small home-based business in Kigali has grown into Rwanda\'s most trusted floral and fragrance destination, serving over 2,500 satisfied customers across the country.',
+    storyParagraph2: 'Diane\'s love for flowers was born from her childhood in the hills of Rwanda, where she spent countless hours admiring the natural beauty of her homeland. Her passion for creating beautiful arrangements began when she started making bouquets for family celebrations and local events. Word of her talent spread quickly through the community.',
+    storyParagraph3: 'Today, we offer an extensive collection of fresh flowers, elegant bouquets, and luxury perfumes. From intimate birthday celebrations to grand weddings, corporate events to romantic gestures, we create memorable experiences that celebrate life\'s most precious moments right here in Rwanda.',
+    storyParagraph4: 'Our commitment extends beyond products - we work directly with local flower growers, support Rwandan communities, and ensure every customer receives personalized service that reflects the warmth and hospitality of our beautiful country.',
+    stats: [
+      { value: '2,500+', label: 'Happy Customers' },
+      { value: '4.8★', label: 'Customer Rating' },
+      { value: '5,000+', label: 'Orders Delivered' },
+      { value: '5+', label: 'Years of Excellence' }
+    ]
+  })
+
+  // Contact Page Content
+  const [contactPageContent, setContactPageContent] = useState({
+    heroTitle: 'Contact Us',
+    heroSubtitle: 'We\'re here to help! Get in touch with us for any questions about our products, orders, or services.',
+    phone1: '+250 788 123 456',
+    phone2: '+250 789 123 456',
+    whatsapp: '+250 784 586 110',
+    email1: 'info@akazuba.com',
+    email2: 'support@akazuba.com',
+    email3: 'orders@akazuba.com',
+    address: 'Kigali, Rwanda',
+    addressDetail: 'Kimihurura, KG 123 St',
+    landmark: 'Near Kigali Convention Centre',
+    hoursWeekdays: 'Monday - Friday: 8:00 AM - 6:00 PM',
+    hoursSaturday: 'Saturday: 9:00 AM - 4:00 PM',
+    hoursSunday: 'Sunday: Closed',
+    emergencyNote: 'Emergency orders: Available 24/7'
+  })
+
   const handleGeneralSettingsChange = (field: string, value: string) => {
     setGeneralSettings(prev => ({
       ...prev,
@@ -93,6 +129,20 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
 
   const handleSocialMediaChange = (field: string, value: string) => {
     setSocialMedia(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleAboutPageContentChange = (field: string, value: string) => {
+    setAboutPageContent(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleContactPageContentChange = (field: string, value: string) => {
+    setContactPageContent(prev => ({
       ...prev,
       [field]: value
     }))
@@ -129,6 +179,8 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
     { id: 'payment', name: 'Payment Info', icon: DollarSign },
     { id: 'hero', name: 'Hero Section', icon: ImageIcon },
     { id: 'about', name: 'About Section', icon: FileText },
+    { id: 'about-page', name: 'About Page', icon: Users },
+    { id: 'contact-page', name: 'Contact Page', icon: Phone },
     { id: 'social', name: 'Social Media', icon: Globe }
   ]
 
@@ -490,6 +542,250 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     placeholder="0784586110"
                   />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* About Page Tab */}
+          {activeTab === 'about-page' && (
+            <div className="p-6 space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900">About Page Content</h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hero Title</label>
+                  <input
+                    type="text"
+                    value={aboutPageContent.heroTitle}
+                    onChange={(e) => handleAboutPageContentChange('heroTitle', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hero Subtitle</label>
+                  <textarea
+                    rows={3}
+                    value={aboutPageContent.heroSubtitle}
+                    onChange={(e) => handleAboutPageContentChange('heroSubtitle', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Story Title</label>
+                  <input
+                    type="text"
+                    value={aboutPageContent.storyTitle}
+                    onChange={(e) => handleAboutPageContentChange('storyTitle', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Story Paragraph 1</label>
+                  <textarea
+                    rows={3}
+                    value={aboutPageContent.storyParagraph1}
+                    onChange={(e) => handleAboutPageContentChange('storyParagraph1', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Story Paragraph 2</label>
+                  <textarea
+                    rows={3}
+                    value={aboutPageContent.storyParagraph2}
+                    onChange={(e) => handleAboutPageContentChange('storyParagraph2', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Story Paragraph 3</label>
+                  <textarea
+                    rows={3}
+                    value={aboutPageContent.storyParagraph3}
+                    onChange={(e) => handleAboutPageContentChange('storyParagraph3', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Story Paragraph 4</label>
+                  <textarea
+                    rows={3}
+                    value={aboutPageContent.storyParagraph4}
+                    onChange={(e) => handleAboutPageContentChange('storyParagraph4', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Contact Page Tab */}
+          {activeTab === 'contact-page' && (
+            <div className="p-6 space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900">Contact Page Content</h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hero Title</label>
+                  <input
+                    type="text"
+                    value={contactPageContent.heroTitle}
+                    onChange={(e) => handleContactPageContentChange('heroTitle', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Hero Subtitle</label>
+                  <textarea
+                    rows={2}
+                    value={contactPageContent.heroSubtitle}
+                    onChange={(e) => handleContactPageContentChange('heroSubtitle', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number 1</label>
+                    <input
+                      type="tel"
+                      value={contactPageContent.phone1}
+                      onChange={(e) => handleContactPageContentChange('phone1', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number 2</label>
+                    <input
+                      type="tel"
+                      value={contactPageContent.phone2}
+                      onChange={(e) => handleContactPageContentChange('phone2', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp Number</label>
+                    <input
+                      type="tel"
+                      value={contactPageContent.whatsapp}
+                      onChange={(e) => handleContactPageContentChange('whatsapp', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email 1</label>
+                    <input
+                      type="email"
+                      value={contactPageContent.email1}
+                      onChange={(e) => handleContactPageContentChange('email1', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email 2</label>
+                    <input
+                      type="email"
+                      value={contactPageContent.email2}
+                      onChange={(e) => handleContactPageContentChange('email2', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email 3</label>
+                    <input
+                      type="email"
+                      value={contactPageContent.email3}
+                      onChange={(e) => handleContactPageContentChange('email3', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <input
+                      type="text"
+                      value={contactPageContent.address}
+                      onChange={(e) => handleContactPageContentChange('address', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address Detail</label>
+                    <input
+                      type="text"
+                      value={contactPageContent.addressDetail}
+                      onChange={(e) => handleContactPageContentChange('addressDetail', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Landmark</label>
+                    <input
+                      type="text"
+                      value={contactPageContent.landmark}
+                      onChange={(e) => handleContactPageContentChange('landmark', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Emergency Note</label>
+                    <input
+                      type="text"
+                      value={contactPageContent.emergencyNote}
+                      onChange={(e) => handleContactPageContentChange('emergencyNote', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Weekdays Hours</label>
+                    <input
+                      type="text"
+                      value={contactPageContent.hoursWeekdays}
+                      onChange={(e) => handleContactPageContentChange('hoursWeekdays', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Saturday Hours</label>
+                    <input
+                      type="text"
+                      value={contactPageContent.hoursSaturday}
+                      onChange={(e) => handleContactPageContentChange('hoursSaturday', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Sunday Hours</label>
+                    <input
+                      type="text"
+                      value={contactPageContent.hoursSunday}
+                      onChange={(e) => handleContactPageContentChange('hoursSunday', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
