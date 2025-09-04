@@ -24,6 +24,7 @@ interface AnalyticsData {
   monthlyRevenue: Array<{ month: string; revenue: number }>
   topProducts: Array<{ name: string; sales: number }>
   recentActivity: Array<{ action: string; time: string; user: string }>
+  orderStatusCounts: Array<{ status: string; _count: { status: number } }>
 }
 
 export default function AnalyticsPage() {
@@ -161,7 +162,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Charts and Data */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Chart */}
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Revenue</h3>
@@ -201,6 +202,35 @@ export default function AnalyticsPage() {
                   </div>
                   <span className="text-sm font-medium text-gray-900 w-8 text-right">
                     {product.sales}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Order Status Distribution */}
+        <div className="card">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status</h3>
+          <div className="space-y-3">
+            {analytics.orderStatusCounts.map((status, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span className="text-sm text-gray-600 capitalize">{status.status.toLowerCase()}</span>
+                <div className="flex items-center space-x-3">
+                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${
+                        status.status === 'DELIVERED' ? 'bg-green-500' :
+                        status.status === 'PROCESSING' ? 'bg-blue-500' :
+                        status.status === 'SHIPPED' ? 'bg-yellow-500' :
+                        status.status === 'PENDING' ? 'bg-orange-500' :
+                        'bg-red-500'
+                      }`}
+                      style={{ width: `${(status._count.status / analytics.totalOrders) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900 w-8 text-right">
+                    {status._count.status}
                   </span>
                 </div>
               </div>
