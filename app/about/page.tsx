@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Users, Award, Heart, Shield, Truck, Star, MapPin, Phone, Mail, Clock } from 'lucide-react'
+import { Users, Award, Heart, Shield, Truck, Star, MapPin, Phone, Mail, Clock, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 
 const AboutPage = () => {
@@ -39,7 +39,7 @@ const AboutPage = () => {
     {
       name: 'Diane Umwali',
       role: 'Founder & CEO',
-      icon: '👩‍💼',
+      icon: UserCheck,
       bio: 'Visionary founder with 8+ years in floral design. Born and raised in Rwanda, Diane combines her natural talent for floral arrangements with a deep commitment to serving her community and showcasing the beauty of Rwanda.'
     }
   ]
@@ -219,7 +219,7 @@ const AboutPage = () => {
             {team.map((member, index) => (
               <div key={index} className="text-center max-w-md">
                 <div className="w-48 h-48 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-8xl">{member.icon}</span>
+                  <member.icon className="h-24 w-24 text-pink-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>
                 <p className="text-pink-600 font-medium mb-3">{member.role}</p>
