@@ -136,7 +136,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             orderId: order.id,
             productId: item.productId,
             productName: item.name,
-            productsImage: item.image,
+            productImage: item.image,
             productsSku: item.sku,
             quantity: item.quantity,
                       unitPrice: item.price,

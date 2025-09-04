@@ -390,10 +390,10 @@ router.get('/orders', async (req, res) => {
         productName: item.products.name,
         quantity: item.quantity,
         price: Number(item.unitPrice),
-        productsImage: item.productsImage
+        productImage: item.productImage
       })),
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt
+      createdAt: orderItem.createdAt,
+      updatedAt: orderItem.updatedAt
     }))
 
     res.json({
