@@ -99,8 +99,8 @@ export default function CategoriesPage() {
             key={category.id} 
             className="card hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105 hover:border-blue-300"
             onClick={() => {
-              // Navigate to products page filtered by this category
-              window.location.href = `/admin/products?category=${encodeURIComponent(category.name)}`
+              // Navigate to category products page
+              window.location.href = `/admin/categories/${category.id}/products`
             }}
           >
             <div className="flex items-start justify-between mb-4">
