@@ -37,22 +37,10 @@ const AboutPage = () => {
 
   const team = [
     {
-      name: 'Diane Akazuba',
-      role: 'Founder & Creative Director',
-      image: '/images/team/diane-akazuba.jpg',
+      name: 'Diane Umwali',
+      role: 'Founder & CEO',
+      icon: '👩‍💼',
       bio: 'Visionary founder with 8+ years in floral design. Born and raised in Rwanda, Diane combines her natural talent for floral arrangements with a deep commitment to serving her community and showcasing the beauty of Rwanda.'
-    },
-    {
-      name: 'Jean Pierre',
-      role: 'Operations Manager',
-      image: '/images/team/jean-pierre.jpg',
-      bio: 'Expert in logistics and customer service with 5+ years experience. Ensures every order is delivered fresh and on time across Rwanda.'
-    },
-    {
-      name: 'Marie Claire',
-      role: 'Senior Florist',
-      image: '/images/team/marie-claire.jpg',
-      bio: 'Master florist with international training. Specializes in wedding arrangements, corporate events, and custom bouquets that exceed expectations.'
     }
   ]
 
@@ -227,19 +215,76 @@ const AboutPage = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="flex justify-center">
             {team.map((member, index) => (
-              <div key={index} className="text-center">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-48 h-48 object-cover rounded-full mx-auto mb-6"
-                />
+              <div key={index} className="text-center max-w-md">
+                <div className="w-48 h-48 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-8xl">{member.icon}</span>
+                </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>
                 <p className="text-pink-600 font-medium mb-3">{member.role}</p>
                 <p className="text-gray-600">{member.bio}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Delivery Partners Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              Our Delivery Network
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We partner with all major delivery companies operating in Rwanda to ensure your flowers 
+              and perfumes reach you fresh and on time, no matter where you are in the country.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Truck className="h-10 w-10 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Nationwide Coverage</h3>
+              <p className="text-gray-600">We deliver to all provinces and districts across Rwanda</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="h-10 w-10 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Fast Delivery</h3>
+              <p className="text-gray-600">Same-day delivery available in Kigali and major cities</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-10 w-10 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure Handling</h3>
+              <p className="text-gray-600">Professional packaging ensures your items arrive in perfect condition</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-10 w-10 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Trusted Partners</h3>
+              <p className="text-gray-600">Working with established delivery companies you know and trust</p>
+            </div>
+          </div>
+          
+          <div className="mt-12 text-center">
+            <p className="text-lg text-gray-600 mb-4">
+              <strong>Delivery Partners Include:</strong> Kigali Express, Rwanda Logistics, 
+              East Africa Courier, and all major motorcycle delivery services across the country.
+            </p>
+            <p className="text-gray-500">
+              We continuously expand our network to reach more customers and provide better service.
+            </p>
           </div>
         </div>
       </section>
