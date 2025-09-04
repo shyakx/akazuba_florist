@@ -28,7 +28,7 @@ const ContactPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+    if (!formData.name || !formData.email || !formData.phone || !formData.subject || !formData.message) {
       toast.error('Please fill in all required fields')
       return
     }
@@ -163,18 +163,20 @@ const ContactPage = () => {
                   </div>
                 </div>
                 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
+                    placeholder="+250 788 123 456"
+                    required
+                  />
+                </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
