@@ -8,7 +8,11 @@ export async function GET(request: NextRequest) {
     // Since this is an admin route, it's already protected by the admin layout
     // We can directly fetch from the backend without additional token validation
     
-    const backendUrl = process.env.NODE_ENV === 'development' n      ? 'http://localhost:5000/api/v1/admin/dashboard/stats/public'n      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/dashboard/stats/public'n    n    const response = await fetch(backendUrl, {
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000/api/v1/admin/dashboard/stats/public'
+      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/dashboard/stats/public'
+    
+    const response = await fetch(backendUrl, {
       headers: {
         'Content-Type': 'application/json'
       }
