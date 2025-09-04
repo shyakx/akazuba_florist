@@ -56,7 +56,11 @@ export default function ProductsPage() {
       if (!response.ok) throw new Error('Failed to fetch products')
       
       const result = await response.json()
+      console.log('🔍 Admin Products API Response:', result)
+      console.log('📊 Products data:', result.data?.products)
+      
       if (result.success) {
+        console.log('✅ Setting products:', result.data.products)
         setProducts(result.data.products)
       } else {
         throw new Error('Failed to fetch products')
@@ -254,20 +258,23 @@ export default function ProductsPage() {
           <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Product Image */}
             <div className="h-48 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center relative overflow-hidden">
-              {product.images && product.images.length > 0 ? (
-                <Image
-                  src={product.images[0]}
-                  alt={product.name}
-                  width={200}
-                  height={200}
-                  className="w-full h-full object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                  <Package className="w-10 h-10 text-blue-600" />
-                </div>
-              )}
+              {(() => {
+                console.log(`🖼️ Product ${product.name} images:`, product.images)
+                return product.images && product.images.length > 0 ? (
+                  <Image
+                    src={product.images[0]}
+                    alt={product.name}
+                    width={200}
+                    height={200}
+                    className="w-full h-full object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                    <Package className="w-10 h-10 text-blue-600" />
+                  </div>
+                )
+              })()}
               <div className="absolute top-4 right-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                   product.status === 'active' 
