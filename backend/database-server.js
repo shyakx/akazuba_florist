@@ -1425,6 +1425,7 @@ app.get('/api/v1/admin/products/public', async (req, res) => {
       category: product.categories?.name || 'Uncategorized',
       stock: product.stockQuantity,
       status: product.isActive ? 'active' : 'inactive',
+      images: product.images || [],
       createdAt: product.createdAt.toISOString().split('T')[0],
       sales: 0, // TODO: Calculate from order_items
       rating: 4.5, // TODO: Calculate from reviews
