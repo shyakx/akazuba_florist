@@ -239,7 +239,7 @@ export const authAPI = {
     try {
       const response = await apiRequest<AuthResponse['data']>('/auth/admin/login', {
         method: 'POST',
-        body: JSON.stringify({ email: data.username, password: data.password }),
+        body: JSON.stringify({ username: data.username, password: data.password }),
       });
 
       if (response.success && response.data) {

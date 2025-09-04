@@ -3,6 +3,18 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+// Admin user
+const adminUser = {
+  email: 'admin@akazubaflorist.com',
+  passwordHash: '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: "password"
+  firstName: 'Admin',
+  lastName: 'User',
+  phone: '+250 700 000 000',
+  role: 'ADMIN',
+  isActive: true,
+  emailVerified: true
+};
+
 // Real Rwandan customer data
 const rwandanCustomers = [
   {
@@ -309,6 +321,11 @@ async function seedDatabase() {
       })
     );
     console.log(`✅ Created ${products.length} products`);
+
+    // Seed admin user
+    console.log('👑 Seeding admin user...');
+    const admin = await prisma.user.create({ data: adminUser });
+    console.log(`✅ Created admin user: ${admin.email}`);
 
     // Seed customers
     console.log('👥 Seeding customers...');
