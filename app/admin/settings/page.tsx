@@ -1,293 +1,382 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   Settings, 
-  Store, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock,
-  Save,
+  Save, 
+  User, 
+  Bell, 
+  Shield, 
+  Database,
+  Mail,
   Globe,
   CreditCard
 } from 'lucide-react'
 
-interface BusinessSettings {
-  businessName: string
-  phone: string
-  email: string
-  address: string
-  businessHours: string
-  currency: string
-  paymentMethods: string[]
-}
-
-export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<BusinessSettings>({
+export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState('general')
+  const [settings, setSettings] = useState({
+    // General Settings
     businessName: 'Akazuba Florist',
-    phone: '+250 789 123 456',
-    email: 'info@akazubaflorist.com',
-    address: 'Kigali, Rwanda',
-    businessHours: 'Monday - Friday: 8:00 AM - 6:00 PM, Saturday: 9:00 AM - 4:00 PM',
+    businessEmail: 'admin@akazubaflorist.com',
+    businessPhone: '+250 788 123 456',
+    businessAddress: 'Kigali, Rwanda',
     currency: 'RWF',
-    paymentMethods: ['MoMo', 'BK', 'Cash on Delivery']
+    timezone: 'Africa/Kigali',
+    
+    // Notification Settings
+    emailNotifications: 'true',
+    orderNotifications: 'true',
+    customerNotifications: 'true',
+    marketingEmails: 'false',
+    
+    // Security Settings
+    twoFactorAuth: 'false',
+    sessionTimeout: '30',
+    passwordExpiry: '90',
+    
+    // System Settings
+    autoBackup: 'true',
+    backupFrequency: 'daily',
+    logRetention: '30',
+    maintenanceMode: 'false'
   })
-
-  const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    // Simulate saving
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsEditing(false)
-    setIsSaving(false)
-    // In real app, save to backend/database
+  const fetchSettings = async () => {
+    try {
+      setIsLoading(true)
+      
+      const response = await fetch('/api/admin/settings/public')
+      if (!response.ok) throw new Error('Failed to fetch settings')
+      
+      const result = await response.json()
+      if (result.success) {
+        setSettings(result.data)
+      } else {
+        throw new Error('Failed to fetch settings')
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error)
+      // Keep default settings on error
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleCancel = () => {
-    setIsEditing(false)
-    // Reset to original values
+  const handleSave = async () => {
+    try {
+      setIsSaving(true)
+      
+      const response = await fetch('/api/admin/settings/public', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings)
+      })
+      
+      if (!response.ok) throw new Error('Failed to save settings')
+      
+      const result = await response.json()
+      if (result.success) {
+        alert('Settings saved successfully!')
+      } else {
+        throw new Error('Failed to save settings')
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      alert('Failed to save settings. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchSettings()
+  }, [])
+
+  const tabs = [
+    { id: 'general', name: 'General', icon: Settings },
+    { id: 'notifications', name: 'Notifications', icon: Bell },
+    { id: 'security', name: 'Security', icon: Shield },
+    { id: 'system', name: 'System', icon: Database }
+  ]
+
+  const renderGeneralSettings = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
+            <input
+              type="text"
+              value={settings.businessName}
+              onChange={(e) => setSettings({...settings, businessName: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
+            <input
+              type="email"
+              value={settings.businessEmail}
+              onChange={(e) => setSettings({...settings, businessEmail: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Business Phone</label>
+            <input
+              type="tel"
+              value={settings.businessPhone}
+              onChange={(e) => setSettings({...settings, businessPhone: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
+            <input
+              type="text"
+              value={settings.businessAddress}
+              onChange={(e) => setSettings({...settings, businessAddress: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+        </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <select
+              value={settings.currency}
+              onChange={(e) => setSettings({...settings, currency: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="RWF">RWF - Rwandan Franc</option>
+              <option value="USD">USD - US Dollar</option>
+              <option value="EUR">EUR - Euro</option>
+            </select>
+      </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+            <select
+              value={settings.timezone}
+              onChange={(e) => setSettings({...settings, timezone: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="Africa/Kigali">Africa/Kigali</option>
+              <option value="UTC">UTC</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderNotificationSettings = () => (
+    <div className="space-y-6">
+        <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Notifications</h3>
+        <div className="space-y-4">
+          {[
+            { key: 'emailNotifications', label: 'Enable email notifications', description: 'Receive notifications via email' },
+            { key: 'orderNotifications', label: 'Order notifications', description: 'Get notified when new orders are placed' },
+            { key: 'customerNotifications', label: 'Customer notifications', description: 'Get notified when customers register' },
+            { key: 'marketingEmails', label: 'Marketing emails', description: 'Receive marketing and promotional emails' }
+          ].map((item) => (
+            <div key={item.key} className="flex items-center justify-between">
+          <div>
+                <p className="font-medium text-gray-900">{item.label}</p>
+                <p className="text-sm text-gray-600">{item.description}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings[item.key as keyof typeof settings] === 'true'}
+                  onChange={(e) => setSettings({...settings, [item.key]: e.target.checked ? 'true' : 'false'})}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderSecuritySettings = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Settings</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-gray-900">Two-Factor Authentication</p>
+              <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.twoFactorAuth === 'true'}
+                onChange={(e) => setSettings({...settings, twoFactorAuth: e.target.checked ? 'true' : 'false'})}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+            </div>
+
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
+                <input
+              type="number"
+              value={settings.sessionTimeout}
+              onChange={(e) => setSettings({...settings, sessionTimeout: parseInt(e.target.value)})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            </div>
+
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password Expiry (days)</label>
+                <input
+              type="number"
+              value={settings.passwordExpiry}
+              onChange={(e) => setSettings({...settings, passwordExpiry: parseInt(e.target.value)})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+        </div>
+      </div>
+            </div>
+  )
+
+  const renderSystemSettings = () => (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">System Settings</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-gray-900">Automatic Backup</p>
+              <p className="text-sm text-gray-600">Automatically backup your data</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.autoBackup === 'true'}
+                onChange={(e) => setSettings({...settings, autoBackup: e.target.checked ? 'true' : 'false'})}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+            </div>
+
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Backup Frequency</label>
+                <select
+              value={settings.backupFrequency}
+              onChange={(e) => setSettings({...settings, backupFrequency: e.target.value})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+                </select>
+            </div>
+
+            <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Log Retention (days)</label>
+                      <input
+              type="number"
+              value={settings.logRetention}
+              onChange={(e) => setSettings({...settings, logRetention: parseInt(e.target.value)})}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+                </div>
+          
+          <div className="flex items-center justify-between">
+                <div>
+              <p className="font-medium text-gray-900">Maintenance Mode</p>
+              <p className="text-sm text-gray-600">Put the system in maintenance mode</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.maintenanceMode === 'true'}
+                onChange={(e) => setSettings({...settings, maintenanceMode: e.target.checked ? 'true' : 'false'})}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  if (isLoading) {
+    return (
+      <div className="loading">
+        <div className="spinner"></div>
+        <p className="mt-4 text-gray-600">Loading settings...</p>
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4 sm:p-6 text-white">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Business Settings</h1>
-            <p className="text-purple-100 text-sm sm:text-lg">
-              Configure your business information and preferences
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Settings className="h-6 w-6" />
-            <span className="text-lg font-semibold">Configuration</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Settings Form */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Business Information</h2>
-          <div className="flex space-x-3">
-            {isEditing ? (
-              <>
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center space-x-2"
-                >
-                  {isSaving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      <span>Save Changes</span>
-                    </>
-                  )}
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-              >
-                <Settings className="h-4 w-4" />
-                <span>Edit Settings</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Business Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Store className="h-4 w-4 inline mr-2" />
-              Business Name
-            </label>
-            {isEditing ? (
-              <input
-                type="text"
-                value={settings.businessName}
-                onChange={(e) => setSettings(prev => ({ ...prev, businessName: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            ) : (
-              <p className="text-gray-900 font-medium">{settings.businessName}</p>
-            )}
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Phone className="h-4 w-4 inline mr-2" />
-              Phone Number
-            </label>
-            {isEditing ? (
-              <input
-                type="tel"
-                value={settings.phone}
-                onChange={(e) => setSettings(prev => ({ ...prev, phone: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            ) : (
-              <p className="text-gray-900 font-medium">{settings.phone}</p>
-            )}
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Mail className="h-4 w-4 inline mr-2" />
-              Email Address
-            </label>
-            {isEditing ? (
-              <input
-                type="email"
-                value={settings.email}
-                onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            ) : (
-              <p className="text-gray-900 font-medium">{settings.email}</p>
-            )}
-          </div>
-
-          {/* Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <MapPin className="h-4 w-4 inline mr-2" />
-              Business Address
-            </label>
-            {isEditing ? (
-              <input
-                type="text"
-                value={settings.address}
-                onChange={(e) => setSettings(prev => ({ ...prev, address: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            ) : (
-              <p className="text-gray-900 font-medium">{settings.address}</p>
-            )}
-          </div>
-
-          {/* Business Hours */}
-          <div className="lg:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Clock className="h-4 w-4 inline mr-2" />
-              Business Hours
-            </label>
-            {isEditing ? (
-              <textarea
-                value={settings.businessHours}
-                onChange={(e) => setSettings(prev => ({ ...prev, businessHours: e.target.value }))}
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            ) : (
-              <p className="text-gray-900 font-medium">{settings.businessHours}</p>
-            )}
-          </div>
-
-          {/* Currency */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Globe className="h-4 w-4 inline mr-2" />
-              Currency
-            </label>
-            {isEditing ? (
-              <select
-                value={settings.currency}
-                onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="RWF">Rwandan Franc (RWF)</option>
-                <option value="USD">US Dollar (USD)</option>
-                <option value="EUR">Euro (EUR)</option>
-              </select>
-            ) : (
-              <p className="text-gray-900 font-medium">{settings.currency}</p>
-            )}
-          </div>
-
-          {/* Payment Methods */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <CreditCard className="h-4 w-4 inline mr-2" />
-              Payment Methods
-            </label>
-            {isEditing ? (
-              <div className="space-y-2">
-                {['MoMo', 'BK', 'Cash on Delivery', 'Bank Transfer'].map((method) => (
-                  <label key={method} className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={settings.paymentMethods.includes(method)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSettings(prev => ({
-                            ...prev,
-                            paymentMethods: [...prev.paymentMethods, method]
-                          }))
-                        } else {
-                          setSettings(prev => ({
-                            ...prev,
-                            paymentMethods: prev.paymentMethods.filter(m => m !== method)
-                          }))
-                        }
-                      }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{method}</span>
-                  </label>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {settings.paymentMethods.map((method) => (
-                  <span
-                    key={method}
-                    className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full"
-                  >
-                    {method}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
+    <div className="space-y-6">
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          <button className="flex items-center justify-center p-3 sm:p-4 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors">
-            <Store className="h-5 w-5 mr-2" />
-            <span className="text-sm sm:text-base font-medium">Business Profile</span>
+      <div className="flex items-center justify-end">
+        <button 
+          onClick={handleSave} 
+          disabled={isSaving}
+          className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSaving ? (
+            <>
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </>
+          )}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="card">
+            <nav className="space-y-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg transition-colors ${
+                    activeTab === tab.id 
+                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  <span>{tab.name}</span>
           </button>
-          <button className="flex items-center justify-center p-3 sm:p-4 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors">
-            <CreditCard className="h-5 w-5 mr-2" />
-            <span className="text-sm sm:text-base font-medium">Payment Setup</span>
-          </button>
-          <button className="flex items-center justify-center p-3 sm:p-4 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
-            <Globe className="h-5 w-5 mr-2" />
-            <span className="text-sm sm:text-base font-medium">Localization</span>
-          </button>
+              ))}
+            </nav>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="lg:col-span-3">
+          <div className="card">
+            {activeTab === 'general' && renderGeneralSettings()}
+            {activeTab === 'notifications' && renderNotificationSettings()}
+            {activeTab === 'security' && renderSecuritySettings()}
+            {activeTab === 'system' && renderSystemSettings()}
+          </div>
         </div>
       </div>
     </div>

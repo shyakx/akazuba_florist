@@ -129,7 +129,7 @@ const CheckoutPage = () => {
       
       toast.success(`Order created successfully! Order #${result.order.orderNumber}`)
     clearCart()
-      router.push(`/orders/${result.order.id}`)
+      router.push(`/dashboard`)
     } catch (error) {
       console.error('Order creation error:', error)
       toast.error('Failed to create order. Please try again.')
@@ -345,7 +345,7 @@ const CheckoutPage = () => {
                             <li>Account Number: <strong>100161182448</strong></li>
                             <li>Bank: <strong>Bank of Kigali</strong></li>
                             <li>Amount: <strong>RWF {totalAmount.toLocaleString()}</strong></li>
-                            <li>Reference: <strong>Your Name + Order</strong></li>
+                            <li>Reference: <strong>Customer Name + Order ID</strong></li>
                           </ul>
                           <p className="mt-2 text-xs">
                             <strong>Alternative:</strong> Send the transfer receipt directly to Diane&apos;s WhatsApp: <strong>0784 5861 10</strong>

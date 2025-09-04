@@ -1,31 +1,64 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useAuth } from '@/contexts/RealAuthContext'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { useAuth } from '@/contexts/RealAuthContext'
+import { Eye, EyeOff, Lock, User, Flower2, Shield } from 'lucide-react'
 import toast from 'react-hot-toast'
+import '../admin-styles.css'
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [formData, setFormData] = useState({
+    username: '',
+    password: ''
+  })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  
-  const { login, isAuthenticated, user, isLoading: authLoading } = useAuth()
+  const [error, setError] = useState('')
   const router = useRouter()
+  const { adminLogin, isAuthenticated, user, isLoading: authLoading, isInitialized } = useAuth()
 
-  useEffect(() => {
-    if (isAuthenticated && user?.role === 'ADMIN') {
+  // Debug authentication states
+  console.log('🔍 Admin Login Debug:', {
+    isInitialized,
+    authLoading,
+    isAuthenticated,
+    userRole: user?.role,
+    userEmail: user?.email
+  })
+
+  // Redirect if already authenticated as admin - but only after initialization
+  React.useEffect(() => {
+    console.log('🔄 Admin Login useEffect triggered:', {
+      isInitialized,
+      isAuthenticated,
+      userRole: user?.role
+    })
+    
+    if (isInitialized && isAuthenticated && user?.role === 'ADMIN') {
+      console.log('✅ Admin user already authenticated, redirecting to admin panel...')
       router.push('/admin')
     }
-  }, [isAuthenticated, user, router])
+  }, [isAuthenticated, user, router, isInitialized])
+
+  // Show loading state while authentication is initializing
+  if (authLoading || !isInitialized) {
+    return (
+      <div className="admin-panel">
+        <div className="loading-state">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p>
+            {!isInitialized ? 'Initializing authentication...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!email || !password) {
+    if (!formData.username || !formData.password) {
       toast.error('Please fill in all fields')
       return
     }
@@ -33,129 +66,112 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     
     try {
-      const success = await login({ email, password })
+      // Use adminLogin from auth context
+      const success = await adminLogin({ username: formData.username, password: formData.password })
       
-      if (success && user?.role === 'ADMIN') {
+      if (success) {
         toast.success('Login successful!')
-        router.push('/admin')
+        // Redirect will happen automatically via useEffect
       } else {
         toast.error('Access denied. Admin privileges required.')
       }
-    } catch (error) {
-      console.error('Login error:', error)
-      toast.error('Login failed. Please check your credentials.')
+    } catch (error: any) {
+      console.error('Admin login error:', error)
+      toast.error(error.message || 'Login failed. Please check your credentials.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (isAuthenticated && user?.role === 'ADMIN') {
-    return null
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Admin Login
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Access the Akazuba Florist admin panel
-          </p>
-        </div>
+    <div className="admin-panel">
+      <div className="admin-login-container">
+        {/* Login Card */}
+        <div className="admin-login-card">
+          {/* Header */}
+          <div className="admin-login-header">
+            <div className="admin-login-logo">
+              <Flower2 className="w-12 h-12 text-pink-500" />
+              <h1>Akazuba Florist</h1>
+            </div>
+            <h2>Admin Login</h2>
+            <p>Access the admin panel to manage your business</p>
+          </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="admin-login-form">
+            <div className="form-group">
+              <label htmlFor="username">
+                <User className="w-4 h-4" />
+                Username
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
+              <div className="input-with-icon">
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="username"
+                  name="username"
+                  type="text"
+                  autoComplete="username"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none relative block w-full pl-10 pr-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="admin@akazuba.com"
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  placeholder="Enter your username"
+                  className="pl-10"
                 />
+                <User className="input-icon" />
               </div>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <div className="form-group">
+              <label htmlFor="password">
+                <Lock className="w-4 h-4" />
                 Password
               </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
+              <div className="input-with-icon">
                 <input
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none relative block w-full pl-10 pr-12 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   placeholder="Enter your password"
+                  className="pl-10"
                 />
+                <Lock className="input-icon" />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
+                  className="password-toggle"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Signing in...
-                </div>
-              ) : (
-                'Sign in to Admin Panel'
-              )}
-            </button>
-          </div>
-        </form>
+            <div className="form-actions">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn btn-primary w-full"
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Signing in...
+                  </div>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </div>
+          </form>
 
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Only authorized administrators can access this panel
-          </p>
+          {/* Security Notice */}
+          <div className="admin-login-security">
+            <Shield className="w-5 h-5 text-gray-400" />
+            <p>This is a secure admin-only area. Unauthorized access attempts will be logged.</p>
+          </div>
         </div>
       </div>
     </div>

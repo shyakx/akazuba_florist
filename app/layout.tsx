@@ -9,6 +9,7 @@ import { WishlistProvider } from '@/contexts/WishlistContext'
 import { ProductsProvider } from '@/contexts/ProductsContext'
 import Header from '@/components/Header'
 import ConditionalHeader from '@/components/ConditionalHeader'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -33,19 +34,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          <ProductsProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <ConditionalHeader />
-                <main className="pt-32 admin-padding">
-                  {children}
-                </main>
-                <Toaster position="top-right" />
-              </WishlistProvider>
-            </CartProvider>
-          </ProductsProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <ProductsProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  <ConditionalHeader />
+                  <main className="pt-32">
+                    {children}
+                  </main>
+                  <Toaster position="top-right" />
+                </WishlistProvider>
+              </CartProvider>
+            </ProductsProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

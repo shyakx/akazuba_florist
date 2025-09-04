@@ -18,8 +18,8 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
   const [generalSettings, setGeneralSettings] = useState({
     shopName: 'Akazuba Florist',
     tagline: 'Rwanda\'s premier floral destination',
-    contactEmail: 'hello@akazubaflorist.com',
-    phoneNumber: '+250 784 586 110',
+    contactEmail: 'info.akazubaflorist@gmail.com',
+    phoneNumber: '0784586110',
     address: 'Kigali, Rwanda',
     businessHours: 'Mon - Sat: 8:00 AM - 8:00 PM',
     sundayHours: 'Sunday: 10:00 AM - 4:00 PM'
@@ -27,7 +27,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
 
   // Payment Settings
   const [paymentSettings, setPaymentSettings] = useState({
-    momoAccountNumber: '0784 5861 10',
+    momoAccountNumber: '0784586110',
     momoAccountName: 'Umwali Diane',
     bkAccountNumber: '100161182448',
     bkAccountName: 'Umwali Diane',
@@ -60,7 +60,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
     instagram: 'https://www.instagram.com/akazuba_florists',
     facebook: '',
     twitter: '',
-    whatsapp: '+250784586110'
+    whatsapp: '0784586110'
   })
 
   const handleGeneralSettingsChange = (field: string, value: string) => {
@@ -423,7 +423,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                           setAboutContent(prev => ({ ...prev, stats: newStats }))
                         }}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                        placeholder="Value"
+                        placeholder="Enter value"
                       />
                       <input
                         type="text"
@@ -434,7 +434,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                           setAboutContent(prev => ({ ...prev, stats: newStats }))
                         }}
                         className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                        placeholder="Label"
+                        placeholder="Enter label"
                       />
                     </div>
                   ))}
@@ -455,7 +455,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                     value={socialMedia.instagram}
                     onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="https://instagram.com/..."
+                    placeholder="https://instagram.com/akazuba_florists"
                   />
                 </div>
                 
@@ -466,7 +466,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                     value={socialMedia.facebook}
                     onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="https://facebook.com/..."
+                    placeholder="https://facebook.com/akazubaflorist"
                   />
                 </div>
                 
@@ -477,7 +477,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                     value={socialMedia.twitter}
                     onChange={(e) => handleSocialMediaChange('twitter', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="https://twitter.com/..."
+                    placeholder="https://twitter.com/akazubaflorist"
                   />
                 </div>
                 
@@ -488,7 +488,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                     value={socialMedia.whatsapp}
                     onChange={(e) => handleSocialMediaChange('whatsapp', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="+250..."
+                    placeholder="0784586110"
                   />
                 </div>
               </div>

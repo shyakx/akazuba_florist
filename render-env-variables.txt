@@ -5,40 +5,35 @@
 NODE_ENV=production
 PORT=10000
 DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a/akazuba_florist
-JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
+JWT_SECRET=ePEjU/59G45QozOIFHr1k/C+iPDkoVKT61QbZxYtqEQ=
 CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 
 # Cloudinary Configuration (for image uploads)
-CLOUDINARY_CLOUD_NAME=akazuba-florist
-CLOUDINARY_API_KEY=your-cloudinary-api-key-here
-CLOUDINARY_API_SECRET=your-cloudinary-api-secret-here
+CLOUDINARY_CLOUD_NAME=dkhac7xh2
+CLOUDINARY_API_KEY=194878579547962
+CLOUDINARY_API_SECRET=wZbXGj1VgByURl-VxRJ25CPcVVs
 
 # Email Configuration (Gmail SMTP)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=akazuba.florist@gmail.com
-SMTP_PASS=your-gmail-app-password-here
+SMTP_USER=info.akazubaflorist@gmail.com
+SMTP_PASS=jugo hasc bepe zdeh
 
 # Redis Configuration (for caching)
-REDIS_URL=redis://localhost:6379
+REDIS_URL=redis://default:YF7BaUSjbRCq8xKYWOFrbGZ8k6ylyRka@redis-14974.c9.us-east-1-4.ec2.redns.redis-cloud.com:14974
 
-# Payment Configuration (Mobile Money)
-MOMO_API_KEY=your-momo-api-key-here
-MOMO_API_SECRET=your-momo-api-secret-here
-MOMO_ENVIRONMENT=sandbox
-
-# Flutterwave Configuration (Bank Transfers)
-FLUTTERWAVE_PUBLIC_KEY=your-flutterwave-public-key-here
-FLUTTERWAVE_SECRET_KEY=your-flutterwave-secret-key-here
+# Payment Configuration (Local Payment with Proof Upload)
+# Users will pay locally and upload proof of payment
+# No API keys needed - only file upload for payment proof
 
 # SendGrid Configuration (Email Service)
-SENDGRID_API_KEY=your-sendgrid-api-key-here
-SENDGRID_FROM_EMAIL=noreply@akazubaflorist.com
+SENDGRID_API_KEY=fe64608c0325e89e27562ded5bb26046b28d044f8688cea1053e375f3b27cd57
+SENDGRID_FROM_EMAIL=info.akazubaflorist@gmail.com
 SENDGRID_FROM_NAME=Akazuba Florist
 
 # JWT Configuration
 JWT_EXPIRES_IN=7d
-JWT_REFRESH_SECRET=akazuba-refresh-secret-2024-production
+JWT_REFRESH_SECRET=Xoan1HrOMCvIaPm0OxDKpzML/wAoPfo54iqFu/cn6gg=
 JWT_REFRESH_EXPIRES_IN=30d
 
 # File Upload Configuration

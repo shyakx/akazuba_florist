@@ -2,7 +2,7 @@
 
 A modern, responsive e-commerce website for Akazuba Florist, offering beautiful flower arrangements and bouquets in Rwanda.
 
-**Latest Update**: Backend deployment fixed, image loading issues resolved, automatic database seeding implemented, and API/CORS configuration fixed for production.
+ to start a fresh **Latest Update**: 🚀 **PRODUCTION READY** - All localhost dependencies removed, completely configured for production deployment. Ready to go live!
 
 ## 🚀 Live Site
 
@@ -48,16 +48,22 @@ A modern, responsive e-commerce website for Akazuba Florist, offering beautiful 
 - **Database**: Render PostgreSQL
 - **Build Process**: Automatic deployment via GitHub
 
-## 🚀 **Quick Start**
+## 🚀 **Production Deployment**
 
-### **Prerequisites**
-- Node.js 18+ and npm
-- Git
+### **Status**: 🟢 **READY FOR PRODUCTION**
 
-### **Installation**
-   ```bash
+Your Akazuba Florist platform is **100% production-ready** with no localhost dependencies. All configurations are optimized for production deployment.
+
+### **Quick Deploy**
+1. **Backend**: Deploy to Render using `backend/render.yaml`
+2. **Frontend**: Deploy to Vercel using `vercel.json`
+3. **Database**: Set up production PostgreSQL
+4. **Go Live**: Your e-commerce platform will be fully operational
+
+### **For Development (Optional)**
+```bash
 # Clone the repository
-   git clone <repository-url>
+git clone <repository-url>
 cd akazuba-florist
 
 # Install dependencies
@@ -134,7 +140,7 @@ akazuba-florist/
 cp env.example .env.local
 
 # Configure environment variables
-NEXT_PUBLIC_API_URL=http://localhost:3000/api/backend
+NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 NODE_ENV=development
 ```
 
@@ -173,9 +179,13 @@ For detailed deployment instructions, see [DEPLOYMENT.md](./DEPLOYMENT.md)
 ## 📞 **Support**
 
 For technical support or questions:
-- **Email**: info@akazuba.rw
-- **Phone**: +250 784 586 110
+- **Email**: info.akazubaflorist@gmail.com
+- **Phone**: 0784586110
 - **Location**: Kigali, Rwanda
+
+**Admin Access:**
+- **Primary Admin**: admin@akazubaflorist.com (password: akazuba2024)
+- **Info Admin**: info.akazubaflorist@gmail.com (password: akazuba2024)
 
 ## 📄 **License**
 

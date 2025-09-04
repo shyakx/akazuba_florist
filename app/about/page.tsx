@@ -216,7 +216,7 @@ const AboutPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Phone</h3>
-                    <p className="text-gray-600">+250 784 586 110</p>
+                    <p className="text-gray-600">0784586110</p>
                   </div>
                 </div>
                 
@@ -226,7 +226,7 @@ const AboutPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-600">hello@akazubaflorist.com</p>
+                    <p className="text-gray-600">info.akazubaflorist@gmail.com</p>
                   </div>
                 </div>
                 
@@ -250,7 +250,7 @@ const AboutPage = () => {
                   <input
                     type="text"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="Your name"
+                    placeholder="Enter your full name"
                   />
                 </div>
                 <div>
@@ -258,7 +258,7 @@ const AboutPage = () => {
                   <input
                     type="email"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="your@email.com"
+                    placeholder="info.akazubaflorist@gmail.com"
                   />
                 </div>
                 <div>
@@ -266,7 +266,7 @@ const AboutPage = () => {
                   <textarea
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="Your message..."
+                    placeholder="Tell us about your floral needs..."
                   ></textarea>
                 </div>
                                  <button type="submit" className="w-full bg-pink-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-pink-700 transition-all duration-300">

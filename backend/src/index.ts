@@ -20,6 +20,7 @@ import orderRoutes from './routes/orders'
 import wishlistRoutes from './routes/wishlist'
 import adminRoutes from './routes/admin'
 import paymentRoutes from './routes/payments'
+import uploadRoutes from './routes/upload'
 // MoMo routes removed - using simplified payment methods
 import { errorHandler } from './middleware/errorHandler'
 import { logger } from './utils/logger'
@@ -117,36 +118,25 @@ app.use(helmet({
   }
 }))
 
-// CORS configuration - Production and Development
+// CORS configuration - Production Only
 const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
     
-    // Define allowed origins based on environment
+    // Define production origins only - no localhost dependencies
     const productionOrigins = [
       'https://online-shopping-by-diane.vercel.app',
       'https://akazuba-florist.vercel.app',
       process.env.FRONTEND_URL
     ].filter((url): url is string => Boolean(url))
     
-    const developmentOrigins = [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-      'http://127.0.0.1:3002'
-    ]
-    
-    // Use production origins only in production, allow development origins in other environments
-    const allowedOrigins = process.env.NODE_ENV === 'production' 
-      ? productionOrigins 
-      : [...productionOrigins, ...developmentOrigins]
+    // In production, only allow production origins
+    const allowedOrigins = productionOrigins
     
     console.log('🔍 CORS Check:')
     console.log('  - Origin:', origin)
-    console.log('  - Environment:', process.env.NODE_ENV || 'development')
+    console.log('  - Environment:', process.env.NODE_ENV || 'production')
     console.log('  - Allowed origins:', allowedOrigins)
     
     // Check if origin is in allowed list
@@ -156,8 +146,8 @@ const corsOptions = {
     } else {
       console.log('🚫 CORS blocked origin:', origin)
       console.log('✅ Allowed origins:', allowedOrigins)
-      console.log('🌍 Environment:', process.env.NODE_ENV || 'development')
-      callback(new Error('Not allowed by CORS'))
+      console.log('🌍 Environment:', process.env.NODE_ENV || 'production')
+      callback(new Error('Not allowed by CORS - Production origins only'))
     }
   },
   credentials: true,
@@ -188,13 +178,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Backend - CORS FIXED - Development Mode Enabled!',
+    message: 'Akazuba Backend - Production Ready - CORS Production Only',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
+    environment: process.env.NODE_ENV || 'production',
     database: 'connected',
-    cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
-    version: '2.0.1',
-    corsEnabled: true
+    cors: 'production-only',
+    version: '2.0.2',
+    corsEnabled: true,
+    productionMode: true
   })
 })
 
@@ -217,6 +208,7 @@ app.use('/api/v1/orders', orderRoutes)
 app.use('/api/v1/wishlist', wishlistRoutes)
 app.use('/api/v1/admin', adminRoutes)
 app.use('/api/v1/payments', paymentRoutes)
+app.use('/api/v1/upload', uploadRoutes)
 
 // Error handling middleware
 app.use(errorHandler)

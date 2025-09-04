@@ -122,7 +122,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   }
 }
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     total: 0,
@@ -130,12 +130,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading: false
   })
   const { isAuthenticated, user } = useAuth()
-  const { getBackendProductId } = useProducts()
   const router = useRouter()
 
   // Load cart from backend when user is authenticated
   useEffect(() => {
+    // Only proceed if we're in the browser and have authentication state
+    if (typeof window === 'undefined') return
+    
     if (isAuthenticated && user) {
+      // Only refresh cart if we have a valid user and authentication
       refreshCart()
     } else {
       // Clear cart when user is not authenticated
@@ -144,13 +147,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isAuthenticated, user])
 
   const refreshCart = async () => {
-    if (!isAuthenticated) return
+    // Early return if not authenticated or no user
+    if (!isAuthenticated || !user) {
+      console.log('Cart refresh skipped - user not authenticated')
+      return
+    }
     
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       
-      // Add a small delay to ensure token is available
-      await new Promise(resolve => setTimeout(resolve, 100))
+      // Check if we have a valid token before making the API call
+      const token = localStorage.getItem('accessToken')
+      if (!token) {
+        console.log('Cart refresh skipped - no access token')
+        dispatch({ type: 'LOAD_CART', payload: [] })
+        return
+      }
       
       const response = await cartAPI.getCart()
       

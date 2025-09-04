@@ -86,7 +86,7 @@ export default function PublicLanding() {
                 <Phone className="h-6 w-6 text-pink-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Call Us</h3>
-              <p className="text-gray-600">+250 788 123 456</p>
+                             <p className="text-gray-600">0784586110</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -100,7 +100,7 @@ export default function PublicLanding() {
                 <Mail className="h-6 w-6 text-pink-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Email Us</h3>
-              <p className="text-gray-600">info@akazuba.rw</p>
+                              <p className="text-gray-600">info.akazubaflorist@gmail.com</p>
             </div>
           </div>
         </div>

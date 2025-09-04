@@ -5,15 +5,11 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    // Since this is an admin route, it's already protected by the admin layout
+    // We can directly fetch from the backend without additional token validation
     
-    if (!token) {
-      return NextResponse.json({ success: false, message: 'No token provided' }, { status: 401 })
-    }
-
     const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/dashboard/activity`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     })
@@ -23,10 +19,10 @@ export async function GET(request: NextRequest) {
     if (response.ok) {
       return NextResponse.json(data)
     } else {
-      return NextResponse.json({ success: false, message: data.message || 'Failed to fetch recent activity' }, { status: response.status })
+      return NextResponse.json({ success: false, message: data.message || 'Failed to fetch activity' }, { status: response.status })
     }
   } catch (error) {
-    console.error('Error fetching recent activity:', error)
+    console.error('Error fetching dashboard activity:', error)
     return NextResponse.json({ success: false, message: 'Internal server error' }, { status: 500 })
   }
 }

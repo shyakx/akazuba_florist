@@ -14,7 +14,7 @@ This application is configured to use the production backend by default for imme
 ### Development Override (Optional)
 To use local backend during development, set:
 ```bash
-NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 ```
 
 ## Environment Variables
@@ -22,7 +22,7 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
 ### Optional: Explicit API URL Override
 You can override the automatic detection by setting:
 ```bash
-NEXT_PUBLIC_API_URL=https://your-custom-backend.com/api/v1
+NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 ```
 
 ### Development Setup
@@ -39,7 +39,7 @@ NEXT_PUBLIC_API_URL=https://your-custom-backend.com/api/v1
 
 3. **Verify Backend Health**:
    ```bash
-   curl http://localhost:5000/health
+   curl https://akazuba-backend-api.onrender.com/health
    ```
 
 ### Production Deployment
@@ -59,7 +59,7 @@ The application automatically uses the production backend when deployed:
 
 ### CORS Issues in Development
 - Ensure backend is running on port 5000
-- Check backend CORS configuration allows localhost:3000
+- Check backend CORS configuration allows your production domain
 - Verify backend health endpoint responds
 
 ### Production Issues
@@ -69,6 +69,6 @@ The application automatically uses the production backend when deployed:
 
 ## Backend CORS Configuration
 The backend is configured to allow:
-- `http://localhost:3000` (development)
+- `https://online-shopping-by-diane.vercel.app` (production)
 - `https://online-shopping-by-diane.vercel.app` (production)
 - `https://online-shopping-by-diane-git-main-steven-shyakas-projects.vercel.app` (preview deployments)

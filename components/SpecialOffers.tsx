@@ -169,7 +169,7 @@ const SpecialOffers = () => {
             <div className="flex gap-3">
               <input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="info.akazubaflorist@gmail.com"
                 className="flex-1 px-4 py-3 rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/50"
               />
               <button className="bg-white text-pink-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">

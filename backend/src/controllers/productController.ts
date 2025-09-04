@@ -8,7 +8,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
   try {
     const {
       page = 1,
-      limit = 10,
+      limit,
       category,
       search,
       minPrice,
@@ -17,8 +17,9 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       inStock
     } = req.query
 
-    const pageNum = parseInt(page as string)
-    const limitNum = parseInt(limit as string)
+    const pageNum = parseInt(page as string) || 1
+    // If no limit specified or limit is invalid, get all products
+    const limitNum = limit ? (parseInt(limit as string) || 1000) : 1000
     const skip = (pageNum - 1) * limitNum
 
     // Build where clause
@@ -62,7 +63,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       include: {
         category: true
       },
-      skip,
+      skip: limitNum === 1000 ? 0 : skip, // Skip pagination if getting all products
       take: limitNum,
       orderBy: {
         createdAt: 'desc'

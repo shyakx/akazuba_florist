@@ -1,6 +1,8 @@
 // API Service Layer for Akazuba Florist
 // Connects Next.js frontend with Express backend
 
+import { Product } from '@/types'
+
 // Types
 export interface User {
   id: string
@@ -27,29 +29,7 @@ export interface Category {
   updatedAt: string
 }
 
-export interface Product {
-  id: string
-  name: string
-  slug: string
-  description?: string
-  shortDescription?: string
-  price: number
-  salePrice?: number
-  costPrice?: number
-  sku?: string
-  stockQuantity: number
-  minStockAlert: number
-  categoryId: string
-  images?: string[]
-  isActive: boolean
-  isFeatured: boolean
-  weight?: number
-  dimensions?: { length: number; width: number; height: number }
-  tags?: string[]
-  createdAt: string
-  updatedAt: string
-  category?: Category
-}
+
 
 export interface CartItem {
   id: string
@@ -136,12 +116,32 @@ export interface ApiResponse<T> {
   error?: string
 }
 
-// Utility function to get auth token
 const getAuthToken = (): string | null => {
   if (typeof window !== 'undefined') {
     return localStorage.getItem('accessToken')
   }
   return null
+}
+
+// Consolidated API base URL function
+const getApiBaseUrl = (): string => {
+  // Check if we're in the browser
+  if (typeof window === 'undefined') {
+    // Server-side rendering - use environment variable
+    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+  }
+
+  // Client-side - check current hostname
+  const hostname = window.location.hostname
+  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  
+  if (isLocalhost) {
+    // Development - use localhost
+    return 'http://localhost:5000/api/v1'
+  } else {
+    // Production - use environment variable or production URL
+    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+  }
 }
 
 // Base API request function with proper production handling
@@ -150,30 +150,7 @@ const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> => {
   const token = getAuthToken()
-  
-  // Use local backend for development, deployed backend for production
-  const API_BASE_URL_ACTUAL = (() => {
-    // Check if we're in the browser
-    if (typeof window === 'undefined') {
-      // Server-side rendering - use environment variable
-      return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
-    }
-
-    // Client-side - check current hostname
-    const hostname = window.location.hostname
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
-    
-    if (isLocalhost) {
-      // Development - use localhost
-      console.log('🔧 Using localhost API for development')
-      return 'http://localhost:5000/api/v1'
-    } else {
-      // Production - use environment variable or production URL
-      const productionUrl = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
-      console.log('🔧 Using production API:', productionUrl)
-      return productionUrl
-    }
-  })()
+  const API_BASE_URL = getApiBaseUrl()
 
   const config: RequestInit = {
     headers: {
@@ -185,60 +162,49 @@ const apiRequest = async <T>(
   }
 
   try {
-    console.log('🌐 Making API request to:', `${API_BASE_URL_ACTUAL}${endpoint}`)
-    console.log('🔑 Token:', token ? 'Present' : 'Missing')
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
     
-    const response = await fetch(`${API_BASE_URL_ACTUAL}${endpoint}`, config)
-    console.log('📡 Response status:', response.status)
-    
-    const data = await response.json()
-    console.log('📥 Response data:', data)
-
     if (!response.ok) {
-      console.error('❌ API request failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        data: data
-      })
+      const data = await response.json()
       throw new Error(data.message || data.error || 'API request failed')
     }
 
-            // Transform backend response to match frontend expectations
-        if (data.user && (data.accessToken || data.token)) {
-          // Login/Register response - handle both accessToken and token
-          const token = data.accessToken || data.token
-          return {
-            success: true,
-            message: data.message || 'Success',
-            data: {
-              user: data.user,
-              accessToken: token,
-              refreshToken: data.refreshToken
-            }
-          } as ApiResponse<T>
-        } else if (data.user && !data.accessToken && !data.token) {
-          // Profile response
-          return {
-            success: true,
-            message: 'Profile retrieved successfully',
-            data: {
-              user: data.user
-            }
-          } as ApiResponse<T>
-        } else if (data.success && data.data) {
-          // Backend already returns { success: true, data: [...] } format
-          return data as ApiResponse<T>
-        } else {
-          // Other responses
-          return {
-            success: true,
-            message: data.message || 'Success',
-            data: data
-          } as ApiResponse<T>
-        }
-  } catch (error: any) {
-    console.error('API Error:', error)
+    const data = await response.json()
 
+    // Transform backend response to match frontend expectations
+    if (data.user && (data.accessToken || data.token)) {
+      // Login/Register response - handle both accessToken and token
+      const token = data.accessToken || data.token
+      return {
+        success: true,
+        message: data.message || 'Success',
+        data: {
+          user: data.user,
+          accessToken: token,
+          refreshToken: data.refreshToken
+        }
+      } as ApiResponse<T>
+    } else if (data.user && !data.accessToken && !data.token) {
+      // Profile response
+      return {
+        success: true,
+        message: 'Profile retrieved successfully',
+        data: {
+          user: data.user
+        }
+      } as ApiResponse<T>
+    } else if (data.success && data.data) {
+      // Backend already returns { success: true, data: [...] } format
+      return data as ApiResponse<T>
+    } else {
+      // Other responses
+      return {
+        success: true,
+        message: data.message || 'Success',
+        data: data
+      } as ApiResponse<T>
+    }
+  } catch (error: any) {
     if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
       throw new Error('Network error. Unable to connect to backend server.')
     }
@@ -324,6 +290,40 @@ export const authAPI = {
       body: JSON.stringify(data),
     })
   },
+
+  // Utility functions for validation
+  utils: {
+    // Validate email format
+    validateEmail: (email: string): boolean => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      return emailRegex.test(email)
+    },
+
+    // Validate password strength
+    validatePassword: (password: string): { isValid: boolean; message: string } => {
+      if (password.length < 8) {
+        return { isValid: false, message: 'Password must be at least 8 characters long' }
+      }
+      
+      if (!/(?=.*[a-z])/.test(password)) {
+        return { isValid: false, message: 'Password must contain at least one lowercase letter' }
+      }
+      
+      if (!/(?=.*[A-Z])/.test(password)) {
+        return { isValid: false, message: 'Password must contain at least one uppercase letter' }
+      }
+      
+      if (!/(?=.*\d)/.test(password)) {
+        return { isValid: false, message: 'Password must contain at least one number' }
+      }
+      
+      if (!/(?=.*[@$!%*?&])/.test(password)) {
+        return { isValid: false, message: 'Password must contain at least one special character (@$!%*?&)' }
+      }
+      
+      return { isValid: true, message: 'Password is strong' }
+    }
+  }
 }
 
 // User API
@@ -519,33 +519,17 @@ export const apiUtils = {
   // Get stored user
   getStoredUser: (): User | null => {
     if (typeof window !== 'undefined') {
-      // First try localStorage
+      // Only try localStorage - cookies are for middleware only
       const userStr = localStorage.getItem('user')
       if (userStr) {
-        return JSON.parse(userStr)
-      }
-      
-      // Fallback to cookies for user role
-      const cookies = document.cookie.split(';')
-      const userRoleCookie = cookies.find(cookie => cookie.trim().startsWith('userRole='))
-      if (userRoleCookie) {
-        const role = userRoleCookie.split('=')[1]
-        // Create a basic user object from cookie data
-        const user: User = {
-          id: 'cookie-user',
-          email: 'admin@akazubaflorist.com', // Default email
-          firstName: 'Admin',
-          lastName: 'User',
-          role: role as 'ADMIN' | 'CUSTOMER',
-          phone: '',
-          isActive: true,
-          emailVerified: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+        try {
+          return JSON.parse(userStr)
+        } catch (error) {
+          console.error('Error parsing stored user:', error)
+          // Clear corrupted user data
+          localStorage.removeItem('user')
+          return null
         }
-        // Store in localStorage for consistency
-        localStorage.setItem('user', JSON.stringify(user))
-        return user
       }
     }
     return null

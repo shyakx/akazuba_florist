@@ -86,8 +86,8 @@ const PrivacyPage = () => {
     {
       icon: Phone,
       label: 'Phone',
-      value: '+250 784 586 110',
-      href: 'tel:+250784586110'
+              value: '0784586110',
+              href: 'tel:0784586110'
     }
   ]
 

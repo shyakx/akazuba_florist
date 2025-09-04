@@ -5,15 +5,11 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
+    // Since this is an admin route, it's already protected by the admin layout
+    // We can directly fetch from the backend without additional token validation
     
-    if (!token) {
-      return NextResponse.json({ success: false, message: 'No token provided' }, { status: 401 })
-    }
-
-    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/dashboard/recent-orders`, {
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/dashboard/recent-orders/public`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     })

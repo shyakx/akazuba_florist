@@ -1,77 +1,130 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useProducts } from '@/contexts/ProductsContext'
+import { Product } from '@/types'
 
-export default function TestAPIPage() {
-  const [apiInfo, setApiInfo] = useState<any>(null)
-  const [testResult, setTestResult] = useState<string>('')
+const TestAPIPage = () => {
+  const { products, isLoading, error, loadProducts } = useProducts()
+  const [apiTest, setApiTest] = useState<any>(null)
 
+  // Test the API directly
   useEffect(() => {
-    // Test the API URL logic
     const testAPI = async () => {
       try {
-        // Simulate the API request logic
-        const hostname = window.location.hostname
-        const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')
-        
-        const baseUrl = isLocalhost ? 'http://localhost:5000/api/v1' : 'https://akazuba-backend-api.onrender.com/api/v1'
-        
-        setApiInfo({
-          hostname,
-          isLocalhost,
-          baseUrl,
-          fullUrl: `${baseUrl}/auth/login`
-        })
-
-        // Test the actual API call
-        const response = await fetch(`${baseUrl}/health`)
-        if (response.ok) {
-          const data = await response.json()
-          setTestResult(`✅ API Test Successful: ${JSON.stringify(data, null, 2)}`)
-        } else {
-          setTestResult(`❌ API Test Failed: ${response.status} ${response.statusText}`)
-        }
+        const response = await fetch('http://localhost:5000/api/v1/products?limit=10')
+        const data = await response.json()
+        setApiTest(data)
+        console.log('🔍 API Test Response:', data)
       } catch (error: any) {
-        setTestResult(`❌ API Test Error: ${error.message}`)
+        console.error('❌ API Test Error:', error)
+        setApiTest({ error: error.message })
       }
     }
 
     testAPI()
   }, [])
 
+  if (isLoading) {
+    return <div className="p-8">Loading products from context...</div>
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">API URL Test Page</h1>
-        
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">API Configuration Info</h2>
-          {apiInfo && (
-            <div className="space-y-2 text-sm">
-              <div><strong>Hostname:</strong> {apiInfo.hostname}</div>
-              <div><strong>Is Localhost:</strong> {apiInfo.isLocalhost ? 'Yes' : 'No'}</div>
-              <div><strong>Base URL:</strong> {apiInfo.baseUrl}</div>
-              <div><strong>Full Login URL:</strong> {apiInfo.fullUrl}</div>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-6">API Test Page</h1>
+      
+      {/* Products from Context */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Products from Context</h2>
+          <button 
+            onClick={() => {
+              console.log('🔄 Manual refresh triggered')
+              loadProducts()
+            }}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            🔄 Refresh Products
+          </button>
+        </div>
+        <div className="bg-gray-100 p-4 rounded">
+          <p><strong>Total Products:</strong> {products?.length || 0}</p>
+          <p><strong>Loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
+          <p><strong>Error:</strong> {error || 'None'}</p>
+          {products && products.length > 0 && (
+            <div className="mt-4">
+              <p><strong>Sample Products:</strong></p>
+              <ul className="list-disc list-inside text-sm">
+                {products.slice(0, 5).map(product => (
+                  <li key={product.id}>
+                    {product.name} - {product.categoryName || 'No Category'} - {product.type}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
+      </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">API Test Result</h2>
-          <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto">
-            {testResult || 'Testing...'}
-          </pre>
-        </div>
-
-        <div className="mt-6 text-center">
-          <a 
-            href="/login" 
-            className="inline-block bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors"
-          >
-            Test Login Page
-          </a>
+      {/* Direct API Test */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Direct API Test</h2>
+        <div className="bg-gray-100 p-4 rounded">
+          {apiTest ? (
+            <div>
+              <p><strong>API Response:</strong></p>
+              <p><strong>Success:</strong> {apiTest.success ? 'Yes' : 'No'}</p>
+              <p><strong>Total Products:</strong> {apiTest.data?.length || 0}</p>
+              <p><strong>Pagination:</strong> {JSON.stringify(apiTest.pagination)}</p>
+              <pre className="text-xs bg-white p-2 rounded overflow-auto">
+                {JSON.stringify(apiTest, null, 2)}
+              </pre>
+            </div>
+          ) : (
+            <p>Testing API...</p>
+          )}
         </div>
       </div>
+
+      {/* Category Breakdown */}
+      {products && products.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Category Breakdown</h2>
+          <div className="bg-gray-100 p-4 rounded">
+            {(() => {
+              const categories = products.reduce((acc, product) => {
+                const cat = product.categoryName || 'Unknown'
+                acc[cat] = (acc[cat] || 0) + 1
+                return acc
+              }, {} as Record<string, number>)
+              
+              return (
+                <ul className="list-disc list-inside">
+                  {Object.entries(categories).map(([category, count]) => (
+                    <li key={category}>
+                      <strong>{category}:</strong> {count} products
+                    </li>
+                  ))}
+                </ul>
+              )
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Raw Products Data */}
+      {products && products.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Raw Products Data (First 3)</h2>
+          <div className="bg-gray-100 p-4 rounded">
+            <pre className="text-xs bg-white p-2 rounded overflow-auto">
+              {JSON.stringify(products.slice(0, 3), null, 2)}
+            </pre>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+
+export default TestAPIPage

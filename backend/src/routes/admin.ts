@@ -1273,8 +1273,8 @@ router.get('/settings', authenticateToken, async (req, res) => {
     // In a real application, you would store settings in the database
     const settings = {
       storeName: 'Akazuba Florist',
-      storeEmail: 'info@akazubaflorist.com',
-      storePhone: '+250 784 586 110',
+              storeEmail: 'info.akazubaflorist@gmail.com',
+              storePhone: '0784586110',
       storeAddress: 'Kigali, Rwanda',
       minOrderAmount: 5000,
       deliveryFee: 1000,

@@ -16,7 +16,7 @@ interface NavigationItem {
 const Header = () => {
   const { state: cartState } = useCart()
   const { user, isAuthenticated, logout } = useAuth()
-  const { itemCount: wishlistItemCount } = useWishlist()
+  const { items: wishlistItems } = useWishlist()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
@@ -30,7 +30,8 @@ const Header = () => {
     // Create navigation items
     const navigation: NavigationItem[] = [
       { name: 'Home', href: '/' },
-      { name: 'Products', href: '/products' },
+      { name: 'Products', href: '/products' }, // Updated to new clean page
+      { name: 'Categories', href: '/categories' },
     ]
 
     // Add flower types that have multiple products (2+ items)
@@ -83,12 +84,19 @@ const Header = () => {
   }
 
   // Generate navigation and store it in a variable
-  const navigation = generateNavigation()
+  const navigation = [
+    { name: 'Home', href: '/' },
+    { name: 'Products', href: '/products' }, // Updated to new clean page
+    { name: 'Categories', href: '/categories' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' }
+  ]
 
   // Fallback navigation if no real flower data
   const fallbackNavigation: NavigationItem[] = [
     { name: 'Home', href: '/' },
     { name: 'Products', href: '/products' },
+    { name: 'Categories', href: '/categories' },
     { name: 'Roses', href: '/category/roses' },
     { name: 'Tulips', href: '/category/tulips' },
     { name: 'Bouquets', href: '/category/mixed' },
@@ -137,12 +145,12 @@ const Header = () => {
       <div className="bg-green-600 text-white py-2 px-4 text-sm">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <span>🚚 Free delivery in Kigali</span>
-            <span>🌸 Fresh flowers daily</span>
+            <span>📞 0784586110</span>
+            <span>📷 @akazuba_florists</span>
           </div>
           <div className="hidden sm:flex items-center space-x-4">
-            <span>📞 +250 784 586 110</span>
-            <span>💳 Secure payment</span>
+            <span>🚚 Free delivery in Kigali</span>
+            <span>🌸 Fresh flowers daily</span>
           </div>
         </div>
       </div>
@@ -188,9 +196,9 @@ const Header = () => {
             {/* Wishlist */}
             <Link href="/wishlist" className="relative p-2 text-gray-600 hover:text-pink-600 transition-colors duration-200">
               <Heart className="w-5 h-5" />
-              {wishlistItemCount > 0 && (
+              {wishlistItems.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {wishlistItemCount}
+                  {wishlistItems.length}
                 </span>
               )}
             </Link>
@@ -235,14 +243,7 @@ const Header = () => {
                         Profile
                       </Link>
                       
-                      <Link
-                        href="/orders"
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                      >
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        My Orders
-                      </Link>
+
                       
                       <button
                         onClick={() => {

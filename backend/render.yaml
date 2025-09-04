@@ -8,16 +8,20 @@ services:
     startCommand: npm start
     envVars:
       - key: NODE_ENV
-        value: development
+        value: production
       - key: DATABASE_URL
         fromDatabase:
           name: akazuba-database
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
       - key: PORT
         value: 10000
       - key: CORS_ORIGIN
+        value: https://online-shopping-by-diane.vercel.app
+      - key: FRONTEND_URL
         value: https://online-shopping-by-diane.vercel.app
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
@@ -25,13 +29,15 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: SMTP_HOST
+      - key: SENDGRID_API_KEY
         sync: false
-      - key: SMTP_PORT
+      - key: FLUTTERWAVE_PUBLIC_KEY
         sync: false
-      - key: SMTP_USER
+      - key: FLUTTERWAVE_SECRET_KEY
         sync: false
-      - key: SMTP_PASS
+      - key: MOMO_API_KEY
+        sync: false
+      - key: MOMO_API_SECRET
         sync: false
       - key: REDIS_URL
         sync: false

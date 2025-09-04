@@ -1,28 +1,17 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { productStorage } from '@/lib/productStorage'
+import { useProducts } from '@/contexts/ProductsContext'
+import { Product } from '@/types'
 
 const TestImagesPage = () => {
-  const [products, setProducts] = useState<any[]>([])
+  const { products, isLoading } = useProducts()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true)
-        const result = await productStorage.getProducts()
-        setProducts(result.products)
-        console.log('Loaded products:', result.products)
-      } catch (error) {
-        console.error('Error loading products:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadProducts()
-  }, [])
+    // Set loading based on products context
+    setLoading(isLoading)
+  }, [isLoading])
 
   if (loading) {
     return <div className="p-8">Loading products...</div>
@@ -31,8 +20,8 @@ const TestImagesPage = () => {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-6">Image Loading Test</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => (
           <div key={product.id} className="border rounded-lg p-4">
             <h3 className="font-semibold mb-2">{product.name}</h3>
@@ -62,18 +51,18 @@ const TestImagesPage = () => {
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <p className="text-gray-500">No Image</p>
-                </div>
+              </div>
               )}
-            </div>
+                </div>
             
             <div className="mt-2">
               <p className="text-xs text-gray-500">Status: {product.isActive ? 'Active' : 'Inactive'}</p>
               <p className="text-xs text-gray-500">Featured: {product.isFeatured ? 'Yes' : 'No'}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      
+          ))}
+        </div>
+
       <div className="mt-8 p-4 bg-gray-100 rounded">
         <h2 className="text-lg font-semibold mb-2">Debug Information</h2>
         <p>Total Products: {products.length}</p>

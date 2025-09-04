@@ -1,71 +1,46 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, X, Flower, Heart, Calendar, Gift, Users, Sparkles } from 'lucide-react'
-import { useProducts } from '@/contexts/ProductsContext'
 import { useRouter } from 'next/navigation'
+import { Search, X, Flower, Sparkles, Heart, Gift, Calendar, Star } from 'lucide-react'
+import { useProducts } from '@/contexts/ProductsContext'
 
 interface SearchSuggestion {
   id: string
   text: string
-  category: 'occasion' | 'flower-type' | 'color' | 'perfume-type'
   icon: React.ReactNode
+  category: string
 }
 
 const SearchBar = () => {
+  const router = useRouter()
+  const { products } = useProducts() // Updated to use the new context structure
   const [searchQuery, setSearchQuery] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [filteredProducts, setFilteredProducts] = useState<any[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-  const { state } = useProducts()
 
-  // Search suggestions based on occasions and product types
-  const searchSuggestions: SearchSuggestion[] = [
-    // Occasions
-    { id: 'wedding', text: 'Flowers for Wedding', category: 'occasion', icon: <Heart className="w-4 h-4" /> },
-    { id: 'anniversary', text: 'Anniversary Flowers', category: 'occasion', icon: <Calendar className="w-4 h-4" /> },
-    { id: 'funeral', text: 'Funeral Flowers', category: 'occasion', icon: <Flower className="w-4 h-4" /> },
-    { id: 'birthday', text: 'Birthday Flowers', category: 'occasion', icon: <Gift className="w-4 h-4" /> },
-    { id: 'graduation', text: 'Graduation Flowers', category: 'occasion', icon: <Users className="w-4 h-4" /> },
-    { id: 'valentine', text: 'Valentine Flowers', category: 'occasion', icon: <Heart className="w-4 h-4" /> },
-    { id: 'mothers-day', text: 'Mother\'s Day Flowers', category: 'occasion', icon: <Heart className="w-4 h-4" /> },
-    
-    // Flower Types
-    { id: 'roses', text: 'Roses', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'tulips', text: 'Tulips', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'lilies', text: 'Lilies', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'sunflowers', text: 'Sunflowers', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'carnations', text: 'Carnations', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'peonies', text: 'Peonies', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'daisies', text: 'Daisies', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'bouquets', text: 'Bouquets', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    { id: 'arrangements', text: 'Arrangements', category: 'flower-type', icon: <Flower className="w-4 h-4" /> },
-    
-    // Colors
-    { id: 'red', text: 'Red Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
-    { id: 'pink', text: 'Pink Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
-    { id: 'white', text: 'White Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
-    { id: 'yellow', text: 'Yellow Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
-    { id: 'purple', text: 'Purple Flowers', category: 'color', icon: <Flower className="w-4 h-4" /> },
-    
-    // Perfume Types
-    { id: 'mens-perfumes', text: 'Men\'s Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
-    { id: 'womens-perfumes', text: 'Women\'s Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
-    { id: 'unisex-perfumes', text: 'Unisex Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
-    { id: 'luxury-perfumes', text: 'Luxury Perfumes', category: 'perfume-type', icon: <Sparkles className="w-4 h-4" /> },
+  // Search suggestions
+  const suggestions: SearchSuggestion[] = [
+    { id: '1', text: 'Red Roses', icon: <Flower className="w-4 h-4" />, category: 'flowers' },
+    { id: '2', text: 'Valentine\'s Day', icon: <Heart className="w-4 h-4" />, category: 'occasions' },
+    { id: '3', text: 'Birthday Flowers', icon: <Gift className="w-4 h-4" />, category: 'occasions' },
+    { id: '4', text: 'Wedding Bouquets', icon: <Flower className="w-4 h-4" />, category: 'flowers' },
+    { id: '5', text: 'Perfumes', icon: <Sparkles className="w-4 h-4" />, category: 'perfumes' },
+    { id: '6', text: 'Anniversary', icon: <Calendar className="w-4 h-4" />, category: 'occasions' },
+    { id: '7', text: 'Premium Flowers', icon: <Star className="w-4 h-4" />, category: 'flowers' },
   ]
 
   // Filter suggestions based on search query
-  const filteredSuggestions = searchSuggestions.filter(suggestion =>
+  const filteredSuggestions = suggestions.filter(suggestion =>
     suggestion.text.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   // Filter products based on search query
   useEffect(() => {
-    if (searchQuery.trim()) {
-      const filtered = state.products.filter((product: any) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    if (searchQuery.trim() && products && products.length > 0) {
+      const filtered = products.filter((product: any) =>
+        (product.name && product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (product.type && product.type.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (product.color && product.color.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -75,7 +50,7 @@ const SearchBar = () => {
     } else {
       setFilteredProducts([])
     }
-  }, [searchQuery, state.products])
+  }, [searchQuery, products]) // Updated dependency
 
   // Handle click outside to close suggestions
   useEffect(() => {
@@ -132,7 +107,7 @@ const SearchBar = () => {
               <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
-                placeholder="Search for flowers, occasions, or flower types..."
+                placeholder="Search for roses, tulips, perfumes, or occasions..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value)
@@ -175,7 +150,7 @@ const SearchBar = () => {
 
                 {/* Product Results */}
                 {searchQuery && filteredProducts.length > 0 && (
-                  <div className="p-3 sm:p-4 border-b border-gray-100">
+                  <div className="p-3 sm:p-4">
                     <h3 className="text-sm font-semibold text-gray-700 mb-3">Products</h3>
                     <div className="space-y-2">
                       {filteredProducts.map((product) => (
@@ -184,40 +159,31 @@ const SearchBar = () => {
                           onClick={() => handleProductClick(product)}
                           className="w-full flex items-center space-x-3 p-2 hover:bg-pink-50 rounded-lg transition-colors text-left"
                         >
-                          <img
-                            src={product.image}
-                            alt={product.name}
-                            className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded-lg"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none'
-                            }}
-                          />
+                          <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            {product.images && product.images[0] ? (
+                              <img
+                                src={product.images[0]}
+                                alt={product.name}
+                                className="w-full h-full object-cover rounded-lg"
+                                onError={(e) => {
+                                  e.currentTarget.src = '/images/placeholder-flower.jpg'
+                                }}
+                              />
+                            ) : (
+                              <Flower className="w-5 h-5 text-gray-400" />
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-medium text-gray-900 text-sm sm:text-base truncate">{product.name}</div>
-                            <div className="text-xs sm:text-sm text-gray-500 truncate">{product.type} • {product.color}</div>
+                            <p className="text-gray-900 text-sm sm:text-base font-medium truncate">{product.name}</p>
+                            <p className="text-gray-500 text-xs sm:text-sm truncate">
+                              {product.type} • {product.color}
+                            </p>
                           </div>
-                          <div className="text-pink-600 font-semibold text-sm sm:text-base whitespace-nowrap">
-                            RWF {product.price.toLocaleString()}
+                          <div className="text-right">
+                            <p className="text-pink-600 font-semibold text-sm sm:text-base">
+                              RWF {product.price?.toLocaleString()}
+                            </p>
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Popular Searches */}
-                {!searchQuery && (
-                  <div className="p-3 sm:p-4">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-3">Popular Searches</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {searchSuggestions.slice(0, 8).map((suggestion) => (
-                        <button
-                          key={suggestion.id}
-                          onClick={() => handleSuggestionClick(suggestion)}
-                          className="flex items-center space-x-2 p-2 hover:bg-pink-50 rounded-lg transition-colors text-left"
-                        >
-                          <span className="text-pink-500">{suggestion.icon}</span>
-                          <span className="text-xs sm:text-sm text-gray-700 truncate">{suggestion.text}</span>
                         </button>
                       ))}
                     </div>
@@ -226,27 +192,47 @@ const SearchBar = () => {
 
                 {/* No Results */}
                 {searchQuery && filteredSuggestions.length === 0 && filteredProducts.length === 0 && (
-                  <div className="p-4 text-center text-gray-500">
-                    <Flower className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm sm:text-base">No results found for &quot;{searchQuery}&quot;</p>
-                    <p className="text-xs sm:text-sm">Try searching for a different term</p>
+                  <div className="p-4 text-center">
+                    <p className="text-gray-500 text-sm">No results found for "{searchQuery}"</p>
+                    <p className="text-gray-400 text-xs mt-1">Try different keywords or browse our categories</p>
+                  </div>
+                )}
+
+                {/* Quick Actions */}
+                {!searchQuery && (
+                  <div className="p-3 sm:p-4">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">Quick Actions</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => router.push('/products')}
+                        className="p-3 text-center bg-pink-50 hover:bg-pink-100 rounded-lg transition-colors"
+                      >
+                        <Flower className="w-6 h-6 text-pink-600 mx-auto mb-1" />
+                        <span className="text-xs text-gray-700">Browse All</span>
+                      </button>
+                      <button
+                        onClick={() => router.push('/contact')}
+                        className="p-3 text-center bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                      >
+                        <Heart className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+                        <span className="text-xs text-gray-700">Contact Us</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          {/* Quick Search Tags */}
-          <div className="mt-4 flex flex-wrap gap-2 justify-center">
-            {['Wedding', 'Anniversary', 'Birthday', 'Roses', 'Bouquets', 'Red Flowers'].map((tag) => (
-              <button
-                key={tag}
-                onClick={() => handleSearch(tag)}
-                className="px-3 sm:px-4 py-2 bg-white border border-pink-200 rounded-full text-xs sm:text-sm text-gray-700 hover:bg-pink-50 hover:border-pink-300 transition-colors whitespace-nowrap"
-              >
-                {tag}
-              </button>
-            ))}
+          {/* Search Button */}
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => handleSearch(searchQuery)}
+              disabled={!searchQuery.trim()}
+              className="bg-pink-600 text-white px-8 py-3 rounded-full font-semibold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg"
+            >
+              Search Products
+            </button>
           </div>
         </div>
       </div>

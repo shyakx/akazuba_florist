@@ -45,12 +45,12 @@ const PerfumeCard = ({ product, showRating = true, className = '' }: PerfumeCard
     console.error('❌ Perfume image failed to load:', product.image)
     setImageError(true)
     
-    // Try fallback image
+    // Try local fallback images
     const img = e.currentTarget
     const fallbackImages = [
-      'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
-      'https://images.unsplash.com/photo-1592945403244-b3faa74b2c98?w=400&h=400&fit=crop'
+      '/images/perfumes/perfume-1.jpg',
+      '/images/perfumes/perfume-2.jpg',
+      '/images/perfumes/perfume-6.jpg'
     ]
     
     const currentIndex = fallbackImages.indexOf(img.src)
@@ -59,7 +59,8 @@ const PerfumeCard = ({ product, showRating = true, className = '' }: PerfumeCard
     if (currentIndex === -1 || currentIndex < fallbackImages.length - 1) {
       img.src = fallbackImages[nextIndex]
     } else {
-      img.style.display = 'none'
+      // If all fallbacks fail, show a perfume placeholder
+      img.src = '/images/placeholder-perfume.jpg'
     }
   }
 

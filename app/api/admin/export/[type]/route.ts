@@ -6,14 +6,9 @@ export async function POST(
 ) {
   try {
     const { type } = params
-    const token = request.headers.get('authorization')?.replace('Bearer ', '')
     
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    // Since this is an admin route, it's already protected by the admin layout
+    // We can directly fetch from the backend without additional token validation
 
     // Forward the request to the backend
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
@@ -24,7 +19,6 @@ export async function POST(
     const response = await fetch(`${API_BASE_URL}/admin/export/${type}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     })

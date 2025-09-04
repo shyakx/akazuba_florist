@@ -1,565 +1,746 @@
-import { realFlowerProducts } from '@/data/real-flowers'
-import { AdminProduct } from './adminApi'
+// Simple product data for SSR compatibility
+import { findProductCategories, getCategoryMappingById } from '@/data/category-product-mapping'
 
-// Helper function to get API base URL
-const getApiBaseUrl = (): string => {
-  // Check if we're in the browser
-  if (typeof window === 'undefined') {
-    // Server-side rendering - use environment variable
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
-  }
+const basicProducts: Product[] = [
+  // Original products with enhanced category assignments
+  {
+    id: '1',
+    name: 'Red Roses Bouquet',
+    type: 'rose',
+    color: 'red',
+    brand: 'Akazuba Florist',
+    description: 'Beautiful red roses perfect for romantic occasions',
+    price: 25000,
+    salePrice: null,
+    stockQuantity: 50,
+    images: ['/images/flowers/roses/red-roses-1.jpg'],
+    categoryName: 'Flowers',
+    size: '30cm x 20cm',
+    isActive: true,
+    isFeatured: true,
+    sku: 'FLW-RED-001',
+    weight: 0.5,
+    tags: ['rose', 'red', 'romantic', 'bouquet'],
+    categoryIds: ['valentine', 'anniversary', 'date']
+  },
+  {
+    id: '2',
+    name: 'Pink Tulips',
+    type: 'tulip',
+    color: 'pink',
+    brand: 'Akazuba Florist',
+    description: 'Fresh pink tulips for spring celebrations',
+    price: 18000,
+    salePrice: null,
+    stockQuantity: 30,
+    images: ['/images/flowers/tulips/pink-tulips-1.jpg'],
+    categoryName: 'Flowers',
+    size: '25cm x 15cm',
+    isActive: true,
+    isFeatured: true,
+    sku: 'FLW-PINK-002',
+    weight: 0.3,
+    tags: ['tulip', 'pink', 'spring', 'fresh'],
+    categoryIds: ['birthday', 'mothers-day', 'date']
+  },
+  {
+    id: '3',
+    name: 'White Lily Arrangement',
+    type: 'lily',
+    color: 'white',
+    brand: 'Akazuba Florist',
+    description: 'Elegant white lilies for special occasions',
+    price: 35000,
+    salePrice: null,
+    stockQuantity: 25,
+    images: ['/images/flowers/lilies/white-lilies-1.jpg'],
+    categoryName: 'Flowers',
+    size: '35cm x 25cm',
+    isActive: true,
+    isFeatured: false,
+    sku: 'FLW-WHITE-003',
+    weight: 0.4,
+    tags: ['lily', 'white', 'elegant', 'special'],
+    categoryIds: ['wedding', 'funerals', 'special-occasions']
+  },
+  {
+    id: '4',
+    name: 'Luxury Perfume Set',
+    type: 'perfume',
+    color: 'clear',
+    brand: 'Akazuba Perfumes',
+    description: 'Premium fragrance collection for discerning customers',
+    price: 150000,
+    salePrice: 120000,
+    stockQuantity: 15,
+    images: ['/images/perfumes/luxury-set-1.jpg'],
+    categoryName: 'Perfumes',
+    size: '100ml',
+    concentration: 'EDP',
+    isActive: true,
+    isFeatured: true,
+    sku: 'PERF-LUX-004',
+    weight: 0.2,
+    tags: ['perfume', 'luxury', 'premium', 'fragrance'],
+    categoryIds: ['special-occasions', 'female', 'strong-scent']
+  },
 
-  // Client-side - check current hostname
-  const hostname = window.location.hostname
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
-  
-  if (isLocalhost) {
-    // Development - use localhost
-    console.log('🔧 Product Storage: Using localhost for development')
-    return 'http://localhost:5000/api/v1'
-  } else {
-    // Production - use environment variable or production URL
-    const productionUrl = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
-    console.log('🔧 Product Storage: Using production API:', productionUrl)
-    return productionUrl
+  // New Wedding Flowers
+  {
+    id: '5',
+    name: 'Bridal White Rose Bouquet',
+    type: 'rose',
+    color: 'white',
+    brand: 'Akazuba Florist',
+    description: 'Stunning white roses perfect for bridal bouquets and wedding ceremonies',
+    price: 45000,
+    salePrice: null,
+    stockQuantity: 20,
+    images: ['/images/flowers/white/white-1.jpg'],
+    categoryName: 'Flowers',
+    size: '40cm x 25cm',
+    isActive: true,
+    isFeatured: true,
+    sku: 'FLW-WED-005',
+    weight: 0.6,
+    tags: ['rose', 'white', 'bridal', 'wedding', 'elegant'],
+    categoryIds: ['wedding', 'engagement', 'special-occasions']
+  },
+  {
+    id: '6',
+    name: 'Pink Peony Wedding Arrangement',
+    type: 'peony',
+    color: 'pink',
+    brand: 'Akazuba Florist',
+    description: 'Romantic pink peonies for wedding receptions and bridal parties',
+    price: 52000,
+    salePrice: null,
+    stockQuantity: 15,
+    images: ['/images/flowers/pink/pink-1.jpg'],
+    categoryName: 'Flowers',
+    size: '35cm x 30cm',
+    isActive: true,
+    isFeatured: true,
+    sku: 'FLW-WED-006',
+    weight: 0.7,
+    tags: ['peony', 'pink', 'wedding', 'romantic', 'reception'],
+    categoryIds: ['wedding', 'engagement', 'date']
+  },
+
+  // Valentine's Day Flowers
+  {
+    id: '7',
+    name: 'Red Rose Heart Arrangement',
+    type: 'rose',
+    color: 'red',
+    brand: 'Akazuba Florist',
+    description: 'Romantic red roses arranged in a heart shape for Valentine\'s Day',
+    price: 38000,
+    salePrice: 32000,
+    stockQuantity: 35,
+    images: ['/images/flowers/red/red-1.jpg'],
+    categoryName: 'Flowers',
+    size: '30cm x 25cm',
+    isActive: true,
+    isFeatured: true,
+    sku: 'FLW-VAL-007',
+    weight: 0.5,
+    tags: ['rose', 'red', 'valentine', 'heart', 'romantic'],
+    categoryIds: ['valentine', 'date', 'anniversary']
+  },
+
+  // Mother's Day Flowers
+  {
+    id: '8',
+    name: 'Pink Carnation Bouquet',
+    type: 'carnation',
+    color: 'pink',
+    brand: 'Akazuba Florist',
+    description: 'Beautiful pink carnations symbolizing motherly love and appreciation',
+    price: 22000,
+    salePrice: null,
+    stockQuantity: 40,
+    images: ['/images/flowers/pink/pink-2.jpg'],
+    categoryName: 'Flowers',
+    size: '25cm x 20cm',
+    isActive: true,
+    isFeatured: false,
+    sku: 'FLW-MOM-008',
+    weight: 0.4,
+    tags: ['carnation', 'pink', 'mother', 'appreciation', 'love'],
+    categoryIds: ['mothers-day', 'birthday', 'date']
+  },
+
+  // Birthday Flowers
+  {
+    id: '9',
+    name: 'Mixed Color Birthday Bouquet',
+    type: 'mixed',
+    color: 'mixed',
+    brand: 'Akazuba Florist',
+    description: 'Colorful mixed flowers perfect for birthday celebrations and parties',
+    price: 28000,
+    salePrice: null,
+    stockQuantity: 30,
+    images: ['/images/flowers/mixed/mixed-1.jpg'],
+    categoryName: 'Flowers',
+    size: '30cm x 25cm',
+    isActive: true,
+    isFeatured: false,
+    sku: 'FLW-BDAY-009',
+    weight: 0.5,
+    tags: ['mixed', 'colorful', 'birthday', 'celebration', 'cheerful'],
+    categoryIds: ['birthday', 'airport-pickup', 'special-occasions']
+  },
+
+  // Graduation Flowers
+  {
+    id: '10',
+    name: 'Yellow Sunflower Bundle',
+    type: 'sunflower',
+    color: 'yellow',
+    brand: 'Akazuba Florist',
+    description: 'Bright yellow sunflowers symbolizing achievement and success',
+    price: 24000,
+    salePrice: null,
+    stockQuantity: 25,
+    images: ['/images/flowers/yellow/yellow-1.jpg'],
+    categoryName: 'Flowers',
+    size: '35cm x 20cm',
+    isActive: true,
+    isFeatured: false,
+    sku: 'FLW-GRAD-010',
+    weight: 0.6,
+    tags: ['sunflower', 'yellow', 'graduation', 'achievement', 'bright'],
+    categoryIds: ['graduation', 'birthday', 'special-occasions']
+  },
+
+  // Anniversary Flowers
+  {
+    id: '11',
+    name: 'Red and Pink Rose Duo',
+    type: 'rose',
+    color: 'mixed',
+    brand: 'Akazuba Florist',
+    description: 'Romantic combination of red and pink roses for anniversary celebrations',
+    price: 42000,
+    salePrice: null,
+    stockQuantity: 20,
+    images: ['/images/flowers/mixed/mixed-2.jpg'],
+    categoryName: 'Flowers',
+    size: '35cm x 25cm',
+    isActive: true,
+    isFeatured: true,
+    sku: 'FLW-ANN-011',
+    weight: 0.6,
+    tags: ['rose', 'mixed', 'anniversary', 'romantic', 'couple'],
+    categoryIds: ['anniversary', 'valentine', 'date']
+  },
+
+  // Airport Pickup Flowers
+  {
+    id: '12',
+    name: 'Welcome Home Mixed Bouquet',
+    type: 'mixed',
+    color: 'mixed',
+    brand: 'Akazuba Florist',
+    description: 'Welcoming mixed flowers perfect for airport pickups and homecomings',
+    price: 26000,
+    salePrice: null,
+    stockQuantity: 35,
+    images: ['/images/flowers/mixed/mixed-3.jpg'],
+    categoryName: 'Flowers',
+    size: '30cm x 20cm',
+    isActive: true,
+    isFeatured: false,
+    sku: 'FLW-AIR-012',
+    weight: 0.5,
+    tags: ['mixed', 'welcome', 'airport', 'homecoming', 'travel'],
+    categoryIds: ['airport-pickup', 'birthday', 'special-occasions']
+  },
+
+  // New Perfume Products
+  {
+    id: '13',
+    name: 'Masculine Confidence Cologne',
+    type: 'cologne',
+    color: 'clear',
+    brand: 'Akazuba Perfumes',
+    description: 'Bold and confident masculine fragrance for the modern gentleman',
+    price: 85000,
+    salePrice: null,
+    stockQuantity: 25,
+    images: ['/images/perfumes/perfume-2.jpg'],
+    categoryName: 'Perfumes',
+    size: '75ml',
+    concentration: 'EDT',
+    isActive: true,
+    isFeatured: true,
+    sku: 'PERF-MALE-013',
+    weight: 0.15,
+    tags: ['cologne', 'masculine', 'confidence', 'professional'],
+    categoryIds: ['male', 'strong-scent', 'special-occasions']
+  },
+  {
+    id: '14',
+    name: 'Feminine Elegance Perfume',
+    type: 'perfume',
+    color: 'clear',
+    brand: 'Akazuba Perfumes',
+    description: 'Elegant and feminine fragrance for the sophisticated woman',
+    price: 95000,
+    salePrice: null,
+    stockQuantity: 20,
+    images: ['/images/perfumes/perfume-3.png'],
+    categoryName: 'Perfumes',
+    size: '50ml',
+    concentration: 'EDP',
+    isActive: true,
+    isFeatured: true,
+    sku: 'PERF-FEM-014',
+    weight: 0.12,
+    tags: ['perfume', 'feminine', 'elegant', 'sophisticated'],
+    categoryIds: ['female', 'strong-scent', 'date']
+  },
+  {
+    id: '15',
+    name: 'Light Daily Freshness',
+    type: 'perfume',
+    color: 'clear',
+    brand: 'Akazuba Perfumes',
+    description: 'Light and refreshing scent perfect for everyday wear',
+    price: 65000,
+    salePrice: null,
+    stockQuantity: 30,
+    images: ['/images/perfumes/perfume-5.png'],
+    categoryName: 'Perfumes',
+    size: '100ml',
+    concentration: 'EDT',
+    isActive: true,
+    isFeatured: false,
+    sku: 'PERF-DAILY-015',
+    weight: 0.18,
+    tags: ['perfume', 'light', 'fresh', 'everyday', 'office'],
+    categoryIds: ['soft-scent', 'casual-everyday', 'female']
+  },
+  {
+    id: '16',
+    name: 'Evening Romance Perfume',
+    type: 'perfume',
+    color: 'clear',
+    brand: 'Akazuba Perfumes',
+    description: 'Seductive and romantic fragrance for special evenings and dates',
+    price: 110000,
+    salePrice: null,
+    stockQuantity: 18,
+    images: ['/images/perfumes/perfume-1.jpg'],
+    categoryName: 'Perfumes',
+    size: '50ml',
+    concentration: 'EDP',
+    isActive: true,
+    isFeatured: true,
+    sku: 'PERF-DATE-016',
+    weight: 0.12,
+    tags: ['perfume', 'romantic', 'evening', 'seductive', 'date'],
+    categoryIds: ['date', 'strong-scent', 'special-occasions']
   }
+]
+
+export interface Product {
+  id: string
+  name: string
+  type: string
+  color: string
+  brand: string
+  description: string
+  price: number
+  salePrice: number | null
+  stockQuantity: number
+  images: string[]
+  categoryName: string
+  size?: string
+  concentration?: string
+  isActive: boolean
+  isFeatured: boolean
+  sku?: string
+  weight?: number
+  tags?: string[]
+  categoryIds?: string[] // New field for specific category IDs
 }
 
-// Transform real flower data to admin product format
-const transformToAdminProduct = (product: any, index: number): AdminProduct => {
-  // Ensure we have a valid image path
-  let imagePath = product.image
-  
-  // Validate and fix image path
-  if (!imagePath || imagePath === '') {
-    // Fallback to a default image based on color
-    imagePath = `/images/flowers/${product.color}/${product.color}-1.jpg`
-  }
-  
-  // If the image path doesn't start with /, add it
-  if (!imagePath.startsWith('/')) {
-    imagePath = `/${imagePath}`
-  }
+const STORAGE_KEYS = {
+  PRODUCTS: 'akazuba_products',
+  FLOWERS: 'akazuba_flowers',
+  PERFUMES: 'akazuba_perfumes'
+}
 
-  // Validate image path and provide fallback if needed
-  const validateImagePath = (path: string, color: string) => {
-    // Check if the path follows the expected pattern
-    const expectedPattern = `/images/flowers/${color}/${color}-`
-    if (!path.includes(expectedPattern)) {
-      // Try to construct a valid path
-      return `/images/flowers/${color}/${color}-1.jpg`
-    }
-    return path
-  }
-
-  imagePath = validateImagePath(imagePath, product.color)
-  
-  // Log the image path for debugging
-  console.log(`Product ${product.name}: Image path set to:`, imagePath)
-
-  return {
-    id: product.id.toString(),
-    name: product.name,
-    slug: product.name.toLowerCase().replace(/\s+/g, '-'),
-    description: product.description,
-    shortDescription: product.description.substring(0, 100) + '...',
-    price: product.price,
-    salePrice: undefined,
-    costPrice: product.price * 0.6, // Estimate cost price as 60% of selling price
-    sku: `${product.type.toUpperCase()}-${product.color.toUpperCase()}-${product.id}`,
-    stockQuantity: Math.floor(Math.random() * 50) + 10, // Random stock between 10-60
-    minStockAlert: 5,
-    categoryId: product.color, // Use color as category for now
-    categoryName: product.color.charAt(0).toUpperCase() + product.color.slice(1) + ' Flowers',
-    images: [imagePath],
-    isActive: true,
-    isFeatured: product.featured,
-    weight: Math.floor(Math.random() * 2) + 1, // Random weight 1-3 kg
-    dimensions: {
-      length: Math.floor(Math.random() * 20) + 20,
-      width: Math.floor(Math.random() * 15) + 15,
-      height: Math.floor(Math.random() * 30) + 30
-    },
-    tags: [product.color, product.type.toLowerCase(), 'flowers'],
-    createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Random date within last 30 days
-    updatedAt: new Date().toISOString(),
-    views: Math.floor(Math.random() * 1000) + 100,
-    sales: Math.floor(Math.random() * 50) + 5,
-    revenue: (Math.floor(Math.random() * 50) + 5) * product.price,
-    rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // Random rating between 3.0-5.0
-    reviewCount: Math.floor(Math.random() * 20) + 1
+// Helper function to check if localStorage is available
+const isLocalStorageAvailable = (): boolean => {
+  if (typeof window === 'undefined') return false
+  try {
+    const test = '__localStorage_test__'
+    localStorage.setItem(test, test)
+    localStorage.removeItem(test)
+    return true
+  } catch {
+    return false
   }
 }
 
 class ProductStorage {
-  private products: AdminProduct[] = []
-  private nextId: number = 1
-  private isInitialized = false
+  private products: Product[] = []
+  private flowers: Product[] = []
+  private perfumes: Product[] = []
 
   constructor() {
-    this.loadFromStorage()
+    this.initializeProducts()
   }
 
-  // Initialize products from real flower data
-  initializeProducts() {
-    if (this.isInitialized) return
+  private initializeProducts() {
+    try {
+      // Try to load from storage first
+      this.loadFromStorage(STORAGE_KEYS.PRODUCTS)
+      this.loadFromStorage(STORAGE_KEYS.FLOWERS)
+      this.loadFromStorage(STORAGE_KEYS.PERFUMES)
 
-    // Transform real flower products to admin format
-    this.products = realFlowerProducts.map((product, index) => 
-      transformToAdminProduct(product, index)
+      // If no stored data, initialize from source
+      if (this.products.length === 0) {
+        this.initializeFromSource()
+      }
+    } catch (error) {
+      console.warn('⚠️ Storage initialization failed, using source data:', error)
+      this.initializeFromSource()
+    }
+  }
+
+  private initializeFromSource() {
+    try {
+      // Use basic products data
+      this.products = [...basicProducts]
+      this.flowers = basicProducts.filter(p => p.categoryName === 'Flowers')
+      this.perfumes = basicProducts.filter(p => p.categoryName === 'Perfumes')
+
+      // Try to save to storage (only if localStorage is available)
+      if (isLocalStorageAvailable()) {
+        this.saveToStorage()
+      }
+      
+      console.log('📦 Initialized products from source data')
+    } catch (error) {
+      console.error('❌ Failed to initialize from source:', error)
+      // Set empty arrays as fallback
+      this.products = []
+      this.flowers = []
+      this.perfumes = []
+    }
+  }
+
+  private loadFromStorage(key: string): any {
+    if (!isLocalStorageAvailable()) {
+      console.warn(`⚠️ localStorage not available, skipping load for ${key}`)
+      return null
+    }
+
+    try {
+      const stored = localStorage.getItem(key)
+      if (stored) {
+        const data = JSON.parse(stored)
+        switch (key) {
+          case STORAGE_KEYS.PRODUCTS:
+            this.products = data
+            break
+          case STORAGE_KEYS.FLOWERS:
+            this.flowers = data
+            break
+          case STORAGE_KEYS.PERFUMES:
+            this.perfumes = data
+            break
+        }
+        return data
+      }
+    } catch (error) {
+      console.error(`❌ Error loading from storage (${key}):`, error)
+    }
+    return null
+  }
+
+  private saveToStorage() {
+    if (!isLocalStorageAvailable()) {
+      console.warn('⚠️ localStorage not available, skipping save')
+      return
+    }
+
+    try {
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(this.products))
+      localStorage.setItem(STORAGE_KEYS.FLOWERS, JSON.stringify(this.flowers))
+      localStorage.setItem(STORAGE_KEYS.PERFUMES, JSON.stringify(this.perfumes))
+    } catch (error) {
+      console.error('❌ Error saving to storage:', error)
+    }
+  }
+
+  // Public methods
+  getAllProducts(): Product[] {
+    return [...this.products]
+  }
+
+  getFlowerProducts(): Product[] {
+    return [...this.flowers]
+  }
+
+  getPerfumeProducts(): Product[] {
+    return [...this.perfumes]
+  }
+
+  getProductsByCategory(category: string): Product[] {
+    return this.products.filter(product => 
+      product.categoryName.toLowerCase() === category.toLowerCase()
     )
-    
-    // Set next ID for new products
-    this.nextId = this.products.length + 1
-    
-    this.isInitialized = true
-    this.saveToStorage()
   }
 
-  // Get products with optional filtering and pagination
-  async getProducts(options?: {
-    search?: string
-    category?: string
-    status?: string
-    page?: number
-    limit?: number
-  }): Promise<{ products: AdminProduct[]; total: number; pages: number }> {
+  getFeaturedProducts(): Product[] {
+    return this.products.filter(product => product.isFeatured)
+  }
+
+  getActiveProducts(): Product[] {
+    return this.products.filter(product => product.isActive)
+  }
+
+  addProduct(product: Omit<Product, 'id'>): Product {
+    const newProduct: Product = {
+      ...product,
+      id: `product_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    }
+
+    this.products.push(newProduct)
+    
+    // Update category-specific arrays
+    if (newProduct.categoryName === 'Flowers') {
+      this.flowers.push(newProduct)
+    } else if (newProduct.categoryName === 'Perfumes') {
+      this.perfumes.push(newProduct)
+    }
+
+    // Save to storage
+    this.saveToStorage()
+    
+    // Trigger storage change event
+    this.triggerStorageChange()
+    
+    return newProduct
+  }
+
+  updateProduct(id: string, updates: Partial<Product>): Product | null {
+    const productIndex = this.products.findIndex(p => p.id === id)
+    if (productIndex === -1) return null
+
+    const updatedProduct = { ...this.products[productIndex], ...updates }
+    this.products[productIndex] = updatedProduct
+
+    // Update category-specific arrays
+    const flowerIndex = this.flowers.findIndex(p => p.id === id)
+    if (flowerIndex !== -1) {
+      this.flowers[flowerIndex] = updatedProduct
+    }
+
+    const perfumeIndex = this.perfumes.findIndex(p => p.id === id)
+    if (perfumeIndex !== -1) {
+      this.perfumes[perfumeIndex] = updatedProduct
+    }
+
+    // Save to storage
+    this.saveToStorage()
+    
+    // Trigger storage change event
+    this.triggerStorageChange()
+    
+    return updatedProduct
+  }
+
+  deleteProduct(id: string): boolean {
+    const productIndex = this.products.findIndex(p => p.id === id)
+    if (productIndex === -1) return false
+
+    this.products.splice(productIndex, 1)
+
+    // Remove from category-specific arrays
+    const flowerIndex = this.flowers.findIndex(p => p.id === id)
+    if (flowerIndex !== -1) {
+      this.flowers.splice(flowerIndex, 1)
+    }
+
+    const perfumeIndex = this.perfumes.findIndex(p => p.id === id)
+    if (perfumeIndex !== -1) {
+      this.perfumes.splice(perfumeIndex, 1)
+    }
+
+    // Save to storage
+    this.saveToStorage()
+    
+    // Trigger storage change event
+    this.triggerStorageChange()
+    
+    return true
+  }
+
+  bulkOperation(operation: 'delete' | 'update', productIds: string[], updates?: Partial<Product>): boolean {
     try {
-      // Check if we're in a browser environment
-      if (typeof window === 'undefined') {
-        // Fallback to local data for SSR
-        this.initializeProducts()
-        return this.getLocalProducts(options)
-      }
-
-      const token = localStorage.getItem('accessToken')
-      if (!token) {
-        // Fallback to local data if no token
-        this.initializeProducts()
-        return this.getLocalProducts(options)
-      }
-
-      const baseURL = getApiBaseUrl()
-      const queryParams = new URLSearchParams()
-      
-      if (options?.page) queryParams.append('page', options.page.toString())
-      if (options?.limit) queryParams.append('limit', options.limit.toString())
-      if (options?.search) queryParams.append('search', options.search)
-      if (options?.category) queryParams.append('category', options.category)
-      if (options?.status) queryParams.append('status', options.status)
-
-      const response = await fetch(`${baseURL}/admin/products?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          return data.data
-        }
-      }
-
-      // Fallback to local data if API fails
-      this.initializeProducts()
-      return this.getLocalProducts(options)
-    } catch (error) {
-      console.error('Error fetching products from API:', error)
-      // Fallback to local data
-      this.initializeProducts()
-      return this.getLocalProducts(options)
-    }
-  }
-
-  // Local products fallback method
-  private getLocalProducts(options?: {
-    search?: string
-    category?: string
-    status?: string
-    page?: number
-    limit?: number
-  }): { products: AdminProduct[]; total: number; pages: number } {
-    let filteredProducts = [...this.products]
-
-    // Apply search filter
-    if (options?.search) {
-      const searchTerm = options.search.toLowerCase()
-      filteredProducts = filteredProducts.filter(product =>
-        product.name.toLowerCase().includes(searchTerm) ||
-        product.description.toLowerCase().includes(searchTerm) ||
-        product.categoryName.toLowerCase().includes(searchTerm)
-      )
-    }
-
-    // Apply category filter
-    if (options?.category && options.category !== 'all') {
-      filteredProducts = filteredProducts.filter(product =>
-        product.categoryId === options.category
-      )
-    }
-
-    // Apply status filter
-    if (options?.status && options.status !== 'all') {
-      if (options.status === 'active') {
-        filteredProducts = filteredProducts.filter(product => product.isActive)
-      } else if (options.status === 'inactive') {
-        filteredProducts = filteredProducts.filter(product => !product.isActive)
-      } else if (options.status === 'featured') {
-        filteredProducts = filteredProducts.filter(product => product.isFeatured)
-      }
-    }
-
-    const total = filteredProducts.length
-    const page = options?.page || 1
-    const limit = options?.limit || 10
-    const pages = Math.ceil(total / limit)
-
-    // Apply pagination
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
-    const paginatedProducts = filteredProducts.slice(startIndex, endIndex)
-
-    return {
-      products: paginatedProducts,
-      total,
-      pages
-    }
-  }
-
-  // Add new product
-  async addProduct(productData: Omit<AdminProduct, 'id' | 'createdAt' | 'updatedAt'>): Promise<AdminProduct> {
-    try {
-      // Check if we're in a browser environment
-      if (typeof window === 'undefined') {
-        // Fallback to local storage for SSR
-        this.initializeProducts()
-        const newProduct: AdminProduct = {
-          ...productData,
-          id: this.nextId.toString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-        this.products.push(newProduct)
-        this.nextId++
-        this.saveToStorage()
-        return newProduct
-      }
-
-      const token = localStorage.getItem('accessToken')
-      if (!token) {
-        // Fallback to local storage if no token
-        this.initializeProducts()
-        const newProduct: AdminProduct = {
-          ...productData,
-          id: this.nextId.toString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-        this.products.push(newProduct)
-        this.nextId++
-        this.saveToStorage()
-        return newProduct
-      }
-
-      const baseURL = getApiBaseUrl()
-      
-      const response = await fetch(`${baseURL}/admin/products`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(productData)
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          return data.data
-        }
-      }
-
-      // Fallback to local storage if API fails
-      this.initializeProducts()
-      const newProduct: AdminProduct = {
-        ...productData,
-        id: this.nextId.toString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      this.products.push(newProduct)
-      this.nextId++
-      this.saveToStorage()
-      return newProduct
-    } catch (error) {
-      console.error('Error creating product via API:', error)
-      // Fallback to local storage
-      this.initializeProducts()
-      const newProduct: AdminProduct = {
-        ...productData,
-        id: this.nextId.toString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-      this.products.push(newProduct)
-      this.nextId++
-      this.saveToStorage()
-      return newProduct
-    }
-  }
-
-  // Update existing product
-  updateProduct(updatedProduct: AdminProduct): AdminProduct {
-    this.initializeProducts()
-    
-    const index = this.products.findIndex(p => p.id === updatedProduct.id)
-    if (index === -1) {
-      throw new Error('Product not found')
-    }
-
-    const product = {
-      ...updatedProduct,
-      updatedAt: new Date().toISOString()
-    }
-
-    this.products[index] = product
-    this.saveToStorage()
-    
-    // Sync with backend
-    this.syncToBackend(product, 'update')
-    
-    return product
-  }
-
-  // Delete product
-  async deleteProduct(id: string): Promise<void> {
-    this.initializeProducts()
-    
-    const index = this.products.findIndex(p => p.id === id)
-    if (index === -1) {
-      throw new Error('Product not found')
-    }
-
-    this.products.splice(index, 1)
-    this.saveToStorage()
-    
-    // Sync with backend
-    await this.syncToBackend({ id } as AdminProduct, 'delete')
-  }
-
-  // Bulk operations
-  async bulkOperation(operation: 'delete' | 'activate' | 'deactivate' | 'feature' | 'unfeature' | 'updateStock', productIds: string[], data?: any): Promise<{ success: boolean; message: string }> {
-    this.initializeProducts()
-    
-    this.products = this.products.map(product => {
-      if (productIds.includes(product.id)) {
-        switch (operation) {
-          case 'delete':
-            return null
-          case 'activate':
-            return { ...product, isActive: true, updatedAt: new Date().toISOString() }
-          case 'deactivate':
-            return { ...product, isActive: false, updatedAt: new Date().toISOString() }
-          case 'feature':
-            return { ...product, isFeatured: true, updatedAt: new Date().toISOString() }
-          case 'unfeature':
-            return { ...product, isFeatured: false, updatedAt: new Date().toISOString() }
-          case 'updateStock':
-            if (data && data.operation && data.quantity !== undefined) {
-              let newQuantity = product.stockQuantity
-              switch (data.operation) {
-                case 'add':
-                  newQuantity += data.quantity
-                  break
-                case 'subtract':
-                  newQuantity = Math.max(0, newQuantity - data.quantity)
-                  break
-                case 'set':
-                  newQuantity = data.quantity
-                  break
-              }
-              return { ...product, stockQuantity: newQuantity, updatedAt: new Date().toISOString() }
-            }
-            return product
-          default:
-            return product
-        }
-      }
-      return product
-    }).filter(Boolean) as AdminProduct[]
-
-    this.saveToStorage()
-    
-    // Sync with backend
-    await this.syncBulkToBackend(operation, productIds)
-    
-    return { success: true, message: `Bulk operation '${operation}' completed successfully` }
-  }
-
-  // Get categories dynamically from products
-  getCategories(): Array<{ id: string; name: string; count: number }> {
-    this.initializeProducts()
-    
-    const categoryMap = new Map<string, number>()
-    
-    this.products.forEach(product => {
-      const count = categoryMap.get(product.categoryId) || 0
-      categoryMap.set(product.categoryId, count + 1)
-    })
-
-    return Array.from(categoryMap.entries()).map(([id, count]) => ({
-      id,
-      name: this.products.find(p => p.categoryId === id)?.categoryName || id,
-      count
-    }))
-  }
-
-  // Get analytics data
-  getAnalytics(): any {
-    this.initializeProducts()
-    
-    const totalProducts = this.products.length
-    const activeProducts = this.products.filter(p => p.isActive).length
-    const featuredProducts = this.products.filter(p => p.isFeatured).length
-    const lowStockProducts = this.products.filter(p => p.stockQuantity <= 5).length
-    
-    const totalRevenue = this.products.reduce((sum, p) => sum + (p.revenue || 0), 0)
-    const totalSales = this.products.reduce((sum, p) => sum + (p.sales || 0), 0)
-    const totalViews = this.products.reduce((sum, p) => sum + (p.views || 0), 0)
-    
-    const avgRating = this.products.length > 0 
-      ? this.products.reduce((sum, p) => sum + (p.rating || 0), 0) / this.products.length 
-      : 0
-
-    return {
-      totalProducts,
-      activeProducts,
-      featuredProducts,
-      lowStockProducts,
-      totalRevenue,
-      totalSales,
-      totalViews,
-      avgRating: parseFloat(avgRating.toFixed(1))
-    }
-  }
-
-  // Sync with backend database
-  private async syncToBackend(product: AdminProduct, operation: 'create' | 'update' | 'delete') {
-    try {
-      // Check if we're in a browser environment
-      if (typeof window === 'undefined') return
-      
-      const token = localStorage.getItem('accessToken')
-      if (!token) return
-
-      const baseURL = getApiBaseUrl()
-      
       switch (operation) {
-        case 'create':
-          await fetch(`${baseURL}/admin/products`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(product)
-          })
+        case 'delete':
+          productIds.forEach(id => this.deleteProduct(id))
           break
         case 'update':
-          await fetch(`${baseURL}/admin/products/${product.id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(product)
-          })
-          break
-        case 'delete':
-          await fetch(`${baseURL}/admin/products/${product.id}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
+          if (updates) {
+            productIds.forEach(id => this.updateProduct(id, updates))
+          }
           break
       }
+      return true
     } catch (error) {
-      console.error('Failed to sync with backend:', error)
+      console.error('❌ Bulk operation failed:', error)
+      return false
     }
   }
 
-  // Sync bulk operations with backend
-  private async syncBulkToBackend(operation: string, productIds: string[]) {
-    try {
-      // Check if we're in a browser environment
-      if (typeof window === 'undefined') return
-      
-      const token = localStorage.getItem('accessToken')
-      if (!token) return
+  searchProducts(query: string): Product[] {
+    if (!query.trim()) return this.products
 
-      const baseURL = getApiBaseUrl()
-      
-      await fetch(`${baseURL}/admin/products/bulk`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ operation, productIds })
-      })
-    } catch (error) {
-      console.error('Failed to sync bulk operation with backend:', error)
-    }
+    const searchTerms = query.toLowerCase().split(' ')
+    return this.products.filter(product => {
+      const searchableText = [
+        product.name,
+        product.type,
+        product.color,
+        product.description,
+        product.brand,
+        product.categoryName
+      ].join(' ').toLowerCase()
+
+      return searchTerms.some(term => searchableText.includes(term))
+    })
   }
 
-  // Load from localStorage
-  private loadFromStorage() {
-    try {
-      // Check if we're in a browser environment
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const stored = localStorage.getItem('productStorage')
-        if (stored) {
-          const data = JSON.parse(stored)
-          this.products = data.products || []
-          this.nextId = data.nextId || 1
-          this.isInitialized = data.isInitialized || false
-        }
-      }
-    } catch (error) {
-      console.error('Error loading from storage:', error)
-    }
+  getProductById(id: string): Product | null {
+    return this.products.find(product => product.id === id) || null
   }
 
-  // Save to localStorage
-  private saveToStorage() {
-    try {
-      // Check if we're in a browser environment
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const data = {
-          products: this.products,
-          nextId: this.nextId,
-          isInitialized: this.isInitialized
-        }
-        localStorage.setItem('productStorage', JSON.stringify(data))
-      }
-    } catch (error) {
-      console.error('Error saving to storage:', error)
-    }
-  }
-
-  // Clear storage and reinitialize (useful for fixing corrupted data)
-  clearAndReinitialize() {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.removeItem('productStorage')
-    }
-    this.isInitialized = false
+  clearStorage(): void {
     this.products = []
-    this.nextId = 1
-    this.initializeProducts()
+    this.flowers = []
+    this.perfumes = []
+    
+    if (isLocalStorageAvailable()) {
+      try {
+        localStorage.removeItem(STORAGE_KEYS.PRODUCTS)
+        localStorage.removeItem(STORAGE_KEYS.FLOWERS)
+        localStorage.removeItem(STORAGE_KEYS.PERFUMES)
+      } catch (error) {
+        console.error('❌ Error clearing storage:', error)
+      }
+    }
+  }
+
+  getStorageStats() {
+    return {
+      totalProducts: this.products.length,
+      flowers: this.flowers.length,
+      perfumes: this.perfumes.length,
+      activeProducts: this.getActiveProducts().length,
+      featuredProducts: this.getFeaturedProducts().length
+    }
+  }
+
+  onStorageChange(callback: (products: Product[]) => void) {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (e) => {
+        if (e.key === STORAGE_KEYS.PRODUCTS) {
+          try {
+            const newProducts = JSON.parse(e.newValue || '[]')
+            callback(newProducts)
+          } catch (error) {
+            console.error('❌ Error parsing storage change:', error)
+          }
+        }
+      })
+    }
+  }
+
+  private triggerStorageChange() {
+    if (typeof window !== 'undefined') {
+      // Dispatch custom event for cross-tab synchronization
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: STORAGE_KEYS.PRODUCTS,
+        newValue: JSON.stringify(this.products),
+        oldValue: null,
+        storageArea: localStorage
+      }))
+    }
   }
 }
 
-export const productStorage = new ProductStorage()
+// Create singleton instance only on client side
+let productStorageInstance: ProductStorage | null = null
+
+const getProductStorage = (): ProductStorage => {
+  if (typeof window === 'undefined') {
+    // Server-side: return a mock instance with basic data
+    return {
+      getAllProducts: () => [...basicProducts],
+      getFlowerProducts: () => basicProducts.filter(p => p.categoryName === 'Flowers'),
+      getPerfumeProducts: () => basicProducts.filter(p => p.categoryName === 'Perfumes'),
+      getProductsByCategory: (category: string) => {
+        return basicProducts.filter(product => 
+          product.categoryName.toLowerCase() === category.toLowerCase()
+        )
+      },
+      getFeaturedProducts: () => {
+        return basicProducts.filter(product => product.isFeatured)
+      },
+      getActiveProducts: () => {
+        return basicProducts.filter(product => product.isActive)
+      },
+      addProduct: () => { throw new Error('Cannot add products on server side') },
+      updateProduct: () => { throw new Error('Cannot update products on server side') },
+      deleteProduct: () => { throw new Error('Cannot delete products on server side') },
+      bulkOperation: () => { throw new Error('Cannot perform bulk operations on server side') },
+      searchProducts: (query: string) => {
+        if (!query.trim()) return [...basicProducts]
+        
+        const searchTerms = query.toLowerCase().split(' ')
+        return basicProducts.filter(product => {
+          const searchableText = [
+            product.name,
+            product.type,
+            product.color,
+            product.description,
+            product.brand,
+            product.categoryName
+          ].join(' ').toLowerCase()
+          
+          return searchTerms.some(term => searchableText.includes(term))
+        })
+      },
+      getProductById: (id: string) => {
+        return basicProducts.find(product => product.id === id) || null
+      },
+      clearStorage: () => {},
+      getStorageStats: () => ({
+        totalProducts: basicProducts.length,
+        flowers: basicProducts.filter(p => p.categoryName === 'Flowers').length,
+        perfumes: basicProducts.filter(p => p.categoryName === 'Perfumes').length,
+        activeProducts: basicProducts.filter(p => p.isActive).length,
+        featuredProducts: basicProducts.filter(p => p.isFeatured).length
+      }),
+      onStorageChange: () => {}
+    } as unknown as ProductStorage
+  }
+
+  // Client-side: create or return existing instance
+  if (!productStorageInstance) {
+    productStorageInstance = new ProductStorage()
+  }
+  return productStorageInstance
+}
+
+export const productStorage = getProductStorage()
+export { STORAGE_KEYS }

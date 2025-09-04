@@ -5,7 +5,7 @@ import { Eye, EyeOff, Lock, User, Mail, Phone, Flower, ArrowLeft, Check } from '
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/RealAuthContext'
-import { authAPI } from '@/lib/auth-api'
+import { authAPI } from '@/lib/api'
 
 const Register = () => {
   const [formData, setFormData] = useState({

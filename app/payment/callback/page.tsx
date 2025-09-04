@@ -118,12 +118,7 @@ const PaymentCallbackContent = () => {
               >
                 Continue Shopping
               </Link>
-              <Link 
-                href="/orders"
-                className="w-full border-2 border-gray-300 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-50 transition-all duration-300 block text-center"
-              >
-                View My Orders
-              </Link>
+
             </div>
           </div>
         )}

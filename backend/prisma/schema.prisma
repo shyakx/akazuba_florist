@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,39 +8,54 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  firstName     String
-  lastName      String
-  phone         String?
-  role          UserRole @default(CUSTOMER)
-  isActive      Boolean  @default(true)
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  orders        Order[]
-  cart          Cart?
-  wishlist      Wishlist[]
-  reviews       Review[]
-  refreshTokens RefreshToken[]
+  id             String           @id @default(cuid())
+  email          String           @unique
+  passwordHash   String
+  firstName      String
+  lastName       String
+  phone          String?
+  role           UserRole         @default(CUSTOMER)
+  isActive       Boolean          @default(true)
+  emailVerified  Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  cart           cart?
+  orders         orders[]
+  refresh_tokens refresh_tokens[]
+  reviews        reviews[]
+  wishlist       wishlist[]
 
   @@map("users")
 }
 
-model RefreshToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+model Product {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  description      String?
+  shortDescription String?
+  price            Decimal       @db.Decimal(10, 2)
+  salePrice        Decimal?      @db.Decimal(10, 2)
+  costPrice        Decimal?      @db.Decimal(10, 2)
+  sku              String?       @unique
+  stockQuantity    Int           @default(0)
+  minStockAlert    Int           @default(5)
+  categoryId       String
+  images           Json?
+  isActive         Boolean       @default(true)
+  isFeatured       Boolean       @default(false)
+  weight           Decimal?      @db.Decimal(8, 2)
+  dimensions       Json?
+  tags             String[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime
+  cart_items       cart_items[]
+  order_items      order_items[]
+  categories       Category      @relation(fields: [categoryId], references: [id])
+  reviews          reviews[]
+  wishlist         wishlist[]
 
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("refresh_tokens")
+  @@map("products")
 }
 
 model Category {
@@ -56,156 +68,98 @@ model Category {
   sortOrder   Int       @default(0)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  // Relations
-  products Product[]
+  products    Product[]
 
   @@map("categories")
 }
 
-model Product {
-  id                String   @id @default(cuid())
-  name              String
-  slug              String   @unique
-  description       String?
-  shortDescription  String?
-  price             Decimal  @db.Decimal(10, 2)
-  salePrice         Decimal? @db.Decimal(10, 2)
-  costPrice         Decimal? @db.Decimal(10, 2)
-  sku               String?  @unique
-  stockQuantity     Int      @default(0)
-  minStockAlert     Int      @default(5)
-  categoryId        String
-  images            Json?    // Array of image URLs
-  isActive          Boolean  @default(true)
-  isFeatured        Boolean  @default(false)
-  weight            Decimal? @db.Decimal(8, 2)
-  dimensions        Json?    // {length, width, height}
-  tags              String[]
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  // Relations
-  category    Category     @relation(fields: [categoryId], references: [id])
-  orderItems  OrderItem[]
-  cartItems   CartItem[]
-  wishlist    Wishlist[]
-  reviews     Review[]
-
-  @@map("products")
+model cart {
+  id         String       @id
+  userId     String       @unique
+  sessionId  String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime
+  users      User         @relation(fields: [userId], references: [id])
+  cart_items cart_items[]
 }
 
-model Order {
-  id                    String        @id @default(cuid())
-  orderNumber           String        @unique // AKZ-001, AKZ-002, etc.
-  
-  // Customer Information (from checkout)
-  customerName          String
-  customerEmail         String
-  customerPhone         String
-  customerAddress       String
-  customerCity          String        // For delivery fee calculation
-  
-  // Order Details
-  status                OrderStatus   @default(PENDING)
-  subtotal              Decimal       @db.Decimal(10, 2)
-  deliveryFee           Decimal       @db.Decimal(10, 2)
-  totalAmount           Decimal       @db.Decimal(10, 2)
-  
-  // Payment Information
-  paymentMethod         PaymentMethod
-  paymentStatus         PaymentStatus @default(PENDING)
-  
-  // Delivery Information
-  deliveryStatus        DeliveryStatus @default(PENDING)
-  trackingNumber        String?
-  estimatedDelivery     DateTime?
-  deliveredAt           DateTime?
-  
-  // Additional Information
-  notes                 String?       // Customer notes
-  adminNotes            String?       // Internal admin notes
-  
-  // Timestamps
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-
-  // Relations
-  userId                String?       // Optional - for registered users
-  user                  User?         @relation(fields: [userId], references: [id])
-  orderItems            OrderItem[]
-  paymentProofs         PaymentProof[]
-
-  @@map("orders")
-}
-
-model OrderItem {
-  id          String  @id @default(cuid())
-  orderId     String
-  productId   String
-  productName String
-  productImage String // Flower image at time of order
-  productSku  String?
-  quantity    Int
-  unitPrice   Decimal @db.Decimal(10, 2)
-  totalPrice  Decimal @db.Decimal(10, 2)
-  color       String  // Flower color
-  type        String  // Flower type
-  createdAt   DateTime @default(now())
-
-  // Relations
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-
-  @@map("order_items")
-}
-
-model Cart {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  sessionId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user      User       @relation(fields: [userId], references: [id])
-  cartItems CartItem[]
-
-  @@map("cart")
-}
-
-model CartItem {
-  id        String   @id @default(cuid())
+model cart_items {
+  id        String   @id
   cartId    String
   productId String
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  updatedAt DateTime
+  cart      cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  products  Product  @relation(fields: [productId], references: [id])
 
   @@unique([cartId, productId])
-  @@map("cart_items")
 }
 
-model Wishlist {
-  id        String   @id @default(cuid())
+model order_items {
+  id           String   @id
+  orderId      String
+  productId    String
+  productName  String
+  productSku   String?
+  quantity     Int
+  unitPrice    Decimal  @db.Decimal(10, 2)
+  totalPrice   Decimal  @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+  color        String
+  productImage String
+  type         String
+  orders       orders   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  products     Product  @relation(fields: [productId], references: [id])
+}
+
+model orders {
+  id                String           @id
+  orderNumber       String           @unique
+  userId            String?
+  status            OrderStatus      @default(PENDING)
+  subtotal          Decimal          @db.Decimal(10, 2)
+  totalAmount       Decimal          @db.Decimal(10, 2)
+  paymentMethod     PaymentMethod
+  paymentStatus     PaymentStatus    @default(PENDING)
+  notes             String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime
+  adminNotes        String?
+  customerAddress   String
+  customerCity      String
+  customerEmail     String
+  customerName      String
+  customerPhone     String
+  deliveredAt       DateTime?
+  deliveryFee       Decimal          @db.Decimal(10, 2)
+  deliveryStatus    DeliveryStatus   @default(PENDING)
+  estimatedDelivery DateTime?
+  trackingNumber    String?
+  order_items       order_items[]
+  users             User?            @relation(fields: [userId], references: [id])
+  payment_proofs    payment_proofs[]
+}
+
+model payment_proofs {
+  id         String   @id
+  orderId    String
+  proofImage String
+  uploadedAt DateTime @default(now())
+  orders     orders   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model refresh_tokens {
+  id        String   @id
+  token     String   @unique
   userId    String
-  productId String
+  expiresAt DateTime
   createdAt DateTime @default(now())
-
-  // Relations
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, productId])
-  @@map("wishlist")
+  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Review {
-  id         String   @id @default(cuid())
+model reviews {
+  id         String   @id
   productId  String
   userId     String
   rating     Int
@@ -213,43 +167,54 @@ model Review {
   comment    String?
   isApproved Boolean  @default(false)
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Relations
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id])
-
-  @@map("reviews")
+  updatedAt  DateTime
+  products   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  users      User     @relation(fields: [userId], references: [id])
 }
 
-model Setting {
-  id          String   @id @default(cuid())
+model settings {
+  id          String   @id
   key         String   @unique
   value       String?
   description String?
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("settings")
+  updatedAt   DateTime
 }
 
-model PaymentProof {
-  id          String   @id @default(cuid())
-  orderId     String
-  proofImage  String   // BK transfer screenshot
-  uploadedAt  DateTime @default(now())
+model wishlist {
+  id        String   @id
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  products  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Relations
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@map("payment_proofs")
+  @@unique([userId, productId])
 }
 
-// Enums
-enum UserRole {
-  CUSTOMER
-  ADMIN
-  STAFF
+model support_tickets {
+  id           String            @id @default(cuid())
+  customerName String
+  customerEmail String
+  subject      String
+  message      String
+  status       SupportTicketStatus @default(PENDING)
+  priority     SupportTicketPriority @default(MEDIUM)
+  assignedTo   String?
+  orderId      String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  resolvedAt   DateTime?
+  adminNotes   String?
+
+  @@map("support_tickets")
+}
+
+enum DeliveryStatus {
+  PENDING
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
 }
 
 enum OrderStatus {
@@ -274,9 +239,22 @@ enum PaymentStatus {
   REFUNDED
 }
 
-enum DeliveryStatus {
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  STAFF
+}
+
+enum SupportTicketStatus {
   PENDING
-  PREPARING
-  OUT_FOR_DELIVERY
-  DELIVERED
-} 
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}

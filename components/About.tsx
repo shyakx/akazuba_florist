@@ -333,7 +333,7 @@ const About = () => {
                 <Phone className="h-8 w-8 text-blue-600" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-2">Call Us</h4>
-                <p className="text-gray-600">+250 784 586 110</p>
+                <p className="text-gray-600">0784586110</p>
               <p className="text-sm text-gray-500 mt-1">Available 24/7 for urgent orders</p>
             </div>
             <div className="text-center group">
@@ -341,7 +341,7 @@ const About = () => {
                 <Mail className="h-8 w-8 text-green-600" />
               </div>
               <h4 className="text-xl font-bold text-gray-900 mb-2">Email Us</h4>
-              <p className="text-gray-600">hello@akazubaflorist.com</p>
+                              <p className="text-gray-600">info.akazubaflorist@gmail.com</p>
               <p className="text-sm text-gray-500 mt-1">We reply within 2 hours</p>
               </div>
             </div>

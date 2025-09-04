@@ -4,7 +4,6 @@ import type { NextRequest } from 'next/server'
 // Define protected routes
 const protectedRoutes = [
   '/profile',
-  '/orders',
   '/wishlist'
 ]
 
@@ -32,8 +31,8 @@ export function middleware(request: NextRequest) {
   const isAdmin = userRole === 'ADMIN'
   
   // Only log important middleware checks (not every request)
-  if (pathname.startsWith('/admin') || pathname.startsWith('/profile') || pathname.startsWith('/orders')) {
-    console.log('🔒 Middleware check:', {
+  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+    console.log('🔒 Admin route check:', {
       pathname,
       isAuthenticated,
       isAdmin,
@@ -44,6 +43,7 @@ export function middleware(request: NextRequest) {
   
   // Handle auth routes (login, register) - ALWAYS allow access
   if (authRoutes.some(route => pathname.startsWith(route))) {
+    // Don't log auth route access to reduce noise
     return NextResponse.next()
   }
   
@@ -73,7 +73,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
   
-  // For all other routes, allow access
+  // For all other routes (including home page), allow access
+  // This ensures first-time users can access the home page without authentication
   return NextResponse.next()
 }
 

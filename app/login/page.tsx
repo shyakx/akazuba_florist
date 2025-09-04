@@ -5,7 +5,7 @@ import { Eye, EyeOff, Lock, User, Flower, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/RealAuthContext'
-import { apiUtils } from '@/lib/api'
+import { authAPI } from '@/lib/api'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -14,26 +14,32 @@ const Login = () => {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({})
+  const [isRedirecting, setIsRedirecting] = useState(false)
   
   const { login, isLoading, user, isAuthenticated } = useAuth()
   const router = useRouter()
 
-  // Monitor authentication state changes
+  // Simplified authentication redirect logic
   useEffect(() => {
-    // Only redirect if user is authenticated and not loading
-    if (!isLoading && isAuthenticated && user) {
-      // Add a small delay to prevent rapid redirects
-      const timer = setTimeout(() => {
-        if (user.role === 'ADMIN') {
-          router.push('/admin')
-        } else {
-          router.push('/dashboard')
-        }
-      }, 1000)
+    // Only redirect if user is authenticated, not loading, and not already redirecting
+    if (!isLoading && isAuthenticated && user && !isRedirecting) {
+      setIsRedirecting(true)
       
-      return () => clearTimeout(timer)
+      // Immediate redirect without delay
+      if (user.role === 'ADMIN') {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
     }
-  }, [isAuthenticated, user, isLoading, router])
+  }, [isAuthenticated, user, isLoading, router, isRedirecting])
+
+  // Prevent multiple redirects
+  useEffect(() => {
+    return () => {
+      setIsRedirecting(false)
+    }
+  }, [])
 
   const validateForm = () => {
     const newErrors: { email?: string; password?: string } = {}
@@ -41,7 +47,7 @@ const Login = () => {
     // Validate email
     if (!formData.email) {
       newErrors.email = 'Email is required'
-    } else if (!apiUtils.validateEmail(formData.email)) {
+    } else if (!authAPI.utils.validateEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address'
     }
 
@@ -67,6 +73,7 @@ const Login = () => {
       
       if (success) {
         // Redirect will happen automatically via useEffect
+        // No need to set errors here
       } else {
         setErrors({ general: 'Invalid email or password' })
       }
@@ -86,12 +93,26 @@ const Login = () => {
   }
 
   // Show loading state while checking authentication
-  if (isLoading) {
+  if (isLoading || isRedirecting) {
     return (
       <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">
+            {isRedirecting ? 'Redirecting...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render login form if already authenticated
+  if (isAuthenticated && user) {
+    return (
+      <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecting...</p>
         </div>
       </div>
     )

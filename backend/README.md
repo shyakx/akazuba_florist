@@ -69,15 +69,15 @@ Create a `.env.local` file in the root directory:
 ```env
 # Payment Configuration
 MOMO_MERCHANT_CODE=123456
-MOMO_ACCOUNT_NUMBER=0788123456
+MOMO_ACCOUNT_NUMBER=0784586110
 BK_ACCOUNT_NUMBER=00040-1234567-01
 
 # Notification Settings
-OWNER_EMAIL=owner@scentivarwanda.com
-OWNER_PHONE=+250788123456
+OWNER_EMAIL=info.akazubaflorist@gmail.com
+OWNER_PHONE=0784586110
 
 # Database (if using)
-DATABASE_URL=your_database_url
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a/akazuba_florist
 ```
 
 ### Payment Setup
@@ -189,9 +189,9 @@ Make sure to set these in your Render service:
 ## 📞 Support
 
 For technical support or business inquiries:
-- **Email**: info@scentivarwanda.com
-- **Phone**: +250 788 123 456
-- **Address**: Kimihurura, KG 123 St, Kigali, Rwanda
+- **Email**: info.akazubaflorist@gmail.com
+- **Phone**: 0784586110
+- **Address**: Kigali, Rwanda
 
 ## 📄 License
 

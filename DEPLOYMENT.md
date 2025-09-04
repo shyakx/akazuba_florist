@@ -52,23 +52,23 @@ Add these environment variables in Render:
 ```bash
 NODE_ENV=production
 PORT=10000
-DATABASE_URL=<your-render-postgresql-internal-url>
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a/akazuba_florist
 JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
 CORS_ORIGIN=https://online-shopping-by-diane.vercel.app
 
 # Cloudinary (for image uploads)
-CLOUDINARY_CLOUD_NAME=akazuba-florist
-CLOUDINARY_API_KEY=your-cloudinary-api-key-here
-CLOUDINARY_API_SECRET=your-cloudinary-api-secret-here
+CLOUDINARY_CLOUD_NAME=dkhac7xh2
+CLOUDINARY_API_KEY=194878579547962
+CLOUDINARY_API_SECRET=wZbXGj1VgByURl-VxRJ25CPcVVs
 
 # Email Configuration
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=akazuba.florist@gmail.com
-SMTP_PASS=your-gmail-app-password-here
+SMTP_USER=info.akazubaflorist@gmail.com
+SMTP_PASS=jugo hasc bepe zdeh
 
 # Optional: Redis for caching
-REDIS_URL=redis://localhost:6379
+REDIS_URL=redis://default:YF7BaUSjbRCq8xKYWOFrbGZ8k6ylyRka@redis-14974.c9.us-east-1-4.ec2.redns.redis-cloud.com:14974
 ```
 
 ### 2.3 Deploy Backend
@@ -94,8 +94,8 @@ Add these environment variables in Vercel:
 ```bash
 NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 NEXT_PUBLIC_JWT_SECRET=akazuba-jwt-secret-2024-production-super-secure
-NEXT_PUBLIC_PAYMENT_PUBLIC_KEY=akazuba-payment-public-key-2024
-NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=akazuba-florist
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dkhac7xh2
+# No payment API keys needed - local payment with proof upload
 ```
 
 ### 3.3 Deploy Frontend
@@ -134,14 +134,23 @@ The backend should automatically connect to the PostgreSQL database.
 
 ## 🔧 Step 6: Setup Admin User
 
-### 6.1 Create Admin Account
-Visit your backend admin setup endpoint:
+### 6.1 Create Admin Accounts
+Visit your backend admin setup endpoints:
+
+**Primary Admin:**
 ```
 https://akazuba-backend-api.onrender.com/api/v1/admin/setup
 ```
-
 This will create an admin user with:
 - **Email**: `admin@akazubaflorist.com`
+- **Password**: `akazuba2024`
+
+**Info Admin:**
+```
+https://akazuba-backend-api.onrender.com/api/v1/admin/setup-info
+```
+This will create an admin user with:
+- **Email**: `info.akazubaflorist@gmail.com`
 - **Password**: `akazuba2024`
 
 ### 6.2 Access Admin Panel

@@ -82,14 +82,14 @@ const Footer = () => {
               {[
                 {
                   icon: Mail,
-                  text: "hello@akazubaflorist.com",
-                  href: "mailto:hello@akazubaflorist.com",
+                  text: "info.akazubaflorist@gmail.com",
+                  href: "mailto:info.akazubaflorist@gmail.com",
                   desc: "Send us your floral dreams"
                 },
                 {
                   icon: Phone,
-                  text: "+250 784 586 110",
-                  href: "tel:+250784586110",
+                  text: "0784586110",
+                  href: "tel:0784586110",
                   desc: "Call us anytime"
                 },
                 {

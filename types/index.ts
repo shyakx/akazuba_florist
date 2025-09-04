@@ -1,26 +1,35 @@
 export interface Product {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  category: 'flowers' | 'bouquets';
-  featured: boolean;
-  description: string;
-  shortDescription?: string;
-  originalPrice?: number;
-  rating?: number;
-  reviews?: number;
-  inStock?: boolean;
-  discount?: number;
-  tags?: string[];
-  weight?: string;
-  dimensions?: string;
-  color?: string;
-  type?: string;
+  id: string
+  name: string
+  type: string
+  color: string
+  brand: string
+  description: string
+  price: number
+  salePrice?: number | null
+  stockQuantity: number
+  images: string[]
+  categoryName: string
+  size?: string
+  concentration?: string
+  isActive: boolean
+  isFeatured: boolean
+  sku?: string
+  weight?: number
+  tags?: string[]
+  categoryIds?: string[]
+  shortDescription?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
-export interface CartItem extends Product {
-  quantity: number;
+export interface CartItem {
+  id: string
+  productId: string
+  product?: Product
+  quantity: number
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface User {
@@ -29,7 +38,7 @@ export interface User {
   firstName: string;
   lastName: string;
   phone?: string;
-  role: 'CUSTOMER' | 'ADMIN';
+  role: 'CUSTOMER' | 'ADMIN' | 'STAFF';
   isActive: boolean;
   emailVerified: boolean;
   createdAt: string;

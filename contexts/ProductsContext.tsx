@@ -1,286 +1,256 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import { productsAPI } from '../lib/api'
-import { realFlowerProducts } from '../data/real-flowers'
-import { perfumeProducts as perfumeData } from '../data/perfumes'
-
-export interface Product {
-  id: string | number
-  name: string
-  price: number
-  image: string
-  category: string
-  featured: boolean
-  description: string
-  color?: string
-  type: string
-  brand?: string
-  size?: string
-  concentration?: string
-  notes?: string
-  salePrice?: number
-  stockQuantity?: number
-  tags?: string[]
-}
-
-interface ProductsState {
-  products: Product[]
-  featuredProducts: Product[]
-  flowerProducts: Product[]
-  perfumeProducts: Product[]
-  isLoading: boolean
-  error: string | null
-}
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react'
+import { Product } from '@/types'
+import { databaseAPI } from '@/lib/databaseApi'
+import { usePathname } from 'next/navigation'
 
 interface ProductsContextType {
-  state: ProductsState
+  products: Product[]
+  isLoading: boolean
+  error: string | null
+  loadProducts: () => Promise<void>
   refreshProducts: () => Promise<void>
-  getProduct: (id: string) => Product | undefined
-  getBackendProductId: (frontendId: number | string) => string | undefined
+  getAllProducts: () => Product[]
+  getProductById: (id: string) => Product | null
   getProductsByCategory: (category: string) => Product[]
-  getFeaturedByCategory: (category: string) => Product[]
+  getFeaturedProducts: () => Product[]
+  getActiveProducts: () => Product[]
+  searchProducts: (query: string) => Product[]
+  addProduct: (product: Omit<Product, 'id'>) => Promise<Product | null>
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<Product | null>
+  deleteProduct: (id: string) => Promise<boolean>
+  clearError: () => void
 }
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined)
 
-const transformProduct = (product: any, index: number): Product => {
-  // Check if it's a perfume based on multiple criteria
-  const isPerfume = product.category === 'perfumes' || 
-                   product.category?.name === 'perfumes' || 
-                   product.brand || 
-                   product.concentration ||
-                   product.type === 'Men' || 
-                   product.type === 'Women' || 
-                   product.type === 'Unisex'
-  
-  let imagePath = product.image || product.images?.[0]
-
-  if (isPerfume) {
-    // For perfumes, use perfume-specific image paths
-    if (!imagePath) {
-      imagePath = 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop'
-    }
-    // If it's a local path, ensure it goes to perfumes directory
-    if (imagePath && !imagePath.startsWith('http') && !imagePath.startsWith('/images/perfumes/')) {
-      imagePath = `/images/perfumes/perfume-${(index % 6) + 1}.jpg`
-    }
-  } else {
-    // For flowers, PRESERVE the original image path from realFlowerProducts
-    if (!imagePath) {
-      // Only set default if no image path exists
-      const color = product.color || 'mixed'
-      imagePath = `/images/flowers/${color}/${color}-${(index % 2) + 1}.jpg`
-    }
-    // DON'T override existing flower image paths - they are already correct
-    // Only ensure flower images go to flowers directory if they're missing
-    if (imagePath && !imagePath.startsWith('/images/flowers/') && !imagePath.startsWith('http') && !imagePath.includes('/images/')) {
-      const color = product.color || 'mixed'
-      imagePath = `/images/flowers/${color}/${color}-1.jpg`
-    }
+export const useProducts = () => {
+  const context = useContext(ProductsContext)
+  if (!context) {
+    throw new Error('useProducts must be used within a ProductsProvider')
   }
-
-  return {
-    id: product.id || index + 1,
-    name: product.name,
-    price: Number(product.price),
-    image: imagePath,
-    category: product.category?.name || product.category || (isPerfume ? 'perfumes' : 'flowers'),
-    featured: product.featured || product.isFeatured || index < 8,
-    description: product.description || `${product.name} from Akazuba Florist`,
-    color: product.color || (isPerfume ? undefined : 'mixed'),
-    type: product.type || (isPerfume ? 'Perfume' : 'Flower'),
-    brand: product.brand,
-    size: product.size,
-    concentration: product.concentration,
-    notes: product.notes,
-    salePrice: product.salePrice ? Number(product.salePrice) : undefined,
-    stockQuantity: product.stockQuantity,
-    tags: product.tags
-  }
+  return context
 }
 
-export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<ProductsState>({
-    products: [],
-    featuredProducts: [],
-    flowerProducts: [],
-    perfumeProducts: [],
-    isLoading: true,
-    error: null
-  })
+export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [products, setProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const isLoadingRef = useRef(false)
+  const pathname = usePathname()
 
-  const [backendIdMapping, setBackendIdMapping] = useState<Map<number, string>>(new Map())
+  const loadProducts = useCallback(async () => {
+    if (isLoadingRef.current) {
+      console.log('🚫 ProductsContext: Load already in progress, skipping...')
+      return
+    }
 
-  // Helper function to load local products only
-  const loadLocalProducts = async () => {
-    // Check if admin mode is active
-    if (typeof window !== 'undefined' && (window.location.pathname.startsWith('/admin') || (window as any).adminProductsMode)) {
-      console.log('🚫 ProductsContext: Admin mode detected - skipping local products load')
+    try {
+      isLoadingRef.current = true
+      setIsLoading(true)
+      setError(null)
+      console.log('🔄 Loading products from database...')
+      
+      const productsData = await databaseAPI.getAllProducts()
+      setProducts(productsData)
+      console.log('✅ Loaded', productsData.length, 'products from database')
+    } catch (err) {
+      console.error('❌ Error loading products:', err)
+      setError(err instanceof Error ? err.message : 'Failed to load products')
+    } finally {
+      setIsLoading(false)
+      isLoadingRef.current = false
+    }
+  }, []) // Empty dependency array since this function doesn't depend on any state
+
+  const refreshProducts = async () => {
+    await loadProducts()
+  }
+
+  // Get all products
+  const getAllProducts = (): Product[] => {
+    return products
+  }
+
+  // Get product by ID
+  const getProductById = (id: string): Product | null => {
+    return products.find(product => product.id === id) || null
+  }
+
+  // Get products by category
+  const getProductsByCategory = (category: string): Product[] => {
+    const categoryLower = category.toLowerCase()
+    return products.filter(product => {
+      const productCategory = product.categoryName?.toLowerCase() || ''
+      const productType = product.type?.toLowerCase() || ''
+      const productColor = product.color?.toLowerCase() || ''
+      
+      return productCategory.includes(categoryLower) ||
+             productType.includes(categoryLower) ||
+             productColor.includes(categoryLower)
+    })
+  }
+
+  // Get featured products
+  const getFeaturedProducts = (): Product[] => {
+    return products.filter(product => product.isFeatured)
+  }
+
+  // Get active products
+  const getActiveProducts = (): Product[] => {
+    return products.filter(product => product.isActive)
+  }
+
+  // Search products
+  const searchProducts = (query: string): Product[] => {
+    const searchTerm = query.toLowerCase()
+    return products.filter(product => 
+      product.name.toLowerCase().includes(searchTerm) ||
+      product.description?.toLowerCase().includes(searchTerm) ||
+      product.categoryName?.toLowerCase().includes(searchTerm) ||
+      product.tags?.some(tag => tag.toLowerCase().includes(searchTerm))
+    )
+  }
+
+  // Add product (Admin only)
+  const addProduct = async (product: Omit<Product, 'id'>): Promise<Product | null> => {
+    try {
+      console.log('➕ Adding product:', product.name)
+      
+      const newProduct = await databaseAPI.createProduct(product)
+      if (newProduct) {
+        console.log('✅ Product added to database successfully:', newProduct.name)
+        await loadProducts() // Refresh from database
+        return newProduct
+      }
+      return null
+      
+    } catch (err) {
+      console.error('❌ Failed to add product:', err)
+      setError('Failed to add product. Please try again.')
+      throw err
+    }
+  }
+
+  // Update product (Admin only)
+  const updateProduct = async (id: string, updates: Partial<Product>): Promise<Product | null> => {
+    try {
+      console.log('✏️ Updating product:', id)
+      
+      const updatedProduct = await databaseAPI.updateProduct(id, updates)
+      if (updatedProduct) {
+        console.log('✅ Product updated in database successfully:', updatedProduct.name)
+        await loadProducts() // Refresh from database
+        return updatedProduct
+      }
+      return null
+      
+    } catch (err) {
+      console.error('❌ Failed to update product:', err)
+      setError('Failed to update product. Please try again.')
+      throw err
+    }
+  }
+
+  // Delete product (Admin only)
+  const deleteProduct = async (id: string): Promise<boolean> => {
+    try {
+      console.log('🗑️ Deleting product:', id)
+      
+      const success = await databaseAPI.deleteProduct(id)
+      if (success) {
+        console.log('✅ Product deleted from database successfully')
+        await loadProducts() // Refresh from database
+        return true
+      }
+      return false
+      
+    } catch (err) {
+      console.error('❌ Failed to delete product:', err)
+      setError('Failed to delete product. Please try again.')
+      throw err
+    }
+  }
+
+  const clearError = () => {
+    setError(null)
+  }
+
+  // Initial load - only if products are empty and not on admin pages
+  useEffect(() => {
+    // Skip loading on admin pages completely
+    if (pathname?.startsWith('/admin')) {
+      console.log('🚫 ProductsContext: Skipping product load on admin page:', pathname)
       return
     }
     
-    console.log('🔄 Loading local products only...')
-    const localFlowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
-    const localPerfumeProducts = perfumeData.map((product, index) => transformProduct(product, index + 100))
+    // Skip loading on auth pages
+    if (pathname && ['/login', '/register', '/admin/login'].includes(pathname)) {
+      console.log('🚫 ProductsContext: Skipping product load on auth page:', pathname)
+      return
+    }
     
-    const allProducts = [...localFlowerProducts, ...localPerfumeProducts]
-    const featuredProducts = allProducts.filter(product => product.featured)
-    const flowerProducts = localFlowerProducts
-    const perfumeProducts = localPerfumeProducts
-    
-    setState({
-      products: allProducts,
-      featuredProducts,
-      flowerProducts,
-      perfumeProducts,
-      isLoading: false,
-      error: null
-    })
-    
-    console.log('✅ Local products loaded successfully:', allProducts.length)
-  }
+    // Only load if products are empty
+    if (products.length === 0) {
+      console.log('🚀 ProductsContext: Initial load triggered (products empty)')
+      loadProducts()
+    } else {
+      console.log('🚫 ProductsContext: Products already loaded, skipping initial load')
+    }
+  }, [pathname, products.length, loadProducts]) // Depend on pathname, products length, and loadProducts
 
-  const fetchProducts = async () => {
-    try {
-      setState(prev => ({ ...prev, isLoading: true, error: null }))
-      
-      console.log('🔄 Loading products with local data priority...')
-      
-      // Always load local flower data first (ensures correct image paths)
-      console.log('🌸 Loading local flower products...')
-      const localFlowerProducts = realFlowerProducts.map((product, index) => transformProduct(product, index))
-      console.log('✅ Local flower products loaded:', localFlowerProducts.length)
-      
-      // Always load local perfume data
-      console.log('🌸 Loading local perfume products...')
-      const localPerfumeProducts = perfumeData.map((product, index) => transformProduct(product, index + 100))
-      console.log('✅ Local perfume products loaded:', localPerfumeProducts.length)
-      
-      // Try to fetch backend products for additional data
-      try {
-        console.log('🔄 Attempting to fetch additional products from backend API...')
-        const response = await productsAPI.getAll()
-        console.log('📡 Backend API response:', response)
-        
-        if (response.success && response.data && Array.isArray(response.data) && response.data.length > 0) {
-          console.log('✅ Backend products fetched successfully:', response.data.length, 'products')
-          const backendProducts = response.data
-          const backendFlowerProducts = backendProducts.map((product, index) => transformProduct(product, index))
-          
-          // Combine backend flowers with local perfumes (prioritize local flowers for correct images)
-          const allProducts = [...localFlowerProducts, ...localPerfumeProducts]
-          const featuredProducts = allProducts.filter(product => product.featured)
-          const flowerProducts = localFlowerProducts // Use local flowers for correct images
-          const perfumeProducts = localPerfumeProducts
-          
-          // Create mapping between frontend IDs and backend IDs for fallback compatibility
-          const mapping = new Map<number, string>()
-          backendProducts.forEach((product, index) => {
-            mapping.set(index + 1, product.id)
-          })
-          setBackendIdMapping(mapping)
-          
-          setState({
-            products: allProducts,
-            featuredProducts,
-            flowerProducts,
-            perfumeProducts,
-            isLoading: false,
-            error: null
-          })
-          
-          console.log('🎉 Products loaded successfully with backend integration')
-        } else {
-          // Backend failed or returned empty, use local data only
-          console.warn('⚠️ Backend products fetch failed or returned empty, using local data only')
-          await loadLocalProducts()
-        }
-      } catch (backendError) {
-        console.error('❌ Error fetching products from backend:', backendError)
-        console.log('🔄 Using local data only...')
-        // Backend failed, use local data only
-        await loadLocalProducts()
+  // Page focus refresh - only if not on admin pages
+  useEffect(() => {
+    if (pathname?.startsWith('/admin')) {
+      console.log('🚫 ProductsContext: Skipping focus refresh on admin page')
+      return
+    }
+    
+    const handleFocus = () => {
+      if (products.length > 0) {
+        console.log('🔄 Page focused, refreshing products...')
+        loadProducts()
       }
-    } catch (error) {
-      console.error('❌ Critical error in fetchProducts:', error)
-      // Final fallback to local data
-      await loadLocalProducts()
     }
-  }
 
-  const refreshProducts = async () => {
-    await fetchProducts()
-  }
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [pathname, products.length, loadProducts]) // Add pathname dependency
 
-  const getProduct = (id: string): Product | undefined => {
-    return state.products.find(product => product.id.toString() === id)
-  }
-
-  const getBackendProductId = (frontendId: number | string): string | undefined => {
-    const numId = typeof frontendId === 'string' ? parseInt(frontendId) : frontendId
-    return backendIdMapping.get(numId)
-  }
-
-  const getProductsByCategory = (category: string): Product[] => {
-    console.log('🔍 getProductsByCategory called with category:', category)
-    console.log('📦 Total products available:', state.products.length)
-    console.log('🌸 Flower products available:', state.flowerProducts.length)
-    
-    // Handle both singular and plural category names
-    const categoryMap: { [key: string]: string[] } = {
-      'flowers': ['flowers', 'flower'],
-      'perfumes': ['perfumes', 'perfume'],
-      'roses': ['roses', 'rose'],
-      'tulips': ['tulips', 'tulip'],
-      'lilies': ['lilies', 'lily'],
-      'sunflowers': ['sunflowers', 'sunflower'],
-      'bouquets': ['bouquets', 'bouquet'],
-      'wedding-flowers': ['wedding-flowers', 'wedding', 'wedding flowers'],
-      'men-perfumes': ['men-perfumes', 'men', 'men perfume'],
-      'women-perfumes': ['women-perfumes', 'women', 'women perfume'],
-      'unisex-perfumes': ['unisex-perfumes', 'unisex', 'unisex perfume']
+  // Auto-refresh - only if not on admin pages
+  useEffect(() => {
+    if (pathname?.startsWith('/admin')) {
+      console.log('🚫 ProductsContext: Skipping auto-refresh on admin page')
+      return
     }
     
-    const validCategories = categoryMap[category] || [category]
-    console.log('🎯 Valid categories for', category, ':', validCategories)
-    
-    const filteredProducts = state.products.filter(product => 
-      validCategories.includes(product.category.toLowerCase())
-    )
-    
-    console.log('✅ Found', filteredProducts.length, 'products for category', category)
-    console.log('📋 Products:', filteredProducts.map(p => ({ id: p.id, name: p.name, category: p.category })))
-    
-    return filteredProducts
-  }
+    const interval = setInterval(() => {
+      if (products.length > 0) {
+        console.log('🔄 Auto-refreshing products...')
+        loadProducts()
+      }
+    }, 15 * 60 * 1000) // 15 minutes
 
-  const getFeaturedByCategory = (category: string): Product[] => {
-    return state.featuredProducts.filter(product => product.category === category)
-  }
-
-  useEffect(() => {
-    fetchProducts()
-  }, [])
-
-  // Debug logging for state changes
-  useEffect(() => {
-    console.log('🔄 ProductsContext state changed:', {
-      totalProducts: state.products.length,
-      flowerProducts: state.flowerProducts.length,
-      perfumeProducts: state.perfumeProducts.length,
-      isLoading: state.isLoading,
-      error: state.error
-    })
-  }, [state])
+    return () => clearInterval(interval)
+  }, [pathname, products.length, loadProducts]) // Add pathname dependency
 
   const value: ProductsContextType = {
-    state,
+    products,
+    isLoading,
+    error,
+    loadProducts,
     refreshProducts,
-    getProduct,
-    getBackendProductId,
+    getAllProducts,
+    getProductById,
     getProductsByCategory,
-    getFeaturedByCategory
+    getFeaturedProducts,
+    getActiveProducts,
+    searchProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    clearError
   }
 
   return (
@@ -290,10 +260,3 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   )
 }
 
-export const useProducts = (): ProductsContextType => {
-  const context = useContext(ProductsContext)
-  if (context === undefined) {
-    throw new Error('useProducts must be used within a ProductsProvider')
-  }
-  return context
-}

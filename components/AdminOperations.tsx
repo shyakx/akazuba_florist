@@ -148,27 +148,25 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Search and Filter Bar */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+      <div>
+        <div>
           {/* Search Section */}
-          <div className="flex flex-1 gap-3 w-full lg:w-auto">
-            <div className="relative flex-1 lg:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div>
+            <div>
+              <Search />
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               />
             </div>
             <select
               value={searchType}
               onChange={(e) => setSearchType(e.target.value as any)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
             >
               <option value="products">Products</option>
               <option value="customers">Customers</option>
@@ -176,114 +174,67 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
             </select>
             <button
               onClick={handleSearch}
-              className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
             >
               Search
             </button>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
+          <div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
             >
-              <Filter className="h-4 w-4" />
+              <Filter />
               Filters
             </button>
             <button
               onClick={onRefreshData}
               disabled={isLoading}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw />
               Refresh
             </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowBulkActions(!showBulkActions)}
-                disabled={selectedItems.length === 0}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-                Bulk Actions ({selectedItems.length})
-              </button>
-              
-              {/* Bulk Actions Dropdown */}
-              {showBulkActions && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 mb-3">Bulk Actions</h3>
-                    
-                    {/* Order Status Update */}
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Update Order Status
-                        </label>
-                        <select
-                          value={bulkStatus}
-                          onChange={(e) => setBulkStatus(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                        >
-                          <option value="">Select Status</option>
-                          {orderStatuses.map(status => (
-                            <option key={status.value} value={status.value}>
-                              {status.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleBulkAction}
-                          disabled={isBulkActionLoading || !bulkStatus}
-                          className="flex-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 text-sm"
-                        >
-                          {isBulkActionLoading ? 'Updating...' : 'Update'}
-                        </button>
-                        <button
-                          onClick={() => setShowBulkActions(false)}
-                          className="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setShowBulkActions(!showBulkActions)}
+              disabled={selectedItems.length === 0}
+            >
+              <MoreHorizontal />
+              Bulk Actions
+            </button>
           </div>
         </div>
 
-        {/* Advanced Filters */}
+        {/* Filters Panel */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <div>
+              <h3>Filters</h3>
+              <button
+                onClick={() => setShowFilters(false)}
+              >
+                <X />
+              </button>
+            </div>
+            <div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status Filter</label>
+                <label>Status:</label>
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 >
-                  <option value="all">All Status</option>
-                  {orderStatuses.map(status => (
+                  <option value="all">All Statuses</option>
+                  {orderStatuses.map((status) => (
                     <option key={status.value} value={status.value}>
                       {status.label}
                     </option>
                   ))}
                 </select>
               </div>
-              
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                <label>Sort By:</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 >
                   <option value="date">Date</option>
                   <option value="name">Name</option>
@@ -291,150 +242,116 @@ const AdminOperations: React.FC<AdminOperationsProps> = ({
                   <option value="amount">Amount</option>
                 </select>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Export</label>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleExport('orders', 'csv')}
-                    disabled={isExporting}
-                    className="flex-1 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 text-sm flex items-center justify-center gap-1"
-                  >
-                    <Download className="h-3 w-3" />
-                    CSV
-                  </button>
-                  <button
-                    onClick={() => handleExport('orders', 'excel')}
-                    disabled={isExporting}
-                    className="flex-1 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm flex items-center justify-center gap-1"
-                  >
-                    <Download className="h-3 w-3" />
-                    Excel
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Quick Actions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Order Management */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <ShoppingCart className="h-6 w-6 text-blue-600" />
-            </div>
-            <span className="text-sm text-gray-500">Orders</span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Order Management</h3>
-          <p className="text-sm text-gray-600 mb-4">Update status, track deliveries, manage returns</p>
-          <div className="space-y-2">
-            <button className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
-              View Orders
+      {/* Bulk Actions Panel */}
+      {showBulkActions && (
+        <div>
+          <div>
+            <h3>Bulk Actions</h3>
+            <button
+              onClick={() => setShowBulkActions(false)}
+            >
+              <X />
             </button>
-            <button className="w-full px-3 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">
-              Process Orders
+          </div>
+          <div>
+            <div>
+              <label>Action:</label>
+              <select
+                value={bulkAction}
+                onChange={(e) => setBulkAction(e.target.value as 'update' | 'delete')}
+              >
+                <option value="update">Update Status</option>
+                <option value="delete">Delete</option>
+              </select>
+            </div>
+            {bulkAction === 'update' && (
+              <div>
+                <label>New Status:</label>
+                <select
+                  value={bulkStatus}
+                  onChange={(e) => setBulkStatus(e.target.value)}
+                >
+                  <option value="">Select Status</option>
+                  {orderStatuses.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <button
+              onClick={handleBulkAction}
+              disabled={isBulkActionLoading || (bulkAction === 'update' && !bulkStatus)}
+            >
+              {isBulkActionLoading ? 'Processing...' : 'Apply'}
             </button>
           </div>
         </div>
+      )}
 
-        {/* Customer Management */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <Users className="h-6 w-6 text-green-600" />
-            </div>
-            <span className="text-sm text-gray-500">Customers</span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Customer Management</h3>
-          <p className="text-sm text-gray-600 mb-4">View profiles, manage accounts, track activity</p>
-          <div className="space-y-2">
-            <button className="w-full px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
-              View Customers
-            </button>
-            <button className="w-full px-3 py-2 border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors text-sm">
-              Manage Accounts
-            </button>
-          </div>
-        </div>
-
-        {/* Product Management */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <Package className="h-6 w-6 text-purple-600" />
-            </div>
-            <span className="text-sm text-gray-500">Products</span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Product Management</h3>
-          <p className="text-sm text-gray-600 mb-4">Add products, update inventory, manage categories</p>
-          <div className="space-y-2">
-            <button className="w-full px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
-              Add Product
-            </button>
-            <button className="w-full px-3 py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors text-sm">
-              Manage Inventory
-            </button>
-          </div>
-        </div>
-
-        {/* Analytics & Reports */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-orange-600" />
-            </div>
-            <span className="text-sm text-gray-500">Analytics</span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics & Reports</h3>
-          <p className="text-sm text-gray-600 mb-4">View insights, generate reports, track performance</p>
-          <div className="space-y-2">
-            <button className="w-full px-3 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm">
-              View Analytics
-            </button>
-            <button className="w-full px-3 py-2 border border-orange-600 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors text-sm">
-              Generate Reports
-            </button>
-          </div>
+      {/* Export Section */}
+      <div>
+        <h3>Export Data</h3>
+        <div>
+          <button
+            onClick={() => handleExport('orders', 'csv')}
+            disabled={isExporting}
+          >
+            <Download />
+            Export Orders (CSV)
+          </button>
+          <button
+            onClick={() => handleExport('orders', 'excel')}
+            disabled={isExporting}
+          >
+            <Download />
+            Export Orders (Excel)
+          </button>
+          <button
+            onClick={() => handleExport('customers', 'csv')}
+            disabled={isExporting}
+          >
+            <Download />
+            Export Customers (CSV)
+          </button>
         </div>
       </div>
 
-      {/* Status Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
+      {/* Quick Stats */}
+      <div>
+        <div>
+          <div>
+            <Package />
             <div>
-              <p className="text-sm text-gray-600">Pending Orders</p>
-              <p className="text-2xl font-bold text-yellow-600">12</p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <Clock className="h-6 w-6 text-yellow-600" />
+              <span>Total Products</span>
+              <span>Loading...</span>
             </div>
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
+          <div>
+            <ShoppingCart />
             <div>
-              <p className="text-sm text-gray-600">Low Stock Items</p>
-              <p className="text-2xl font-bold text-red-600">5</p>
-            </div>
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+              <span>Total Orders</span>
+              <span>Loading...</span>
             </div>
           </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between">
+          <div>
+            <Users />
             <div>
-              <p className="text-sm text-gray-600">Today&apos;s Revenue</p>
-              <p className="text-2xl font-bold text-green-600">RWF 450K</p>
+              <span>Total Customers</span>
+              <span>Loading...</span>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-green-600" />
+          </div>
+          <div>
+            <DollarSign />
+            <div>
+              <span>Total Revenue</span>
+              <span>Loading...</span>
             </div>
           </div>
         </div>

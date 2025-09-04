@@ -813,8 +813,8 @@ class AdminAPI {
           
           <div class="footer">
             <p><span class="highlight">Thank you for choosing Akazuba Florist!</span></p>
-            <p>For any questions, please contact us at info@akazuba.rw</p>
-            <p>Phone: +250 784 586 110 | Address: Kigali, Rwanda</p>
+            <p>For any questions, please contact us at info.akazubaflorist@gmail.com</p>
+                          <p>Phone: 0784586110 | Address: Kigali, Rwanda</p>
             <p style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">
               This is a computer-generated invoice. No signature required.
             </p>
