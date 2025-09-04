@@ -27,6 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { user, isAuthenticated, isLoading, logout, isInitialized } = useAuth()
 
   const navigation = [
@@ -47,13 +48,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ]
 
   const handleLogout = async () => {
+    setIsLoggingOut(true)
     await logout()
     // Redirect is handled in the logout function in RealAuthContext
   }
 
   // Handle authentication
   useEffect(() => {
-    if (isLoading || !isInitialized) return
+    if (isLoading || !isInitialized || isLoggingOut) return
 
     if (!isAuthenticated) {
       router.push('/admin/login')
@@ -64,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.push('/')
       return
     }
-  }, [isAuthenticated, user?.role, isLoading, isInitialized, router])
+  }, [isAuthenticated, user?.role, isLoading, isInitialized, isLoggingOut, router])
 
   // Show loading state
   if (isLoading || !isInitialized) {
