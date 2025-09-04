@@ -1693,6 +1693,7 @@ app.get('/api/v1/admin/categories/public', async (req, res) => {
       description: category.description || '',
       productCount: category._count.products,
       status: category.isActive ? 'active' : 'inactive',
+      imageUrl: category.imageUrl,
       createdAt: category.createdAt.toISOString().split('T')[0]
     }));
     

@@ -11,6 +11,7 @@ import {
   Package
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Category {
   id: string
@@ -18,6 +19,7 @@ interface Category {
   description: string
   productCount: number
   status: 'active' | 'inactive'
+  imageUrl?: string
   createdAt: string
 }
 
@@ -105,9 +107,19 @@ export default function CategoriesPage() {
           >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Tag className="w-6 h-6 text-blue-600" />
-          </div>
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center overflow-hidden">
+                  {category.imageUrl ? (
+                    <Image
+                      src={category.imageUrl}
+                      alt={category.name}
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Tag className="w-6 h-6 text-blue-600" />
+                  )}
+                </div>
                     <div>
                   <h3 
                     className="font-semibold text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
