@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const backendUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/analytics/public`
+    const backendUrl = process.env.NODE_ENV === 'development' n      ? 'http://localhost:5000/api/v1/admin/analytics/public'n      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/analytics/public'
     
     const response = await fetch(backendUrl, {
       method: 'GET',

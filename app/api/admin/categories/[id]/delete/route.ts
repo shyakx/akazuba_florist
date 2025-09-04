@@ -7,7 +7,9 @@ export async function DELETE(
   try {
     const { id } = params
 
-    const backendUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/categories/${id}/public`
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? `http://localhost:5000/api/v1/admin/categories/${id}/public`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/categories/${id}/public`
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',

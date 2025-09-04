@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const backendUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/settings/public`
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? `http://localhost:5000/api/v1/admin/settings/public`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings/public`
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -31,7 +33,9 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
     
-    const backendUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/settings/public`
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? `http://localhost:5000/api/v1/admin/settings/public`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings/public`
     
     const response = await fetch(backendUrl, {
       method: 'PUT',

@@ -13,7 +13,9 @@ export async function GET(request: NextRequest) {
     params.append('page', page)
     params.append('limit', limit)
 
-    const backendUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/v1/admin/customers/public?${params.toString()}`
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? `http://localhost:5000/api/v1/admin/customers/public?${params.toString()}`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/customers/public?${params.toString()}`
     
     const response = await fetch(backendUrl, {
       method: 'GET',
