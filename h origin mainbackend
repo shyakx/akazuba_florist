@@ -1,0 +1,5 @@
+[33m63e97d63[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Add forgot password functionality for customers and admins
+[33mab30ccd4[m Fix final TypeScript error in authController - Add missing 'as any' type assertion to refresh_tokens.create operation - Complete all TypeScript error fixes for successful deployment
+[33mc2718c0d[m Fix remaining TypeScript errors with type assertions - Add 'as any' type assertions to Prisma create operations - Fix productsSku to productSku property name - Resolve all TypeScript compilation errors for successful deployment
+[33m178b071e[m Fix remaining property name errors - Correct productsImage to productImage - Fix property access in admin routes - Resolve final TypeScript compilation errors
+[33m55760a3b[m Fix variable reference errors in backend controllers and routes - Correct 'orders' to 'order' variable references - Fix property access in map functions - Resolve remaining TypeScript compilation errors - Enable successful backend deployment
