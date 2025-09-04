@@ -142,8 +142,7 @@ export default function CategoriesPage() {
                   className="p-1 text-gray-400 hover:text-blue-600"
                   onClick={(e) => {
                     e.stopPropagation()
-                    // TODO: View category details
-                    console.log('View category:', category.id)
+                    window.location.href = `/admin/categories/view/${category.id}`
                   }}
                 >
                   <Eye className="w-4 h-4" />
@@ -158,11 +157,25 @@ export default function CategoriesPage() {
                 </Link>
                 <button 
                   className="p-1 text-gray-400 hover:text-red-600"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.stopPropagation()
-                    // TODO: Delete category
                     if (confirm('Are you sure you want to delete this category?')) {
-                      console.log('Delete category:', category.id)
+                      try {
+                        const response = await fetch(`/api/admin/categories/${category.id}/delete`, {
+                          method: 'DELETE'
+                        })
+                        
+                        if (response.ok) {
+                          // Remove category from local state
+                          setCategories(prev => prev.filter(c => c.id !== category.id))
+                          alert('Category deleted successfully!')
+                        } else {
+                          throw new Error('Failed to delete category')
+                        }
+                      } catch (error) {
+                        console.error('Error deleting category:', error)
+                        alert('Failed to delete category. Please try again.')
+                      }
                     }
                   }}
                 >

@@ -140,16 +140,31 @@ export default function EditProductPage() {
     setLoading(true)
     
     try {
-      // TODO: Implement actual API call to update product
-      console.log('Updating product:', formData)
+      const response = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          categoryId: formData.category,
+          stockQuantity: parseInt(formData.stock),
+          isActive: formData.status === 'active',
+          images: formData.images
+        })
+      })
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Redirect to products page
-      router.push('/admin/products')
+      if (response.ok) {
+        alert('Product updated successfully!')
+        router.push('/admin/products')
+      } else {
+        throw new Error('Failed to update product')
+      }
     } catch (error) {
       console.error('Error updating product:', error)
+      alert('Failed to update product. Please try again.')
     } finally {
       setLoading(false)
     }

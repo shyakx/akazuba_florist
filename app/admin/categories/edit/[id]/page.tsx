@@ -115,16 +115,28 @@ export default function EditCategoryPage() {
     setLoading(true)
     
     try {
-      // TODO: Implement actual API call to update category
-      console.log('Updating category:', formData)
+      const response = await fetch(`/api/admin/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          description: formData.description,
+          isActive: formData.status === 'active',
+          imageUrl: formData.image
+        })
+      })
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Redirect to categories page
-      router.push('/admin/categories')
+      if (response.ok) {
+        alert('Category updated successfully!')
+        router.push('/admin/categories')
+      } else {
+        throw new Error('Failed to update category')
+      }
     } catch (error) {
       console.error('Error updating category:', error)
+      alert('Failed to update category. Please try again.')
     } finally {
       setLoading(false)
     }

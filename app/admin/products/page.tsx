@@ -330,8 +330,7 @@ export default function ProductsPage() {
                     <button 
                       className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                       onClick={() => {
-                        // TODO: Navigate to product details
-                        console.log('View product:', product.id)
+                        window.location.href = `/admin/products/view/${product.id}`
                       }}
                     >
                       <Eye className="w-4 h-4" />
@@ -343,10 +342,24 @@ export default function ProductsPage() {
                     </Link>
                     <button 
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
-                      onClick={() => {
-                        // TODO: Implement delete functionality
+                      onClick={async () => {
                         if (confirm('Are you sure you want to delete this product?')) {
-                          console.log('Delete product:', product.id)
+                          try {
+                            const response = await fetch(`/api/admin/products/${product.id}/delete`, {
+                              method: 'DELETE'
+                            })
+                            
+                            if (response.ok) {
+                              // Remove product from local state
+                              setProducts(prev => prev.filter(p => p.id !== product.id))
+                              alert('Product deleted successfully!')
+                            } else {
+                              throw new Error('Failed to delete product')
+                            }
+                          } catch (error) {
+                            console.error('Error deleting product:', error)
+                            alert('Failed to delete product. Please try again.')
+                          }
                         }
                       }}
                     >

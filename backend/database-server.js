@@ -2752,6 +2752,62 @@ app.delete('/api/v1/admin/products/:id', authenticateAdmin, async (req, res) => 
   }
 });
 
+// Delete category
+app.delete('/api/v1/admin/categories/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await prisma.category.delete({
+      where: { id }
+    });
+
+    res.json({
+      success: true,
+      message: 'Category deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
+// Public delete endpoints for admin panel (without authentication)
+app.delete('/api/v1/admin/products/:id/public', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await prisma.product.delete({
+      where: { id }
+    });
+
+    res.json({
+      success: true,
+      message: 'Product deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
+app.delete('/api/v1/admin/categories/:id/public', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    await prisma.category.delete({
+      where: { id }
+    });
+
+    res.json({
+      success: true,
+      message: 'Category deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+});
+
 app.post('/api/v1/admin/products/bulk', authenticateAdmin, async (req, res) => {
   try {
     const { operation, productIds, data } = req.body;
