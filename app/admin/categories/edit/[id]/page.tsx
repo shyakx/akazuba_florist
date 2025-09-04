@@ -20,26 +20,32 @@ export default function EditCategoryPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Mock category data - in real app, fetch from API
-  const mockCategory = {
-    id: categoryId,
-    name: 'Flowers',
-    description: 'Beautiful flower arrangements for all occasions',
-    status: 'active',
-    image: '/api/placeholder/300/200'
-  }
+  // Real category data will be fetched from API
 
   useEffect(() => {
-    // Simulate loading category data
     const loadCategory = async () => {
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`/api/admin/categories/${categoryId}`)
-        // const category = await response.json()
+        setInitialLoading(true)
+        const response = await fetch(`/api/admin/categories/public`)
+        if (!response.ok) throw new Error('Failed to fetch categories')
         
-        // For now, use mock data
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setFormData(mockCategory)
+        const result = await response.json()
+        if (result.success && result.data) {
+          // Find the specific category by ID
+          const foundCategory = result.data.find((c: any) => c.id === categoryId)
+          if (foundCategory) {
+            setFormData({
+              name: foundCategory.name || '',
+              description: foundCategory.description || '',
+              status: foundCategory.status || 'active',
+              image: foundCategory.image || null
+            })
+          } else {
+            throw new Error('Category not found')
+          }
+        } else {
+          throw new Error('Failed to fetch category data')
+        }
       } catch (error) {
         console.error('Error loading category:', error)
       } finally {

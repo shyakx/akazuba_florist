@@ -30,29 +30,35 @@ export default function EditProductPage() {
     { id: '4', name: 'Funeral' }
   ]
 
-  // Mock product data - in real app, fetch from API
-  const mockProduct = {
-    id: productId,
-    name: 'Red Roses Bouquet',
-    description: 'Beautiful red roses perfect for any occasion',
-    price: '25000',
-    category: '1',
-    stock: '15',
-    status: 'active',
-    images: ['/api/placeholder/300/200']
-  }
+  // Real product data will be fetched from API
 
   useEffect(() => {
-    // Simulate loading product data
     const loadProduct = async () => {
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`/api/admin/products/${productId}`)
-        // const product = await response.json()
+        setInitialLoading(true)
+        const response = await fetch(`/api/admin/products/public`)
+        if (!response.ok) throw new Error('Failed to fetch products')
         
-        // For now, use mock data
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setFormData(mockProduct)
+        const result = await response.json()
+        if (result.success && result.data) {
+          // Find the specific product by ID
+          const foundProduct = result.data.find((p: any) => p.id === productId)
+          if (foundProduct) {
+            setFormData({
+              name: foundProduct.name || '',
+              description: foundProduct.description || '',
+              price: foundProduct.price?.toString() || '',
+              category: foundProduct.categoryId || '',
+              stock: foundProduct.stockQuantity?.toString() || '',
+              status: foundProduct.status || 'active',
+              images: foundProduct.images || []
+            })
+          } else {
+            throw new Error('Product not found')
+          }
+        } else {
+          throw new Error('Failed to fetch product data')
+        }
       } catch (error) {
         console.error('Error loading product:', error)
       } finally {

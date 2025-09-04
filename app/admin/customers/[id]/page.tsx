@@ -12,58 +12,30 @@ export default function CustomerDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [customer, setCustomer] = useState<any>(null)
 
-  // Mock customer data - in real app, fetch from API
-  const mockCustomer = {
-    id: customerId,
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+250 788 123 456',
-    address: 'Kigali, Rwanda',
-    joinedDate: '2024-01-15',
-    totalOrders: 3,
-    totalSpent: 75000,
-    status: 'active',
-    orders: [
-      {
-        id: '1',
-        orderNumber: 'ORD-001',
-        total: 25000,
-        status: 'delivered',
-        date: '2024-01-15',
-        items: 2
-      },
-      {
-        id: '2',
-        orderNumber: 'ORD-002',
-        total: 30000,
-        status: 'processing',
-        date: '2024-01-20',
-        items: 1
-      },
-      {
-        id: '3',
-        orderNumber: 'ORD-003',
-        total: 20000,
-        status: 'shipped',
-        date: '2024-01-25',
-        items: 3
-      }
-    ]
-  }
+  // Real customer data will be fetched from API
 
   useEffect(() => {
-    // Simulate loading customer data
     const loadCustomer = async () => {
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`/api/admin/customers/${customerId}`)
-        // const customerData = await response.json()
+        setLoading(true)
+        const response = await fetch(`/api/admin/customers/public`)
+        if (!response.ok) throw new Error('Failed to fetch customers')
         
-        // For now, use mock data
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setCustomer(mockCustomer)
+        const result = await response.json()
+        if (result.success && result.data) {
+          // Find the specific customer by ID
+          const foundCustomer = result.data.find((c: any) => c.id === customerId)
+          if (foundCustomer) {
+            setCustomer(foundCustomer)
+          } else {
+            throw new Error('Customer not found')
+          }
+        } else {
+          throw new Error('Failed to fetch customer data')
+        }
       } catch (error) {
         console.error('Error loading customer:', error)
+        setCustomer(null)
       } finally {
         setLoading(false)
       }

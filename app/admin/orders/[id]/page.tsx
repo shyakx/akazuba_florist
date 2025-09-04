@@ -12,66 +12,30 @@ export default function OrderDetailsPage() {
   const [loading, setLoading] = useState(true)
   const [order, setOrder] = useState<any>(null)
 
-  // Mock order data - in real app, fetch from API
-  const mockOrder = {
-    id: orderId,
-    orderNumber: 'ORD-001',
-    customer: {
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '+250 788 123 456'
-    },
-    status: 'delivered',
-    paymentStatus: 'paid',
-    paymentMethod: 'mobile_money',
-    total: 25000,
-    subtotal: 22000,
-    shipping: 3000,
-    createdAt: '2024-01-15T10:30:00Z',
-    deliveredAt: '2024-01-17T14:20:00Z',
-    shippingAddress: {
-      street: 'KG 123 St',
-      city: 'Kigali',
-      district: 'Nyarugenge',
-      country: 'Rwanda'
-    },
-    items: [
-      {
-        id: '1',
-        product: {
-          name: 'Red Roses Bouquet',
-          price: 15000,
-          image: '/api/placeholder/100/100'
-        },
-        quantity: 1,
-        total: 15000
-      },
-      {
-        id: '2',
-        product: {
-          name: 'White Lilies',
-          price: 7000,
-          image: '/api/placeholder/100/100'
-        },
-        quantity: 1,
-        total: 7000
-      }
-    ]
-  }
+  // Real order data will be fetched from API
 
   useEffect(() => {
-    // Simulate loading order data
     const loadOrder = async () => {
       try {
-        // TODO: Replace with actual API call
-        // const response = await fetch(`/api/admin/orders/${orderId}`)
-        // const orderData = await response.json()
+        setLoading(true)
+        const response = await fetch(`/api/admin/orders/public`)
+        if (!response.ok) throw new Error('Failed to fetch orders')
         
-        // For now, use mock data
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setOrder(mockOrder)
+        const result = await response.json()
+        if (result.success && result.data) {
+          // Find the specific order by ID
+          const foundOrder = result.data.find((o: any) => o.id === orderId)
+          if (foundOrder) {
+            setOrder(foundOrder)
+          } else {
+            throw new Error('Order not found')
+          }
+        } else {
+          throw new Error('Failed to fetch order data')
+        }
       } catch (error) {
         console.error('Error loading order:', error)
+        setOrder(null)
       } finally {
         setLoading(false)
       }
