@@ -36,10 +36,10 @@ router.get('/analytics', async (req, res) => {
       customerGrowth
     ] = await Promise.all([
       // Total orders
-      prisma.orders.count(),
+      prisma.orderss.count(),
       
       // Total revenue
-      prisma.orders.aggregate({
+      prisma.orderss.aggregate({
         _sum: {
           totalAmount: true
         }
@@ -50,22 +50,22 @@ router.get('/analytics', async (req, res) => {
         where: { role: 'CUSTOMER' }
       }),
       
-      // Total products
+      // Total productss
       prisma.products.count(),
       
       // Recent orders (last 10)
-      prisma.orders.findMany({
+      prisma.orderss.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
-        include: { users: {
+        include: { userss: {
             select: {
               firstName: true,
               lastName: true,
               email: true
             }
           },
-          orderItems: {
-            include: { products: {
+          order_items: {
+            include: { productss: {
                 select: {
                   name: true,
                   price: true
@@ -76,9 +76,9 @@ router.get('/analytics', async (req, res) => {
         }
       }),
       
-      // Top selling products
-      prisma.order_items.groupBy({
-        by: ['productId'],
+      // Top selling productss
+      prisma.orders_items.groupBy({
+        by: ['productsId'],
         _sum: {
           quantity: true
         },
@@ -91,7 +91,7 @@ router.get('/analytics', async (req, res) => {
       }),
       
       // Monthly revenue for last 6 months
-      prisma.orders.groupBy({
+      prisma.orderss.groupBy({
         by: ['createdAt'],
         _sum: {
           totalAmount: true
@@ -122,15 +122,15 @@ router.get('/analytics', async (req, res) => {
     const totalRevenueAmount = totalRevenue._sum.totalAmount ? Number(totalRevenue._sum.totalAmount) : 0
     const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenueAmount / totalOrders) : 0
     
-    // Get top products with names
+    // Get top productss with names
     const topProductsWithNames = await Promise.all(
       topProducts.map(async (item) => {
-        const product = await prisma.products.findUnique({
-          where: { id: item.productId },
+        const products = await prisma.products.findUnique({
+          where: { id: item.productsId },
           select: { name: true }
         })
         return {
-          name: product?.name || 'Unknown Product',
+          name: products?.name || 'Unknown Product',
           sales: item._sum.quantity || 0
         }
       })
@@ -155,7 +155,7 @@ router.get('/analytics', async (req, res) => {
     const previousMonthRevenue = monthlyRevenueData[new Date().getMonth() - 1] || 0
     const revenueGrowth = previousMonthRevenue > 0 ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 : 0
 
-    const currentMonthOrders = await prisma.orders.count({
+    const currentMonthOrders = await prisma.orderss.count({
       where: {
         createdAt: {
           gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
@@ -163,7 +163,7 @@ router.get('/analytics', async (req, res) => {
       }
     })
     
-    const previousMonthOrders = await prisma.orders.count({
+    const previousMonthOrders = await prisma.orderss.count({
       where: {
         createdAt: {
           gte: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
@@ -185,13 +185,13 @@ router.get('/analytics', async (req, res) => {
       revenueGrowth: Math.round(revenueGrowth * 100) / 100,
       orderGrowth: Math.round(orderGrowth * 100) / 100,
       customerGrowth: 0, // Would need to calculate from actual data
-      productGrowth: 0, // Would need to calculate from actual data
+      productsGrowth: 0, // Would need to calculate from actual data
       avgOrderGrowth: 0, // Would need to calculate from actual data
       conversionGrowth: 0, // Would need to calculate from actual data
       topProducts: topProductsWithNames,
       recentOrders: recentOrders.map(o => ({
         id: o.id,
-        customer: o.users ? `${o.users.firstName} ${o.users.lastName}` : 'Guest User',
+        customer: o.userss ? `${o.userss.firstName} ${o.userss.lastName}` : 'Guest User',
         amount: Number(o.totalAmount),
         status: o.status.toLowerCase(),
         date: o.createdAt.toISOString().split('T')[0]
@@ -217,37 +217,37 @@ router.get('/analytics', async (req, res) => {
 
 // Helper function to get top categories
 async function getTopCategories() {
-  const categorySales = await prisma.order_items.groupBy({
-    by: ['productId'],
+  const categoriesSales = await prisma.orders_items.groupBy({
+    by: ['productsId'],
     _sum: {
       quantity: true
     }
   })
 
-  const categoryMap = new Map<string, number>()
+  const categoriesMap = new Map<string, number>()
   
-  for (const item of categorySales) {
-    const product = await prisma.products.findUnique({
-      where: { id: item.productId },
-      select: { categoryId: true }
+  for (const item of categoriesSales) {
+    const products = await prisma.products.findUnique({
+      where: { id: item.productsId },
+      select: { categoriesId: true }
     })
     
-    if (product?.categoryId) {
-      const currentSales = categoryMap.get(product.categoryId) || 0
-      categoryMap.set(product.categoryId, currentSales + (item._sum.quantity || 0))
+    if (products?.categoriesId) {
+      const currentSales = categoriesMap.get(products.categoriesId) || 0
+      categoriesMap.set(products.categoriesId, currentSales + (item._sum.quantity || 0))
     }
   }
 
-  // Get category names
+  // Get categories names
   const categories = await prisma.categories.findMany({
     where: {
-      id: { in: Array.from(categoryMap.keys()) }
+      id: { in: Array.from(categoriesMap.keys()) }
     }
   })
 
-  return categories.map(category => ({
-    name: category.name,
-    sales: categoryMap.get(category.id) || 0
+  return categories.map(categories => ({
+    name: categories.name,
+    sales: categoriesMap.get(categories.id) || 0
   })).sort((a, b) => b.sales - a.sales).slice(0, 5)
 }
 
@@ -286,19 +286,19 @@ router.get('/customers', async (req, res) => {
     // Get real order counts and totals for each customer
     const customersWithStats = await Promise.all(
       customers.map(async (customer) => {
-        const orders = await prisma.orders.findMany({
-          where: { userId: customer.id }
+        const order = await prisma.orderss.findMany({
+          where: { usersId: customer.id }
         })
 
         const totalOrders = orders.length
         const totalSpent = orders.reduce((sum, order) => sum + Number(order.totalAmount), 0)
         const wishlistItems = await prisma.wishlist.count({
-          where: { userId: customer.id }
+          where: { usersId: customer.id }
         })
 
         // Get customer's address from their most recent order
-        const recentOrder = await prisma.orders.findFirst({
-          where: { userId: customer.id },
+        const recentOrder = await prisma.orderss.findFirst({
+          where: { usersId: customer.id },
           orderBy: { createdAt: 'desc' },
           select: { customerAddress: true, customerCity: true }
         })
@@ -347,16 +347,16 @@ router.get('/customers', async (req, res) => {
  */
 router.get('/orders', async (req, res) => {
   try {
-    const orders = await prisma.orders.findMany({
-      include: { users: {
+    const order = await prisma.orderss.findMany({
+      include: { userss: {
           select: {
             firstName: true,
             lastName: true,
             email: true
           }
         },
-        orderItems: {
-          include: { products: {
+        order_items: {
+          include: { productss: {
               select: {
                 name: true,
                 price: true,
@@ -386,11 +386,11 @@ router.get('/orders', async (req, res) => {
         address: order.customerAddress,
         city: order.customerCity
       },
-      items: order.order_itemss.map(item => ({
-        productName: item.products.name,
+      items: order.order_items.map(item => ({
+        productsName: item.productss.name,
         quantity: item.quantity,
         price: Number(item.unitPrice),
-        productImage: item.productImage
+        productsImage: item.productsImage
       })),
       createdAt: order.createdAt,
       updatedAt: order.updatedAt
@@ -412,9 +412,9 @@ router.get('/orders', async (req, res) => {
 
 /**
  * @swagger
- * /admin/products:
+ * /admin/productss:
  *   get:
- *     summary: Get all products (admin)
+ *     summary: Get all productss (admin)
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -424,28 +424,28 @@ router.get('/orders', async (req, res) => {
  *       401:
  *         description: Unauthorized
  */
-router.get('/products', async (req, res) => {
+router.get('/productss', async (req, res) => {
   try {
-    const products = await prisma.products.findMany({
+    const productss = await prisma.products.findMany({
       include: { categories: true
       }
     })
 
-    const formattedProducts = products.map(product => ({
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      description: product.description || '',
-      price: Number(product.price),
-      stockQuantity: product.stockQuantity,
-      categoryId: product.categoryId,
-      category: product.categories.name,
-      isActive: product.isActive,
-      isFeatured: product.isFeatured,
-      images: Array.isArray(product.images) ? product.images : [],
-      status: product.isActive ? 'active' : 'inactive',
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString()
+    const formattedProducts = productss.map(products => ({
+      id: products.id,
+      name: products.name,
+      slug: products.slug,
+      description: products.description || '',
+      price: Number(products.price),
+      stockQuantity: products.stockQuantity,
+      categoriesId: products.categoriesId,
+      categories: products.categories.name,
+      isActive: products.isActive,
+      isFeatured: products.isFeatured,
+      images: Array.isArray(products.images) ? products.images : [],
+      status: products.isActive ? 'active' : 'inactive',
+      createdAt: products.createdAt.toISOString(),
+      updatedAt: products.updatedAt.toISOString()
     }))
 
     res.json({
@@ -454,10 +454,10 @@ router.get('/products', async (req, res) => {
       data: formattedProducts
     })
   } catch (error) {
-    console.error('Error fetching products:', error)
+    console.error('Error fetching productss:', error)
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch products'
+      message: 'Failed to fetch productss'
     })
   }
 })
@@ -479,18 +479,18 @@ router.get('/products', async (req, res) => {
 router.get('/wishlists', async (req, res) => {
   try {
     const wishlists = await prisma.wishlist.findMany({
-      include: { users: true,
-        product: true
+      include: { userss: true,
+        products: true
       }
     })
 
-    // Group wishlists by user
+    // Group wishlists by users
     const wishlistsByUser = wishlists.reduce((acc, wishlist) => {
-      const userId = wishlist.userId
-      if (!acc[userId]) {
-        acc[userId] = {
-          id: `wishlist-${userId}`,
-          customerId: userId,
+      const usersId = wishlist.userId
+      if (!acc[usersId]) {
+        acc[usersId] = {
+          id: `wishlist-${usersId}`,
+          customerId: usersId,
           customerName: `${wishlist.users.firstName} ${wishlist.users.lastName}`,
           customerEmail: wishlist.users.email,
           items: [],
@@ -501,15 +501,15 @@ router.get('/wishlists', async (req, res) => {
         }
       }
 
-      acc[userId].items.push({
-        productId: wishlist.productId,
-        productName: wishlist.products.name,
+      acc[usersId].items.push({
+        productsId: wishlist.productId,
+        productsName: wishlist.products.name,
         price: Number(wishlist.products.price),
         addedAt: wishlist.createdAt.toISOString()
       })
 
-      acc[userId].totalItems += 1
-      acc[userId].totalValue += Number(wishlist.products.price)
+      acc[usersId].totalItems += 1
+      acc[usersId].totalValue += Number(wishlist.products.price)
 
       return acc
     }, {} as Record<string, any>)
@@ -548,7 +548,7 @@ router.get('/dashboard/stats', async (req, res) => {
   try {
     // Get real counts from database
     const [totalOrders, totalProducts, totalCustomers, lowStockProducts] = await Promise.all([
-      prisma.orders.count(),
+      prisma.orderss.count(),
       prisma.products.count(),
       prisma.users.count({ where: { role: 'CUSTOMER' } }),
       prisma.products.count({ where: { stockQuantity: { lte: 10 } } })
@@ -558,7 +558,7 @@ router.get('/dashboard/stats', async (req, res) => {
     const sevenDaysAgo = new Date()
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
     
-    const newOrders = await prisma.orders.count({
+    const newOrders = await prisma.orderss.count({
       where: {
         createdAt: {
           gte: sevenDaysAgo
@@ -567,7 +567,7 @@ router.get('/dashboard/stats', async (req, res) => {
     })
 
     // Get total revenue
-    const totalRevenue = await prisma.orders.aggregate({
+    const totalRevenue = await prisma.orderss.aggregate({
       _sum: {
         totalAmount: true
       }
@@ -612,10 +612,10 @@ router.get('/dashboard/stats', async (req, res) => {
  */
 router.get('/dashboard/recent-orders', async (req, res) => {
   try {
-    const recentOrders = await prisma.orders.findMany({
+    const recentOrders = await prisma.orderss.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
-      include: { users: {
+      include: { userss: {
       select: {
             firstName: true,
             lastName: true
@@ -664,10 +664,10 @@ router.get('/dashboard/recent-orders', async (req, res) => {
 router.get('/dashboard/activity', async (req, res) => {
   try {
     // Get recent orders for activity feed
-    const recentOrders = await prisma.orders.findMany({
+    const recentOrders = await prisma.orderss.findMany({
       take: 5,
         orderBy: { createdAt: 'desc' },
-        include: { users: {
+        include: { userss: {
             select: {
               firstName: true,
               lastName: true
@@ -676,7 +676,7 @@ router.get('/dashboard/activity', async (req, res) => {
         }
     })
       
-    // Get recent user registrations
+    // Get recent users registrations
     const recentUsers = await prisma.users.findMany({
       take: 3,
         where: { role: 'CUSTOMER' },
@@ -696,11 +696,11 @@ router.get('/dashboard/activity', async (req, res) => {
         timestamp: order.createdAt,
         status: 'success'
       })),
-      ...recentUsers.map(user => ({
+      ...recentUsers.map(users => ({
         type: 'customer',
         title: 'New customer registered',
-        description: `${user.firstName} ${user.lastName} joined the platform`,
-        timestamp: user.createdAt,
+        description: `${users.firstName} ${users.lastName} joined the platform`,
+        timestamp: users.createdAt,
         status: 'info'
       }))
     ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -747,10 +747,10 @@ router.get('/dashboard/analytics', async (req, res) => {
       customerGrowth
     ] = await Promise.all([
       // Total orders
-      prisma.orders.count(),
+      prisma.orderss.count(),
       
       // Total revenue
-      prisma.orders.aggregate({
+      prisma.orderss.aggregate({
         _sum: {
           totalAmount: true
         }
@@ -761,22 +761,22 @@ router.get('/dashboard/analytics', async (req, res) => {
         where: { role: 'CUSTOMER' }
       }),
       
-      // Total products
+      // Total productss
       prisma.products.count(),
       
       // Recent orders (last 10)
-      prisma.orders.findMany({
+      prisma.orderss.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
-        include: { users: {
+        include: { userss: {
             select: {
               firstName: true,
               lastName: true,
               email: true
             }
           },
-          orderItems: {
-            include: { products: {
+          order_items: {
+            include: { productss: {
                 select: {
                   name: true,
                   price: true
@@ -787,9 +787,9 @@ router.get('/dashboard/analytics', async (req, res) => {
         }
       }),
       
-      // Top selling products
-      prisma.order_items.groupBy({
-        by: ['productId'],
+      // Top selling productss
+      prisma.orders_items.groupBy({
+        by: ['productsId'],
         _sum: {
           quantity: true
         },
@@ -802,7 +802,7 @@ router.get('/dashboard/analytics', async (req, res) => {
       }),
       
       // Monthly revenue for last 6 months
-      prisma.orders.groupBy({
+      prisma.orderss.groupBy({
         by: ['createdAt'],
         _sum: {
           totalAmount: true
@@ -870,10 +870,10 @@ router.get('/dashboard/analytics', async (req, res) => {
   }
 })
 
-// Admin product management routes
-router.get('/products', async (req, res) => {
+// Admin products management routes
+router.get('/productss', async (req, res) => {
   try {
-    const { page = 1, limit = 10, search, category, status } = req.query
+    const { page = 1, limit = 10, search, categories, status } = req.query
     
     const skip = (Number(page) - 1) * Number(limit)
     const where: any = {}
@@ -885,8 +885,8 @@ router.get('/products', async (req, res) => {
       ]
     }
     
-    if (category && category !== 'all') {
-      where.categoryId = category
+    if (categories && categories !== 'all') {
+      where.categoriesId = categories
     }
     
     if (status && status !== 'all') {
@@ -895,7 +895,7 @@ router.get('/products', async (req, res) => {
       else if (status === 'featured') where.isFeatured = true
     }
     
-    const [products, total] = await Promise.all([
+    const [productss, total] = await Promise.all([
       prisma.products.findMany({
         where,
         skip,
@@ -913,31 +913,31 @@ router.get('/products', async (req, res) => {
       success: true,
       message: 'Products retrieved successfully',
       data: {
-        products,
+        productss,
         total,
         pages
       }
     })
   } catch (error) {
-    console.error('Error fetching products:', error)
+    console.error('Error fetching productss:', error)
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch products'
+      message: 'Failed to fetch productss'
     })
   }
 })
 
-router.get('/products/:id', async (req, res) => {
+router.get('/productss/:id', async (req, res) => {
   try {
     const { id } = req.params
     
-    const product = await prisma.products.findUnique({
+    const products = await prisma.products.findUnique({
       where: { id },
       include: { categories: true
       }
     })
     
-    if (!product) {
+    if (!products) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
@@ -947,23 +947,23 @@ router.get('/products/:id', async (req, res) => {
     return res.json({
       success: true,
       message: 'Product retrieved successfully',
-      data: product
+      data: products
     })
   } catch (error) {
-    console.error('Error fetching product:', error)
+    console.error('Error fetching products:', error)
     return res.status(500).json({
       success: false,
-      message: 'Failed to fetch product'
+      message: 'Failed to fetch products'
     })
   }
 })
 
-router.post('/products', async (req, res) => {
+router.post('/productss', async (req, res) => {
   try {
-    const productData = req.body
+    const productsData = req.body
     
-    const product = await prisma.products.create({
-      data: productData,
+    const products = await prisma.products.create({
+      data: productsData,
       include: { categories: true
       }
     })
@@ -971,23 +971,23 @@ router.post('/products', async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
-      data: product
+      data: products
     })
   } catch (error) {
-    console.error('Error creating product:', error)
+    console.error('Error creating products:', error)
     res.status(500).json({
       success: false,
-      message: 'Failed to create product'
+      message: 'Failed to create products'
     })
   }
 })
 
-router.put('/products/:id', async (req, res) => {
+router.put('/productss/:id', async (req, res) => {
   try {
     const { id } = req.params
     const updateData = req.body
     
-    const product = await prisma.products.update({
+    const products = await prisma.products.update({
       where: { id },
       data: updateData,
       include: { categories: true
@@ -997,18 +997,18 @@ router.put('/products/:id', async (req, res) => {
     res.json({
       success: true,
       message: 'Product updated successfully',
-      data: product
+      data: products
     })
   } catch (error) {
-    console.error('Error updating product:', error)
+    console.error('Error updating products:', error)
     res.status(500).json({
       success: false,
-      message: 'Failed to update product'
+      message: 'Failed to update products'
     })
   }
 })
 
-router.delete('/products/:id', async (req, res) => {
+router.delete('/productss/:id', async (req, res) => {
   try {
     const { id } = req.params
     
@@ -1021,19 +1021,19 @@ router.delete('/products/:id', async (req, res) => {
       message: 'Product deleted successfully'
     })
   } catch (error) {
-    console.error('Error deleting product:', error)
+    console.error('Error deleting products:', error)
     res.status(500).json({
       success: false,
-      message: 'Failed to delete product'
+      message: 'Failed to delete products'
     })
   }
 })
 
 /**
  * @swagger
- * /admin/products/bulk:
+ * /admin/productss/bulk:
  *   post:
- *     summary: Perform bulk operations on products
+ *     summary: Perform bulk operations on productss
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -1044,7 +1044,7 @@ router.delete('/products/:id', async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               productIds:
+ *               productsIds:
  *                 type: array
  *                 items:
  *                   type: string
@@ -1059,11 +1059,11 @@ router.delete('/products/:id', async (req, res) => {
  *       401:
  *         description: Unauthorized
  */
-router.post('/products/bulk', async (req, res) => {
+router.post('/productss/bulk', async (req, res) => {
   try {
-    const { productIds, operation, data } = req.body
+    const { productsIds, operation, data } = req.body
     
-    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+    if (!productsIds || !Array.isArray(productsIds) || productsIds.length === 0) {
       return res.status(400).json({
         success: false,
         message: 'Product IDs are required'
@@ -1083,7 +1083,7 @@ router.post('/products/bulk', async (req, res) => {
       case 'delete':
         result = await prisma.products.deleteMany({
           where: {
-            id: { in: productIds }
+            id: { in: productsIds }
           }
         })
         break
@@ -1091,7 +1091,7 @@ router.post('/products/bulk', async (req, res) => {
       case 'activate':
         result = await prisma.products.updateMany({
           where: {
-            id: { in: productIds }
+            id: { in: productsIds }
           },
           data: {
             isActive: true
@@ -1102,7 +1102,7 @@ router.post('/products/bulk', async (req, res) => {
       case 'deactivate':
         result = await prisma.products.updateMany({
           where: {
-            id: { in: productIds }
+            id: { in: productsIds }
           },
           data: {
             isActive: false
@@ -1113,7 +1113,7 @@ router.post('/products/bulk', async (req, res) => {
       case 'feature':
         result = await prisma.products.updateMany({
           where: {
-            id: { in: productIds }
+            id: { in: productsIds }
           },
           data: {
             isFeatured: true
@@ -1124,7 +1124,7 @@ router.post('/products/bulk', async (req, res) => {
       case 'unfeature':
         result = await prisma.products.updateMany({
           where: {
-            id: { in: productIds }
+            id: { in: productsIds }
           },
           data: {
             isFeatured: false
@@ -1140,9 +1140,9 @@ router.post('/products/bulk', async (req, res) => {
           })
         }
         
-        const products = await prisma.products.findMany({
+        const productss = await prisma.products.findMany({
           where: {
-            id: { in: productIds }
+            id: { in: productsIds }
           },
           select: {
             id: true,
@@ -1150,15 +1150,15 @@ router.post('/products/bulk', async (req, res) => {
           }
         })
         
-        const updatePromises = products.map(product => {
+        const updatePromises = productss.map(products => {
           let newQuantity: number
           
           switch (data.operation) {
             case 'add':
-              newQuantity = product.stockQuantity + data.quantity
+              newQuantity = products.stockQuantity + data.quantity
               break
             case 'subtract':
-              newQuantity = Math.max(0, product.stockQuantity - data.quantity)
+              newQuantity = Math.max(0, products.stockQuantity - data.quantity)
               break
             case 'set':
               newQuantity = Math.max(0, data.quantity)
@@ -1168,7 +1168,7 @@ router.post('/products/bulk', async (req, res) => {
           }
           
           return prisma.products.update({
-            where: { id: product.id },
+            where: { id: products.id },
             data: { stockQuantity: newQuantity }
           })
         })
@@ -1201,7 +1201,7 @@ router.post('/products/bulk', async (req, res) => {
  * @swagger
  * /admin/categories:
  *   get:
- *     summary: Get all categories with product counts
+ *     summary: Get all categories with products counts
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -1213,12 +1213,12 @@ router.post('/products/bulk', async (req, res) => {
  */
 router.get('/categories', async (req, res) => {
   try {
-    // Get all categories with product counts
+    // Get all categories with products counts
     const categories = await prisma.categories.findMany({
       include: {
         _count: {
           select: {
-            products: true
+            productss: true
           }
         }
       },
@@ -1227,15 +1227,15 @@ router.get('/categories', async (req, res) => {
       }
     })
 
-    const formattedCategories = categories.map(category => ({
-      id: category.id,
-      name: category.name,
-      slug: category.slug,
-      isActive: category.isActive,
-      sortOrder: category.sortOrder,
-      productCount: category._count.products,
-      createdAt: category.createdAt.toISOString(),
-      updatedAt: category.updatedAt.toISOString()
+    const formattedCategories = categories.map(categories => ({
+      id: categories.id,
+      name: categories.name,
+      slug: categories.slug,
+      isActive: categories.isActive,
+      sortOrder: categories.sortOrder,
+      productsCount: categories._count.productss,
+      createdAt: categories.createdAt.toISOString(),
+      updatedAt: categories.updatedAt.toISOString()
     }))
 
     res.json({
@@ -1331,7 +1331,7 @@ router.put('/settings', authenticateToken, async (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *           enum: [orders, customers, products, analytics]
+ *           enum: [orders, customers, productss, analytics]
  *     responses:
  *       200:
  *         description: Data exported successfully
@@ -1347,16 +1347,16 @@ router.post('/export/:type', async (req, res) => {
     
     switch (type) {
       case 'orders':
-        const orders = await prisma.orders.findMany({
-          include: { users: {
+        const order = await prisma.orderss.findMany({
+          include: { userss: {
               select: {
                 firstName: true,
                 lastName: true,
                 email: true
               }
             },
-            orderItems: {
-              include: { products: {
+            order_items: {
+              include: { productss: {
                   select: {
                     name: true,
                     price: true
@@ -1390,8 +1390,8 @@ router.post('/export/:type', async (req, res) => {
         
         headers = ['Customer ID', 'First Name', 'Last Name', 'Email', 'Phone', 'Registration Date', 'Total Orders', 'Total Spent']
         data = await Promise.all(customers.map(async (customer) => {
-          const customerOrders = await prisma.orders.findMany({
-            where: { userId: customer.id }
+          const customerOrders = await prisma.orderss.findMany({
+            where: { usersId: customer.id }
           })
           const totalSpent = customerOrders.reduce((sum, order) => sum + Number(order.totalAmount), 0)
           
@@ -1408,22 +1408,22 @@ router.post('/export/:type', async (req, res) => {
         }))
         break
         
-      case 'products':
-        const products = await prisma.products.findMany({
+      case 'productss':
+        const productss = await prisma.products.findMany({
           include: { categories: true
           },
           orderBy: { createdAt: 'desc' }
         })
         
         headers = ['Product ID', 'Name', 'Category', 'Price', 'Stock Quantity', 'Status', 'Created Date']
-        data = products.map(product => [
-          product.id,
-          product.name,
-          product.categories?.name || 'Uncategorized',
-          product.price,
-          product.stockQuantity,
-          product.isActive ? 'Active' : 'Inactive',
-          product.createdAt.toISOString()
+        data = productss.map(products => [
+          products.id,
+          products.name,
+          products.categories?.name || 'Uncategorized',
+          products.price,
+          products.stockQuantity,
+          products.isActive ? 'Active' : 'Inactive',
+          products.createdAt.toISOString()
         ])
         break
         
@@ -1436,13 +1436,13 @@ router.post('/export/:type', async (req, res) => {
           monthlyRevenue,
           customerGrowth
         ] = await Promise.all([
-          prisma.orders.count(),
-          prisma.orders.aggregate({
+          prisma.orderss.count(),
+          prisma.orderss.aggregate({
             _sum: { totalAmount: true }
           }),
           prisma.users.count({ where: { role: 'CUSTOMER' } }),
           prisma.products.count(),
-          prisma.orders.groupBy({
+          prisma.orderss.groupBy({
             by: ['createdAt'],
             _sum: { totalAmount: true },
             where: {

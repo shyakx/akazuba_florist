@@ -23,13 +23,13 @@ router.post('/:orderId/payment-proof', uploadPaymentProof)
 // Customer routes (protected)
 router.get('/my-orders', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const usersId = req.users.id
 
-    const orders = await prisma.orders.findMany({
-      where: { userId },
+    const order = await prisma.orderss.findMany({
+      where: { usersId },
       include: {
-        orderItems: {
-          include: { products: {
+        order_items: {
+          include: { productss: {
               include: { categories: true
               }
             }
@@ -47,7 +47,7 @@ router.get('/my-orders', verifyToken, async (req, res) => {
       data: orders
     })
   } catch (error) {
-    console.error('Error getting user orders:', error)
+    console.error('Error getting users orders:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve orders'
@@ -57,17 +57,17 @@ router.get('/my-orders', verifyToken, async (req, res) => {
 
 router.get('/my-orders/:id', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const usersId = req.users.id
     const { id } = req.params
 
-    const order = await prisma.orders.findFirst({
+    const order = await prisma.orderss.findFirst({
       where: {
         id,
-        userId
+        usersId
       },
       include: {
-        orderItems: {
-          include: { products: {
+        order_items: {
+          include: { productss: {
               include: { categories: true
               }
             }
@@ -90,7 +90,7 @@ router.get('/my-orders/:id', verifyToken, async (req, res) => {
     })
     return
   } catch (error) {
-    console.error('Error getting user order:', error)
+    console.error('Error getting users order:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve order'

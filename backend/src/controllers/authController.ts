@@ -14,15 +14,15 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d'
 
 // Generate JWT tokens
-const generateTokens = (userId: string, role: string) => {
+const generateTokens = (usersId: string, role: string) => {
   const accessToken = (jwt as any).sign(
-    { userId, role },
+    { usersId, role },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   )
   
   const refreshToken = (jwt as any).sign(
-    { userId, role, type: 'refresh' },
+    { usersId, role, type: 'refresh' },
     JWT_SECRET,
     { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
   )
@@ -69,7 +69,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    // Check if user already exists
+    // Check if users already exists
     const existingUser = await prisma.users.findUnique({
       where: { email: email.toLowerCase() }
     })
@@ -86,8 +86,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const saltRounds = 12
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
-    // Create user
-    const user = await prisma.users.create({
+    // Create users
+    const users = await prisma.users.create({
       data: {
         email: email.toLowerCase(),
         passwordHash: hashedPassword,
@@ -113,13 +113,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     })
 
     // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user.id, user.role)
+    const { accessToken, refreshToken } = generateTokens(users.id, users.role)
 
     // Store refresh token
     await prisma.refresh_tokens.create({
       data: {
         token: refreshToken,
-        userId: user.id,
+        usersId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
       }
     })
@@ -128,7 +128,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       success: true,
       message: 'User registered successfully',
       data: {
-        user,
+        users,
         accessToken,
         refreshToken
       }
@@ -156,8 +156,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return
     }
 
-    // Find user with password hash
-    const user = await prisma.users.findUnique({
+    // Find users with password hash
+    const users = await prisma.users.findUnique({
       where: { email: email.toLowerCase() },
       select: {
         id: true,
@@ -174,7 +174,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       }
     })
 
-    if (!user || !user.isActive) {
+    if (!users || !users.isActive) {
       res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -183,7 +183,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash)
+    const isPasswordValid = await bcrypt.compare(password, users.passwordHash)
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
@@ -193,25 +193,25 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user.id, user.role)
+    const { accessToken, refreshToken } = generateTokens(users.id, users.role)
 
     // Store refresh token
     await prisma.refresh_tokens.create({
       data: {
         token: refreshToken,
-        userId: user.id,
+        usersId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
       }
     })
 
     // Remove password from response
-    const { passwordHash, ...userWithoutPassword } = user
+    const { passwordHash, ...usersWithoutPassword } = users
 
     res.status(200).json({
       success: true,
       message: 'Login successful',
       data: {
-        user: userWithoutPassword,
+        users: usersWithoutPassword,
         accessToken,
         refreshToken
       }
@@ -228,10 +228,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 // Admin login
 export const adminLogin = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password } = req.body
+    const { usersname, password } = req.body
 
     // Validation
-    if (!username || !password) {
+    if (!usersname || !password) {
       res.status(400).json({
         success: false,
         message: 'Username and password are required'
@@ -239,12 +239,12 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
       return
     }
 
-    // Find admin user with password hash
-    const user = await prisma.users.findFirst({
+    // Find admin users with password hash
+    const users = await prisma.users.findFirst({
       where: {
         OR: [
-          { email: username.toLowerCase() },
-          { firstName: username }
+          { email: usersname.toLowerCase() },
+          { firstName: usersname }
         ],
         role: 'ADMIN',
         isActive: true
@@ -264,7 +264,7 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
       }
     })
 
-    if (!user) {
+    if (!users) {
       res.status(401).json({
         success: false,
         message: 'Invalid credentials'
@@ -273,7 +273,7 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
     }
 
     // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash)
+    const isPasswordValid = await bcrypt.compare(password, users.passwordHash)
     if (!isPasswordValid) {
       res.status(401).json({
         success: false,
@@ -283,25 +283,25 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
     }
 
     // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user.id, user.role)
+    const { accessToken, refreshToken } = generateTokens(users.id, users.role)
 
     // Store refresh token
     await prisma.refresh_tokens.create({
       data: {
         token: refreshToken,
-        userId: user.id,
+        usersId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
       }
     })
 
     // Remove password from response
-    const { passwordHash, ...userWithoutPassword } = user
+    const { passwordHash, ...usersWithoutPassword } = users
 
     res.status(200).json({
       success: true,
       message: 'Admin login successful',
       data: {
-        user: userWithoutPassword,
+        users: usersWithoutPassword,
         accessToken,
         refreshToken
       }
@@ -325,7 +325,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
       // Invalidate refresh token
       await prisma.refresh_tokens.deleteMany({
         where: {
-          userId: req.users!.id
+          usersId: req.users!.id
         }
       })
     }
@@ -371,12 +371,12 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     const storedToken = await prisma.refresh_tokens.findFirst({
       where: {
         token: refreshToken,
-        userId: decoded.userId,
+        usersId: decoded.usersId,
         expiresAt: {
           gt: new Date()
         }
       },
-      include: { users: {
+      include: { userss: {
           select: {
             id: true,
             email: true,
@@ -393,7 +393,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       }
     })
 
-    if (!storedToken || !storedToken.users.isActive) {
+    if (!storedToken || !storedToken.userss.isActive) {
       res.status(401).json({
         success: false,
         message: 'Invalid or expired refresh token'
@@ -403,8 +403,8 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     // Generate new tokens
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens(
-      storedToken.users.id,
-      storedToken.users.role
+      storedToken.userss.id,
+      storedToken.userss.role
     )
 
     // Delete old refresh token and store new one
@@ -415,7 +415,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     await prisma.refresh_tokens.create({
       data: {
         token: newRefreshToken,
-        userId: storedToken.users.id,
+        usersId: storedToken.userss.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
       }
     })
@@ -424,7 +424,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
       success: true,
       message: 'Token refreshed successfully',
       data: {
-        user: storedToken.users,
+        users: storedToken.userss,
         accessToken: newAccessToken,
         refreshToken: newRefreshToken
       }
@@ -438,10 +438,10 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
   }
 }
 
-// Get user profile
+// Get users profile
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const user = await prisma.users.findUnique({
+    const users = await prisma.users.findUnique({
       where: { id: req.users!.id },
       select: {
         id: true,
@@ -457,7 +457,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
       }
     })
 
-    if (!user) {
+    if (!users) {
       res.status(404).json({
         success: false,
         message: 'User not found'
@@ -468,7 +468,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     res.status(200).json({
       success: true,
       message: 'Profile retrieved successfully',
-      data: { user }
+      data: { users }
     })
   } catch (error) {
     logger.error('Get profile error:', error)
@@ -479,7 +479,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
-// Update user profile
+// Update users profile
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const { firstName, lastName, phone } = req.body
@@ -493,7 +493,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
       return
     }
 
-    // Update user
+    // Update users
     const updatedUser = await prisma.users.update({
       where: { id: req.users!.id },
       data: {
@@ -518,7 +518,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
-      data: { user: updatedUser }
+      data: { users: updatedUser }
     })
   } catch (error) {
     logger.error('Update profile error:', error)
@@ -552,12 +552,12 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       return
     }
 
-    // Get user with password
-    const user = await prisma.users.findUnique({
+    // Get users with password
+    const users = await prisma.users.findUnique({
       where: { id: req.users!.id }
     })
 
-    if (!user) {
+    if (!users) {
       res.status(404).json({
         success: false,
         message: 'User not found'
@@ -566,7 +566,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash)
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, users.passwordHash)
     if (!isCurrentPasswordValid) {
       res.status(401).json({
         success: false,
@@ -587,7 +587,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
 
     // Invalidate all refresh tokens
     await prisma.refresh_tokens.deleteMany({
-      where: { userId: req.users!.id }
+      where: { usersId: req.users!.id }
     })
 
     res.status(200).json({

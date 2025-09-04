@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
  * @swagger
  * /wishlist:
  *   get:
- *     summary: Get user wishlist
+ *     summary: Get users wishlist
  *     tags: [Wishlist]
  *     security:
  *       - bearerAuth: []
@@ -21,11 +21,11 @@ const prisma = new PrismaClient()
  */
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const usersId = req.users.id
 
     const wishlistItems = await prisma.wishlist.findMany({
-      where: { userId },
-      include: { products: {
+      where: { usersId },
+      include: { productss: {
           include: { categories: true
           }
         }
@@ -64,9 +64,9 @@ router.get('/', verifyToken, async (req, res) => {
  *           schema:
  *             type: object
  *             required:
- *               - productId
+ *               - productsId
  *             properties:
- *               productId:
+ *               productsId:
  *                 type: string
  *     responses:
  *       200:
@@ -76,22 +76,22 @@ router.get('/', verifyToken, async (req, res) => {
  */
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
-    const { productId } = req.body
+    const usersId = req.users.id
+    const { productsId } = req.body
 
-    if (!productId) {
+    if (!productsId) {
       return res.status(400).json({
         success: false,
         message: 'Product ID is required'
       })
     }
 
-    // Verify product exists
-    const product = await prisma.products.findUnique({
-      where: { id: productId }
+    // Verify products exists
+    const products = await prisma.products.findUnique({
+      where: { id: productsId }
     })
 
-    if (!product) {
+    if (!products) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
@@ -101,8 +101,8 @@ router.post('/', verifyToken, async (req, res) => {
     // Check if item already exists in wishlist
     const existingItem = await prisma.wishlist.findFirst({
       where: {
-        userId,
-        productId
+        usersId,
+        productsId
       }
     })
 
@@ -115,10 +115,10 @@ router.post('/', verifyToken, async (req, res) => {
 
     const wishlistItem = await prisma.wishlist.create({
       data: {
-        userId,
-        productId
+        usersId,
+        productsId
       },
-      include: { products: {
+      include: { productss: {
           include: { categories: true
           }
         }
@@ -152,14 +152,14 @@ router.post('/', verifyToken, async (req, res) => {
  */
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const usersId = req.users.id
     const { id } = req.params
 
-    // Verify wishlist item belongs to user
+    // Verify wishlist item belongs to users
     const wishlistItem = await prisma.wishlist.findFirst({
       where: {
         id,
-        userId
+        usersId
       }
     })
 
@@ -200,10 +200,10 @@ router.delete('/:id', verifyToken, async (req, res) => {
  */
 router.delete('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const usersId = req.users.id
 
     await prisma.wishlist.deleteMany({
-      where: { userId }
+      where: { usersId }
     })
 
     res.json({

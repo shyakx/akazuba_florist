@@ -3,13 +3,13 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// Get all products with filtering and pagination
+// Get all productss with filtering and pagination
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       page = 1,
       limit,
-      category,
+      categories,
       search,
       minPrice,
       maxPrice,
@@ -18,7 +18,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     } = req.query
 
     const pageNum = parseInt(page as string) || 1
-    // If no limit specified or limit is invalid, get all products
+    // If no limit specified or limit is invalid, get all productss
     const limitNum = limit ? (parseInt(limit as string) || 1000) : 1000
     const skip = (pageNum - 1) * limitNum
 
@@ -27,9 +27,9 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       isActive: true
     }
 
-    if (category) {
+    if (categories) {
       where.categories = {
-        slug: category
+        slug: categories
       }
     }
 
@@ -57,12 +57,12 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       }
     }
 
-    // Get products with category
-    const products = await prisma.products.findMany({
+    // Get productss with categories
+    const productss = await prisma.products.findMany({
       where,
       include: { categories: true
       },
-      skip: limitNum === 1000 ? 0 : skip, // Skip pagination if getting all products
+      skip: limitNum === 1000 ? 0 : skip, // Skip pagination if getting all productss
       take: limitNum,
       orderBy: {
         createdAt: 'desc'
@@ -75,7 +75,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     res.json({
       success: true,
       message: 'Products retrieved successfully',
-      data: products,
+      data: productss,
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -84,7 +84,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       }
     })
   } catch (error) {
-    console.error('Get products error:', error)
+    console.error('Get productss error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -92,16 +92,16 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
   }
 }
 
-// Get product by ID
+// Get products by ID
 export const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
 
-    const product = await prisma.products.findUnique({
+    const products = await prisma.products.findUnique({
       where: { id },
       include: { categories: true,
         reviews: {
-          include: { users: {
+          include: { userss: {
               select: {
                 id: true,
                 firstName: true,
@@ -119,7 +119,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
       }
     })
 
-    if (!product) {
+    if (!products) {
       res.status(404).json({
         success: false,
         message: 'Product not found'
@@ -130,10 +130,10 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
     res.json({
       success: true,
       message: 'Product retrieved successfully',
-      data: product
+      data: products
     })
   } catch (error) {
-    console.error('Get product error:', error)
+    console.error('Get products error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -141,13 +141,13 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
   }
 }
 
-// Get featured products
+// Get featured productss
 export const getFeaturedProducts = async (req: Request, res: Response): Promise<void> => {
   try {
     const { limit = 8 } = req.query
     const limitNum = parseInt(limit as string)
 
-    const products = await prisma.products.findMany({
+    const productss = await prisma.products.findMany({
       where: {
         isActive: true,
         isFeatured: true
@@ -162,11 +162,11 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
 
     res.json({
       success: true,
-      message: 'Featured products retrieved successfully',
-      data: products
+      message: 'Featured productss retrieved successfully',
+      data: productss
     })
   } catch (error) {
-    console.error('Get featured products error:', error)
+    console.error('Get featured productss error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -174,7 +174,7 @@ export const getFeaturedProducts = async (req: Request, res: Response): Promise<
   }
 }
 
-// Create product (Admin only)
+// Create products (Admin only)
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
@@ -187,7 +187,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       sku,
       stockQuantity,
       minStockAlert,
-      categoryId,
+      categoriesId,
       images,
       weight,
       dimensions,
@@ -196,10 +196,10 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     } = req.body
 
     // Validate required fields
-    if (!name || !price || !categoryId) {
+    if (!name || !price || !categoriesId) {
       res.status(400).json({
         success: false,
-        message: 'Name, price, and category are required'
+        message: 'Name, price, and categories are required'
       })
       return
     }
@@ -207,7 +207,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     // Generate slug from name
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-    // Check if product with same slug exists
+    // Check if products with same slug exists
     const existingProduct = await prisma.products.findUnique({
       where: { slug }
     })
@@ -220,7 +220,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       return
     }
 
-    const product = await prisma.products.create({
+    const products = await prisma.products.create({
       data: {
         name,
         slug,
@@ -232,7 +232,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         sku,
         stockQuantity: parseInt(stockQuantity) || 0,
         minStockAlert: parseInt(minStockAlert) || 5,
-        categoryId,
+        categoriesId,
         images: images || [],
         weight: weight ? parseFloat(weight) : null,
         dimensions: dimensions || null,
@@ -247,10 +247,10 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
-      data: product
+      data: products
     })
   } catch (error) {
-    console.error('Create product error:', error)
+    console.error('Create products error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -258,13 +258,13 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
   }
 }
 
-// Update product (Admin only)
+// Update products (Admin only)
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
     const updateData = req.body
 
-    // Check if product exists
+    // Check if products exists
     const existingProduct = await prisma.products.findUnique({
       where: { id }
     })
@@ -305,7 +305,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     if (updateData.minStockAlert) updateData.minStockAlert = parseInt(updateData.minStockAlert)
     if (updateData.weight) updateData.weight = parseFloat(updateData.weight)
 
-    const product = await prisma.products.update({
+    const products = await prisma.products.update({
       where: { id },
       data: updateData,
       include: { categories: true
@@ -315,10 +315,10 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     res.json({
       success: true,
       message: 'Product updated successfully',
-      data: product
+      data: products
     })
   } catch (error) {
-    console.error('Update product error:', error)
+    console.error('Update products error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -326,12 +326,12 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
   }
 }
 
-// Delete product (Admin only)
+// Delete products (Admin only)
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
 
-    // Check if product exists
+    // Check if products exists
     const existingProduct = await prisma.products.findUnique({
       where: { id }
     })
@@ -355,7 +355,7 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
       message: 'Product deleted successfully'
     })
   } catch (error) {
-    console.error('Delete product error:', error)
+    console.error('Delete products error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'

@@ -13,7 +13,7 @@ export const getAllCategories = async (req: Request, res: Response): Promise<voi
       include: {
         _count: {
           select: {
-            products: {
+            productss: {
               where: {
                 isActive: true
               }
@@ -40,15 +40,15 @@ export const getAllCategories = async (req: Request, res: Response): Promise<voi
   }
 }
 
-// Get category by ID
+// Get categories by ID
 export const getCategoryById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
 
-    const category = await prisma.categories.findUnique({
+    const categories = await prisma.categories.findUnique({
       where: { id },
       include: {
-        products: {
+        productss: {
           where: {
             isActive: true
           },
@@ -60,7 +60,7 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
         },
         _count: {
           select: {
-            products: {
+            productss: {
               where: {
                 isActive: true
               }
@@ -70,7 +70,7 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
       }
     })
 
-    if (!category) {
+    if (!categories) {
       res.status(404).json({
         success: false,
         message: 'Category not found'
@@ -81,10 +81,10 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
     res.json({
       success: true,
       message: 'Category retrieved successfully',
-      data: category
+      data: categories
     })
   } catch (error) {
-    console.error('Get category error:', error)
+    console.error('Get categories error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -92,15 +92,15 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
   }
 }
 
-// Get category by slug
+// Get categories by slug
 export const getCategoryBySlug = async (req: Request, res: Response): Promise<void> => {
   try {
     const { slug } = req.params
 
-    const category = await prisma.categories.findUnique({
+    const categories = await prisma.categories.findUnique({
       where: { slug },
       include: {
-        products: {
+        productss: {
           where: {
             isActive: true
           },
@@ -112,7 +112,7 @@ export const getCategoryBySlug = async (req: Request, res: Response): Promise<vo
         },
         _count: {
           select: {
-            products: {
+            productss: {
               where: {
                 isActive: true
               }
@@ -122,7 +122,7 @@ export const getCategoryBySlug = async (req: Request, res: Response): Promise<vo
       }
     })
 
-    if (!category) {
+    if (!categories) {
       res.status(404).json({
         success: false,
         message: 'Category not found'
@@ -133,10 +133,10 @@ export const getCategoryBySlug = async (req: Request, res: Response): Promise<vo
     res.json({
       success: true,
       message: 'Category retrieved successfully',
-      data: category
+      data: categories
     })
   } catch (error) {
-    console.error('Get category by slug error:', error)
+    console.error('Get categories by slug error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -144,7 +144,7 @@ export const getCategoryBySlug = async (req: Request, res: Response): Promise<vo
   }
 }
 
-// Create category (Admin only)
+// Create categories (Admin only)
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, description, imageUrl, sortOrder } = req.body
@@ -161,7 +161,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
     // Generate slug from name
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-    // Check if category with same slug exists
+    // Check if categories with same slug exists
     const existingCategory = await prisma.categories.findUnique({
       where: { slug }
     })
@@ -174,7 +174,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
       return
     }
 
-    const category = await prisma.categories.create({
+    const categories = await prisma.categories.create({
       data: {
         name,
         slug,
@@ -188,10 +188,10 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
     res.status(201).json({
       success: true,
       message: 'Category created successfully',
-      data: category
+      data: categories
     })
   } catch (error) {
-    console.error('Create category error:', error)
+    console.error('Create categories error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -199,13 +199,13 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
   }
 }
 
-// Update category (Admin only)
+// Update categories (Admin only)
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
     const updateData = req.body
 
-    // Check if category exists
+    // Check if categories exists
     const existingCategory = await prisma.categories.findUnique({
       where: { id }
     })
@@ -241,7 +241,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
     // Convert numeric fields
     if (updateData.sortOrder) updateData.sortOrder = parseInt(updateData.sortOrder)
 
-    const category = await prisma.categories.update({
+    const categories = await prisma.categories.update({
       where: { id },
       data: updateData
     })
@@ -249,10 +249,10 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
     res.json({
       success: true,
       message: 'Category updated successfully',
-      data: category
+      data: categories
     })
   } catch (error) {
-    console.error('Update category error:', error)
+    console.error('Update categories error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -260,18 +260,18 @@ export const updateCategory = async (req: Request, res: Response): Promise<void>
   }
 }
 
-// Delete category (Admin only)
+// Delete categories (Admin only)
 export const deleteCategory = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params
 
-    // Check if category exists
+    // Check if categories exists
     const existingCategory = await prisma.categories.findUnique({
       where: { id },
       include: {
         _count: {
           select: {
-            products: true
+            productss: true
           }
         }
       }
@@ -285,11 +285,11 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
       return
     }
 
-    // Check if category has products
-    if (existingCategory._count.products > 0) {
+    // Check if categories has productss
+    if (existingCategory._count.productss > 0) {
       res.status(400).json({
         success: false,
-        message: 'Cannot delete category with existing products'
+        message: 'Cannot delete categories with existing productss'
       })
       return
     }
@@ -305,7 +305,7 @@ export const deleteCategory = async (req: Request, res: Response): Promise<void>
       message: 'Category deleted successfully'
     })
   } catch (error) {
-    console.error('Delete category error:', error)
+    console.error('Delete categories error:', error)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
