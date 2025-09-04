@@ -117,7 +117,7 @@ router.post('/', verifyToken, async (req, res) => {
       data: {
         userId,
         productId
-      },
+      } as any,
       include: { products: {
           include: { categories: true
           }

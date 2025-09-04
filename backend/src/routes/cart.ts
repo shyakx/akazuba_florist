@@ -44,7 +44,7 @@ router.get('/', verifyToken, async (req, res) => {
           cart_items: {
             create: []
           }
-        },
+        } as any,
         include: { cart_items: {
             include: { products: {
                 include: { categories: true
@@ -129,7 +129,7 @@ router.post('/items', verifyToken, async (req, res) => {
 
     if (!cart) {
       cart = await prisma.cart.create({
-        data: { userId }
+        data: { userId } as any
       })
     }
 
@@ -160,7 +160,7 @@ router.post('/items', verifyToken, async (req, res) => {
           cartId: cart.id,
           productId,
           quantity
-        },
+        } as any,
         include: { products: {
             include: { categories: true
             }

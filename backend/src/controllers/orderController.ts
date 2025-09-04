@@ -125,7 +125,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             userId: req.user?.id || null,
             status: 'PENDING',
             paymentStatus: 'PENDING'
-      }
+      } as any
     })
 
     // Create order items
@@ -137,13 +137,13 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             productId: item.productId,
             productName: item.name,
             productImage: item.image,
-            productsSku: item.sku,
+            productSku: item.sku,
             quantity: item.quantity,
                       unitPrice: item.price,
           totalPrice: item.price * item.quantity,
             color: item.color,
             type: item.type
-          }
+          } as any
         })
       )
     )
@@ -153,7 +153,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
           data: {
             orderId: order.id,
             proofImage: req.file.filename
-          }
+          } as any
         })
 
     // Send admin notification
@@ -406,7 +406,7 @@ export const uploadPaymentProof = async (req: Request, res: Response): Promise<v
       data: {
         orderId,
         proofImage
-      }
+      } as any
     })
 
     res.status(201).json({

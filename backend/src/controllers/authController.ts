@@ -121,7 +121,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      }
+      } as any
     })
 
     res.status(201).json({
@@ -201,7 +201,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      }
+      } as any
     })
 
     // Remove password from response
@@ -291,7 +291,7 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      }
+      } as any
     })
 
     // Remove password from response

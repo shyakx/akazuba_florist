@@ -239,7 +239,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         tags: tags || [],
         isFeatured: isFeatured || false,
         isActive: true
-      },
+      } as any,
       include: { categories: true
       }
     })
