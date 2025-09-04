@@ -73,20 +73,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         console.log('🚀 Initializing authentication system...')
         
-        // In development mode, always start fresh for testing
-        if (process.env.NODE_ENV === 'development') {
-          console.log('🔧 Development mode: Starting with clean authentication state')
-          clearAllAuthData()
+        // Check for existing valid tokens in both development and production
+        const token = localStorage.getItem('accessToken')
+        if (token) {
+          console.log('🔍 Found existing token, validating...')
+          await validateAndSetUser(token)
         } else {
-          // In production, check for existing valid tokens
-          const token = localStorage.getItem('accessToken')
-          if (token) {
-            console.log('🔍 Found existing token, validating...')
-            await validateAndSetUser(token)
-          } else {
-            console.log('🔓 No existing token found')
-            setUser(null)
-          }
+          console.log('🔓 No existing token found')
+          setUser(null)
         }
       } catch (error) {
         console.error('❌ Authentication initialization failed:', error)
