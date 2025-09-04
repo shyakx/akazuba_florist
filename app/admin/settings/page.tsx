@@ -67,7 +67,7 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     try {
-      setIsSaving(true)
+    setIsSaving(true)
       
       const response = await fetch('/api/admin/settings/public', {
         method: 'PUT',
@@ -89,7 +89,7 @@ export default function SettingsPage() {
       console.error('Error saving settings:', error)
       alert('Failed to save settings. Please try again.')
     } finally {
-      setIsSaving(false)
+    setIsSaving(false)
     }
   }
 
@@ -216,7 +216,7 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input
+                <input
                 type="checkbox"
                 checked={settings.twoFactorAuth === 'true'}
                 onChange={(e) => setSettings({...settings, twoFactorAuth: e.target.checked ? 'true' : 'false'})}
@@ -261,7 +261,7 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-600">Automatically backup your data</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
-              <input
+                <input
                 type="checkbox"
                 checked={settings.autoBackup === 'true'}
                 onChange={(e) => setSettings({...settings, autoBackup: e.target.checked ? 'true' : 'false'})}
@@ -343,7 +343,7 @@ export default function SettingsPage() {
               Save Changes
             </>
           )}
-        </button>
+          </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

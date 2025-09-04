@@ -167,7 +167,7 @@ export default function AdminDashboard() {
 
       {/* Quick Actions & Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Actions */}
+      {/* Quick Actions */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -190,7 +190,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Recent Activity */}
+      {/* Recent Activity */}
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Orders</h2>
           <div className="space-y-3">
@@ -251,7 +251,7 @@ export default function AdminDashboard() {
               analytics.topProducts.slice(0, 3).map((product, index) => {
                 const colors = ['bg-blue-100', 'bg-green-100', 'bg-yellow-100']
                 const textColors = ['text-blue-600', 'text-green-600', 'text-yellow-600']
-                return (
+  return (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className={`w-6 h-6 ${colors[index]} rounded flex items-center justify-center`}>

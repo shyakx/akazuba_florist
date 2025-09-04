@@ -17,7 +17,8 @@ import {
   ShoppingBag,
   Calendar,
   DollarSign,
-  BarChart3
+  BarChart3,
+  Tag
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -42,6 +43,7 @@ export default function ProductsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
+  const [filterCategory, setFilterCategory] = useState('')
 
   const fetchProducts = async () => {
     try {
@@ -51,6 +53,7 @@ export default function ProductsPage() {
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       if (filterStatus !== 'all') params.append('status', filterStatus)
+      if (filterCategory) params.append('category', filterCategory)
       
       const response = await fetch(`/api/admin/products/public?${params.toString()}`)
       if (!response.ok) throw new Error('Failed to fetch products')
@@ -71,9 +74,18 @@ export default function ProductsPage() {
     }
   }
 
+  // Read category parameter from URL on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const categoryParam = urlParams.get('category')
+    if (categoryParam) {
+      setFilterCategory(categoryParam)
+    }
+  }, [])
+
   useEffect(() => {
     fetchProducts()
-  }, [searchTerm, filterStatus])
+  }, [searchTerm, filterStatus, filterCategory])
 
   // Products are already filtered by the API
   const filteredProducts = products
@@ -92,7 +104,7 @@ export default function ProductsPage() {
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
-          <div>
+        <div>
             <h1 className="text-3xl font-bold mb-2">Product Management</h1>
             <p className="text-blue-100 text-lg">Manage your beautiful flower products with ease</p>
           </div>
@@ -115,7 +127,7 @@ export default function ProductsPage() {
                 </div>
               </div>
             </div>
-          </div>
+        </div>
         </div>
       </div>
 
@@ -190,6 +202,35 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {/* Category Filter Indicator */}
+      {filterCategory && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Tag className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Showing products in category:</p>
+                <p className="font-semibold text-blue-900">{filterCategory}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setFilterCategory('')
+                // Update URL to remove category parameter
+                const url = new URL(window.location.href)
+                url.searchParams.delete('category')
+                window.history.replaceState({}, '', url.toString())
+              }}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              Clear Filter
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -235,7 +276,7 @@ export default function ProductsPage() {
               <option value="active">Active Only</option>
               <option value="inactive">Inactive Only</option>
             </select>
-            <button 
+              <button
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
                 // TODO: Implement advanced filters
@@ -244,8 +285,8 @@ export default function ProductsPage() {
             >
               <Filter className="w-4 h-4 mr-2" />
               More Filters
-            </button>
-          </div>
+              </button>
+            </div>
         </div>
       </div>
 
@@ -321,7 +362,7 @@ export default function ProductsPage() {
                   <span className="text-sm text-gray-500">Sales</span>
                   <span className="text-sm font-medium text-gray-900">{product.sales || 0} sold</span>
                 </div>
-              </div>
+                  </div>
 
               {/* Actions */}
               <div className="mt-6 pt-4 border-t border-gray-100">
@@ -338,9 +379,9 @@ export default function ProductsPage() {
                     <Link href={`/admin/products/edit/${product.id}`}>
                       <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200">
                         <Edit className="w-4 h-4" />
-                      </button>
+                    </button>
                     </Link>
-                    <button 
+                    <button
                       className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                       onClick={async () => {
                         if (confirm('Are you sure you want to delete this product?')) {

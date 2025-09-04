@@ -97,7 +97,7 @@ export default function OrdersPage() {
     )
   }
 
-  return (
+    return (
     <div className="space-y-8">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white">
@@ -282,7 +282,7 @@ export default function OrdersPage() {
                   {order.status}
                 </span>
               </div>
-            </div>
+                  </div>
 
             {/* Order Info */}
             <div className="p-6">
@@ -294,14 +294,14 @@ export default function OrdersPage() {
                 <div className="text-right">
                   <p className="text-lg font-bold text-green-600">RWF {order.total.toLocaleString()}</p>
                   <p className="text-sm text-gray-500">{order.items} items</p>
-                </div>
-              </div>
+                  </div>
+                  </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Customer</span>
                   <span className="text-sm font-medium text-gray-900">{order.customerName}</span>
-                </div>
+                  </div>
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Email</span>
@@ -311,13 +311,13 @@ export default function OrdersPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Location</span>
                   <span className="text-sm font-medium text-gray-900">{order.deliveryAddress}</span>
-                </div>
+                      </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Date</span>
                   <span className="text-sm font-medium text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</span>
                 </div>
-              </div>
+                  </div>
 
               {/* Actions */}
               <div className="mt-6 pt-4 border-t border-gray-100">
@@ -343,7 +343,7 @@ export default function OrdersPage() {
                     >
                       <CheckCircle className="w-4 h-4" />
                     </button>
-                    <button 
+                    <button
                       className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
                       onClick={() => {
                         // TODO: Update shipping status
