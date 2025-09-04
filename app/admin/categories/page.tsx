@@ -93,14 +93,31 @@ export default function CategoriesPage() {
       {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCategories.map((category) => (
-          <div key={category.id} className="card hover:shadow-md transition-shadow">
+          <div 
+            key={category.id} 
+            className="card hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105 hover:border-blue-300"
+            onClick={() => {
+              // Navigate to category details or products in this category
+              console.log('View category details:', category.id)
+              // TODO: Navigate to category products page
+              // window.location.href = `/admin/categories/${category.id}/products`
+            }}
+          >
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                   <Tag className="w-6 h-6 text-blue-600" />
           </div>
                     <div>
-                  <h3 className="font-semibold text-gray-900">{category.name}</h3>
+                  <h3 
+                    className="font-semibold text-gray-900 hover:text-blue-600 transition-colors cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      console.log('View category details:', category.id)
+                    }}
+                  >
+                    {category.name}
+                  </h3>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     category.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
@@ -111,7 +128,8 @@ export default function CategoriesPage() {
               <div className="flex items-center space-x-1">
                 <button 
                   className="p-1 text-gray-400 hover:text-blue-600"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     // TODO: View category details
                     console.log('View category:', category.id)
                   }}
@@ -119,13 +137,17 @@ export default function CategoriesPage() {
                   <Eye className="w-4 h-4" />
                 </button>
                 <Link href={`/admin/categories/edit/${category.id}`}>
-                  <button className="p-1 text-gray-400 hover:text-green-600">
+                  <button 
+                    className="p-1 text-gray-400 hover:text-green-600"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Edit className="w-4 h-4" />
                   </button>
                 </Link>
                 <button 
                   className="p-1 text-gray-400 hover:text-red-600"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation()
                     // TODO: Delete category
                     if (confirm('Are you sure you want to delete this category?')) {
                       console.log('Delete category:', category.id)
@@ -140,7 +162,16 @@ export default function CategoriesPage() {
             <p className="text-gray-600 text-sm mb-4">{category.description}</p>
             
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
+              <div 
+                className="flex items-center space-x-2 text-sm text-gray-500 hover:text-blue-600 cursor-pointer transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  // Navigate to products page filtered by this category
+                  console.log('View products in category:', category.id)
+                  // TODO: Navigate to products page with category filter
+                  // window.location.href = `/admin/products?category=${category.id}`
+                }}
+              >
                 <Package className="w-4 h-4" />
                 <span>{category.productCount} products</span>
               </div>
