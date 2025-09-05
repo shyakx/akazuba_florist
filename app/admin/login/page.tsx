@@ -118,6 +118,12 @@ export default function AdminLoginPage() {
           }
         }, 500)
         
+        // Additional fallback - force redirect after 2 seconds regardless
+        setTimeout(() => {
+          console.log('🚀 Fallback redirect - forcing navigation to admin panel...')
+          window.location.href = '/admin'
+        }, 2000)
+        
         // Redirect will happen automatically via useEffect
       } else {
         toast.error('Access denied. Admin privileges required.')
