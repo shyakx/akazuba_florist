@@ -134,12 +134,12 @@ app.get('/health', (req, res) => {
     .finally(() => {
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Backend - Cart, Wishlist & Checkout Fixed - Version 2.2.0',
+    message: 'Akazuba Backend - Cart, Wishlist & Checkout Fixed - Version 2.2.1',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
         database: dbStatus,
     cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
-    version: '2.2.0',
+    version: '2.2.1',
     corsEnabled: true,
     deployment: 'forced-redeploy'
       });
@@ -598,7 +598,7 @@ app.post('/api/v1/cart/items', async (req, res) => {
           productId,
           quantity,
           updatedAt: new Date()
-        } as any,
+        },
         include: {
           products: true
         }
@@ -850,7 +850,7 @@ app.post('/api/v1/wishlist', async (req, res) => {
         id: `wishlist_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId,
         productId
-      } as any,
+      },
       include: {
         products: true
       }
@@ -996,7 +996,7 @@ app.post('/api/v1/orders', async (req, res) => {
         status: 'PENDING',
         paymentStatus: 'PENDING',
         updatedAt: new Date()
-      } as any
+      }
     });
 
     // Create order items
@@ -1013,7 +1013,7 @@ app.post('/api/v1/orders', async (req, res) => {
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
             updatedAt: new Date()
-          } as any
+          }
         })
       )
     );
