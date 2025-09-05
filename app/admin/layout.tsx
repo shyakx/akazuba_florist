@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { AdminErrorBoundary } from '@/components/ErrorBoundary'
 import { 
   LayoutDashboard, 
   Package, 
@@ -91,7 +92,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="admin-panel">
+    <AdminErrorBoundary>
+      <div className="admin-panel">
         {/* Sidebar */}
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="flex flex-col h-full">
@@ -235,6 +237,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           onClick={() => setSidebarOpen(false)}
         />
       )}
-    </div>
+      </div>
+    </AdminErrorBoundary>
   )
 }

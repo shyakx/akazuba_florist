@@ -7,11 +7,12 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['images.unsplash.com', 'images.pexels.com'],
+    domains: ['images.unsplash.com', 'images.pexels.com', 'akazuba-production-assets.s3.us-east-1.amazonaws.com'],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     unoptimized: true, // Allow static images to be served directly
+    formats: ['image/webp', 'image/avif'],
   },
   experimental: {
     optimizePackageImports: ['@headlessui/react', '@heroicons/react', 'lucide-react'],

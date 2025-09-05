@@ -15,13 +15,13 @@ const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d'
 
 // Generate JWT tokens
 const generateTokens = (userId: string, role: string) => {
-  const accessToken = (jwt as any).sign(
+  const accessToken = jwt.sign(
     { userId, role },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   )
   
-  const refreshToken = (jwt as any).sign(
+  const refreshToken = jwt.sign(
     { userId, role, type: 'refresh' },
     JWT_SECRET,
     { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
@@ -121,8 +121,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      } as any
-    }) as any
+      }
+    })
 
     res.status(201).json({
       success: true,
@@ -201,8 +201,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      } as any
-    }) as any
+      }
+    })
 
     // Remove password from response
     const { passwordHash, ...usersWithoutPassword } = users
@@ -291,8 +291,8 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      } as any
-    }) as any
+      }
+    })
 
     // Remove password from response
     const { passwordHash, ...usersWithoutPassword } = users
@@ -357,7 +357,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     }
 
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, JWT_SECRET) as any
+    const decoded = jwt.verify(refreshToken, JWT_SECRET) as { userId: string; role: string; type: string }
     
     if (decoded.type !== 'refresh') {
       res.status(401).json({
@@ -417,8 +417,8 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
         token: newRefreshToken,
         userId: storedToken.users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
-      } as any
-    }) as any
+      }
+    })
 
     res.status(200).json({
       success: true,
@@ -617,7 +617,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }
 
     // Verify reset token
-    const decoded = jwt.verify(token, JWT_SECRET) as any
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; role: string }
     
     if (decoded.type !== 'password_reset') {
       res.status(401).json({

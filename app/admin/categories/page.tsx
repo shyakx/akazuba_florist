@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 interface Category {
   id: string
@@ -24,6 +25,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+  const router = useRouter()
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -33,16 +35,21 @@ export default function CategoriesPage() {
       setIsLoading(true)
       
       const response = await fetch('/api/admin/categories/public')
-      if (!response.ok) throw new Error('Failed to fetch categories')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch categories`)
+      }
       
       const result = await response.json()
       if (result.success) {
         setCategories(result.data)
       } else {
-        throw new Error('Failed to fetch categories')
+        throw new Error(result.message || 'Failed to fetch categories')
       }
     } catch (error) {
       console.error('Error fetching categories:', error)
+      // Show user-friendly error message
+      alert(`Failed to load categories: ${error instanceof Error ? error.message : 'Unknown error'}`)
       // Fallback to empty array on error
       setCategories([])
     } finally {
@@ -168,11 +175,13 @@ export default function CategoriesPage() {
                           setCategories(prev => prev.filter(c => c.id !== category.id))
                           alert('Category deleted successfully!')
                         } else {
-                          throw new Error('Failed to delete category')
+                          const errorData = await response.json().catch(() => ({}))
+                          throw new Error(errorData.message || `HTTP ${response.status}: Failed to delete category`)
                         }
                       } catch (error) {
                         console.error('Error deleting category:', error)
-                        alert('Failed to delete category. Please try again.')
+                        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+                        alert(`Failed to delete category: ${errorMessage}`)
                       }
                     }
                   }}
@@ -190,9 +199,7 @@ export default function CategoriesPage() {
                 onClick={(e) => {
                   e.stopPropagation()
                   // Navigate to products page filtered by this category
-                  console.log('View products in category:', category.id)
-                  // TODO: Navigate to products page with category filter
-                  // window.location.href = `/admin/products?category=${category.id}`
+                  router.push(`/admin/products?category=${category.id}`)
                 }}
               >
                 <Package className="w-4 h-4" />

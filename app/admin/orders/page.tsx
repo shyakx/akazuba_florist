@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   ShoppingCart, 
   Search, 
@@ -27,8 +28,11 @@ interface Order {
   orderNumber: string
   customerName: string
   customerEmail: string
-  total: number
+  customerPhone: string
+  totalAmount: number
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
+  deliveryStatus: 'pending' | 'preparing' | 'out_for_delivery' | 'delivered'
   items: number
   createdAt: string
   deliveryAddress: string
@@ -38,6 +42,7 @@ interface Order {
 }
 
 export default function OrdersPage() {
+  const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -73,9 +78,6 @@ export default function OrdersPage() {
   useEffect(() => {
     fetchOrders()
   }, [searchTerm, filterStatus])
-
-  // Orders are already filtered by the API
-  const filteredOrders = orders
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -120,7 +122,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">RWF {orders.reduce((sum, o) => sum + o.total, 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">RWF {orders.reduce((sum, o) => sum + o.totalAmount, 0).toLocaleString()}</div>
                   <div className="text-sm text-green-100">Total Revenue</div>
                 </div>
               </div>
@@ -186,7 +188,7 @@ export default function OrdersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-green-600">RWF {orders.reduce((sum, o) => sum + o.total, 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-green-600">RWF {orders.reduce((sum, o) => sum + o.totalAmount, 0).toLocaleString()}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-green-600" />
@@ -206,8 +208,30 @@ export default function OrdersPage() {
           <button 
             className="btn btn-primary bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
             onClick={() => {
-              // TODO: Implement export functionality
-              console.log('Export orders data')
+              // Export orders data as CSV
+              const csvContent = [
+                ['Order #', 'Customer', 'Email', 'Phone', 'Status', 'Payment Status', 'Total Amount', 'Created At'],
+                ...orders.map(order => [
+                  order.orderNumber,
+                  order.customerName,
+                  order.customerEmail,
+                  order.customerPhone,
+                  order.status,
+                  order.paymentStatus,
+                  order.totalAmount,
+                  new Date(order.createdAt).toLocaleDateString()
+                ])
+              ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+              
+              const blob = new Blob([csvContent], { type: 'text/csv' })
+              const url = window.URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              window.URL.revokeObjectURL(url)
             }}
           >
             <Download className="w-5 h-5 mr-2" />
@@ -217,7 +241,7 @@ export default function OrdersPage() {
             className="btn btn-secondary"
             onClick={() => {
               // Navigate to analytics page
-              router.push('/admin/analytics'
+              router.push('/admin/analytics')
             }}
           >
             <BarChart3 className="w-4 h-4 mr-2" />
@@ -244,7 +268,7 @@ export default function OrdersPage() {
           <div className="flex gap-3">
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled')}
               className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200"
             >
               <option value="all">All Status</option>
@@ -270,7 +294,7 @@ export default function OrdersPage() {
 
       {/* Orders Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredOrders.map((order) => (
+        {orders.map((order) => (
           <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Order Header */}
             <div className="h-32 bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center relative">
@@ -292,7 +316,7 @@ export default function OrdersPage() {
                   <p className="text-sm text-gray-500">{order.customerName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-green-600">RWF {order.total.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-green-600">RWF {order.totalAmount.toLocaleString()}</p>
                   <p className="text-sm text-gray-500">{order.items} items</p>
                   </div>
                   </div>
@@ -334,10 +358,35 @@ export default function OrdersPage() {
                     </button>
                     <button 
                       className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
-                      onClick={() => {
-                        // TODO: Mark as completed
+                      onClick={async () => {
                         if (confirm('Mark this order as completed?')) {
-                          console.log('Complete order:', order.id)
+                          try {
+                            const response = await fetch(`/api/admin/orders/${order.id}`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                status: 'delivered',
+                                deliveryStatus: 'delivered'
+                              })
+                            })
+                            
+                            if (response.ok) {
+                              // Update local state
+                              setOrders(prev => prev.map(o => 
+                                o.id === order.id 
+                                  ? { ...o, status: 'delivered', deliveryStatus: 'delivered' }
+                                  : o
+                              ))
+                              alert('Order marked as completed!')
+                            } else {
+                              throw new Error('Failed to update order')
+                            }
+                          } catch (error) {
+                            console.error('Error updating order:', error)
+                            alert('Failed to update order. Please try again.')
+                          }
                         }
                       }}
                     >
@@ -345,9 +394,38 @@ export default function OrdersPage() {
                     </button>
                     <button
                       className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
-                      onClick={() => {
-                        // TODO: Update shipping status
-                        console.log('Update shipping for order:', order.id)
+                      onClick={async () => {
+                        const newStatus = prompt('Enter new shipping status (pending, preparing, out_for_delivery, delivered):', order.deliveryStatus)
+                        if (newStatus && ['pending', 'preparing', 'out_for_delivery', 'delivered'].includes(newStatus)) {
+                          try {
+                            const response = await fetch(`/api/admin/orders/${order.id}`, {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                deliveryStatus: newStatus
+                              })
+                            })
+                            
+                            if (response.ok) {
+                              // Update local state
+                              setOrders(prev => prev.map(o => 
+                                o.id === order.id 
+                                  ? { ...o, deliveryStatus: newStatus as 'pending' | 'preparing' | 'out_for_delivery' | 'delivered' }
+                                  : o
+                              ))
+                              alert('Shipping status updated!')
+                            } else {
+                              throw new Error('Failed to update shipping status')
+                            }
+                          } catch (error) {
+                            console.error('Error updating shipping status:', error)
+                            alert('Failed to update shipping status. Please try again.')
+                          }
+                        } else if (newStatus) {
+                          alert('Invalid status. Please use: pending, preparing, out_for_delivery, or delivered')
+                        }
                       }}
                     >
                       <Truck className="w-4 h-4" />
@@ -365,7 +443,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Empty State */}
-      {filteredOrders.length === 0 && (
+      {orders.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <ShoppingCart className="w-12 h-12 text-gray-400" />
@@ -381,4 +459,4 @@ export default function OrdersPage() {
       )}
     </div>
   )
-})
+}

@@ -25,6 +25,10 @@ model User {
   reviews        reviews[]
   wishlist       wishlist[]
 
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -55,6 +59,11 @@ model Product {
   reviews          reviews[]
   wishlist         wishlist[]
 
+  @@index([categoryId])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([createdAt])
+  @@index([price])
   @@map("products")
 }
 
@@ -70,6 +79,8 @@ model Category {
   updatedAt   DateTime  @updatedAt
   products    Product[]
 
+  @@index([isActive])
+  @@index([createdAt])
   @@map("categories")
 }
 
@@ -139,6 +150,13 @@ model orders {
   order_items       order_items[]
   users             User?            @relation(fields: [userId], references: [id])
   payment_proofs    payment_proofs[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([deliveryStatus])
+  @@index([createdAt])
+  @@index([orderNumber])
 }
 
 model payment_proofs {

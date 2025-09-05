@@ -97,14 +97,28 @@ export default function NewProductPage() {
     setLoading(true)
     
     try {
-      // TODO: Implement actual API call to create product
-      console.log('Creating product:', formData)
+      // Implement actual API call to create product
+      const response = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          price: parseFloat(formData.price),
+          stock: parseInt(formData.stock),
+          categoryId: formData.category
+        })
+      })
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Redirect to products page
-      router.push('/admin/products')
+      if (response.ok) {
+        const result = await response.json()
+        alert('Product created successfully!')
+        router.push('/admin/products')
+      } else {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to create product')
+      }
     } catch (error) {
       console.error('Error creating product:', error)
     } finally {

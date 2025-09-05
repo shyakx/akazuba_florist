@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   Package, 
   Plus, 
@@ -39,6 +40,7 @@ interface Product {
 }
 
 export default function ProductsPage() {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -86,9 +88,6 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchProducts()
   }, [searchTerm, filterStatus, filterCategory])
-
-  // Products are already filtered by the API
-  const filteredProducts = products
 
   if (isLoading) {
     return (
@@ -241,8 +240,30 @@ export default function ProductsPage() {
           <button 
             className="btn btn-secondary"
             onClick={() => {
-              // TODO: Implement export functionality
-              console.log('Export products data')
+              // Export products data as CSV
+              const csvContent = [
+                ['Name', 'Category', 'Price', 'Stock', 'Status', 'Sales', 'Rating', 'Created At'],
+                ...products.map(product => [
+                  product.name,
+                  product.category,
+                  product.price,
+                  product.stock,
+                  product.status,
+                  product.sales || 0,
+                  product.rating || 0,
+                  new Date(product.createdAt).toLocaleDateString()
+                ])
+              ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+              
+              const blob = new Blob([csvContent], { type: 'text/csv' })
+              const url = window.URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `products-export-${new Date().toISOString().split('T')[0]}.csv`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              window.URL.revokeObjectURL(url)
             }}
           >
             <Download className="w-4 h-4 mr-2" />
@@ -269,7 +290,7 @@ export default function ProductsPage() {
           <div className="flex gap-3">
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
+              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
               className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200"
             >
               <option value="all">All Status</option>
@@ -292,7 +313,7 @@ export default function ProductsPage() {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((product) => (
+        {products.map((product) => (
           <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Product Image */}
             <div className="h-48 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center relative overflow-hidden">
@@ -371,7 +392,7 @@ export default function ProductsPage() {
                     <button 
                       className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                       onClick={() => {
-                        router.push(`/admin/products/view/${product.id}`
+                        router.push(`/admin/products/view/${product.id}`)
                       }}
                     >
                       <Eye className="w-4 h-4" />
@@ -419,7 +440,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Empty State */}
-      {filteredProducts.length === 0 && (
+      {products.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Package className="w-12 h-12 text-gray-400" />
@@ -441,4 +462,4 @@ export default function ProductsPage() {
       )}
     </div>
   )
-})
+}

@@ -75,14 +75,23 @@ export default function NewCategoryPage() {
     setLoading(true)
     
     try {
-      // TODO: Implement actual API call to create category
-      console.log('Creating category:', formData)
+      // Implement actual API call to create category
+      const response = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Redirect to categories page
-      router.push('/admin/categories')
+      if (response.ok) {
+        const result = await response.json()
+        alert('Category created successfully!')
+        router.push('/admin/categories')
+      } else {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to create category')
+      }
     } catch (error) {
       console.error('Error creating category:', error)
     } finally {

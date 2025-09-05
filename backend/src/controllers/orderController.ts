@@ -98,7 +98,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
     // Calculate subtotal
     const subtotal = items.reduce((sum: number, item: any) => {
-      return sum + (item.price * item.quantity)
+      return sum + (item.unitPrice * item.quantity)
     }, 0)
 
     // Calculate delivery fee
@@ -120,13 +120,13 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         subtotal: subtotal,
         deliveryFee: deliveryFee,
         totalAmount: totalAmount,
-        paymentMethod,
+        paymentMethod: paymentMethod as any,
         notes,
-            userId: req.user?.id || null,
-            status: 'PENDING',
-            paymentStatus: 'PENDING'
-      } as any
-    }) as any
+        userId: req.user?.id || null,
+        status: 'PENDING' as any,
+        paymentStatus: 'PENDING' as any
+      }
+    })
 
     // Create order items
     const order_items = await Promise.all(
@@ -139,12 +139,12 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             productImage: item.image,
             productSku: item.sku,
             quantity: item.quantity,
-                      unitPrice: item.price,
-          totalPrice: item.price * item.quantity,
+            unitPrice: item.price,
+            totalPrice: item.price * item.quantity,
             color: item.color,
             type: item.type
           } as any
-        }) as any
+        })
       )
     )
 
@@ -154,7 +154,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             orderId: order.id,
             proofImage: req.file.filename
           } as any
-        }) as any
+        })
 
     // Send admin notification
     await smsService.sendOrderNotification(orderNumber, customerName, totalAmount)
@@ -180,9 +180,29 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     })
   } catch (error) {
     console.error('Error in createOrder:', error)
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message.includes('Required fields')) {
+        res.status(400).json({
+          success: false,
+          message: error.message
+        })
+        return
+      }
+      
+      if (error.message.includes('Payment proof')) {
+        res.status(400).json({
+          success: false,
+          message: error.message
+        })
+        return
+      }
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Failed to create order'
+      message: 'Failed to create order. Please try again.'
     })
   }
 }
@@ -407,7 +427,7 @@ export const uploadPaymentProof = async (req: Request, res: Response): Promise<v
         orderId,
         proofImage
       } as any
-    }) as any
+    })
 
     res.status(201).json({
       success: true,

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
+import { logger } from '../../lib/logger'
 
 const prisma = new PrismaClient()
 
@@ -57,10 +58,29 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       }
     }
 
-    // Get products with categories
+    // Get products with categories (optimized query)
     const products = await prisma.product.findMany({
       where,
-      include: { categories: true
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        shortDescription: true,
+        price: true,
+        salePrice: true,
+        images: true,
+        isActive: true,
+        isFeatured: true,
+        stockQuantity: true,
+        createdAt: true,
+        categories: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
       },
       skip: limitNum === 1000 ? 0 : skip, // Skip pagination if getting all products
       take: limitNum,
@@ -84,7 +104,7 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
       }
     })
   } catch (error) {
-    console.error('Get products error:', error)
+    logger.error('Failed to retrieve products', 'PRODUCT_CONTROLLER', { error: error instanceof Error ? error.message : 'Unknown error' }, error instanceof Error ? error : undefined)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -133,7 +153,7 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
       data: products
     })
   } catch (error) {
-    console.error('Get products error:', error)
+    logger.error('Failed to retrieve products', 'PRODUCT_CONTROLLER', { error: error instanceof Error ? error.message : 'Unknown error' }, error instanceof Error ? error : undefined)
     res.status(500).json({
       success: false,
       message: 'Internal server error'
@@ -232,17 +252,18 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         sku,
         stockQuantity: parseInt(stockQuantity) || 0,
         minStockAlert: parseInt(minStockAlert) || 5,
-        categoryId,
+        categoryId: categoryId as string,
         images: images || [],
         weight: weight ? parseFloat(weight) : null,
         dimensions: dimensions || null,
         tags: tags || [],
         isFeatured: isFeatured || false,
         isActive: true
-      } as any,
-      include: { categories: true
+      },
+      include: { 
+        categories: true 
       }
-    }) as any
+    })
 
     res.status(201).json({
       success: true,
@@ -250,10 +271,30 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       data: products
     })
   } catch (error) {
-    console.error('Create products error:', error)
+    logger.error('Failed to create product', 'PRODUCT_CONTROLLER', { error: error instanceof Error ? error.message : 'Unknown error' }, error instanceof Error ? error : undefined)
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message.includes('Unique constraint')) {
+        res.status(409).json({
+          success: false,
+          message: 'Product with this name already exists'
+        })
+        return
+      }
+      
+      if (error.message.includes('Foreign key constraint')) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid category ID provided'
+        })
+        return
+      }
+    }
+    
     res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Failed to create product. Please try again.'
     })
   }
 }

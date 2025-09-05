@@ -2,47 +2,64 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
+import Link from 'next/link'
 
 interface Props {
   children: ReactNode
   fallback?: ReactNode
+  onError?: (error: Error, errorInfo: ErrorInfo) => void
 }
 
 interface State {
   hasError: boolean
-  error?: Error
-  errorInfo?: ErrorInfo
+  error: Error | null
+  errorInfo: ErrorInfo | null
 }
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
-    this.state = { hasError: false }
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null
+    }
   }
 
   static getDerivedStateFromError(error: Error): State {
-    // Update state so the next render will show the fallback UI
-    return { hasError: true, error }
+    return {
+      hasError: true,
+      error,
+      errorInfo: null
+    }
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Error Boundary caught an error:', error, errorInfo)
-    }
-    
     this.setState({
       error,
       errorInfo
     })
+
+    // Log error to console in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('ErrorBoundary caught an error:', error, errorInfo)
+    }
+
+    // Call custom error handler if provided
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo)
+    }
+
+    // In production, you would send this to an error reporting service
+    // like Sentry, LogRocket, or Bugsnag
   }
 
   handleRetry = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined })
-  }
-
-  handleGoHome = () => {
-    window.location.href = '/'
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null
+    })
   }
 
   render() {
@@ -54,49 +71,48 @@ class ErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full space-y-8">
+            <div className="text-center">
+              <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
+              <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
+                Oops! Something went wrong
+              </h2>
+              <p className="mt-2 text-sm text-gray-600">
+                We're sorry, but something unexpected happened. Please try again.
+              </p>
             </div>
-            
-            <h1 className="text-xl font-semibold text-gray-900 mb-2">
-              Something went wrong
-            </h1>
-            
-            <p className="text-gray-600 mb-6">
-              We encountered an unexpected error. Please try refreshing the page or contact support if the problem persists.
-            </p>
 
+            <div className="mt-8 space-y-4">
+              <button
+                onClick={this.handleRetry}
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </button>
+
+              <Link
+                href="/"
+                className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Go Home
+              </Link>
+            </div>
+
+            {/* Development error details */}
             {process.env.NODE_ENV === 'development' && this.state.error && (
-              <details className="text-left mb-4 p-3 bg-gray-100 rounded text-sm">
-                <summary className="cursor-pointer font-medium text-gray-700 mb-2">
-                  Error Details (Development)
-                </summary>
-                <pre className="text-red-600 text-xs overflow-auto">
+              <div className="mt-8 bg-red-50 border border-red-200 rounded-md p-4">
+                <h3 className="text-sm font-medium text-red-800 mb-2">
+                  Error Details (Development Only)
+                </h3>
+                <pre className="text-xs text-red-700 whitespace-pre-wrap overflow-auto max-h-40">
                   {this.state.error.toString()}
                   {this.state.errorInfo?.componentStack}
                 </pre>
-              </details>
+              </div>
             )}
-
-            <div className="flex gap-3 justify-center">
-              <button
-                onClick={this.handleRetry}
-                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                <RefreshCw className="h-4 w-4" />
-                Try Again
-              </button>
-              
-              <button
-                onClick={this.handleGoHome}
-                className="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
-              >
-                <Home className="h-4 w-4" />
-                Go Home
-              </button>
-            </div>
           </div>
         </div>
       )
@@ -105,5 +121,92 @@ class ErrorBoundary extends Component<Props, State> {
     return this.props.children
   }
 }
+
+// Specialized error boundaries for different parts of the app
+export const AdminErrorBoundary: React.FC<{ children: ReactNode }> = ({ children }) => (
+  <ErrorBoundary
+    fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full space-y-8 text-center">
+          <AlertTriangle className="mx-auto h-12 w-12 text-red-500" />
+          <h2 className="text-2xl font-bold text-gray-900">
+            Admin Panel Error
+          </h2>
+          <p className="text-gray-600">
+            There was an error in the admin panel. Please refresh the page or contact support.
+          </p>
+          <div className="space-y-4">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Refresh Page
+            </button>
+            <Link
+              href="/admin"
+              className="block w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors"
+            >
+              Back to Admin Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    }
+  >
+    {children}
+  </ErrorBoundary>
+)
+
+export const ProductErrorBoundary: React.FC<{ children: ReactNode }> = ({ children }) => (
+  <ErrorBoundary
+    fallback={
+      <div className="bg-red-50 border border-red-200 rounded-md p-4 m-4">
+        <div className="flex">
+          <AlertTriangle className="h-5 w-5 text-red-400" />
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-red-800">
+              Product Loading Error
+            </h3>
+            <div className="mt-2 text-sm text-red-700">
+              <p>Failed to load product information. Please try again.</p>
+            </div>
+            <div className="mt-4">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-red-100 px-3 py-1 rounded-md text-sm font-medium text-red-800 hover:bg-red-200 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  >
+    {children}
+  </ErrorBoundary>
+)
+
+export const CartErrorBoundary: React.FC<{ children: ReactNode }> = ({ children }) => (
+  <ErrorBoundary
+    fallback={
+      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 m-4">
+        <div className="flex">
+          <AlertTriangle className="h-5 w-5 text-yellow-400" />
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-yellow-800">
+              Cart Error
+            </h3>
+            <div className="mt-2 text-sm text-yellow-700">
+              <p>There was an issue with your cart. Please refresh the page.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  >
+    {children}
+  </ErrorBoundary>
+)
 
 export default ErrorBoundary

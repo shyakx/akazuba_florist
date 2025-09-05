@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, Filter, Grid, List, Flower, Sparkles } from 'lucide-react'
 import { useProducts } from '@/contexts/ProductsContext'
 import ProductCard from '@/components/ProductCard'
@@ -14,6 +14,7 @@ import { findProductCategories, getCategoryMappingById } from '@/data/category-p
 // Separate component that uses useSearchParams
 const SearchContent = () => {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const query = searchParams.get('q') || ''
   const { products, getProductsByCategory } = useProducts()
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
@@ -227,7 +228,7 @@ const SearchContent = () => {
                     <span className="text-sm font-medium text-gray-700">Sort:</span>
                     <select
                       value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
+                      onChange={(e) => setSortBy(e.target.value as 'name' | 'price-low' | 'price-high' | 'newest')}
                       className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     >
                       {sortOptions.map((option) => (
@@ -285,7 +286,7 @@ const SearchContent = () => {
                   {['Roses', 'Bouquets', 'Wedding', 'Birthday', 'Red Flowers', 'Perfumes', 'Male', 'Female', 'Strong Scent'].map((suggestion) => (
                     <button
                       key={suggestion}
-                      onClick={() => router.push(`/search?q=${encodeURIComponent(suggestion)}`}
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(suggestion)}`)}
                       className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm hover:bg-pink-200 transition-colors"
                     >
                       {suggestion}
@@ -346,4 +347,4 @@ const SearchPage = () => {
   )
 }
 
-export default SearchPage )
+export default SearchPage

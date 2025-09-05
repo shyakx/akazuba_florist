@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   Users, 
   Search, 
@@ -23,18 +24,20 @@ import {
 
 interface Customer {
   id: string
-  name: string
+  firstName: string
+  lastName: string
   email: string
-  phone: string
-  address: string
-  totalOrders: number
-  totalSpent: number
-  lastOrder: string
-  joinedDate: string
+  phone?: string
+  address?: string
+  totalOrders?: number
+  totalSpent?: number
+  lastOrder?: string
+  createdAt: string
   status: 'active' | 'inactive'
 }
 
 export default function CustomersPage() {
+  const router = useRouter()
   const [customers, setCustomers] = useState<Customer[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -69,9 +72,6 @@ export default function CustomersPage() {
     fetchCustomers()
   }, [searchTerm])
 
-  // Customers are already filtered by the API
-  const filteredCustomers = customers
-
   if (isLoading) {
     return (
       <div className="loading">
@@ -104,7 +104,7 @@ export default function CustomersPage() {
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">RWF {customers.reduce((sum, c) => sum + c.totalSpent, 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">RWF {customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0).toLocaleString()}</div>
                   <div className="text-sm text-purple-100">Total Revenue</div>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-blue-600">{customers.reduce((sum, c) => sum + c.totalOrders, 0)}</p>
+              <p className="text-2xl font-bold text-blue-600">{customers.reduce((sum, c) => sum + (c.totalOrders ?? 0), 0)}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 text-blue-600" />
@@ -170,7 +170,7 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-pink-600">RWF {customers.reduce((sum, c) => sum + c.totalSpent, 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-pink-600">RWF {customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0).toLocaleString()}</p>
             </div>
             <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-pink-600" />
@@ -190,8 +190,29 @@ export default function CustomersPage() {
           <button 
             className="btn btn-primary bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg"
             onClick={() => {
-              // TODO: Implement export functionality
-              console.log('Export customers data')
+              // Export customers data as CSV
+              const csvContent = [
+                ['Name', 'Email', 'Phone', 'Status', 'Orders', 'Total Spent', 'Created At'],
+                ...customers.map(customer => [
+                  `${customer.firstName} ${customer.lastName}`,
+                  customer.email,
+                  customer.phone || 'N/A',
+                  customer.status,
+                  customer.totalOrders || 0,
+                  customer.totalSpent || 0,
+                  new Date(customer.createdAt).toLocaleDateString()
+                ])
+              ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
+              
+              const blob = new Blob([csvContent], { type: 'text/csv' })
+              const url = window.URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = `customers-export-${new Date().toISOString().split('T')[0]}.csv`
+              document.body.appendChild(a)
+              a.click()
+              document.body.removeChild(a)
+              window.URL.revokeObjectURL(url)
             }}
           >
             <Download className="w-5 h-5 mr-2" />
@@ -201,7 +222,7 @@ export default function CustomersPage() {
             className="btn btn-secondary"
             onClick={() => {
               // Navigate to analytics page
-              router.push('/admin/analytics'
+              router.push('/admin/analytics')
             }}
           >
             <BarChart3 className="w-4 h-4 mr-2" />
@@ -242,7 +263,7 @@ export default function CustomersPage() {
 
       {/* Customers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCustomers.map((customer) => (
+        {customers.map((customer) => (
           <div key={customer.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Customer Header */}
             <div className="h-32 bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center relative">
@@ -264,7 +285,7 @@ export default function CustomersPage() {
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{customer.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{customer.firstName} {customer.lastName}</h3>
                   <p className="text-sm text-gray-500">{customer.email}</p>
                 </div>
                 <div className="text-right">
@@ -286,7 +307,7 @@ export default function CustomersPage() {
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Total Spent</span>
-                  <span className="text-sm font-bold text-pink-600">RWF {customer.totalSpent.toLocaleString()}</span>
+                  <span className="text-sm font-bold text-pink-600">RWF {(customer.totalSpent ?? 0).toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -313,8 +334,16 @@ export default function CustomersPage() {
                     <button 
                       className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
                       onClick={() => {
-                        // TODO: Send email to customer
-                        window.open(`mailto:${customer.email}`)
+                        // Send email to customer
+                        const subject = prompt('Email subject:', 'Message from Akazuba Florist')
+                        const body = prompt('Email message:', 'Hello! Thank you for being our valued customer.')
+                        if (subject && body) {
+                          window.open(`mailto:${customer.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
+                        } else if (subject || body) {
+                          window.open(`mailto:${customer.email}?subject=${encodeURIComponent(subject || '')}&body=${encodeURIComponent(body || '')}`)
+                        } else {
+                          window.open(`mailto:${customer.email}`)
+                        }
                       }}
                     >
                       <Mail className="w-4 h-4" />
@@ -322,8 +351,12 @@ export default function CustomersPage() {
                     <button 
                       className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
                       onClick={() => {
-                        // TODO: Call customer
-                        window.open(`tel:${customer.phone}`)
+                        // Call customer
+                        if (customer.phone) {
+                          window.open(`tel:${customer.phone}`)
+                        } else {
+                          alert('No phone number available for this customer')
+                        }
                       }}
                     >
                       <Phone className="w-4 h-4" />
@@ -331,7 +364,7 @@ export default function CustomersPage() {
                   </div>
                   <div className="flex items-center text-xs text-gray-500">
                     <Calendar className="w-3 h-3 mr-1" />
-                    Joined {new Date(customer.joinedDate).toLocaleDateString()}
+                    Joined {new Date(customer.createdAt).toLocaleDateString()}
                   </div>
                 </div>
               </div>
@@ -341,7 +374,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Empty State */}
-      {filteredCustomers.length === 0 && (
+      {customers.length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Users className="w-12 h-12 text-gray-400" />
@@ -358,4 +391,3 @@ export default function CustomersPage() {
     </div>
   )
 }
-)

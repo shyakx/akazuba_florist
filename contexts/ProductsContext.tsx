@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react'
 import { Product } from '@/types'
+import { logger } from '@/lib/logger'
 import { databaseAPI } from '@/lib/databaseApi'
 import { usePathname } from 'next/navigation'
 
@@ -56,7 +57,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       setProducts(productsData)
       console.log('✅ Loaded', productsData.length, 'products from database')
     } catch (err) {
-      console.error('❌ Error loading products:', err)
+      logger.error('Failed to load products', 'PRODUCTS_CONTEXT', { error: err instanceof Error ? err.message : 'Unknown error' }, err instanceof Error ? err : undefined)
       setError(err instanceof Error ? err.message : 'Failed to load products')
     } finally {
       setIsLoading(false)
@@ -127,7 +128,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       return null
       
     } catch (err) {
-      console.error('❌ Failed to add product:', err)
+      logger.error('Failed to add product', 'PRODUCTS_CONTEXT', { productName: product.name, error: err instanceof Error ? err.message : 'Unknown error' }, err instanceof Error ? err : undefined)
       setError('Failed to add product. Please try again.')
       throw err
     }
