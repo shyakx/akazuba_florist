@@ -6,25 +6,20 @@ import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Heart, Flower, Clock
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-white relative overflow-hidden">
-      {/* Simple background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-500/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-rose-500/5 rounded-full blur-3xl"></div>
-      </div>
+    <footer className="bg-slate-900 text-white relative">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Company Info */}
           <div className="lg:col-span-1">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="flex items-center mb-6">
+              <div className="w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center">
                 <Flower className="h-6 w-6 text-white" />
               </div>
               <span className="ml-3 text-2xl font-bold">Akazuba Florist</span>
             </div>
-            <p className="text-gray-300 text-sm mb-4">
+            <p className="text-gray-300 text-sm mb-6">
               Premium flowers and perfumes delivered fresh to your door.
             </p>
             <div className="flex space-x-4">
@@ -55,8 +50,8 @@ const Footer = () => {
                 { name: "Home", href: "/", desc: "Discover our floral world" },
                 { name: "Roses Collection", href: "/category/roses", desc: "Timeless elegance" },
                 { name: "Tulips Gallery", href: "/category/tulips", desc: "Spring's vibrant messengers" },
-                { name: "Mixed Bouquets", href: "/category/mixed-bouquets", desc: "Artistic floral symphonies" },
-                { name: "Wedding Flowers", href: "/category/wedding-flowers", desc: "Your special day blooms" }
+                { name: "Mixed Bouquets", href: "/category/mixed", desc: "Artistic floral symphonies" },
+                { name: "Wedding Flowers", href: "/category/wedding", desc: "Your special day blooms" }
               ].map((link, index) => (
                 <li key={index}>
                   <Link
@@ -158,55 +153,46 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Company Logo Section */}
-        <div className="border-t border-gray-800 pt-6 mb-6">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="text-center">
-              <p className="text-gray-400 text-sm mb-3">Developed by</p>
-              <div className="flex items-center justify-center space-x-3">
+        {/* Developer Section */}
+        <div className="border-t border-gray-700/30 pt-12 pb-8">
+          <div className="text-center">
+            <div className="inline-block">
+              <div className="text-gray-500 text-xs uppercase tracking-wider mb-6">Developed by</div>
+              <div className="flex items-center justify-center space-x-4">
                 <img 
-                  src="/images/company-logo.png" 
-                  alt="Company Logo" 
-                  className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
-                  onError={(e) => {
-                    // Try SVG fallback first
-                    if (e.currentTarget.src.includes('.png')) {
-                      e.currentTarget.src = '/images/company-logo.svg'
-                      return
-                    }
-                    // Fallback to text if both logo files don't exist
-                    e.currentTarget.style.display = 'none'
-                    const parent = e.currentTarget.parentElement
-                    if (parent && !parent.querySelector('.fallback-text')) {
-                      const fallback = document.createElement('span')
-                      fallback.className = 'fallback-text text-gray-300 font-semibold text-lg'
-                      fallback.textContent = 'Cloud Synch'
-                      parent.appendChild(fallback)
-                    }
-                  }}
+                  src="/images/cloud-sync-logo.png" 
+                  alt="Cloud Sync Logo" 
+                  className="h-16 w-auto object-contain filter brightness-110 flex-shrink-0"
                 />
+                <div className="text-left">
+                  <div className="text-white font-bold text-2xl tracking-tight leading-tight">Cloud Sync</div>
+                  <div className="text-gray-400 text-sm italic leading-tight">Crafting Digital Experiences That Sync</div>
+                </div>
               </div>
-              <p className="text-gray-500 text-xs mt-2">
-                Professional Web Development Services
-              </p>
             </div>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 pt-6 mb-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm mb-2 md:mb-0">
+        <div className="border-t border-gray-700/50 pt-6">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p className="text-gray-400 text-sm">
               © 2024 Akazuba Florist. All rights reserved.
             </p>
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-400 text-sm">Secure shopping</span>
-              <span className="text-green-400">✓</span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <span className="text-gray-400 text-sm">Secure shopping</span>
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-xs">✓</span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Heart className="h-4 w-4 text-pink-400" />
+                <span className="text-gray-400 text-sm">Made with love</span>
+              </div>
             </div>
           </div>
         </div>
-
-
       </div>
     </footer>
   )

@@ -211,29 +211,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="text-sm text-gray-600">
             © 2024 Akazuba Florist Admin Panel
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
-            <span>Developed by</span>
-            <img 
-              src="/images/company-logo.png" 
-              alt="Company Logo" 
-              className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-300"
-              onError={(e) => {
-                // Try SVG fallback first
-                if (e.currentTarget.src.includes('.png')) {
-                  e.currentTarget.src = '/images/company-logo.svg'
-                  return
-                }
-                // Fallback to text if both logo files don't exist
-                e.currentTarget.style.display = 'none'
-                const parent = e.currentTarget.parentElement
-                if (parent && !parent.querySelector('.fallback-text')) {
-                  const fallback = document.createElement('span')
-                  fallback.className = 'fallback-text text-gray-400 font-medium'
-                  fallback.textContent = 'Cloud Synch'
-                  parent.appendChild(fallback)
-                }
-              }}
-            />
+          <div className="flex items-center space-x-3 text-sm text-gray-500">
+            <span className="whitespace-nowrap">Developed by</span>
+            <div className="flex items-center space-x-3">
+              <img 
+                src="/images/cloud-sync-logo.png" 
+                alt="Cloud Sync Logo" 
+                className="h-8 w-auto object-contain flex-shrink-0"
+              />
+              <div className="text-left min-w-0">
+                <div className="text-gray-400 font-semibold whitespace-nowrap">Cloud Sync</div>
+                <div className="text-gray-500 text-xs italic whitespace-nowrap">Crafting Digital Experiences That Sync</div>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
