@@ -1,27 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://akazuba-backend-api.onrender.com/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production",
-    "NEXT_PUBLIC_APP_URL": "https://akazubaflorist.com",
-    "NEXT_PUBLIC_APP_NAME": "Akazuba Florist",
-    "NEXT_PUBLIC_APP_DESCRIPTION": "Premium flowers and perfumes in Rwanda"
-  },
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
@@ -58,7 +36,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://akazubaflorist.com"
+          "value": "https://akazuba-florist.vercel.app"
         },
         {
           "key": "Access-Control-Allow-Methods",
