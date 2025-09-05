@@ -31,6 +31,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { user, isAuthenticated, isLoading, logout, isInitialized } = useAuth()
 
+  // If we're on the login page, don't apply the admin layout
+  if (pathname === '/admin/login') {
+    return <>{children}</>
+  }
+
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
