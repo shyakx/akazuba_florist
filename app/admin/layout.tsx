@@ -205,6 +205,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </main>
 
+      {/* Admin Footer */}
+      <footer className="bg-gray-50 border-t border-gray-200 py-4 px-6">
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+          <div className="text-sm text-gray-600">
+            © 2024 Akazuba Florist Admin Panel
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <span>Developed by</span>
+            <img 
+              src="/images/company-logo.png" 
+              alt="Company Logo" 
+              className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity duration-300"
+              onError={(e) => {
+                // Try SVG fallback first
+                if (e.currentTarget.src.includes('.png')) {
+                  e.currentTarget.src = '/images/company-logo.svg'
+                  return
+                }
+                // Fallback to text if both logo files don't exist
+                e.currentTarget.style.display = 'none'
+                const parent = e.currentTarget.parentElement
+                if (parent && !parent.querySelector('.fallback-text')) {
+                  const fallback = document.createElement('span')
+                  fallback.className = 'fallback-text text-gray-400 font-medium'
+                  fallback.textContent = 'Cloud Synch'
+                  parent.appendChild(fallback)
+                }
+              }}
+            />
+          </div>
+        </div>
+      </footer>
+
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div

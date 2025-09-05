@@ -158,6 +158,41 @@ const Footer = () => {
           </div>
         </div>
 
+        {/* Company Logo Section */}
+        <div className="border-t border-gray-800 pt-6 mb-6">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="text-center">
+              <p className="text-gray-400 text-sm mb-3">Developed by</p>
+              <div className="flex items-center justify-center space-x-3">
+                <img 
+                  src="/images/company-logo.png" 
+                  alt="Company Logo" 
+                  className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity duration-300"
+                  onError={(e) => {
+                    // Try SVG fallback first
+                    if (e.currentTarget.src.includes('.png')) {
+                      e.currentTarget.src = '/images/company-logo.svg'
+                      return
+                    }
+                    // Fallback to text if both logo files don't exist
+                    e.currentTarget.style.display = 'none'
+                    const parent = e.currentTarget.parentElement
+                    if (parent && !parent.querySelector('.fallback-text')) {
+                      const fallback = document.createElement('span')
+                      fallback.className = 'fallback-text text-gray-300 font-semibold text-lg'
+                      fallback.textContent = 'Cloud Synch'
+                      parent.appendChild(fallback)
+                    }
+                  }}
+                />
+              </div>
+              <p className="text-gray-500 text-xs mt-2">
+                Professional Web Development Services
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-6 mb-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
