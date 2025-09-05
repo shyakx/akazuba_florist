@@ -11,3 +11,33 @@ akazuba-*.pem
 
 # Temporary files
 temp-pem-files/
+
+# Backend directory - handled by Render
+backend/
+
+# Backend dependencies
+backend/node_modules/
+backend/package-lock.json
+
+# Backend build artifacts
+backend/dist/
+backend/build/
+
+# Backend environment files
+backend/.env
+backend/.env.local
+backend/.env.production
+
+# Backend logs
+backend/logs/
+backend/*.log
+
+# Backend test files
+backend/**/*.test.ts
+backend/**/*.test.js
+backend/**/*.spec.ts
+backend/**/*.spec.js
+
+# Backend documentation
+backend/README.md
+backend/docs/
