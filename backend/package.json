@@ -2,10 +2,10 @@
   "name": "akazuba-backend",
   "version": "1.0.0",
   "description": "Akazuba Florist Backend API",
-  "main": "dist/server.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts",
     "build": "tsc",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
