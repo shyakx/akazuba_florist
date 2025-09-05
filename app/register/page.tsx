@@ -77,9 +77,11 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('🚀 Registration form submitted')
     setErrors({})
 
     if (!validateForm()) {
+      console.log('❌ Form validation failed')
       return
     }
 
@@ -92,13 +94,20 @@ const Register = () => {
         password: formData.password,
       }
 
+      console.log('📝 Attempting registration with data:', { ...registerData, password: '[HIDDEN]' })
       const success = await register(registerData)
       
+      console.log('✅ Registration result:', success)
       if (success) {
+        console.log('🎉 Registration successful, redirecting to dashboard')
         // Redirect to dashboard
         router.push('/dashboard')
+      } else {
+        console.log('❌ Registration failed')
+        setErrors({ general: 'Registration failed. Please try again.' })
       }
     } catch (error: any) {
+      console.error('❌ Registration error:', error)
       setErrors({ general: error.message || 'Registration failed. Please try again.' })
     }
   }

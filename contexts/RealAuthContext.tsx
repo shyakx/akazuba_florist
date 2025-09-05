@@ -234,44 +234,50 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const register = async (data: RegisterRequest): Promise<boolean> => {
     try {
       setIsLoading(true)
-      console.log('📝 Attempting registration for:', data.email)
+      console.log('📝 AuthContext: Attempting registration for:', data.email)
       
       const response = await authAPI.register(data)
+      console.log('📝 AuthContext: API response:', response)
       
       if (response.success && response.data) {
-        console.log('✅ Registration successful, storing authentication data')
+        console.log('✅ AuthContext: Registration successful, storing authentication data')
         
         // Store tokens
         if (response.data.accessToken) {
           localStorage.setItem('accessToken', response.data.accessToken)
           document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax`
+          console.log('🔑 AuthContext: Access token stored')
         }
         
         if (response.data.refreshToken) {
           localStorage.setItem('refreshToken', response.data.refreshToken)
+          console.log('🔑 AuthContext: Refresh token stored')
         }
         
         // Store user data
         if (response.data.user) {
           localStorage.setItem('user', JSON.stringify(response.data.user))
           setUser(response.data.user)
+          console.log('👤 AuthContext: User data stored:', response.data.user)
           
           // Set user role cookie for middleware
           if (response.data.user.role) {
           document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+          console.log('🍪 AuthContext: User role cookie set:', response.data.user.role)
         }
         }
         
         // Set visited flag
         localStorage.setItem('hasVisitedBefore', 'true')
+        console.log('✅ AuthContext: Registration completed successfully')
         
         return true
       } else {
-        console.error('❌ Registration failed:', response.message)
+        console.error('❌ AuthContext: Registration failed:', response.message)
       return false
       }
     } catch (error) {
-      console.error('❌ Registration error:', error)
+      console.error('❌ AuthContext: Registration error:', error)
       return false
     } finally {
       setIsLoading(false)
