@@ -134,12 +134,12 @@ app.get('/health', (req, res) => {
     .finally(() => {
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Backend - Admin Panel Enhanced - Version 2.1.2 - Prisma Schema Fixed',
+    message: 'Akazuba Backend - Cart, Wishlist & Checkout Fixed - Version 2.2.0',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
         database: dbStatus,
     cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
-    version: '2.1.2',
+    version: '2.2.0',
     corsEnabled: true,
     deployment: 'forced-redeploy'
       });
@@ -586,17 +586,19 @@ app.post('/api/v1/cart/items', async (req, res) => {
         where: { id: existingItem.id },
         data: { quantity: existingItem.quantity + quantity },
         include: {
-            products: true
+          products: true
         }
       });
     } else {
       // Add new item
       cartItem = await prisma.cart_items.create({
         data: {
+          id: `cart_item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           cartId: cart.id,
           productId,
-          quantity
-        },
+          quantity,
+          updatedAt: new Date()
+        } as any,
         include: {
           products: true
         }
@@ -845,9 +847,10 @@ app.post('/api/v1/wishlist', async (req, res) => {
     // Add to wishlist
     const wishlistItem = await prisma.wishlist.create({
       data: {
+        id: `wishlist_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId,
         productId
-      },
+      } as any,
       include: {
         products: true
       }
@@ -972,12 +975,13 @@ app.post('/api/v1/orders', async (req, res) => {
     }
 
     // Generate order number
-    const orderCount = await prisma.order.count();
+    const orderCount = await prisma.orders.count();
     const orderNumber = `AKZ-${String(orderCount + 1).padStart(3, '0')}`;
 
     // Create order
-    const order = await prisma.order.create({
+    const order = await prisma.orders.create({
       data: {
+        id: `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         orderNumber,
         customerName,
         customerEmail,
@@ -990,23 +994,26 @@ app.post('/api/v1/orders', async (req, res) => {
         paymentMethod,
         notes,
         status: 'PENDING',
-        paymentStatus: 'PENDING'
-      }
+        paymentStatus: 'PENDING',
+        updatedAt: new Date()
+      } as any
     });
 
     // Create order items
     const orderItems = await Promise.all(
       items.map((item) =>
-        prisma.orderItem.create({
+        prisma.order_items.create({
           data: {
+            id: `order_item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             orderId: order.id,
             productId: item.productId,
             productName: item.productName,
             productSku: item.productSku,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
-            totalPrice: item.totalPrice
-          }
+            totalPrice: item.totalPrice,
+            updatedAt: new Date()
+          } as any
         })
       )
     );
