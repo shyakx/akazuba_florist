@@ -33,7 +33,8 @@ export default function AdminLoginPage() {
     console.log('🔄 Admin Login useEffect triggered:', {
       isInitialized,
       isAuthenticated,
-      userRole: user?.role
+      userRole: user?.role,
+      userEmail: user?.email
     })
     
     if (isInitialized && isAuthenticated && user?.role === 'ADMIN') {
@@ -41,6 +42,17 @@ export default function AdminLoginPage() {
       router.push('/admin')
     }
   }, [isAuthenticated, user, router, isInitialized])
+
+  // Additional effect to handle redirect after successful login
+  React.useEffect(() => {
+    if (isInitialized && isAuthenticated && user?.role === 'ADMIN') {
+      console.log('🚀 Redirecting to admin panel after successful login...')
+      // Use setTimeout to ensure state updates are complete
+      setTimeout(() => {
+        router.push('/admin')
+      }, 100)
+    }
+  }, [isAuthenticated, user?.role, isInitialized, router])
 
   // Show loading state while authentication is initializing
   if (authLoading || !isInitialized) {
@@ -72,6 +84,14 @@ export default function AdminLoginPage() {
       
       if (success) {
         toast.success('Login successful!')
+        console.log('🎉 Login successful, waiting for state update...')
+        
+        // Force a small delay to ensure state updates are complete
+        setTimeout(() => {
+          console.log('🔄 Checking authentication state after login...')
+          console.log('Current state:', { isAuthenticated, userRole: user?.role, isInitialized })
+        }, 200)
+        
         // Redirect will happen automatically via useEffect
       } else {
         toast.error('Access denied. Admin privileges required.')

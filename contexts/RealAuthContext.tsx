@@ -180,6 +180,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await authAPI.adminLogin(data)
       
       if (response.success && response.data) {
+        console.log('✅ Login successful, checking admin role...')
+        
+        // Check if user has admin role
+        if (response.data.user.role !== 'ADMIN') {
+          console.error('❌ Access denied: User is not an admin')
+          return false
+        }
+        
         console.log('✅ Admin login successful, storing authentication data')
         
         // Store tokens

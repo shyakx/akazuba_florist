@@ -237,9 +237,9 @@ export const authAPI = {
   // Admin login
   adminLogin: async (data: { username: string; password: string }): Promise<ApiResponse<AuthResponse['data']>> => {
     try {
-      const response = await apiRequest<AuthResponse['data']>('/auth/admin/login', {
+      const response = await apiRequest<AuthResponse['data']>('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ username: data.username, password: data.password }),
+        body: JSON.stringify({ email: data.username, password: data.password }),
       });
 
       if (response.success && response.data) {
