@@ -31,6 +31,8 @@ interface AnalyticsData {
 }
 
 export default function AdminDashboard() {
+  console.log('🏠 Admin Dashboard component rendered')
+  
   const [stats, setStats] = useState<DashboardStats>({
     categories: 0,
     products: 0,
@@ -44,6 +46,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
+      console.log('📊 Fetching dashboard stats...')
       setIsLoading(true)
       setError(null)
       
@@ -53,11 +56,17 @@ export default function AdminDashboard() {
         fetch('/api/admin/analytics/public')
       ])
       
+      console.log('📊 Stats response status:', statsResponse.status)
+      console.log('📊 Analytics response status:', analyticsResponse.status)
+      
       if (!statsResponse.ok) throw new Error('Failed to fetch stats')
       if (!analyticsResponse.ok) throw new Error('Failed to fetch analytics')
       
       const statsData = await statsResponse.json()
       const analyticsData = await analyticsResponse.json()
+      
+      console.log('📊 Stats data received:', statsData)
+      console.log('📊 Analytics data received:', analyticsData)
       
       setStats({
         categories: statsData.categories || 0,
@@ -70,8 +79,10 @@ export default function AdminDashboard() {
       if (analyticsData.success) {
         setAnalytics(analyticsData)
       }
+      
+      console.log('✅ Dashboard data loaded successfully')
     } catch (error) {
-      console.error('Error fetching stats:', error)
+      console.error('❌ Error fetching stats:', error)
       setError('Failed to load dashboard data')
     } finally {
       setIsLoading(false)
