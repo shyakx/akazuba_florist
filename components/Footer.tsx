@@ -153,7 +153,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Developer Section */}
+        {/* Developer Section - Cloud Sync Logo */}
         <div className="border-t border-gray-700/30 pt-12 pb-8">
           <div className="text-center">
             <div className="inline-block">
