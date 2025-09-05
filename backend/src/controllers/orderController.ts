@@ -126,7 +126,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             status: 'PENDING',
             paymentStatus: 'PENDING'
       } as any
-    })
+    }) as any
 
     // Create order items
     const order_items = await Promise.all(
@@ -144,7 +144,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             color: item.color,
             type: item.type
           } as any
-        })
+        }) as any
       )
     )
 
@@ -154,7 +154,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             orderId: order.id,
             proofImage: req.file.filename
           } as any
-        })
+        }) as any
 
     // Send admin notification
     await smsService.sendOrderNotification(orderNumber, customerName, totalAmount)
@@ -407,7 +407,7 @@ export const uploadPaymentProof = async (req: Request, res: Response): Promise<v
         orderId,
         proofImage
       } as any
-    })
+    }) as any
 
     res.status(201).json({
       success: true,
