@@ -252,7 +252,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         sku,
         stockQuantity: parseInt(stockQuantity) || 0,
         minStockAlert: parseInt(minStockAlert) || 5,
-        categoryId: categoryId as string,
+        categoryId,
         images: images || [],
         weight: weight ? parseFloat(weight) : null,
         dimensions: dimensions || null,

@@ -342,7 +342,7 @@ export default function CustomersPage() {
                         } else if (subject || body) {
                           window.open(`mailto:${customer.email}?subject=${encodeURIComponent(subject || '')}&body=${encodeURIComponent(body || '')}`)
                         } else {
-                          window.open(`mailto:${customer.email}`)
+                        window.open(`mailto:${customer.email}`)
                         }
                       }}
                     >
@@ -353,7 +353,7 @@ export default function CustomersPage() {
                       onClick={() => {
                         // Call customer
                         if (customer.phone) {
-                          window.open(`tel:${customer.phone}`)
+                        window.open(`tel:${customer.phone}`)
                         } else {
                           alert('No phone number available for this customer')
                         }
