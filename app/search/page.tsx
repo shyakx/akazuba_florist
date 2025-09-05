@@ -285,7 +285,7 @@ const SearchContent = () => {
                   {['Roses', 'Bouquets', 'Wedding', 'Birthday', 'Red Flowers', 'Perfumes', 'Male', 'Female', 'Strong Scent'].map((suggestion) => (
                     <button
                       key={suggestion}
-                      onClick={() => window.location.href = `/search?q=${encodeURIComponent(suggestion)}`}
+                      onClick={() => router.push(`/search?q=${encodeURIComponent(suggestion)}`}
                       className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm hover:bg-pink-200 transition-colors"
                     >
                       {suggestion}
@@ -346,4 +346,4 @@ const SearchPage = () => {
   )
 }
 
-export default SearchPage 
+export default SearchPage )

@@ -217,7 +217,7 @@ export default function OrdersPage() {
             className="btn btn-secondary"
             onClick={() => {
               // Navigate to analytics page
-              window.location.href = '/admin/analytics'
+              router.push('/admin/analytics'
             }}
           >
             <BarChart3 className="w-4 h-4 mr-2" />
@@ -381,4 +381,4 @@ export default function OrdersPage() {
       )}
     </div>
   )
-}
+})

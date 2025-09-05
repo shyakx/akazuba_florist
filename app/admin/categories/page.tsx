@@ -100,7 +100,7 @@ export default function CategoriesPage() {
             className="card hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105 hover:border-blue-300"
             onClick={() => {
               // Navigate to category products page
-              window.location.href = `/admin/categories/${category.id}/products`
+              router.push(`/admin/categories/${category.id}/products`)
             }}
           >
             <div className="flex items-start justify-between mb-4">
@@ -140,7 +140,7 @@ export default function CategoriesPage() {
                   className="p-1 text-gray-400 hover:text-blue-600"
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = `/admin/categories/view/${category.id}`
+                    router.push(`/admin/categories/view/${category.id}`)
                   }}
                 >
                   <Eye className="w-4 h-4" />

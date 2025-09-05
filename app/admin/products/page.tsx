@@ -371,7 +371,7 @@ export default function ProductsPage() {
                     <button 
                       className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                       onClick={() => {
-                        window.location.href = `/admin/products/view/${product.id}`
+                        router.push(`/admin/products/view/${product.id}`
                       }}
                     >
                       <Eye className="w-4 h-4" />
@@ -441,4 +441,4 @@ export default function ProductsPage() {
       )}
     </div>
   )
-}
+})
