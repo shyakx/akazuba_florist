@@ -70,7 +70,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Check if users already exists
-    const existingUser = await prisma.users.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: { email: email.toLowerCase() }
     })
 
@@ -87,7 +87,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
     // Create users
-    const users = await prisma.users.create({
+    const users = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
         passwordHash: hashedPassword,
@@ -157,7 +157,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Find users with password hash
-    const users = await prisma.users.findUnique({
+    const users = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       select: {
         id: true,
@@ -240,7 +240,7 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
     }
 
     // Find admin users with password hash
-    const users = await prisma.users.findFirst({
+    const users = await prisma.user.findFirst({
       where: {
         OR: [
           { email: usersname.toLowerCase() },
@@ -441,7 +441,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 // Get users profile
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const users = await prisma.users.findUnique({
+    const users = await prisma.user.findUnique({
       where: { id: req.user!.id },
       select: {
         id: true,
@@ -494,7 +494,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     }
 
     // Update users
-    const updatedUser = await prisma.users.update({
+    const updatedUser = await prisma.user.update({
       where: { id: req.user!.id },
       data: {
         ...(firstName && { firstName }),
@@ -544,7 +544,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     }
 
     // Find user
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
       select: {
         id: true,
@@ -628,7 +628,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }
 
     // Find user
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: decoded.userId }
     })
 
@@ -645,7 +645,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds)
 
     // Update password
-    await prisma.users.update({
+    await prisma.user.update({
       where: { id: user.id },
       data: { passwordHash: hashedNewPassword }
     })
@@ -700,7 +700,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     }
 
     // Get users with password
-    const users = await prisma.users.findUnique({
+    const users = await prisma.user.findUnique({
       where: { id: req.user!.id }
     })
 
@@ -727,7 +727,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds)
 
     // Update password
-    await prisma.users.update({
+    await prisma.user.update({
       where: { id: req.user!.id },
       data: { passwordHash: hashedNewPassword }
     })
