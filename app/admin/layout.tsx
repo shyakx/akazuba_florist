@@ -56,17 +56,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Handle authentication
   useEffect(() => {
-    if (isLoading || !isInitialized || isLoggingOut) return
+    console.log('🔍 Admin Layout Auth Check:', {
+      isLoading,
+      isInitialized,
+      isLoggingOut,
+      isAuthenticated,
+      userRole: user?.role,
+      userEmail: user?.email
+    })
+    
+    if (isLoading || !isInitialized || isLoggingOut) {
+      console.log('⏳ Admin Layout: Waiting for auth initialization...')
+      return
+    }
 
     if (!isAuthenticated) {
+      console.log('🚫 Admin Layout: Not authenticated, redirecting to login...')
       router.push('/admin/login')
       return
     }
     
     if (user?.role !== 'ADMIN') {
+      console.log('🚫 Admin Layout: Not admin role, redirecting to home...')
       router.push('/')
       return
     }
+    
+    console.log('✅ Admin Layout: Authentication successful, rendering admin panel...')
   }, [isAuthenticated, user?.role, isLoading, isInitialized, isLoggingOut, router])
 
   // Show loading state
