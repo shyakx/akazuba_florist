@@ -79,8 +79,14 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     
     try {
+      console.log('🚀 Starting admin login process...')
+      console.log('Current auth state before login:', { isAuthenticated, userRole: user?.role, isInitialized })
+      
       // Use adminLogin from auth context
       const success = await adminLogin({ username: formData.username, password: formData.password })
+      
+      console.log('🔍 Admin login result:', success)
+      console.log('Auth state after login:', { isAuthenticated, userRole: user?.role, isInitialized })
       
       if (success) {
         toast.success('Login successful!')
@@ -90,7 +96,27 @@ export default function AdminLoginPage() {
         setTimeout(() => {
           console.log('🔄 Checking authentication state after login...')
           console.log('Current state:', { isAuthenticated, userRole: user?.role, isInitialized })
-        }, 200)
+          
+          // Force redirect if state is correct
+          if (isAuthenticated && user?.role === 'ADMIN') {
+            console.log('🚀 Force redirecting to admin panel...')
+            router.push('/admin')
+          } else {
+            // If state isn't updated, try to get user from localStorage
+            const storedUser = localStorage.getItem('user')
+            if (storedUser) {
+              try {
+                const userData = JSON.parse(storedUser)
+                if (userData.role === 'ADMIN') {
+                  console.log('🚀 Found admin user in localStorage, redirecting...')
+                  router.push('/admin')
+                }
+              } catch (error) {
+                console.error('Error parsing stored user:', error)
+              }
+            }
+          }
+        }, 500)
         
         // Redirect will happen automatically via useEffect
       } else {

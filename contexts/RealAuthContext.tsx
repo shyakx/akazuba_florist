@@ -202,12 +202,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Store user data
         if (response.data.user) {
+          console.log('💾 Storing user data:', response.data.user)
           localStorage.setItem('user', JSON.stringify(response.data.user))
           setUser(response.data.user)
+          console.log('👤 User state updated:', response.data.user)
           
           // Set user role cookie for middleware
           if (response.data.user.role) {
           document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+          console.log('🍪 User role cookie set:', response.data.user.role)
         }
         }
         
