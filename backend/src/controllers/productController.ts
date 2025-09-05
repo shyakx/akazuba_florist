@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
-import { logger } from '../../lib/logger'
+import { logger } from '../utils/logger'
 
 const prisma = new PrismaClient()
 
@@ -242,17 +242,17 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 
     const products = await prisma.product.create({
       data: {
-        name,
-        slug,
-        description,
-        shortDescription,
+        name: name as string,
+        slug: slug as string,
+        description: description as string,
+        shortDescription: shortDescription as string,
         price: parseFloat(price),
         salePrice: salePrice ? parseFloat(salePrice) : null,
         costPrice: costPrice ? parseFloat(costPrice) : null,
-        sku,
+        sku: sku as string,
         stockQuantity: parseInt(stockQuantity) || 0,
         minStockAlert: parseInt(minStockAlert) || 5,
-        categoryId,
+        categoryId: categoryId as string,
         images: images || [],
         weight: weight ? parseFloat(weight) : null,
         dimensions: dimensions || null,
