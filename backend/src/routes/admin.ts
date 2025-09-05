@@ -46,12 +46,12 @@ router.get('/analytics', async (req, res) => {
       }),
       
       // Total customers
-      prisma.users.count({
+      prisma.user.count({
         where: { role: 'CUSTOMER' }
       }),
       
       // Total products
-      prisma.products.count(),
+      prisma.product.count(),
       
       // Recent orders (last 10)
       prisma.orders.findMany({
@@ -104,7 +104,7 @@ router.get('/analytics', async (req, res) => {
       }),
       
       // Customer growth for last 6 months
-      prisma.users.groupBy({
+      prisma.user.groupBy({
         by: ['createdAt'],
         _count: {
           id: true
@@ -125,7 +125,7 @@ router.get('/analytics', async (req, res) => {
     // Get top products with names
     const topProductsWithNames = await Promise.all(
       topProducts.map(async (item) => {
-        const products = await prisma.products.findUnique({
+        const products = await prisma.product.findUnique({
           where: { id: item.productId },
           select: { name: true }
         })
@@ -227,7 +227,7 @@ async function getTopCategories() {
   const categoriesMap = new Map<string, number>()
   
   for (const item of categoriesSales) {
-    const products = await prisma.products.findUnique({
+    const products = await prisma.product.findUnique({
       where: { id: item.productId },
       select: { categoryId: true }
     })
@@ -239,7 +239,7 @@ async function getTopCategories() {
   }
 
   // Get categories names
-  const categories = await prisma.categories.findMany({
+  const categories = await prisma.category.findMany({
     where: {
       id: { in: Array.from(categoriesMap.keys()) }
     }
@@ -267,7 +267,7 @@ async function getTopCategories() {
  */
 router.get('/customers', async (req, res) => {
   try {
-    const customers = await prisma.users.findMany({
+    const customers = await prisma.user.findMany({
       where: { role: 'CUSTOMER' },
       select: {
         id: true,
@@ -426,7 +426,7 @@ router.get('/orders', async (req, res) => {
  */
 router.get('/products', async (req, res) => {
   try {
-    const products = await prisma.products.findMany({
+    const products = await prisma.product.findMany({
       include: { categories: true
       }
     })
@@ -549,9 +549,9 @@ router.get('/dashboard/stats', async (req, res) => {
     // Get real counts from database
     const [totalOrders, totalProducts, totalCustomers, lowStockProducts] = await Promise.all([
       prisma.orders.count(),
-      prisma.products.count(),
-      prisma.users.count({ where: { role: 'CUSTOMER' } }),
-      prisma.products.count({ where: { stockQuantity: { lte: 10 } } })
+      prisma.product.count(),
+      prisma.user.count({ where: { role: 'CUSTOMER' } }),
+      prisma.product.count({ where: { stockQuantity: { lte: 10 } } })
     ])
 
     // Get new orders (orders created in the last 7 days)
@@ -677,7 +677,7 @@ router.get('/dashboard/activity', async (req, res) => {
     })
       
     // Get recent users registrations
-    const recentUsers = await prisma.users.findMany({
+    const recentUsers = await prisma.user.findMany({
       take: 3,
         where: { role: 'CUSTOMER' },
         orderBy: { createdAt: 'desc' },
@@ -757,12 +757,12 @@ router.get('/dashboard/analytics', async (req, res) => {
       }),
       
       // Total customers
-      prisma.users.count({
+      prisma.user.count({
         where: { role: 'CUSTOMER' }
       }),
       
       // Total products
-      prisma.products.count(),
+      prisma.product.count(),
       
       // Recent orders (last 10)
       prisma.orders.findMany({
@@ -815,7 +815,7 @@ router.get('/dashboard/analytics', async (req, res) => {
       }),
       
       // Customer growth (new customers per month)
-      prisma.users.groupBy({
+      prisma.user.groupBy({
         by: ['createdAt'],
         _count: {
           id: true
@@ -896,7 +896,7 @@ router.get('/products', async (req, res) => {
     }
     
     const [products, total] = await Promise.all([
-      prisma.products.findMany({
+      prisma.product.findMany({
         where,
         skip,
         take: Number(limit),
@@ -904,7 +904,7 @@ router.get('/products', async (req, res) => {
         },
         orderBy: { createdAt: 'desc' }
       }),
-      prisma.products.count({ where })
+      prisma.product.count({ where })
     ])
     
     const pages = Math.ceil(total / Number(limit))
@@ -931,7 +931,7 @@ router.get('/products/:id', async (req, res) => {
   try {
     const { id } = req.params
     
-    const products = await prisma.products.findUnique({
+    const products = await prisma.product.findUnique({
       where: { id },
       include: { categories: true
       }
@@ -962,7 +962,7 @@ router.post('/products', async (req, res) => {
   try {
     const productsData = req.body
     
-    const products = await prisma.products.create({
+    const products = await prisma.product.create({
       data: productsData,
       include: { categories: true
       }
@@ -987,7 +987,7 @@ router.put('/products/:id', async (req, res) => {
     const { id } = req.params
     const updateData = req.body
     
-    const products = await prisma.products.update({
+    const products = await prisma.product.update({
       where: { id },
       data: updateData,
       include: { categories: true
@@ -1012,7 +1012,7 @@ router.delete('/products/:id', async (req, res) => {
   try {
     const { id } = req.params
     
-    await prisma.products.delete({
+    await prisma.product.delete({
       where: { id }
     })
     
@@ -1081,7 +1081,7 @@ router.post('/products/bulk', async (req, res) => {
     
     switch (operation) {
       case 'delete':
-        result = await prisma.products.deleteMany({
+        result = await prisma.product.deleteMany({
           where: {
             id: { in: productIds }
           }
@@ -1089,7 +1089,7 @@ router.post('/products/bulk', async (req, res) => {
         break
         
       case 'activate':
-        result = await prisma.products.updateMany({
+        result = await prisma.product.updateMany({
           where: {
             id: { in: productIds }
           },
@@ -1100,7 +1100,7 @@ router.post('/products/bulk', async (req, res) => {
         break
         
       case 'deactivate':
-        result = await prisma.products.updateMany({
+        result = await prisma.product.updateMany({
           where: {
             id: { in: productIds }
           },
@@ -1111,7 +1111,7 @@ router.post('/products/bulk', async (req, res) => {
         break
         
       case 'feature':
-        result = await prisma.products.updateMany({
+        result = await prisma.product.updateMany({
           where: {
             id: { in: productIds }
           },
@@ -1122,7 +1122,7 @@ router.post('/products/bulk', async (req, res) => {
         break
         
       case 'unfeature':
-        result = await prisma.products.updateMany({
+        result = await prisma.product.updateMany({
           where: {
             id: { in: productIds }
           },
@@ -1140,7 +1140,7 @@ router.post('/products/bulk', async (req, res) => {
           })
         }
         
-        const products = await prisma.products.findMany({
+        const products = await prisma.product.findMany({
           where: {
             id: { in: productIds }
           },
@@ -1167,7 +1167,7 @@ router.post('/products/bulk', async (req, res) => {
               throw new Error('Invalid stock operation')
           }
           
-          return prisma.products.update({
+          return prisma.product.update({
             where: { id: products.id },
             data: { stockQuantity: newQuantity }
           })
@@ -1214,7 +1214,7 @@ router.post('/products/bulk', async (req, res) => {
 router.get('/categories', async (req, res) => {
   try {
     // Get all categories with products counts
-    const categories = await prisma.categories.findMany({
+    const categories = await prisma.category.findMany({
       include: {
         _count: {
           select: {
@@ -1383,7 +1383,7 @@ router.post('/export/:type', async (req, res) => {
         break
         
       case 'customers':
-        const customers = await prisma.users.findMany({
+        const customers = await prisma.user.findMany({
           where: { role: 'CUSTOMER' },
           orderBy: { createdAt: 'desc' }
         })
@@ -1409,7 +1409,7 @@ router.post('/export/:type', async (req, res) => {
         break
         
       case 'products':
-        const products = await prisma.products.findMany({
+        const products = await prisma.product.findMany({
           include: { categories: true
           },
           orderBy: { createdAt: 'desc' }
@@ -1440,8 +1440,8 @@ router.post('/export/:type', async (req, res) => {
           prisma.orders.aggregate({
             _sum: { totalAmount: true }
           }),
-          prisma.users.count({ where: { role: 'CUSTOMER' } }),
-          prisma.products.count(),
+          prisma.user.count({ where: { role: 'CUSTOMER' } }),
+          prisma.product.count(),
           prisma.orders.groupBy({
             by: ['createdAt'],
             _sum: { totalAmount: true },
@@ -1451,7 +1451,7 @@ router.post('/export/:type', async (req, res) => {
               }
             }
           }),
-          prisma.users.groupBy({
+          prisma.user.groupBy({
             by: ['createdAt'],
             _count: { id: true },
             where: {

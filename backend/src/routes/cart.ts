@@ -21,7 +21,7 @@ const prisma = new PrismaClient()
  */
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const userId = req.user.id
 
     // Get or create cart for users
     let cart = await prisma.cart.findFirst({
@@ -100,7 +100,7 @@ router.get('/', verifyToken, async (req, res) => {
  */
 router.post('/items', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const userId = req.user.id
     const { productId, quantity } = req.body
 
     if (!productId || !quantity || quantity <= 0) {
@@ -111,7 +111,7 @@ router.post('/items', verifyToken, async (req, res) => {
     }
 
     // Verify products exists
-    const products = await prisma.products.findUnique({
+    const products = await prisma.product.findUnique({
       where: { id: productId }
     })
 
@@ -196,7 +196,7 @@ router.post('/items', verifyToken, async (req, res) => {
  */
 router.put('/items/:id', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const userId = req.user.id
     const { id } = req.params
     const { quantity } = req.body
 
@@ -266,7 +266,7 @@ router.put('/items/:id', verifyToken, async (req, res) => {
  */
 router.delete('/items/:id', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const userId = req.user.id
     const { id } = req.params
 
     // Verify cart item belongs to users
@@ -316,7 +316,7 @@ router.delete('/items/:id', verifyToken, async (req, res) => {
  */
 router.delete('/', verifyToken, async (req, res) => {
   try {
-    const userId = req.users.id
+    const userId = req.user.id
 
     const cart = await prisma.cart.findFirst({
       where: { userId }
