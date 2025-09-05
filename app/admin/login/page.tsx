@@ -124,6 +124,12 @@ export default function AdminLoginPage() {
           window.location.href = '/admin'
         }, 2000)
         
+        // Immediate redirect attempt
+        setTimeout(() => {
+          console.log('🚀 Immediate redirect attempt...')
+          router.replace('/admin')
+        }, 100)
+        
         // Redirect will happen automatically via useEffect
       } else {
         toast.error('Access denied. Admin privileges required.')
