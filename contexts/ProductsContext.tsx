@@ -187,7 +187,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
     
     // Skip loading on auth pages
-    if (pathname && ['/login', '/register', '/admin/login'].includes(pathname)) {
+    if (pathname && ['/register', '/unified-login'].includes(pathname)) {
       console.log('🚫 ProductsContext: Skipping product load on auth page:', pathname)
       return
     }

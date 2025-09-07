@@ -191,7 +191,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!isAuthenticated) {
       console.log('❌ User not authenticated, redirecting to login')
       toast.error('Please sign in to add items to cart')
-      router.push('/login')
+      router.push('/unified-login')
       return
     }
     

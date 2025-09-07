@@ -100,7 +100,7 @@ export default function AdminForgotPasswordPage() {
             </div>
 
             <div className="admin-login-footer">
-              <Link href="/admin/login" className="admin-login-link">
+              <Link href="/unified-login" className="admin-login-link">
                 <ArrowLeft className="w-4 h-4" />
                 Back to Admin Login
               </Link>

@@ -51,7 +51,7 @@ const ForgotPassword = () => {
           {/* Back Button */}
           <div className="mb-6">
             <Link 
-              href="/login" 
+              href="/unified-login" 
               className="inline-flex items-center text-gray-600 hover:text-pink-600 transition-colors duration-200 group"
             >
               <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
@@ -117,7 +117,7 @@ const ForgotPassword = () => {
         {/* Back Button */}
         <div className="mb-6">
           <Link 
-            href="/login" 
+            href="/unified-login" 
             className="inline-flex items-center text-gray-600 hover:text-pink-600 transition-colors duration-200 group"
           >
             <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
@@ -195,7 +195,7 @@ const ForgotPassword = () => {
               <p className="text-gray-600">
                 Remember your password?{' '}
                 <Link
-                  href="/login"
+                  href="/unified-login"
                   className="font-medium text-pink-600 hover:text-pink-500 transition-colors"
                 >
                   Sign in here

@@ -402,7 +402,7 @@ const Register = () => {
               <p className="text-gray-600">
               Already have an account?{' '}
                 <Link
-                  href="/login"
+                  href="/unified-login"
                   className="font-medium text-pink-600 hover:text-pink-500 transition-colors"
                 >
                 Sign in here

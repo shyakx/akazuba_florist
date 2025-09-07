@@ -14,9 +14,8 @@ const adminRoutes = [
 
 // Define auth routes (login, register)
 const authRoutes = [
-  '/login',
   '/register',
-  '/admin/login'
+  '/unified-login'
 ]
 
 export function middleware(request: NextRequest) {
@@ -31,7 +30,7 @@ export function middleware(request: NextRequest) {
   const isAdmin = userRole === 'ADMIN'
   
   // Only log important middleware checks (not every request)
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+  if (pathname.startsWith('/admin')) {
     console.log('🔒 Admin route check:', {
       pathname,
       isAuthenticated,
@@ -51,7 +50,7 @@ export function middleware(request: NextRequest) {
   if (adminRoutes.some(route => pathname.startsWith(route))) {
     if (!isAuthenticated) {
       console.log('❌ Admin access denied - not authenticated')
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      return NextResponse.redirect(new URL('/unified-login', request.url))
     }
     
     if (!isAdmin) {
@@ -67,7 +66,7 @@ export function middleware(request: NextRequest) {
   if (protectedRoutes.some(route => pathname.startsWith(route))) {
     if (!isAuthenticated) {
       console.log('❌ Protected route access denied - redirecting to login')
-      return NextResponse.redirect(new URL('/login', request.url))
+      return NextResponse.redirect(new URL('/unified-login', request.url))
     }
     
     return NextResponse.next()

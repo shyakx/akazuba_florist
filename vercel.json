@@ -52,7 +52,7 @@
   "redirects": [
     {
       "source": "/admin",
-      "destination": "/admin/login",
+      "destination": "/unified-login",
       "permanent": false
     }
   ]

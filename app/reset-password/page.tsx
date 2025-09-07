@@ -151,7 +151,7 @@ const ResetPasswordContent = () => {
               </p>
               
               <Link
-                href="/login"
+                href="/unified-login"
                 className="inline-block w-full py-3 px-4 bg-pink-500 hover:bg-pink-600 text-white rounded-lg font-medium transition-colors"
               >
                 Sign In Now

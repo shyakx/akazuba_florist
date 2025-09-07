@@ -30,11 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { user, isAuthenticated, isLoading, logout, isInitialized } = useAuth()
 
-  // If we're on the login page, don't apply the admin layout
-  if (pathname === '/admin/login') {
-    console.log('🚫 Admin Layout: Excluding login page from admin layout')
-    return <>{children}</>
-  }
+  // Admin layout applies to all admin pages
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -76,7 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     if (!isAuthenticated) {
       console.log('🚫 Admin Layout: Not authenticated, redirecting to login...')
-      router.push('/admin/login')
+      router.push('/unified-login')
       return
     }
     
