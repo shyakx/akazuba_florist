@@ -75,8 +75,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Check for existing valid tokens in both development and production
         const token = localStorage.getItem('accessToken')
-        if (token) {
-          console.log('🔍 Found existing token, validating...')
+        const storedUser = localStorage.getItem('user')
+        
+        if (token && storedUser) {
+          console.log('🔍 Found existing token and user data, validating...')
+          try {
+            const userData = JSON.parse(storedUser)
+            // Set user immediately from stored data
+            setUser(userData)
+            console.log('✅ User restored from localStorage:', userData.email)
+            
+            // Then validate token in background
+            await validateAndSetUser(token)
+          } catch (error) {
+            console.error('❌ Error parsing stored user data:', error)
+            clearAllAuthData()
+          }
+        } else if (token) {
+          console.log('🔍 Found token but no user data, validating...')
           await validateAndSetUser(token)
         } else {
           console.log('🔓 No existing token found')
@@ -114,12 +130,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
         }
       } else {
-        console.warn('❌ Token validation failed, clearing auth data')
-        clearAllAuthData()
+        console.warn('❌ Token validation failed, but keeping user data if available')
+        // Don't clear auth data immediately - let the user try to use the app
+        // The token might be temporarily invalid but could be refreshed
+        const storedUser = localStorage.getItem('user')
+        if (!storedUser) {
+          clearAllAuthData()
+        }
       }
     } catch (error) {
       console.error('❌ Token validation error:', error)
-      clearAllAuthData()
+      // Don't clear auth data on network errors - keep user logged in
+      // Only clear if it's a clear authentication error
+      if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
+        console.warn('❌ Authentication error, clearing auth data')
+        clearAllAuthData()
+      } else {
+        console.warn('❌ Network error during token validation, keeping user logged in')
+      }
     }
   }
 
@@ -144,7 +172,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           localStorage.setItem('refreshToken', response.data.refreshToken)
         }
         
-        // Store user data
+        // Store user data and set state immediately
         if (response.data.user) {
           localStorage.setItem('user', JSON.stringify(response.data.user))
           setUser(response.data.user)
@@ -153,17 +181,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (response.data.user.role) {
             document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
           }
-          }
+        }
         
         // Set visited flag
         localStorage.setItem('hasVisitedBefore', 'true')
         
+        // Mark as authenticated immediately after successful login
+        console.log('✅ Authentication state updated after login')
+        
         return true
-        } else {
+      } else {
         console.error('❌ Login failed:', response.message)
         return false
-        }
-      } catch (error) {
+      }
+    } catch (error) {
       console.error('❌ Login error:', error)
       return false
     } finally {

@@ -23,12 +23,15 @@ const Login = () => {
   useEffect(() => {
     // Only redirect if user is authenticated, not loading, and not already redirecting
     if (!isLoading && isAuthenticated && user && !isRedirecting) {
+      console.log('🔄 Login page: User authenticated, redirecting...', { userRole: user.role })
       setIsRedirecting(true)
       
       // Immediate redirect without delay
       if (user.role === 'ADMIN') {
+        console.log('🚀 Redirecting admin to /admin')
         router.push('/admin')
       } else {
+        console.log('🚀 Redirecting user to /dashboard')
         router.push('/dashboard')
       }
     }
