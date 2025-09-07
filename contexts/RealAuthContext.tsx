@@ -227,7 +227,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (response.data.accessToken) {
           localStorage.setItem('accessToken', response.data.accessToken)
           // Set cookie with proper domain and secure settings
-          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax; secure=false`
+          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax`
           console.log('🍪 Access token cookie set')
         }
         
@@ -244,7 +244,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Set user role cookie for middleware
           if (response.data.user.role) {
-            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; secure=false`
+            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
             console.log('🍪 User role cookie set:', response.data.user.role)
           }
         }
