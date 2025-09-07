@@ -362,7 +362,9 @@ export default function OrdersPage() {
                       className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                       onClick={() => {
                         // Navigate to order details
-                        window.location.href = `/admin/orders/${order.id}`
+                        if (typeof window !== 'undefined') {
+                          window.location.href = `/admin/orders/${order.id}`
+                        }
                       }}
                     >
                       <Eye className="w-4 h-4" />

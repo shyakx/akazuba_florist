@@ -137,7 +137,11 @@ export const AdminErrorBoundary: React.FC<{ children: ReactNode }> = ({ children
           </p>
           <div className="space-y-4">
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.reload()
+                }
+              }}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
             >
               Refresh Page
@@ -172,7 +176,11 @@ export const ProductErrorBoundary: React.FC<{ children: ReactNode }> = ({ childr
             </div>
             <div className="mt-4">
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.reload()
+                  }
+                }}
                 className="bg-red-100 px-3 py-1 rounded-md text-sm font-medium text-red-800 hover:bg-red-200 transition-colors"
               >
                 Retry

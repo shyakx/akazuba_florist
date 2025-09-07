@@ -49,7 +49,9 @@ export default function OfflinePage() {
     .then(() => {
       setIsOnline(true)
       // Redirect to home page when back online
-      window.location.href = '/'
+      if (typeof window !== 'undefined') {
+        window.location.href = '/'
+      }
     })
     .catch(() => {
       // Still offline

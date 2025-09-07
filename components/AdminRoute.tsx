@@ -33,7 +33,11 @@ const AdminError = ({ error, retry }: { error: Error; retry: () => void }) => (
           Try Again
         </button>
         <button
-          onClick={() => window.location.href = '/'}
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.location.href = '/'
+            }
+          }}
           className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors"
         >
           Go to Homepage

@@ -336,7 +336,9 @@ export default function CustomersPage() {
                       className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                       onClick={() => {
                         // Navigate to customer details
-                        window.location.href = `/admin/customers/${customer.id}`
+                        if (typeof window !== 'undefined') {
+                          window.location.href = `/admin/customers/${customer.id}`
+                        }
                       }}
                     >
                       <Eye className="w-4 h-4" />
