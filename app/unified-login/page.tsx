@@ -34,13 +34,20 @@ export default function UnifiedLoginPage() {
   React.useEffect(() => {
     if (isInitialized && isAuthenticated && user) {
       console.log('✅ User already authenticated, redirecting...')
-      if (user.role === 'ADMIN') {
-        router.push('/admin')
-      } else {
-        router.push('/dashboard')
-      }
+      console.log('🔍 User details:', { role: user.role, email: user.email })
+      
+      // Add a small delay to ensure cookies are properly set
+      setTimeout(() => {
+        if (user.role === 'ADMIN') {
+          console.log('🚀 Redirecting to admin panel...')
+          window.location.href = '/admin'
+        } else {
+          console.log('🚀 Redirecting to dashboard...')
+          window.location.href = '/dashboard'
+        }
+      }, 100)
     }
-  }, [isAuthenticated, user, router, isInitialized])
+  }, [isAuthenticated, user, isInitialized])
 
   // Show loading state while authentication is initializing
   if (authLoading || !isInitialized) {
