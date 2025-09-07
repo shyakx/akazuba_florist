@@ -356,8 +356,8 @@ class Analytics {
         error_name: error.name,
         error_stack: error.stack,
         context: context,
-        url: window.location.href,
-        user_agent: navigator.userAgent
+        url: typeof window !== 'undefined' ? window.location.href : 'unknown',
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown'
       }
     })
   }

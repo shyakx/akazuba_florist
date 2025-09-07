@@ -90,10 +90,12 @@ export default function ProductsPage() {
 
   // Read category parameter from URL on component mount
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const categoryParam = urlParams.get('category')
-    if (categoryParam) {
-      setFilterCategory(categoryParam)
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const categoryParam = urlParams.get('category')
+      if (categoryParam) {
+        setFilterCategory(categoryParam)
+      }
     }
   }, [])
 
@@ -230,9 +232,11 @@ export default function ProductsPage() {
               onClick={() => {
                 setFilterCategory('')
                 // Update URL to remove category parameter
-                const url = new URL(window.location.href)
-                url.searchParams.delete('category')
-                window.history.replaceState({}, '', url.toString())
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href)
+                  url.searchParams.delete('category')
+                  window.history.replaceState({}, '', url.toString())
+                }
               }}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium"
             >
