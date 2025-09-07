@@ -42,6 +42,7 @@ router.get('/', verifyToken, async (req, res) => {
         data: {
           id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           userId,
+          updatedAt: new Date(),
           cart_items: {
             create: []
           }
@@ -132,7 +133,8 @@ router.post('/items', verifyToken, async (req, res) => {
       cart = await prisma.cart.create({
         data: { 
           id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          userId 
+          userId,
+          updatedAt: new Date()
         } as any
       }) as any
     }
