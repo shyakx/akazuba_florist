@@ -68,7 +68,9 @@ export default function UnifiedLoginPage() {
       console.log('🚀 Redirecting to:', redirectUrl)
       
       // Use replace instead of href to prevent back button issues
-      window.location.replace(redirectUrl)
+      if (typeof window !== 'undefined') {
+        window.location.replace(redirectUrl)
+      }
     }
   }, [isInitialized, authLoading, isAuthenticated, user, hasRedirected, sessionRedirected])
 
@@ -145,12 +147,14 @@ export default function UnifiedLoginPage() {
         
         // Wait for state to update, then redirect based on login type
         setTimeout(() => {
-          if (loginType === 'admin' || (loginType === 'auto' && formData.email.includes('admin'))) {
-            console.log('🚀 Redirecting to admin panel...')
-            window.location.href = '/admin'
-          } else {
-            console.log('🚀 Redirecting to dashboard...')
-            window.location.href = '/dashboard'
+          if (typeof window !== 'undefined') {
+            if (loginType === 'admin' || (loginType === 'auto' && formData.email.includes('admin'))) {
+              console.log('🚀 Redirecting to admin panel...')
+              window.location.href = '/admin'
+            } else {
+              console.log('🚀 Redirecting to dashboard...')
+              window.location.href = '/dashboard'
+            }
           }
         }, 2000)
         

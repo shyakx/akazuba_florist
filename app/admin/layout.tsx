@@ -72,13 +72,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     if (!isAuthenticated) {
       console.log('🚫 Admin Layout: Not authenticated, redirecting to login...')
-      window.location.href = '/unified-login'
+      if (typeof window !== 'undefined') {
+        window.location.href = '/unified-login'
+      }
       return
     }
     
     if (user?.role !== 'ADMIN') {
       console.log('🚫 Admin Layout: Not admin role, redirecting to home...')
-      window.location.href = '/'
+      if (typeof window !== 'undefined') {
+        window.location.href = '/'
+      }
       return
     }
     
