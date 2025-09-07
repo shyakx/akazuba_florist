@@ -18,6 +18,14 @@ export default function UnifiedLoginPage() {
   const [loginType, setLoginType] = useState<'auto' | 'admin' | 'customer'>('auto')
   const [hasRedirected, setHasRedirected] = useState(false)
   
+  // Check if we've already redirected in this session
+  const [sessionRedirected, setSessionRedirected] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('loginRedirected') === 'true'
+    }
+    return false
+  })
+  
   const router = useRouter()
   const { login, adminLogin, isAuthenticated, user, isLoading: authLoading, isInitialized } = useAuth()
 
@@ -31,29 +39,49 @@ export default function UnifiedLoginPage() {
     loginType
   })
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated - with more robust logic
   React.useEffect(() => {
-    if (isInitialized && isAuthenticated && user && !hasRedirected) {
+    console.log('🔄 Auth state changed:', {
+      isInitialized,
+      isAuthenticated,
+      hasUser: !!user,
+      userRole: user?.role,
+      hasRedirected,
+      authLoading
+    })
+
+    // Only redirect if we have stable authentication state and haven't redirected in this session
+    if (isInitialized && !authLoading && isAuthenticated && user && !hasRedirected && !sessionRedirected) {
       console.log('✅ User already authenticated, redirecting...')
       console.log('🔍 User details:', { role: user.role, email: user.email })
       
       setHasRedirected(true) // Prevent multiple redirects
+      setSessionRedirected(true) // Mark session as redirected
       
-      // Add a small delay to ensure cookies are properly set
-      setTimeout(() => {
-        if (user.role === 'ADMIN') {
-          console.log('🚀 Redirecting to admin panel...')
-          window.location.href = '/admin'
-        } else {
-          console.log('🚀 Redirecting to dashboard...')
-          window.location.href = '/dashboard'
-        }
-      }, 100)
-    } else if (isInitialized && !isAuthenticated && hasRedirected) {
-      // Reset redirect flag if user is no longer authenticated
-      setHasRedirected(false)
+      // Store in sessionStorage to persist across page reloads
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('loginRedirected', 'true')
+      }
+      
+      // Use a more reliable redirect method
+      const redirectUrl = user.role === 'ADMIN' ? '/admin' : '/dashboard'
+      console.log('🚀 Redirecting to:', redirectUrl)
+      
+      // Use replace instead of href to prevent back button issues
+      window.location.replace(redirectUrl)
     }
-  }, [isAuthenticated, user, isInitialized, hasRedirected])
+  }, [isInitialized, authLoading, isAuthenticated, user, hasRedirected, sessionRedirected])
+
+  // Clear session redirect flag when user is not authenticated
+  React.useEffect(() => {
+    if (isInitialized && !isAuthenticated && sessionRedirected) {
+      console.log('🧹 Clearing session redirect flag - user not authenticated')
+      setSessionRedirected(false)
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('loginRedirected')
+      }
+    }
+  }, [isInitialized, isAuthenticated, sessionRedirected])
 
   // Show loading state while authentication is initializing
   if (authLoading || !isInitialized || (isAuthenticated && hasRedirected)) {
