@@ -174,8 +174,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Store user data and set state immediately
         if (response.data.user) {
+          console.log('💾 Storing user data:', response.data.user)
           localStorage.setItem('user', JSON.stringify(response.data.user))
           setUser(response.data.user)
+          console.log('👤 User state set to:', response.data.user)
           
           // Set user role cookie for middleware
           if (response.data.user.role) {

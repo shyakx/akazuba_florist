@@ -19,6 +19,16 @@ const Login = () => {
   const { login, isLoading, user, isAuthenticated } = useAuth()
   const router = useRouter()
 
+  // Debug authentication state
+  useEffect(() => {
+    console.log('🔍 Login page auth state:', {
+      isLoading,
+      isAuthenticated,
+      user: user ? { email: user.email, role: user.role } : null,
+      isRedirecting
+    })
+  }, [isLoading, isAuthenticated, user, isRedirecting])
+
   // Simplified authentication redirect logic
   useEffect(() => {
     // Only redirect if user is authenticated, not loading, and not already redirecting

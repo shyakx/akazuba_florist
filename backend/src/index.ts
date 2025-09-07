@@ -118,26 +118,42 @@ app.use(helmet({
   }
 }))
 
-// CORS configuration - Production Only
+// CORS configuration - Development and Production
 const corsOptions = {
   origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true)
     
-    // Define production origins only - no localhost dependencies
-    const productionOrigins = [
-      'https://online-shopping-by-diane.vercel.app',
-      'https://akazuba-florist.vercel.app',
-      process.env.FRONTEND_URL
-    ].filter((url): url is string => Boolean(url))
+    // Define allowed origins based on environment
+    const isDevelopment = process.env.NODE_ENV === 'development'
     
-    // In production, only allow production origins
-    const allowedOrigins = productionOrigins
+    let allowedOrigins: string[] = []
+    
+    if (isDevelopment) {
+      // Development - allow localhost
+      allowedOrigins = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3001'
+      ]
+    } else {
+      // Production - allow production origins and localhost for development
+      allowedOrigins = [
+        'https://online-shopping-by-diane.vercel.app',
+        'https://akazuba-florist.vercel.app',
+        'https://akazubaflorist.com',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        process.env.FRONTEND_URL
+      ].filter((url): url is string => Boolean(url))
+    }
     
     console.log('🔍 CORS Check:')
     console.log('  - Origin:', origin)
     console.log('  - Environment:', process.env.NODE_ENV || 'production')
     console.log('  - Allowed origins:', allowedOrigins)
+    console.log('  - Is Development:', isDevelopment)
     
     // Check if origin is in allowed list
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -147,7 +163,7 @@ const corsOptions = {
       console.log('🚫 CORS blocked origin:', origin)
       console.log('✅ Allowed origins:', allowedOrigins)
       console.log('🌍 Environment:', process.env.NODE_ENV || 'production')
-      callback(new Error('Not allowed by CORS - Production origins only'))
+      callback(new Error(`Not allowed by CORS - ${isDevelopment ? 'Development' : 'Production'} origins only`))
     }
   },
   credentials: true,
@@ -176,16 +192,17 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  const isDevelopment = process.env.NODE_ENV === 'development'
   res.status(200).json({
     status: 'OK',
-    message: 'Akazuba Backend - Production Ready - CORS Production Only',
+    message: `Akazuba Backend - ${isDevelopment ? 'Development' : 'Production'} Ready`,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'production',
     database: 'connected',
-    cors: 'production-only',
-    version: '2.0.2',
+    cors: isDevelopment ? 'development-allowed' : 'production-only',
+    version: '2.0.3',
     corsEnabled: true,
-    productionMode: true
+    developmentMode: isDevelopment
   })
 })
 
