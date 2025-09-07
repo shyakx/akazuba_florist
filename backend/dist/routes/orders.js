@@ -16,14 +16,12 @@ router.post('/:orderId/payment-proof', orderController_1.uploadPaymentProof);
 router.get('/my-orders', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
-        const orders = await prisma.order.findMany({
+        const order = await prisma.orders.findMany({
             where: { userId },
             include: {
-                orderItems: {
-                    include: {
-                        product: {
-                            include: {
-                                category: true
+                order_items: {
+                    include: { products: {
+                            include: { categories: true
                             }
                         }
                     }
@@ -36,11 +34,11 @@ router.get('/my-orders', auth_1.verifyToken, async (req, res) => {
         res.json({
             success: true,
             message: 'Orders retrieved successfully',
-            data: orders
+            data: order
         });
     }
     catch (error) {
-        console.error('Error getting user orders:', error);
+        console.error('Error getting users orders:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to retrieve orders'
@@ -51,17 +49,15 @@ router.get('/my-orders/:id', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const { id } = req.params;
-        const order = await prisma.order.findFirst({
+        const order = await prisma.orders.findFirst({
             where: {
                 id,
                 userId
             },
             include: {
-                orderItems: {
-                    include: {
-                        product: {
-                            include: {
-                                category: true
+                order_items: {
+                    include: { products: {
+                            include: { categories: true
                             }
                         }
                     }
@@ -82,7 +78,7 @@ router.get('/my-orders/:id', auth_1.verifyToken, async (req, res) => {
         return;
     }
     catch (error) {
-        console.error('Error getting user order:', error);
+        console.error('Error getting users order:', error);
         res.status(500).json({
             success: false,
             message: 'Failed to retrieve order'

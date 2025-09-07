@@ -27,7 +27,7 @@ class PaymentController {
                     return;
                 }
                 // Check if order exists
-                const order = await prisma.order.findUnique({
+                const order = await prisma.orders.findUnique({
                     where: { id: paymentData.orderId }
                 });
                 if (!order) {
@@ -40,7 +40,7 @@ class PaymentController {
                 // Generate payment reference
                 const paymentReference = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
                 // Update order with payment method and status
-                const updatedOrder = await prisma.order.update({
+                const updatedOrder = await prisma.orders.update({
                     where: { id: paymentData.orderId },
                     data: {
                         paymentMethod: paymentData.paymentMethod.toUpperCase(),
@@ -92,7 +92,7 @@ class PaymentController {
         this.checkPaymentStatus = async (req, res) => {
             try {
                 const { orderId } = req.params;
-                const order = await prisma.order.findUnique({
+                const order = await prisma.orders.findUnique({
                     where: { id: orderId }
                 });
                 if (!order) {
@@ -135,7 +135,7 @@ class PaymentController {
                     });
                     return;
                 }
-                const order = await prisma.order.update({
+                const order = await prisma.orders.update({
                     where: { id: orderId },
                     data: {
                         paymentStatus: paymentStatus,

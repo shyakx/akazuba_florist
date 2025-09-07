@@ -185,7 +185,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   const addToCart = async (product: Product) => {
+    console.log('🛒 Add to cart clicked for product:', product.name, 'ID:', product.id)
+    console.log('🛒 User authenticated:', isAuthenticated, 'User:', user?.email)
+    
     if (!isAuthenticated) {
+      console.log('❌ User not authenticated, redirecting to login')
       toast.error('Please sign in to add items to cart')
       router.push('/login')
       return
@@ -193,6 +197,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
+      console.log('🛒 Making API call to add item to cart...')
       
       // Use the product ID directly since backend mapping is unreliable
       const response = await cartAPI.addItem({
@@ -200,14 +205,18 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         quantity: 1
       })
       
+      console.log('🛒 Cart API response:', response)
+      
       if (response.success && response.data) {
         dispatch({ type: 'ADD_ITEM', payload: response.data })
         toast.success(`${product.name} added to cart!`)
+        console.log('✅ Item successfully added to cart')
       } else {
+        console.log('❌ Failed to add item to cart:', response.message)
         toast.error('Failed to add item to cart')
       }
     } catch (error) {
-      console.error('Error adding to cart:', error)
+      console.error('❌ Error adding to cart:', error)
       toast.error('Failed to add item to cart')
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })

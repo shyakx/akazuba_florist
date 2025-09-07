@@ -114,33 +114,23 @@ app.use((0, helmet_1.default)({
         preload: true
     }
 }));
-// CORS configuration - Production and Development
+// CORS configuration - Production Only
 const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin)
             return callback(null, true);
-        // Define allowed origins based on environment
+        // Define production origins only - no localhost dependencies
         const productionOrigins = [
             'https://online-shopping-by-diane.vercel.app',
             'https://akazuba-florist.vercel.app',
             process.env.FRONTEND_URL
         ].filter((url) => Boolean(url));
-        const developmentOrigins = [
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'http://localhost:3002',
-            'http://127.0.0.1:3000',
-            'http://127.0.0.1:3001',
-            'http://127.0.0.1:3002'
-        ];
-        // Use production origins only in production, allow development origins in other environments
-        const allowedOrigins = process.env.NODE_ENV === 'production'
-            ? productionOrigins
-            : [...productionOrigins, ...developmentOrigins];
+        // In production, only allow production origins
+        const allowedOrigins = productionOrigins;
         console.log('🔍 CORS Check:');
         console.log('  - Origin:', origin);
-        console.log('  - Environment:', process.env.NODE_ENV || 'development');
+        console.log('  - Environment:', process.env.NODE_ENV || 'production');
         console.log('  - Allowed origins:', allowedOrigins);
         // Check if origin is in allowed list
         if (allowedOrigins.indexOf(origin) !== -1) {
@@ -150,8 +140,8 @@ const corsOptions = {
         else {
             console.log('🚫 CORS blocked origin:', origin);
             console.log('✅ Allowed origins:', allowedOrigins);
-            console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
-            callback(new Error('Not allowed by CORS'));
+            console.log('🌍 Environment:', process.env.NODE_ENV || 'production');
+            callback(new Error('Not allowed by CORS - Production origins only'));
         }
     },
     credentials: true,
@@ -176,13 +166,14 @@ app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.de
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'OK',
-        message: 'Akazuba Backend - CORS FIXED - Development Mode Enabled!',
+        message: 'Akazuba Backend - Production Ready - CORS Production Only',
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || 'production',
         database: 'connected',
-        cors: process.env.NODE_ENV === 'production' ? 'production-only' : 'development-allowed',
-        version: '2.0.1',
-        corsEnabled: true
+        cors: 'production-only',
+        version: '2.0.2',
+        corsEnabled: true,
+        productionMode: true
     });
 });
 // CORS test endpoint

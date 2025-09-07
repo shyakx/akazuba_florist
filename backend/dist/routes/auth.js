@@ -230,4 +230,59 @@ router.put('/profile', auth_1.requireAuth, authController_1.updateProfile);
  *         description: Current password incorrect
  */
 router.post('/change-password', auth_1.requireAuth, authController_1.changePassword);
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: Request password reset
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Password reset link sent (if email exists)
+ *       400:
+ *         description: Bad request - email required
+ */
+router.post('/forgot-password', authLimiter, authController_1.forgotPassword);
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Reset password with token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       400:
+ *         description: Bad request - validation error
+ *       401:
+ *         description: Invalid or expired token
+ */
+router.post('/reset-password', authLimiter, authController_1.resetPassword);
 exports.default = router;

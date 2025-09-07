@@ -96,27 +96,36 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   }
 
   const addToWishlist = async (product: any): Promise<boolean> => {
+    console.log('❤️ Add to wishlist clicked for product:', product.name, 'ID:', product.id)
+    console.log('❤️ User authenticated:', !!user, 'User:', user?.email)
+    
     try {
       setIsLoading(true)
 
       if (!user) {
+        console.log('❌ User not authenticated for wishlist')
         toast.error('Please login to add items to your wishlist')
         return false
       }
 
+      console.log('❤️ Making API call to add item to wishlist...')
       // User mode - add to backend
       const response = await wishlistAPI.addToWishlist(product.id)
+      
+      console.log('❤️ Wishlist API response:', response)
       
       if (response.success) {
         await refreshWishlist()
         toast.success(`${product.name} added to wishlist!`)
+        console.log('✅ Item successfully added to wishlist')
         return true
       } else {
+        console.log('❌ Failed to add to wishlist:', response.message)
         toast.error(response.message || 'Failed to add to wishlist')
         return false
       }
     } catch (error) {
-      console.error('Error adding to wishlist:', error)
+      console.error('❌ Error adding to wishlist:', error)
       toast.error('Failed to add to wishlist')
       return false
     } finally {

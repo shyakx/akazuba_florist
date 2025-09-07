@@ -111,6 +111,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     // Create order
     const order = await prisma.orders.create({
       data: {
+        id: crypto.randomUUID(),
         orderNumber,
         customerName,
         customerEmail,
@@ -120,11 +121,12 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         subtotal: subtotal,
         deliveryFee: deliveryFee,
         totalAmount: totalAmount,
-        paymentMethod: paymentMethod as any,
+        paymentMethod: paymentMethod as 'MOMO' | 'BK' | 'CASH',
         notes,
         userId: req.user?.id || null,
-        status: 'PENDING' as any,
-        paymentStatus: 'PENDING' as any
+        status: 'PENDING' as 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED',
+        paymentStatus: 'PENDING' as 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED',
+        updatedAt: new Date()
       }
     })
 

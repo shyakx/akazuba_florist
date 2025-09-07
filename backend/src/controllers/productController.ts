@@ -258,7 +258,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
         dimensions: dimensions || null,
         tags: tags || [],
         isFeatured: isFeatured || false,
-        isActive: true
+        isActive: true,
+        updatedAt: new Date()
       },
       include: { 
         categories: true 

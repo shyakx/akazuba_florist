@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import jwt, { Secret, SignOptions } from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client'
 import { logger } from '../utils/logger'
 import { validateEmail, validatePassword, validatePhone } from '../middleware/auth'
@@ -13,18 +13,23 @@ const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-2024-developmen
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d'
 
+// Ensure JWT_SECRET is defined
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required')
+}
+
 // Generate JWT tokens
 const generateTokens = (userId: string, role: string) => {
   const accessToken = jwt.sign(
     { userId, role },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    JWT_SECRET as Secret,
+    { expiresIn: JWT_EXPIRES_IN } as SignOptions
   )
   
   const refreshToken = jwt.sign(
     { userId, role, type: 'refresh' },
-    JWT_SECRET,
-    { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
+    JWT_SECRET as Secret,
+    { expiresIn: REFRESH_TOKEN_EXPIRES_IN } as SignOptions
   )
   
   return { accessToken, refreshToken }
@@ -118,6 +123,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     // Store refresh token
     await prisma.refresh_tokens.create({
       data: {
+        id: crypto.randomUUID(),
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
@@ -198,6 +204,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Store refresh token
     await prisma.refresh_tokens.create({
       data: {
+        id: crypto.randomUUID(),
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
@@ -288,6 +295,7 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
     // Store refresh token
     await prisma.refresh_tokens.create({
       data: {
+        id: crypto.randomUUID(),
         token: refreshToken,
         userId: users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
@@ -357,7 +365,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     }
 
     // Verify refresh token
-    const decoded = jwt.verify(refreshToken, JWT_SECRET) as { userId: string; role: string; type: string }
+    const decoded = jwt.verify(refreshToken, JWT_SECRET as Secret) as { userId: string; role: string; type: string }
     
     if (decoded.type !== 'refresh') {
       res.status(401).json({
@@ -414,6 +422,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     await prisma.refresh_tokens.create({
       data: {
+        id: crypto.randomUUID(),
         token: newRefreshToken,
         userId: storedToken.users.id,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
@@ -566,8 +575,8 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     // Generate reset token
     const resetToken = jwt.sign(
       { userId: user.id, type: 'password_reset' },
-      JWT_SECRET,
-      { expiresIn: '1h' }
+      JWT_SECRET as Secret,
+      { expiresIn: '1h' } as SignOptions
     )
 
     // Store reset token in database (you might want to create a separate table for this)
@@ -617,7 +626,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }
 
     // Verify reset token
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; role: string }
+    const decoded = jwt.verify(token, JWT_SECRET as Secret) as { userId: string; role: string; type: string }
     
     if (decoded.type !== 'password_reset') {
       res.status(401).json({

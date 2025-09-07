@@ -9,7 +9,7 @@ const prisma = new client_1.PrismaClient();
  * @swagger
  * /cart:
  *   get:
- *     summary: Get user cart
+ *     summary: Get users cart
  *     tags: [Cart]
  *     security:
  *       - bearerAuth: []
@@ -22,15 +22,12 @@ const prisma = new client_1.PrismaClient();
 router.get('/', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
-        // Get or create cart for user
+        // Get or create cart for users
         let cart = await prisma.cart.findFirst({
             where: { userId },
-            include: {
-                cartItems: {
-                    include: {
-                        product: {
-                            include: {
-                                category: true
+            include: { cart_items: {
+                    include: { products: {
+                            include: { categories: true
                             }
                         }
                     }
@@ -42,16 +39,13 @@ router.get('/', auth_1.verifyToken, async (req, res) => {
             cart = await prisma.cart.create({
                 data: {
                     userId,
-                    cartItems: {
+                    cart_items: {
                         create: []
                     }
                 },
-                include: {
-                    cartItems: {
-                        include: {
-                            product: {
-                                include: {
-                                    category: true
+                include: { cart_items: {
+                        include: { products: {
+                                include: { categories: true
                                 }
                             }
                         }
@@ -111,11 +105,11 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
                 message: 'Product ID and valid quantity are required'
             });
         }
-        // Verify product exists
-        const product = await prisma.product.findUnique({
+        // Verify products exists
+        const products = await prisma.product.findUnique({
             where: { id: productId }
         });
-        if (!product) {
+        if (!products) {
             return res.status(404).json({
                 success: false,
                 message: 'Product not found'
@@ -131,7 +125,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
             });
         }
         // Check if item already exists in cart
-        const existingItem = await prisma.cartItem.findFirst({
+        const existingItem = await prisma.cart_items.findFirst({
             where: {
                 cartId: cart.id,
                 productId
@@ -140,13 +134,11 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
         let cartItem;
         if (existingItem) {
             // Update quantity
-            cartItem = await prisma.cartItem.update({
+            cartItem = await prisma.cart_items.update({
                 where: { id: existingItem.id },
                 data: { quantity: existingItem.quantity + quantity },
-                include: {
-                    product: {
-                        include: {
-                            category: true
+                include: { products: {
+                        include: { categories: true
                         }
                     }
                 }
@@ -154,16 +146,14 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
         }
         else {
             // Add new item
-            cartItem = await prisma.cartItem.create({
+            cartItem = await prisma.cart_items.create({
                 data: {
                     cartId: cart.id,
                     productId,
                     quantity
                 },
-                include: {
-                    product: {
-                        include: {
-                            category: true
+                include: { products: {
+                        include: { categories: true
                         }
                     }
                 }
@@ -205,18 +195,16 @@ router.put('/items/:id', auth_1.verifyToken, async (req, res) => {
                 message: 'Valid quantity is required'
             });
         }
-        // Verify cart item belongs to user
-        const cartItem = await prisma.cartItem.findFirst({
+        // Verify cart item belongs to users
+        const cartItem = await prisma.cart_items.findFirst({
             where: {
                 id,
                 cart: {
                     userId
                 }
             },
-            include: {
-                product: {
-                    include: {
-                        category: true
+            include: { products: {
+                    include: { categories: true
                     }
                 }
             }
@@ -227,13 +215,11 @@ router.put('/items/:id', auth_1.verifyToken, async (req, res) => {
                 message: 'Cart item not found'
             });
         }
-        const updatedItem = await prisma.cartItem.update({
+        const updatedItem = await prisma.cart_items.update({
             where: { id },
             data: { quantity },
-            include: {
-                product: {
-                    include: {
-                        category: true
+            include: { products: {
+                    include: { categories: true
                     }
                 }
             }
@@ -267,8 +253,8 @@ router.delete('/items/:id', auth_1.verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const { id } = req.params;
-        // Verify cart item belongs to user
-        const cartItem = await prisma.cartItem.findFirst({
+        // Verify cart item belongs to users
+        const cartItem = await prisma.cart_items.findFirst({
             where: {
                 id,
                 cart: {
@@ -282,7 +268,7 @@ router.delete('/items/:id', auth_1.verifyToken, async (req, res) => {
                 message: 'Cart item not found'
             });
         }
-        await prisma.cartItem.delete({
+        await prisma.cart_items.delete({
             where: { id }
         });
         res.json({
@@ -317,7 +303,7 @@ router.delete('/', auth_1.verifyToken, async (req, res) => {
         });
         if (cart) {
             // Delete all cart items first
-            await prisma.cartItem.deleteMany({
+            await prisma.cart_items.deleteMany({
                 where: { cartId: cart.id }
             });
             // Delete cart

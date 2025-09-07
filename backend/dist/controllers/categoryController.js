@@ -40,19 +40,18 @@ const getAllCategories = async (req, res) => {
     }
 };
 exports.getAllCategories = getAllCategories;
-// Get category by ID
+// Get categories by ID
 const getCategoryById = async (req, res) => {
     try {
         const { id } = req.params;
-        const category = await prisma.category.findUnique({
+        const categories = await prisma.category.findUnique({
             where: { id },
             include: {
                 products: {
                     where: {
                         isActive: true
                     },
-                    include: {
-                        category: true
+                    include: { categories: true
                     },
                     orderBy: {
                         createdAt: 'desc'
@@ -69,7 +68,7 @@ const getCategoryById = async (req, res) => {
                 }
             }
         });
-        if (!category) {
+        if (!categories) {
             res.status(404).json({
                 success: false,
                 message: 'Category not found'
@@ -79,11 +78,11 @@ const getCategoryById = async (req, res) => {
         res.json({
             success: true,
             message: 'Category retrieved successfully',
-            data: category
+            data: categories
         });
     }
     catch (error) {
-        console.error('Get category error:', error);
+        console.error('Get categories error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
@@ -91,19 +90,18 @@ const getCategoryById = async (req, res) => {
     }
 };
 exports.getCategoryById = getCategoryById;
-// Get category by slug
+// Get categories by slug
 const getCategoryBySlug = async (req, res) => {
     try {
         const { slug } = req.params;
-        const category = await prisma.category.findUnique({
+        const categories = await prisma.category.findUnique({
             where: { slug },
             include: {
                 products: {
                     where: {
                         isActive: true
                     },
-                    include: {
-                        category: true
+                    include: { categories: true
                     },
                     orderBy: {
                         createdAt: 'desc'
@@ -120,7 +118,7 @@ const getCategoryBySlug = async (req, res) => {
                 }
             }
         });
-        if (!category) {
+        if (!categories) {
             res.status(404).json({
                 success: false,
                 message: 'Category not found'
@@ -130,11 +128,11 @@ const getCategoryBySlug = async (req, res) => {
         res.json({
             success: true,
             message: 'Category retrieved successfully',
-            data: category
+            data: categories
         });
     }
     catch (error) {
-        console.error('Get category by slug error:', error);
+        console.error('Get categories by slug error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
@@ -142,7 +140,7 @@ const getCategoryBySlug = async (req, res) => {
     }
 };
 exports.getCategoryBySlug = getCategoryBySlug;
-// Create category (Admin only)
+// Create categories (Admin only)
 const createCategory = async (req, res) => {
     try {
         const { name, description, imageUrl, sortOrder } = req.body;
@@ -156,7 +154,7 @@ const createCategory = async (req, res) => {
         }
         // Generate slug from name
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        // Check if category with same slug exists
+        // Check if categories with same slug exists
         const existingCategory = await prisma.category.findUnique({
             where: { slug }
         });
@@ -167,7 +165,7 @@ const createCategory = async (req, res) => {
             });
             return;
         }
-        const category = await prisma.category.create({
+        const categories = await prisma.category.create({
             data: {
                 name,
                 slug,
@@ -180,11 +178,11 @@ const createCategory = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Category created successfully',
-            data: category
+            data: categories
         });
     }
     catch (error) {
-        console.error('Create category error:', error);
+        console.error('Create categories error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
@@ -192,12 +190,12 @@ const createCategory = async (req, res) => {
     }
 };
 exports.createCategory = createCategory;
-// Update category (Admin only)
+// Update categories (Admin only)
 const updateCategory = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-        // Check if category exists
+        // Check if categories exists
         const existingCategory = await prisma.category.findUnique({
             where: { id }
         });
@@ -227,18 +225,18 @@ const updateCategory = async (req, res) => {
         // Convert numeric fields
         if (updateData.sortOrder)
             updateData.sortOrder = parseInt(updateData.sortOrder);
-        const category = await prisma.category.update({
+        const categories = await prisma.category.update({
             where: { id },
             data: updateData
         });
         res.json({
             success: true,
             message: 'Category updated successfully',
-            data: category
+            data: categories
         });
     }
     catch (error) {
-        console.error('Update category error:', error);
+        console.error('Update categories error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
@@ -246,11 +244,11 @@ const updateCategory = async (req, res) => {
     }
 };
 exports.updateCategory = updateCategory;
-// Delete category (Admin only)
+// Delete categories (Admin only)
 const deleteCategory = async (req, res) => {
     try {
         const { id } = req.params;
-        // Check if category exists
+        // Check if categories exists
         const existingCategory = await prisma.category.findUnique({
             where: { id },
             include: {
@@ -268,11 +266,11 @@ const deleteCategory = async (req, res) => {
             });
             return;
         }
-        // Check if category has products
+        // Check if categories has products
         if (existingCategory._count.products > 0) {
             res.status(400).json({
                 success: false,
-                message: 'Cannot delete category with existing products'
+                message: 'Cannot delete categories with existing products'
             });
             return;
         }
@@ -287,7 +285,7 @@ const deleteCategory = async (req, res) => {
         });
     }
     catch (error) {
-        console.error('Delete category error:', error);
+        console.error('Delete categories error:', error);
         res.status(500).json({
             success: false,
             message: 'Internal server error'
