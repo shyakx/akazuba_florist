@@ -227,7 +227,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (response.data.accessToken) {
           localStorage.setItem('accessToken', response.data.accessToken)
           // Set cookie with proper domain and secure settings
-          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax`
+          const isProduction = window.location.hostname !== 'localhost'
+          const cookieOptions = isProduction 
+            ? `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax; secure`
+            : `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax`
+          document.cookie = cookieOptions
           console.log('🍪 Access token cookie set')
         }
         
@@ -244,7 +248,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Set user role cookie for middleware
           if (response.data.user.role) {
-            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+            const isProduction = window.location.hostname !== 'localhost'
+            const roleCookieOptions = isProduction 
+              ? `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; secure`
+              : `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+            document.cookie = roleCookieOptions
             console.log('🍪 User role cookie set:', response.data.user.role)
           }
         }

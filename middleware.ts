@@ -36,7 +36,8 @@ export function middleware(request: NextRequest) {
       isAuthenticated,
       isAdmin,
       hasToken: !!accessToken,
-      userRole
+      userRole,
+      allCookies: request.cookies.getAll().map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' }))
     })
   }
   
