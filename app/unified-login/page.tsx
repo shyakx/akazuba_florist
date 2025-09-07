@@ -16,6 +16,7 @@ export default function UnifiedLoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [loginType, setLoginType] = useState<'auto' | 'admin' | 'customer'>('auto')
+  const [hasRedirected, setHasRedirected] = useState(false)
   
   const router = useRouter()
   const { login, adminLogin, isAuthenticated, user, isLoading: authLoading, isInitialized } = useAuth()
@@ -32,9 +33,11 @@ export default function UnifiedLoginPage() {
 
   // Redirect if already authenticated
   React.useEffect(() => {
-    if (isInitialized && isAuthenticated && user) {
+    if (isInitialized && isAuthenticated && user && !hasRedirected) {
       console.log('✅ User already authenticated, redirecting...')
       console.log('🔍 User details:', { role: user.role, email: user.email })
+      
+      setHasRedirected(true) // Prevent multiple redirects
       
       // Add a small delay to ensure cookies are properly set
       setTimeout(() => {
@@ -46,17 +49,21 @@ export default function UnifiedLoginPage() {
           window.location.href = '/dashboard'
         }
       }, 100)
+    } else if (isInitialized && !isAuthenticated && hasRedirected) {
+      // Reset redirect flag if user is no longer authenticated
+      setHasRedirected(false)
     }
-  }, [isAuthenticated, user, isInitialized])
+  }, [isAuthenticated, user, isInitialized, hasRedirected])
 
   // Show loading state while authentication is initializing
-  if (authLoading || !isInitialized) {
+  if (authLoading || !isInitialized || (isAuthenticated && hasRedirected)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-100 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto mb-4"></div>
           <p className="text-gray-600">
-            {!isInitialized ? 'Initializing authentication...' : 'Loading...'}
+            {!isInitialized ? 'Initializing authentication...' : 
+             isAuthenticated && hasRedirected ? 'Redirecting...' : 'Loading...'}
           </p>
         </div>
       </div>
