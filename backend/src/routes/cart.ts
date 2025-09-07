@@ -40,6 +40,7 @@ router.get('/', verifyToken, async (req, res) => {
       // Create new cart if doesn't exist
       cart = await prisma.cart.create({
         data: {
+          id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           userId,
           cart_items: {
             create: []
@@ -129,7 +130,10 @@ router.post('/items', verifyToken, async (req, res) => {
 
     if (!cart) {
       cart = await prisma.cart.create({
-        data: { userId } as any
+        data: { 
+          id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          userId 
+        } as any
       }) as any
     }
 
@@ -157,6 +161,7 @@ router.post('/items', verifyToken, async (req, res) => {
       // Add new item
       cartItem = await prisma.cart_items.create({
         data: {
+          id: `cart_item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           cartId: cart.id,
           productId,
           quantity
