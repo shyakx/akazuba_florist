@@ -12,6 +12,7 @@ interface ContentManagerProps {
 const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
   const [activeTab, setActiveTab] = useState('general')
   const [isUploading, setIsUploading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // General Settings
@@ -164,15 +165,87 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
     }
   }
 
-  const handleSave = async () => {
+  const loadContent = async () => {
     try {
-      // Simulate saving
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      toast.success('Content saved successfully!')
+      setIsLoading(true)
+      const response = await fetch('/api/admin/settings/public', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success && result.data) {
+          // Load saved content if available
+          const settings = result.data
+          
+          // You can extend this to load specific content sections
+          // For now, we'll keep the default values
+          console.log('Loaded settings:', settings)
+        }
+      }
     } catch (error) {
-      toast.error('Failed to save content')
+      console.error('Error loading content:', error)
+      // Don't show error toast for loading, just use defaults
+    } finally {
+      setIsLoading(false)
     }
   }
+
+  const handleSave = async () => {
+    try {
+      setIsLoading(true)
+      
+      // Prepare all content data
+      const contentData = {
+        general: generalSettings,
+        payment: paymentSettings,
+        hero: heroContent,
+        about: aboutContent,
+        social: socialMedia,
+        aboutPage: aboutPageContent
+      }
+
+      // Save to backend
+      const response = await fetch('/api/admin/settings/public', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify({
+          contentManager: contentData
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save content')
+      }
+
+      const result = await response.json()
+      
+      if (result.success) {
+        toast.success('Content saved successfully!')
+        // Optionally close the modal after successful save
+        // onClose()
+      } else {
+        throw new Error(result.message || 'Failed to save content')
+      }
+    } catch (error) {
+      console.error('Error saving content:', error)
+      toast.error('Failed to save content. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Load content when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      loadContent()
+    }
+  }, [isOpen])
 
   const tabs = [
     { id: 'general', name: 'General Settings', icon: Settings },
@@ -795,10 +868,15 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
           <div className="flex justify-end pt-6 border-t border-gray-200">
             <button
               onClick={handleSave}
-              className="px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-lg hover:from-pink-700 hover:to-rose-700 transition-all duration-300 flex items-center space-x-2"
+              disabled={isLoading}
+              className={`px-6 py-3 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-lg transition-all duration-300 flex items-center space-x-2 ${
+                isLoading 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:from-pink-700 hover:to-rose-700'
+              }`}
             >
               <Save className="h-4 w-4" />
-              <span>Save Changes</span>
+              <span>{isLoading ? 'Saving...' : 'Save Changes'}</span>
             </button>
           </div>
         </div>

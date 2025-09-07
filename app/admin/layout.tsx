@@ -17,7 +17,8 @@ import {
   User,
   Bell,
   HelpCircle,
-  FileText
+  FileText,
+  Edit3
 } from 'lucide-react'
 import { useAuth } from '@/contexts/RealAuthContext'
 import './admin-styles.css'
@@ -41,6 +42,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Customers', href: '/admin/customers', icon: Users },
+    { name: 'Content Manager', href: '/admin/content', icon: Edit3 },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ]
 

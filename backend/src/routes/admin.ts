@@ -1293,7 +1293,49 @@ router.put('/settings', authenticateToken, async (req, res) => {
   try {
     const settings = req.body
 
-    // Validate required fields
+    // Handle content manager data
+    if (settings.contentManager) {
+      const contentData = settings.contentManager
+      
+      // Save each content section to the settings table
+      const contentSections = [
+        { key: 'content_general', value: JSON.stringify(contentData.general), description: 'General settings' },
+        { key: 'content_payment', value: JSON.stringify(contentData.payment), description: 'Payment settings' },
+        { key: 'content_hero', value: JSON.stringify(contentData.hero), description: 'Hero section content' },
+        { key: 'content_about', value: JSON.stringify(contentData.about), description: 'About section content' },
+        { key: 'content_social', value: JSON.stringify(contentData.social), description: 'Social media settings' },
+        { key: 'content_about_page', value: JSON.stringify(contentData.aboutPage), description: 'About page content' }
+      ]
+
+      // Upsert each setting
+      for (const section of contentSections) {
+        await prisma.settings.upsert({
+          where: { key: section.key },
+          update: { 
+            value: section.value,
+            description: section.description,
+            updatedAt: new Date()
+          },
+          create: {
+            id: `setting_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            key: section.key,
+            value: section.value,
+            description: section.description,
+            updatedAt: new Date()
+          }
+        })
+      }
+
+      console.log('Content manager data saved successfully')
+      
+      return res.json({
+        success: true,
+        message: 'Content saved successfully',
+        data: contentData
+      })
+    }
+
+    // Handle regular settings (legacy support)
     if (!settings.storeName || !settings.storeEmail) {
       return res.status(400).json({
         success: false,
@@ -1301,9 +1343,40 @@ router.put('/settings', authenticateToken, async (req, res) => {
       })
     }
 
-    // In a real application, you would save settings to the database
-    // For now, we'll just return success
-    console.log('Settings updated:', settings)
+    // Save regular settings to database
+    const regularSettings = [
+      { key: 'store_name', value: settings.storeName, description: 'Store name' },
+      { key: 'store_email', value: settings.storeEmail, description: 'Store email' },
+      { key: 'store_phone', value: settings.storePhone || '', description: 'Store phone' },
+      { key: 'store_address', value: settings.storeAddress || '', description: 'Store address' },
+      { key: 'min_order_amount', value: settings.minOrderAmount?.toString() || '5000', description: 'Minimum order amount' },
+      { key: 'delivery_fee', value: settings.deliveryFee?.toString() || '1000', description: 'Delivery fee' },
+      { key: 'free_delivery_threshold', value: settings.freeDeliveryThreshold?.toString() || '50000', description: 'Free delivery threshold' },
+      { key: 'business_hours', value: settings.businessHours || '8:00 AM - 6:00 PM', description: 'Business hours' },
+      { key: 'currency', value: settings.currency || 'RWF', description: 'Currency' },
+      { key: 'tax_rate', value: settings.taxRate?.toString() || '0.18', description: 'Tax rate' }
+    ]
+
+    // Upsert each setting
+    for (const setting of regularSettings) {
+      await prisma.settings.upsert({
+        where: { key: setting.key },
+        update: { 
+          value: setting.value,
+          description: setting.description,
+          updatedAt: new Date()
+        },
+        create: {
+          id: `setting_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          key: setting.key,
+          value: setting.value,
+          description: setting.description,
+          updatedAt: new Date()
+        }
+      })
+    }
+
+    console.log('Settings updated successfully:', settings)
 
     res.json({
       success: true,
