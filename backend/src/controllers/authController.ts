@@ -477,7 +477,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
     res.status(200).json({
       success: true,
       message: 'Profile retrieved successfully',
-      data: { users }
+      data: { user: users }
     })
   } catch (error) {
     logger.error('Get profile error:', error)
@@ -527,7 +527,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
-      data: { users: updatedUser }
+      data: { user: updatedUser }
     })
   } catch (error) {
     logger.error('Update profile error:', error)
