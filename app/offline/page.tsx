@@ -26,15 +26,17 @@ export default function OfflinePage() {
     }
 
     // Listen for online/offline events
-    window.addEventListener('online', updateOnlineStatus)
-    window.addEventListener('offline', updateOnlineStatus)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', updateOnlineStatus)
+      window.addEventListener('offline', updateOnlineStatus)
 
-    // Initial check
-    updateOnlineStatus()
+      // Initial check
+      updateOnlineStatus()
 
-    return () => {
-      window.removeEventListener('online', updateOnlineStatus)
-      window.removeEventListener('offline', updateOnlineStatus)
+      return () => {
+        window.removeEventListener('online', updateOnlineStatus)
+        window.removeEventListener('offline', updateOnlineStatus)
+      }
     }
   }, [])
 

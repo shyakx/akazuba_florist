@@ -215,14 +215,16 @@ export default function CustomersPage() {
               ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
               
               const blob = new Blob([csvContent], { type: 'text/csv' })
-              const url = window.URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = `customers-export-${new Date().toISOString().split('T')[0]}.csv`
-              document.body.appendChild(a)
-              a.click()
-              document.body.removeChild(a)
-              window.URL.revokeObjectURL(url)
+              if (typeof window !== 'undefined') {
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `customers-export-${new Date().toISOString().split('T')[0]}.csv`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                window.URL.revokeObjectURL(url)
+              }
             }}
           >
             <Download className="w-5 h-5 mr-2" />
@@ -349,12 +351,14 @@ export default function CustomersPage() {
                         // Send email to customer
                         const subject = prompt('Email subject:', 'Message from Akazuba Florist')
                         const body = prompt('Email message:', 'Hello! Thank you for being our valued customer.')
-                        if (subject && body) {
-                          window.open(`mailto:${customer.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
-                        } else if (subject || body) {
-                          window.open(`mailto:${customer.email}?subject=${encodeURIComponent(subject || '')}&body=${encodeURIComponent(body || '')}`)
-                        } else {
-                        window.open(`mailto:${customer.email}`)
+                        if (typeof window !== 'undefined') {
+                          if (subject && body) {
+                            window.open(`mailto:${customer.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`)
+                          } else if (subject || body) {
+                            window.open(`mailto:${customer.email}?subject=${encodeURIComponent(subject || '')}&body=${encodeURIComponent(body || '')}`)
+                          } else {
+                            window.open(`mailto:${customer.email}`)
+                          }
                         }
                       }}
                     >
@@ -364,10 +368,12 @@ export default function CustomersPage() {
                       className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
                       onClick={() => {
                         // Call customer
-                        if (customer.phone) {
-                        window.open(`tel:${customer.phone}`)
-                        } else {
-                          alert('No phone number available for this customer')
+                        if (typeof window !== 'undefined') {
+                          if (customer.phone) {
+                            window.open(`tel:${customer.phone}`)
+                          } else {
+                            alert('No phone number available for this customer')
+                          }
                         }
                       }}
                     >

@@ -235,14 +235,16 @@ export default function OrdersPage() {
               ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
               
               const blob = new Blob([csvContent], { type: 'text/csv' })
-              const url = window.URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url
-              a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`
-              document.body.appendChild(a)
-              a.click()
-              document.body.removeChild(a)
-              window.URL.revokeObjectURL(url)
+              if (typeof window !== 'undefined') {
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                window.URL.revokeObjectURL(url)
+              }
             }}
           >
             <Download className="w-5 h-5 mr-2" />
