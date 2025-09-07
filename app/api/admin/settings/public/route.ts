@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+// Force dynamic rendering to prevent static generation issues
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     const backendUrl = process.env.NODE_ENV === 'development' 
       ? `http://localhost:5000/api/v1/admin/settings`
       : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings`
     
-    // Get the authorization header from the request
-    const authHeader = request.headers.get('authorization')
+    // Get the authorization header from the request (only if available)
+    const authHeader = request.headers?.get('authorization') || null
     
     const response = await fetch(backendUrl, {
       method: 'GET',
@@ -41,8 +44,8 @@ export async function PUT(request: NextRequest) {
       ? `http://localhost:5000/api/v1/admin/settings`
       : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings`
     
-    // Get the authorization header from the request
-    const authHeader = request.headers.get('authorization')
+    // Get the authorization header from the request (only if available)
+    const authHeader = request.headers?.get('authorization') || null
     
     const response = await fetch(backendUrl, {
       method: 'PUT',
