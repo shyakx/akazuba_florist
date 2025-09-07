@@ -54,7 +54,7 @@ const DashboardPage = () => {
         setLoading(true)
         const response = await ordersAPI.getUserOrders()
         
-        if (response.success && response.data) {
+        if (response.success && response.data && Array.isArray(response.data)) {
           const orders: Order[] = response.data.slice(0, 3).map((order: any) => ({
             id: order.id,
             orderNumber: order.orderNumber,
