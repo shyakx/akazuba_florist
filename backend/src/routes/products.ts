@@ -162,7 +162,7 @@ router.get('/:id', getProductById)
  *       400:
  *         description: Bad request
  */
-router.post('/', createProduct)
+router.post('/', requireAdmin, createProduct)
 
 /**
  * @swagger
@@ -226,7 +226,7 @@ router.post('/', createProduct)
  *       404:
  *         description: Product not found
  */
-router.put('/:id', updateProduct)
+router.put('/:id', requireAdmin, updateProduct)
 
 /**
  * @swagger
@@ -249,6 +249,6 @@ router.put('/:id', updateProduct)
  *       404:
  *         description: Product not found
  */
-router.delete('/:id', deleteProduct)
+router.delete('/:id', requireAdmin, deleteProduct)
 
 export default router 

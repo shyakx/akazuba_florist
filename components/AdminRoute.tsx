@@ -95,13 +95,6 @@ export const AdminCustomersPage = dynamic(
   }
 )
 
-export const AdminAnalyticsPage = dynamic(
-  () => import('@/app/admin/analytics/page'),
-  {
-    loading: () => <AdminLoading />,
-    ssr: false
-  }
-)
 
 // Admin form components
 export const AdminNewCategoryPage = dynamic(
@@ -127,7 +120,6 @@ export const preloadAdminRoute = (route: string) => {
     products: () => import('@/app/admin/products/page'),
     orders: () => import('@/app/admin/orders/page'),
     customers: () => import('@/app/admin/customers/page'),
-    analytics: () => import('@/app/admin/analytics/page'),
     'categories/new': () => import('@/app/admin/categories/new/page'),
     'products/new': () => import('@/app/admin/products/new/page')
   }
@@ -153,7 +145,6 @@ export const useAdminRoute = () => {
       products: true,
       orders: true,
       customers: true,
-      analytics: true
     }).forEach(route => {
       preloadAdminRoute(route)
     })

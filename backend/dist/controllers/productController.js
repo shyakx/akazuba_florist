@@ -17,7 +17,7 @@ const getAllProducts = async (req, res) => {
             isActive: true
         };
         if (categories) {
-            where.categories = {
+            where.category = {
                 slug: categories
             };
         }
@@ -59,7 +59,7 @@ const getAllProducts = async (req, res) => {
                 isFeatured: true,
                 stockQuantity: true,
                 createdAt: true,
-                categories: {
+                category: {
                     select: {
                         id: true,
                         name: true,
@@ -100,9 +100,9 @@ exports.getAllProducts = getAllProducts;
 const getProductById = async (req, res) => {
     try {
         const { id } = req.params;
-        const products = await prisma.product.findUnique({
+        const product = await prisma.product.findUnique({
             where: { id },
-            include: { categories: true,
+            include: { category: true,
                 reviews: {
                     include: { users: {
                             select: {
@@ -121,7 +121,7 @@ const getProductById = async (req, res) => {
                 }
             }
         });
-        if (!products) {
+        if (!product) {
             res.status(404).json({
                 success: false,
                 message: 'Product not found'
@@ -131,7 +131,7 @@ const getProductById = async (req, res) => {
         res.json({
             success: true,
             message: 'Product retrieved successfully',
-            data: products
+            data: product
         });
     }
     catch (error) {
@@ -153,7 +153,7 @@ const getFeaturedProducts = async (req, res) => {
                 isActive: true,
                 isFeatured: true
             },
-            include: { categories: true
+            include: { category: true
             },
             take: limitNum,
             orderBy: {
@@ -189,7 +189,7 @@ const createProduct = async (req, res) => {
         }
         // Generate slug from name
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        // Check if products with same slug exists
+        // Check if product with same slug exists
         const existingProduct = await prisma.product.findUnique({
             where: { slug }
         });
@@ -200,21 +200,70 @@ const createProduct = async (req, res) => {
             });
             return;
         }
-        const products = await prisma.product.create({
+        // Validate numeric inputs
+        const priceNum = parseFloat(price);
+        if (isNaN(priceNum) || priceNum < 0) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid price value'
+            });
+            return;
+        }
+        const salePriceNum = salePrice ? parseFloat(salePrice) : null;
+        if (salePrice && (isNaN(salePriceNum) || salePriceNum < 0)) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid sale price value'
+            });
+            return;
+        }
+        const costPriceNum = costPrice ? parseFloat(costPrice) : null;
+        if (costPrice && (isNaN(costPriceNum) || costPriceNum < 0)) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid cost price value'
+            });
+            return;
+        }
+        const stockQuantityNum = parseInt(stockQuantity) || 0;
+        if (isNaN(stockQuantityNum) || stockQuantityNum < 0) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid stock quantity value'
+            });
+            return;
+        }
+        const minStockAlertNum = parseInt(minStockAlert) || 5;
+        if (isNaN(minStockAlertNum) || minStockAlertNum < 0) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid minimum stock alert value'
+            });
+            return;
+        }
+        const weightNum = weight ? parseFloat(weight) : null;
+        if (weight && (isNaN(weightNum) || weightNum < 0)) {
+            res.status(400).json({
+                success: false,
+                message: 'Invalid weight value'
+            });
+            return;
+        }
+        const product = await prisma.product.create({
             data: {
                 name: name,
                 slug: slug,
                 description: description,
                 shortDescription: shortDescription,
-                price: parseFloat(price),
-                salePrice: salePrice ? parseFloat(salePrice) : null,
-                costPrice: costPrice ? parseFloat(costPrice) : null,
+                price: priceNum,
+                salePrice: salePriceNum,
+                costPrice: costPriceNum,
                 sku: sku,
-                stockQuantity: parseInt(stockQuantity) || 0,
-                minStockAlert: parseInt(minStockAlert) || 5,
+                stockQuantity: stockQuantityNum,
+                minStockAlert: minStockAlertNum,
                 categoryId: categoryId,
                 images: images || [],
-                weight: weight ? parseFloat(weight) : null,
+                weight: weightNum,
                 dimensions: dimensions || null,
                 tags: tags || [],
                 isFeatured: isFeatured || false,
@@ -222,13 +271,13 @@ const createProduct = async (req, res) => {
                 updatedAt: new Date()
             },
             include: {
-                categories: true
+                category: true
             }
         });
         res.status(201).json({
             success: true,
             message: 'Product created successfully',
-            data: products
+            data: product
         });
     }
     catch (error) {
@@ -289,29 +338,83 @@ const updateProduct = async (req, res) => {
             }
             updateData.slug = slug;
         }
-        // Convert numeric fields
-        if (updateData.price)
-            updateData.price = parseFloat(updateData.price);
-        if (updateData.salePrice)
-            updateData.salePrice = parseFloat(updateData.salePrice);
-        if (updateData.costPrice)
-            updateData.costPrice = parseFloat(updateData.costPrice);
-        if (updateData.stockQuantity)
-            updateData.stockQuantity = parseInt(updateData.stockQuantity);
-        if (updateData.minStockAlert)
-            updateData.minStockAlert = parseInt(updateData.minStockAlert);
-        if (updateData.weight)
-            updateData.weight = parseFloat(updateData.weight);
-        const products = await prisma.product.update({
+        // Convert and validate numeric fields
+        if (updateData.price) {
+            const price = parseFloat(updateData.price);
+            if (isNaN(price) || price < 0) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid price value'
+                });
+                return;
+            }
+            updateData.price = price;
+        }
+        if (updateData.salePrice) {
+            const salePrice = parseFloat(updateData.salePrice);
+            if (isNaN(salePrice) || salePrice < 0) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid sale price value'
+                });
+                return;
+            }
+            updateData.salePrice = salePrice;
+        }
+        if (updateData.costPrice) {
+            const costPrice = parseFloat(updateData.costPrice);
+            if (isNaN(costPrice) || costPrice < 0) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid cost price value'
+                });
+                return;
+            }
+            updateData.costPrice = costPrice;
+        }
+        if (updateData.stockQuantity) {
+            const stockQuantity = parseInt(updateData.stockQuantity);
+            if (isNaN(stockQuantity) || stockQuantity < 0) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid stock quantity value'
+                });
+                return;
+            }
+            updateData.stockQuantity = stockQuantity;
+        }
+        if (updateData.minStockAlert) {
+            const minStockAlert = parseInt(updateData.minStockAlert);
+            if (isNaN(minStockAlert) || minStockAlert < 0) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid minimum stock alert value'
+                });
+                return;
+            }
+            updateData.minStockAlert = minStockAlert;
+        }
+        if (updateData.weight) {
+            const weight = parseFloat(updateData.weight);
+            if (isNaN(weight) || weight < 0) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Invalid weight value'
+                });
+                return;
+            }
+            updateData.weight = weight;
+        }
+        const product = await prisma.product.update({
             where: { id },
             data: updateData,
-            include: { categories: true
+            include: { category: true
             }
         });
         res.json({
             success: true,
             message: 'Product updated successfully',
-            data: products
+            data: product
         });
     }
     catch (error) {
@@ -327,7 +430,7 @@ exports.updateProduct = updateProduct;
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        // Check if products exists
+        // Check if product exists
         const existingProduct = await prisma.product.findUnique({
             where: { id }
         });

@@ -46,11 +46,21 @@ export default function CustomersPage() {
     try {
       setIsLoading(true)
       
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
       // Build query parameters
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       
-      const response = await fetch(`/api/admin/customers/public?${params.toString()}`)
+      const response = await fetch(`/api/admin/customers/public?${params.toString()}`, { headers })
       if (!response.ok) throw new Error('Failed to fetch customers')
       
       const result = await response.json()
@@ -221,12 +231,12 @@ export default function CustomersPage() {
           <button 
             className="btn btn-secondary"
             onClick={() => {
-              // Navigate to analytics page
-              router.push('/admin/analytics')
+              // Navigate to dashboard
+              router.push('/admin')
             }}
           >
             <BarChart3 className="w-4 h-4 mr-2" />
-            View Analytics
+            View Dashboard
           </button>
         </div>
       </div>

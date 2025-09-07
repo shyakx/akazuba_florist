@@ -386,7 +386,7 @@ router.get('/orders', async (req, res) => {
 router.get('/products', async (req, res) => {
     try {
         const products = await prisma.product.findMany({
-            include: { categories: true
+            include: { category: true
             }
         });
         const formattedProducts = products.map(products => ({
@@ -397,7 +397,7 @@ router.get('/products', async (req, res) => {
             price: Number(products.price),
             stockQuantity: products.stockQuantity,
             categoryId: products.categoryId,
-            categories: products.categories.name,
+            category: products.category.name,
             isActive: products.isActive,
             isFeatured: products.isFeatured,
             images: Array.isArray(products.images) ? products.images : [],
@@ -821,7 +821,7 @@ router.get('/products', async (req, res) => {
                 where,
                 skip,
                 take: Number(limit),
-                include: { categories: true
+                include: { category: true
                 },
                 orderBy: { createdAt: 'desc' }
             }),
@@ -851,7 +851,7 @@ router.get('/products/:id', async (req, res) => {
         const { id } = req.params;
         const products = await prisma.product.findUnique({
             where: { id },
-            include: { categories: true
+            include: { category: true
             }
         });
         if (!products) {
@@ -879,7 +879,7 @@ router.post('/products', async (req, res) => {
         const productsData = req.body;
         const products = await prisma.product.create({
             data: productsData,
-            include: { categories: true
+            include: { category: true
             }
         });
         res.status(201).json({
@@ -903,7 +903,7 @@ router.put('/products/:id', async (req, res) => {
         const products = await prisma.product.update({
             where: { id },
             data: updateData,
-            include: { categories: true
+            include: { category: true
             }
         });
         res.json({
@@ -1291,7 +1291,7 @@ router.post('/export/:type', async (req, res) => {
                 break;
             case 'products':
                 const products = await prisma.product.findMany({
-                    include: { categories: true
+                    include: { category: true
                     },
                     orderBy: { createdAt: 'desc' }
                 });
@@ -1299,7 +1299,7 @@ router.post('/export/:type', async (req, res) => {
                 data = products.map(products => [
                     products.id,
                     products.name,
-                    products.categories?.name || 'Uncategorized',
+                    products.category?.name || 'Uncategorized',
                     products.price,
                     products.stockQuantity,
                     products.isActive ? 'Active' : 'Inactive',

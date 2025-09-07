@@ -67,15 +67,15 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
       try {
         const orderData = JSON.parse(req.body.orderData)
-    const {
-      customerName,
-      customerEmail,
-      customerPhone,
-      customerAddress,
-      customerCity,
-      items,
-      paymentMethod,
-      notes
+        const {
+          customerName,
+          customerEmail,
+          customerPhone,
+          customerAddress,
+          customerCity,
+          items,
+          paymentMethod,
+          notes
         } = orderData
 
     // Validate required fields
@@ -96,9 +96,48 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       return
     }
 
+    // Validate items
+    if (!Array.isArray(items) || items.length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'Items array is required and cannot be empty'
+      })
+      return
+    }
+
+    // Validate each item
+    for (const item of items) {
+      if (!item.productId || !item.name || !item.quantity || !item.price) {
+        res.status(400).json({
+          success: false,
+          message: 'Each item must have productId, name, quantity, and price'
+        })
+        return
+      }
+
+      const quantity = parseInt(item.quantity)
+      const price = parseFloat(item.price)
+      
+      if (isNaN(quantity) || quantity <= 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid quantity for item: ' + item.name
+        })
+        return
+      }
+
+      if (isNaN(price) || price < 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Invalid price for item: ' + item.name
+        })
+        return
+      }
+    }
+
     // Calculate subtotal
     const subtotal = items.reduce((sum: number, item: any) => {
-      return sum + (item.unitPrice * item.quantity)
+      return sum + (parseFloat(item.price) * parseInt(item.quantity))
     }, 0)
 
     // Calculate delivery fee
@@ -135,14 +174,15 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       items.map((item: any) =>
         prisma.order_items.create({
           data: {
+            id: crypto.randomUUID(),
             orderId: order.id,
             productId: item.productId,
             productName: item.name,
             productImage: item.image,
             productSku: item.sku,
-            quantity: item.quantity,
-            unitPrice: item.price,
-            totalPrice: item.price * item.quantity,
+            quantity: parseInt(item.quantity),
+            unitPrice: parseFloat(item.price),
+            totalPrice: parseFloat(item.price) * parseInt(item.quantity),
             color: item.color,
             type: item.type
           } as any
@@ -153,6 +193,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         // Create payment proof record
         const paymentProof = await prisma.payment_proofs.create({
           data: {
+            id: crypto.randomUUID(),
             orderId: order.id,
             proofImage: req.file.filename
           } as any
@@ -426,6 +467,7 @@ export const uploadPaymentProof = async (req: Request, res: Response): Promise<v
 
     const paymentProof = await prisma.payment_proofs.create({
       data: {
+        id: crypto.randomUUID(),
         orderId,
         proofImage
       } as any

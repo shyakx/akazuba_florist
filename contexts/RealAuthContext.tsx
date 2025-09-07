@@ -226,7 +226,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Store tokens
         if (response.data.accessToken) {
           localStorage.setItem('accessToken', response.data.accessToken)
-          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax`
+          // Set cookie with proper domain and secure settings
+          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax; secure=false`
+          console.log('🍪 Access token cookie set')
         }
         
         if (response.data.refreshToken) {
@@ -242,10 +244,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Set user role cookie for middleware
           if (response.data.user.role) {
-          document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
-          console.log('🍪 User role cookie set:', response.data.user.role)
+            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; secure=false`
+            console.log('🍪 User role cookie set:', response.data.user.role)
+          }
         }
-        }
+        
+        // Force a small delay to ensure cookies are set
+        await new Promise(resolve => setTimeout(resolve, 100))
         
         // Set visited flag
         localStorage.setItem('hasVisitedBefore', 'true')

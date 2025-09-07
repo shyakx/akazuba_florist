@@ -17,7 +17,7 @@ export async function getServerSession(): Promise<AuthSession | null> {
   return {
     user: {
       id: '1',
-      email: 'admin@akazubaflorist.com',
+      email: 'info.akazubaflorist@gmail.com',
       role: 'ADMIN'
     }
   }

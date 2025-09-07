@@ -51,7 +51,7 @@ const getCategoryById = async (req, res) => {
                     where: {
                         isActive: true
                     },
-                    include: { categories: true
+                    include: { category: true
                     },
                     orderBy: {
                         createdAt: 'desc'
@@ -101,7 +101,7 @@ const getCategoryBySlug = async (req, res) => {
                     where: {
                         isActive: true
                     },
-                    include: { categories: true
+                    include: { category: true
                     },
                     orderBy: {
                         createdAt: 'desc'

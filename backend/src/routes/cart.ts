@@ -28,7 +28,7 @@ router.get('/', verifyToken, async (req, res) => {
       where: { userId },
       include: { cart_items: {
           include: { products: {
-              include: { categories: true
+              include: { category: true
               }
             }
           }
@@ -47,7 +47,7 @@ router.get('/', verifyToken, async (req, res) => {
         } as any,
         include: { cart_items: {
             include: { products: {
-                include: { categories: true
+                include: { category: true
                 }
               }
             }
@@ -148,7 +148,7 @@ router.post('/items', verifyToken, async (req, res) => {
         where: { id: existingItem.id },
         data: { quantity: existingItem.quantity + quantity },
         include: { products: {
-            include: { categories: true
+            include: { category: true
             }
           }
         }
@@ -162,7 +162,7 @@ router.post('/items', verifyToken, async (req, res) => {
           quantity
         } as any,
         include: { products: {
-            include: { categories: true
+            include: { category: true
             }
           }
         }
@@ -216,7 +216,7 @@ router.put('/items/:id', verifyToken, async (req, res) => {
         }
       },
       include: { products: {
-          include: { categories: true
+          include: { category: true
           }
         }
       }
@@ -233,7 +233,7 @@ router.put('/items/:id', verifyToken, async (req, res) => {
       where: { id },
       data: { quantity },
       include: { products: {
-          include: { categories: true
+          include: { category: true
           }
         }
       }

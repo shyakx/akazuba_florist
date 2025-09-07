@@ -18,15 +18,19 @@ export async function GET(request: NextRequest) {
     params.append('limit', limit)
 
     const baseUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api/v1/admin/products/public'
-      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/products/public'
+      ? 'http://localhost:5000/api/v1/admin/products'
+      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/products'
     const backendUrl = `${baseUrl}?${params.toString()}`
+    
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization')
     
     try {
       const response = await fetch(backendUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          ...(authHeader && { 'Authorization': authHeader }),
         },
         cache: 'no-store'
       })
@@ -36,6 +40,37 @@ export async function GET(request: NextRequest) {
       }
 
       const data = await response.json()
+      
+      // Transform the data to match frontend expectations
+      if (data.success && data.data) {
+        const transformedData = {
+          success: true,
+          data: {
+            products: data.data.map((product: any) => ({
+              id: product.id,
+              name: product.name,
+              price: product.price,
+              category: product.category,
+              stock: product.stockQuantity,
+              status: product.isActive ? 'active' : 'inactive',
+              image: product.images?.[0] || '/images/placeholder.jpg',
+              images: product.images || [],
+              description: product.description,
+              rating: 4.5, // Default rating
+              sales: Math.floor(Math.random() * 10), // Random sales for demo
+              createdAt: product.createdAt
+            }))
+          },
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: data.data.length,
+            pages: 1
+          }
+        }
+        return NextResponse.json(transformedData)
+      }
+      
       return NextResponse.json(data)
     } catch (backendError) {
       console.warn('Backend not available, using fallback products data:', backendError)

@@ -3,13 +3,17 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function GET(request: NextRequest) {
   try {
     const backendUrl = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:5000/api/v1/admin/settings/public`
-      : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings/public`
+      ? `http://localhost:5000/api/v1/admin/settings`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings`
+    
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization')
     
     const response = await fetch(backendUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
       },
       cache: 'no-store'
     })
@@ -34,13 +38,17 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     
     const backendUrl = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:5000/api/v1/admin/settings/public`
-      : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings/public`
+      ? `http://localhost:5000/api/v1/admin/settings`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/settings`
+    
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization')
     
     const response = await fetch(backendUrl, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
       },
       body: JSON.stringify(body),
       cache: 'no-store'

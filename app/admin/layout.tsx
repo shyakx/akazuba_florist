@@ -10,7 +10,6 @@ import {
   Tag, 
   ShoppingCart, 
   Users, 
-  TrendingUp, 
   Settings,
   Menu,
   X,
@@ -18,8 +17,7 @@ import {
   User,
   Bell,
   HelpCircle,
-  FileText,
-  BarChart3
+  FileText
 } from 'lucide-react'
 import { useAuth } from '@/contexts/RealAuthContext'
 import './admin-styles.css'
@@ -43,8 +41,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Customers', href: '/admin/customers', icon: Users },
-    { name: 'Analytics', href: '/admin/analytics', icon: TrendingUp },
-    { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ]
 

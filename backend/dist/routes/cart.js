@@ -27,7 +27,7 @@ router.get('/', auth_1.verifyToken, async (req, res) => {
             where: { userId },
             include: { cart_items: {
                     include: { products: {
-                            include: { categories: true
+                            include: { category: true
                             }
                         }
                     }
@@ -45,7 +45,7 @@ router.get('/', auth_1.verifyToken, async (req, res) => {
                 },
                 include: { cart_items: {
                         include: { products: {
-                                include: { categories: true
+                                include: { category: true
                                 }
                             }
                         }
@@ -138,7 +138,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
                 where: { id: existingItem.id },
                 data: { quantity: existingItem.quantity + quantity },
                 include: { products: {
-                        include: { categories: true
+                        include: { category: true
                         }
                     }
                 }
@@ -153,7 +153,7 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
                     quantity
                 },
                 include: { products: {
-                        include: { categories: true
+                        include: { category: true
                         }
                     }
                 }
@@ -204,7 +204,7 @@ router.put('/items/:id', auth_1.verifyToken, async (req, res) => {
                 }
             },
             include: { products: {
-                    include: { categories: true
+                    include: { category: true
                     }
                 }
             }
@@ -219,7 +219,7 @@ router.put('/items/:id', auth_1.verifyToken, async (req, res) => {
             where: { id },
             data: { quantity },
             include: { products: {
-                    include: { categories: true
+                    include: { category: true
                     }
                 }
             }

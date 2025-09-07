@@ -80,8 +80,8 @@ const PrivacyPage = () => {
     {
       icon: Mail,
       label: 'Email',
-      value: 'privacy@akazubaflorist.com',
-      href: 'mailto:privacy@akazubaflorist.com'
+      value: 'info.akazubaflorist@gmail.com',
+      href: 'mailto:info.akazubaflorist@gmail.com'
     },
     {
       icon: Phone,

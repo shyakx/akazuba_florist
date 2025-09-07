@@ -12,9 +12,20 @@ const router = (0, express_1.Router)();
 const authLimiter = (0, express_rate_limit_1.default)(auth_1.authRateLimit);
 // Handle preflight requests for CORS
 router.options('*', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    const origin = req.headers.origin;
+    const allowedOrigins = [
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'https://online-shopping-by-diane.vercel.app',
+        'https://akazuba-florist.vercel.app',
+        'https://akazubaflorist.com'
+    ];
+    if (origin && allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+    }
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
     res.status(200).end();
 });
 /**

@@ -33,7 +33,8 @@ interface Order {
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
   deliveryStatus: 'pending' | 'preparing' | 'out_for_delivery' | 'delivered'
-  items: number
+  items: any[]
+  itemsCount: number
   createdAt: string
   deliveryAddress: string
   phoneNumber?: string
@@ -52,17 +53,27 @@ export default function OrdersPage() {
     try {
       setIsLoading(true)
       
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
       // Build query parameters
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       if (filterStatus !== 'all') params.append('status', filterStatus)
       
-      const response = await fetch(`/api/admin/orders/public?${params.toString()}`)
+      const response = await fetch(`/api/admin/orders/public?${params.toString()}`, { headers })
       if (!response.ok) throw new Error('Failed to fetch orders')
       
       const result = await response.json()
       if (result.success) {
-        setOrders(result.data.orders)
+        setOrders(result.data || [])
       } else {
         throw new Error('Failed to fetch orders')
       }
@@ -112,17 +123,17 @@ export default function OrdersPage() {
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
               <div className="flex items-center space-x-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{orders.length}</div>
+                  <div className="text-2xl font-bold">{orders?.length || 0}</div>
                   <div className="text-sm text-green-100">Total Orders</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{orders.filter(o => o.status === 'delivered').length}</div>
+                  <div className="text-2xl font-bold">{orders?.filter(o => o.status === 'delivered').length || 0}</div>
                   <div className="text-sm text-green-100">Delivered</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">RWF {orders.reduce((sum, o) => sum + o.totalAmount, 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">RWF {orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString() || '0'}</div>
                   <div className="text-sm text-green-100">Total Revenue</div>
                 </div>
               </div>
@@ -137,7 +148,7 @@ export default function OrdersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-gray-900">{orders.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{orders?.length || 0}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 text-blue-600" />
@@ -154,7 +165,7 @@ export default function OrdersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-              <p className="text-2xl font-bold text-yellow-600">{orders.filter(o => o.status === 'pending').length}</p>
+              <p className="text-2xl font-bold text-yellow-600">{orders?.filter(o => o.status === 'pending').length || 0}</p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
               <Clock className="w-6 h-6 text-yellow-600" />
@@ -171,7 +182,7 @@ export default function OrdersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Processing</p>
-              <p className="text-2xl font-bold text-blue-600">{orders.filter(o => o.status === 'processing').length}</p>
+              <p className="text-2xl font-bold text-blue-600">{orders?.filter(o => o.status === 'processing').length || 0}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-blue-600" />
@@ -188,7 +199,7 @@ export default function OrdersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-green-600">RWF {orders.reduce((sum, o) => sum + o.totalAmount, 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-green-600">RWF {orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString() || '0'}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-green-600" />
@@ -211,7 +222,7 @@ export default function OrdersPage() {
               // Export orders data as CSV
               const csvContent = [
                 ['Order #', 'Customer', 'Email', 'Phone', 'Status', 'Payment Status', 'Total Amount', 'Created At'],
-                ...orders.map(order => [
+                ...(orders || []).map(order => [
                   order.orderNumber,
                   order.customerName,
                   order.customerEmail,
@@ -240,12 +251,12 @@ export default function OrdersPage() {
           <button 
             className="btn btn-secondary"
             onClick={() => {
-              // Navigate to analytics page
-              router.push('/admin/analytics')
+              // Navigate to dashboard
+              router.push('/admin')
             }}
           >
             <BarChart3 className="w-4 h-4 mr-2" />
-            View Analytics
+            View Dashboard
           </button>
         </div>
       </div>
@@ -294,7 +305,7 @@ export default function OrdersPage() {
 
       {/* Orders Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {orders.map((order) => (
+        {(orders || []).map((order) => (
           <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Order Header */}
             <div className="h-32 bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center relative">
@@ -316,8 +327,8 @@ export default function OrdersPage() {
                   <p className="text-sm text-gray-500">{order.customerName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-green-600">RWF {order.totalAmount.toLocaleString()}</p>
-                  <p className="text-sm text-gray-500">{order.items} items</p>
+                  <p className="text-lg font-bold text-green-600">RWF {order.totalAmount?.toLocaleString() || '0'}</p>
+                  <p className="text-sm text-gray-500">{order.itemsCount || order.items?.length || 0} items</p>
                   </div>
                   </div>
 
@@ -443,7 +454,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Empty State */}
-      {orders.length === 0 && (
+      {(orders || []).length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <ShoppingCart className="w-12 h-12 text-gray-400" />

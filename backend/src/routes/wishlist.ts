@@ -26,7 +26,7 @@ router.get('/', verifyToken, async (req, res) => {
     const wishlistItems = await prisma.wishlist.findMany({
       where: { userId },
       include: { products: {
-          include: { categories: true
+          include: { category: true
           }
         }
       },
@@ -119,7 +119,7 @@ router.post('/', verifyToken, async (req, res) => {
         productId
       } as any,
       include: { products: {
-          include: { categories: true
+          include: { category: true
           }
         }
       }

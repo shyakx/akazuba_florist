@@ -136,7 +136,7 @@ const getApiBaseUrl = (): string => {
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
   
   if (isLocalhost) {
-    // Development - use localhost
+    // Development - use local backend since it's working perfectly
     return 'http://localhost:5000/api/v1'
   } else {
     // Production - use environment variable or production URL

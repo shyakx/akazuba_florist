@@ -90,47 +90,19 @@ export default function AdminLoginPage() {
       
       if (success) {
         toast.success('Login successful!')
-        console.log('🎉 Login successful, waiting for state update...')
+        console.log('🎉 Login successful, redirecting to admin panel...')
         
-        // Force a small delay to ensure state updates are complete
-        setTimeout(() => {
-          console.log('🔄 Checking authentication state after login...')
-          console.log('Current state:', { isAuthenticated, userRole: user?.role, isInitialized })
-          
-          // Force redirect if state is correct
-          if (isAuthenticated && user?.role === 'ADMIN') {
-            console.log('🚀 Force redirecting to admin panel...')
-            router.push('/admin')
-          } else {
-            // If state isn't updated, try to get user from localStorage
-            const storedUser = localStorage.getItem('user')
-            if (storedUser) {
-              try {
-                const userData = JSON.parse(storedUser)
-                if (userData.role === 'ADMIN') {
-                  console.log('🚀 Found admin user in localStorage, redirecting...')
-                  router.push('/admin')
-                }
-              } catch (error) {
-                console.error('Error parsing stored user:', error)
-              }
-            }
-          }
-        }, 500)
+        // Clear any existing error
+        setError('')
         
-        // Additional fallback - force redirect after 2 seconds regardless
+        // Use window.location.href for a hard redirect to ensure cookies are properly set
         setTimeout(() => {
-          console.log('🚀 Fallback redirect - forcing navigation to admin panel...')
+          console.log('🚀 Redirecting to admin panel...')
           window.location.href = '/admin'
-        }, 2000)
+        }, 1000)
         
-        // Immediate redirect attempt
-        setTimeout(() => {
-          console.log('🚀 Immediate redirect attempt...')
-          router.replace('/admin')
-        }, 100)
-        
-        // Redirect will happen automatically via useEffect
+        // Show loading state during redirect
+        setIsLoading(true)
       } else {
         toast.error('Access denied. Admin privileges required.')
       }

@@ -21,7 +21,7 @@ router.get('/my-orders', auth_1.verifyToken, async (req, res) => {
             include: {
                 order_items: {
                     include: { products: {
-                            include: { categories: true
+                            include: { category: true
                             }
                         }
                     }
@@ -57,7 +57,7 @@ router.get('/my-orders/:id', auth_1.verifyToken, async (req, res) => {
             include: {
                 order_items: {
                     include: { products: {
-                            include: { categories: true
+                            include: { category: true
                             }
                         }
                     }
@@ -75,7 +75,6 @@ router.get('/my-orders/:id', auth_1.verifyToken, async (req, res) => {
             message: 'Order retrieved successfully',
             data: order
         });
-        return;
     }
     catch (error) {
         console.error('Error getting users order:', error);
@@ -83,7 +82,6 @@ router.get('/my-orders/:id', auth_1.verifyToken, async (req, res) => {
             success: false,
             message: 'Failed to retrieve order'
         });
-        return;
     }
 });
 // Admin routes (protected)

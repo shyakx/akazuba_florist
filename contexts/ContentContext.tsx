@@ -59,8 +59,8 @@ const defaultAboutPageContent: AboutPageContent = {
 const defaultContactPageContent: ContactPageContent = {
   heroTitle: 'Contact Us',
   heroSubtitle: 'We\'re here to help! Get in touch with us for any questions about our products, orders, or services.',
-  phone1: '+250 788 123 456',
-  phone2: '+250 789 123 456',
+  phone1: '+250 784 586 110',
+  phone2: '+250 784 586 110',
   whatsapp: '+250 784 586 110',
   email1: 'info@akazuba.com',
   email2: 'support@akazuba.com',

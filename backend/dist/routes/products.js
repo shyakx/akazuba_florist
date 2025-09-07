@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const productController_1 = require("../controllers/productController");
+const auth_1 = require("../middleware/auth");
 const router = (0, express_1.Router)();
 /**
  * @swagger
@@ -151,7 +152,7 @@ router.get('/:id', productController_1.getProductById);
  *       400:
  *         description: Bad request
  */
-router.post('/', productController_1.createProduct);
+router.post('/', auth_1.requireAdmin, productController_1.createProduct);
 /**
  * @swagger
  * /products/{id}:
@@ -214,7 +215,7 @@ router.post('/', productController_1.createProduct);
  *       404:
  *         description: Product not found
  */
-router.put('/:id', productController_1.updateProduct);
+router.put('/:id', auth_1.requireAdmin, productController_1.updateProduct);
 /**
  * @swagger
  * /products/{id}:
@@ -236,5 +237,5 @@ router.put('/:id', productController_1.updateProduct);
  *       404:
  *         description: Product not found
  */
-router.delete('/:id', productController_1.deleteProduct);
+router.delete('/:id', auth_1.requireAdmin, productController_1.deleteProduct);
 exports.default = router;

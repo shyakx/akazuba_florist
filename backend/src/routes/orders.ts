@@ -30,7 +30,7 @@ router.get('/my-orders', verifyToken, async (req, res) => {
       include: {
         order_items: {
           include: { products: {
-              include: { categories: true
+              include: { category: true
               }
             }
           }
@@ -68,7 +68,7 @@ router.get('/my-orders/:id', verifyToken, async (req, res) => {
       include: {
         order_items: {
           include: { products: {
-              include: { categories: true
+              include: { category: true
               }
             }
           }
@@ -88,14 +88,12 @@ router.get('/my-orders/:id', verifyToken, async (req, res) => {
       message: 'Order retrieved successfully',
       data: order
     })
-    return
   } catch (error) {
     console.error('Error getting users order:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve order'
     })
-    return
   }
 })
 

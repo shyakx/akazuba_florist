@@ -319,8 +319,8 @@ const AboutPage = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">Phone</h3>
-                    <p className="text-gray-600">+250 788 123 456</p>
-                    <p className="text-gray-600">+250 789 123 456</p>
+                    <p className="text-gray-600">+250 784 586 110</p>
+                    <p className="text-gray-600">+250 784 586 110</p>
                   </div>
                 </div>
                 

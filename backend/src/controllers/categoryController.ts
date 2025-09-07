@@ -52,7 +52,7 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
           where: {
             isActive: true
           },
-          include: { categories: true
+          include: { category: true
           },
           orderBy: {
             createdAt: 'desc'
@@ -104,7 +104,7 @@ export const getCategoryBySlug = async (req: Request, res: Response): Promise<vo
           where: {
             isActive: true
           },
-          include: { categories: true
+          include: { category: true
           },
           orderBy: {
             createdAt: 'desc'

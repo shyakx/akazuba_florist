@@ -1,6 +1,6 @@
 {
-  "watch": ["database-server.js", "prisma/"],
-  "ext": "js,json",
-  "ignore": ["node_modules/", "dist/", "src/"],
-  "exec": "node database-server.js"
+  "watch": ["src/", "prisma/"],
+  "ext": "ts,js,json",
+  "ignore": ["node_modules/", "dist/"],
+  "exec": "ts-node src/index.ts"
 } 

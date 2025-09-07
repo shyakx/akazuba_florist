@@ -34,7 +34,19 @@ export default function CategoriesPage() {
     try {
       setIsLoading(true)
       
-      const response = await fetch('/api/admin/categories/public')
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
+      const response = await fetch('/api/admin/categories/public', {
+        headers
+      })
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.message || `HTTP ${response.status}: Failed to fetch categories`)

@@ -58,7 +58,7 @@ const register = async (req, res) => {
             });
             return;
         }
-        // Check if users already exists
+        // Check if user already exists
         const existingUser = await prisma.user.findUnique({
             where: { email: email.toLowerCase() }
         });
@@ -72,8 +72,8 @@ const register = async (req, res) => {
         // Hash password
         const saltRounds = 12;
         const hashedPassword = await bcryptjs_1.default.hash(password, saltRounds);
-        // Create users
-        const users = await prisma.user.create({
+        // Create user
+        const user = await prisma.user.create({
             data: {
                 email: email.toLowerCase(),
                 passwordHash: hashedPassword,
@@ -98,13 +98,13 @@ const register = async (req, res) => {
             }
         });
         // Generate tokens
-        const { accessToken, refreshToken } = generateTokens(users.id, users.role);
+        const { accessToken, refreshToken } = generateTokens(user.id, user.role);
         // Store refresh token
         await prisma.refresh_tokens.create({
             data: {
                 id: crypto.randomUUID(),
                 token: refreshToken,
-                userId: users.id,
+                userId: user.id,
                 expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
             }
         });
@@ -112,7 +112,7 @@ const register = async (req, res) => {
             success: true,
             message: 'User registered successfully',
             data: {
-                users,
+                user,
                 accessToken,
                 refreshToken
             }
@@ -139,8 +139,8 @@ const login = async (req, res) => {
             });
             return;
         }
-        // Find users with password hash
-        const users = await prisma.user.findUnique({
+        // Find user with password hash
+        const user = await prisma.user.findUnique({
             where: { email: email.toLowerCase() },
             select: {
                 id: true,
@@ -156,7 +156,7 @@ const login = async (req, res) => {
                 updatedAt: true
             }
         });
-        if (!users || !users.isActive) {
+        if (!user || !user.isActive) {
             res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -164,7 +164,7 @@ const login = async (req, res) => {
             return;
         }
         // Verify password
-        const isPasswordValid = await bcryptjs_1.default.compare(password, users.passwordHash);
+        const isPasswordValid = await bcryptjs_1.default.compare(password, user.passwordHash);
         if (!isPasswordValid) {
             res.status(401).json({
                 success: false,
@@ -173,23 +173,23 @@ const login = async (req, res) => {
             return;
         }
         // Generate tokens
-        const { accessToken, refreshToken } = generateTokens(users.id, users.role);
+        const { accessToken, refreshToken } = generateTokens(user.id, user.role);
         // Store refresh token
         await prisma.refresh_tokens.create({
             data: {
                 id: crypto.randomUUID(),
                 token: refreshToken,
-                userId: users.id,
+                userId: user.id,
                 expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
             }
         });
         // Remove password from response
-        const { passwordHash, ...usersWithoutPassword } = users;
+        const { passwordHash, ...userWithoutPassword } = user;
         res.status(200).json({
             success: true,
             message: 'Login successful',
             data: {
-                users: usersWithoutPassword,
+                user: userWithoutPassword,
                 accessToken,
                 refreshToken
             }
@@ -207,21 +207,21 @@ exports.login = login;
 // Admin login
 const adminLogin = async (req, res) => {
     try {
-        const { usersname, password } = req.body;
+        const { username, password } = req.body;
         // Validation
-        if (!usersname || !password) {
+        if (!username || !password) {
             res.status(400).json({
                 success: false,
                 message: 'Username and password are required'
             });
             return;
         }
-        // Find admin users with password hash
-        const users = await prisma.user.findFirst({
+        // Find admin user with password hash
+        const user = await prisma.user.findFirst({
             where: {
                 OR: [
-                    { email: usersname.toLowerCase() },
-                    { firstName: usersname }
+                    { email: username.toLowerCase() },
+                    { firstName: username }
                 ],
                 role: 'ADMIN',
                 isActive: true
@@ -240,7 +240,7 @@ const adminLogin = async (req, res) => {
                 updatedAt: true
             }
         });
-        if (!users) {
+        if (!user) {
             res.status(401).json({
                 success: false,
                 message: 'Invalid credentials'
@@ -248,7 +248,7 @@ const adminLogin = async (req, res) => {
             return;
         }
         // Verify password
-        const isPasswordValid = await bcryptjs_1.default.compare(password, users.passwordHash);
+        const isPasswordValid = await bcryptjs_1.default.compare(password, user.passwordHash);
         if (!isPasswordValid) {
             res.status(401).json({
                 success: false,
@@ -257,23 +257,23 @@ const adminLogin = async (req, res) => {
             return;
         }
         // Generate tokens
-        const { accessToken, refreshToken } = generateTokens(users.id, users.role);
+        const { accessToken, refreshToken } = generateTokens(user.id, user.role);
         // Store refresh token
         await prisma.refresh_tokens.create({
             data: {
                 id: crypto.randomUUID(),
                 token: refreshToken,
-                userId: users.id,
+                userId: user.id,
                 expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
             }
         });
         // Remove password from response
-        const { passwordHash, ...usersWithoutPassword } = users;
+        const { passwordHash, ...userWithoutPassword } = user;
         res.status(200).json({
             success: true,
             message: 'Admin login successful',
             data: {
-                users: usersWithoutPassword,
+                user: userWithoutPassword,
                 accessToken,
                 refreshToken
             }
@@ -385,7 +385,7 @@ const refreshToken = async (req, res) => {
             success: true,
             message: 'Token refreshed successfully',
             data: {
-                users: storedToken.users,
+                user: storedToken.users,
                 accessToken: newAccessToken,
                 refreshToken: newRefreshToken
             }
@@ -400,10 +400,10 @@ const refreshToken = async (req, res) => {
     }
 };
 exports.refreshToken = refreshToken;
-// Get users profile
+// Get user profile
 const getProfile = async (req, res) => {
     try {
-        const users = await prisma.user.findUnique({
+        const user = await prisma.user.findUnique({
             where: { id: req.user.id },
             select: {
                 id: true,
@@ -418,7 +418,7 @@ const getProfile = async (req, res) => {
                 updatedAt: true
             }
         });
-        if (!users) {
+        if (!user) {
             res.status(404).json({
                 success: false,
                 message: 'User not found'
@@ -428,7 +428,7 @@ const getProfile = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Profile retrieved successfully',
-            data: { users }
+            data: { user }
         });
     }
     catch (error) {
@@ -440,7 +440,7 @@ const getProfile = async (req, res) => {
     }
 };
 exports.getProfile = getProfile;
-// Update users profile
+// Update user profile
 const updateProfile = async (req, res) => {
     try {
         const { firstName, lastName, phone } = req.body;
@@ -452,7 +452,7 @@ const updateProfile = async (req, res) => {
             });
             return;
         }
-        // Update users
+        // Update user
         const updatedUser = await prisma.user.update({
             where: { id: req.user.id },
             data: {
@@ -476,7 +476,7 @@ const updateProfile = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Profile updated successfully',
-            data: { users: updatedUser }
+            data: { user: updatedUser }
         });
     }
     catch (error) {
@@ -635,11 +635,11 @@ const changePassword = async (req, res) => {
             });
             return;
         }
-        // Get users with password
-        const users = await prisma.user.findUnique({
+        // Get user with password
+        const user = await prisma.user.findUnique({
             where: { id: req.user.id }
         });
-        if (!users) {
+        if (!user) {
             res.status(404).json({
                 success: false,
                 message: 'User not found'
@@ -647,7 +647,7 @@ const changePassword = async (req, res) => {
             return;
         }
         // Verify current password
-        const isCurrentPasswordValid = await bcryptjs_1.default.compare(currentPassword, users.passwordHash);
+        const isCurrentPasswordValid = await bcryptjs_1.default.compare(currentPassword, user.passwordHash);
         if (!isCurrentPasswordValid) {
             res.status(401).json({
                 success: false,

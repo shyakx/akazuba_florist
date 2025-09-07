@@ -4,6 +4,7 @@ import { logger } from '../utils/logger'
 export interface AppError extends Error {
   statusCode?: number
   isOperational?: boolean
+  code?: string
 }
 
 export const errorHandler = (
@@ -25,21 +26,27 @@ export const errorHandler = (
     userAgent: req.get('User-Agent'),
   })
 
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
+  // Prisma record not found
+  if (err.code === 'P2025') {
     const message = 'Resource not found'
     error = { message, statusCode: 404 } as AppError
   }
 
-  // Mongoose duplicate key
-  if (err.name === 'MongoError' && (err as any).code === 11000) {
+  // Prisma unique constraint violation
+  if (err.code === 'P2002') {
     const message = 'Duplicate field value entered'
     error = { message, statusCode: 400 } as AppError
   }
 
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const message = Object.values((err as any).errors).map((val: any) => val.message).join(', ')
+  // Prisma validation error
+  if (err.code === 'P2003') {
+    const message = 'Invalid reference to related record'
+    error = { message, statusCode: 400 } as AppError
+  }
+
+  // Prisma foreign key constraint
+  if (err.code === 'P2004') {
+    const message = 'Constraint violation'
     error = { message, statusCode: 400 } as AppError
   }
 

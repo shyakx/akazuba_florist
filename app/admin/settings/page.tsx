@@ -10,7 +10,8 @@ import {
   Database,
   Mail,
   Globe,
-  CreditCard
+  CreditCard,
+  RefreshCw
 } from 'lucide-react'
 
 export default function SettingsPage() {
@@ -18,8 +19,8 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     // General Settings
     businessName: 'Akazuba Florist',
-    businessEmail: 'admin@akazubaflorist.com',
-    businessPhone: '+250 788 123 456',
+    businessEmail: 'info.akazubaflorist@gmail.com',
+    businessPhone: '+250 784 586 110',
     businessAddress: 'Kigali, Rwanda',
     currency: 'RWF',
     timezone: 'Africa/Kigali',
@@ -48,7 +49,17 @@ export default function SettingsPage() {
     try {
       setIsLoading(true)
       
-      const response = await fetch('/api/admin/settings/public')
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
+      const response = await fetch('/api/admin/settings/public', { headers })
       if (!response.ok) throw new Error('Failed to fetch settings')
       
       const result = await response.json()
@@ -69,11 +80,19 @@ export default function SettingsPage() {
     try {
     setIsSaving(true)
       
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
       const response = await fetch('/api/admin/settings/public', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(settings)
       })
       

@@ -184,7 +184,7 @@ For technical support or questions:
 - **Location**: Kigali, Rwanda
 
 **Admin Access:**
-- **Primary Admin**: admin@akazubaflorist.com (password: akazuba2024)
+- **Primary Admin**: info.akazubaflorist@gmail.com (password: akazuba2024)
 - **Info Admin**: info.akazubaflorist@gmail.com (password: akazuba2024)
 
 ## 📄 **License**
