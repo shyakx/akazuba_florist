@@ -45,7 +45,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push('/unified-login')
       return
     }
 

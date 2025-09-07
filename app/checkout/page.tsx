@@ -70,7 +70,7 @@ const CheckoutPage = () => {
     
     if (!isAuthenticated) {
       toast.error('Please sign in to complete your order')
-      router.push('/login')
+      router.push('/unified-login')
       return
     }
 
