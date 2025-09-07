@@ -4,9 +4,12 @@
   "description": "Akazuba Florist - Online shopping platform for flowers and perfumes in Rwanda",
   "private": true,
   "scripts": {
-    "build": "cd backend && npm install && npm run build",
-    "start": "cd backend && npm start",
-    "dev": "cd backend && npm run dev",
+    "build": "next build",
+    "start": "next start",
+    "dev": "next dev",
+    "build:backend": "cd backend && npm install && npm run build",
+    "start:backend": "cd backend && npm start",
+    "dev:backend": "cd backend && npm run dev",
     "install:backend": "cd backend && npm install"
   },
   "engines": {
