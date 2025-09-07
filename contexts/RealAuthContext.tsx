@@ -249,8 +249,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         }
         
-        // Force a small delay to ensure cookies are set
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Force a delay to ensure cookies are set
+        await new Promise(resolve => setTimeout(resolve, 500))
         
         // Set visited flag
         localStorage.setItem('hasVisitedBefore', 'true')

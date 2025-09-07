@@ -99,7 +99,7 @@ export default function AdminLoginPage() {
         setTimeout(() => {
           console.log('🚀 Redirecting to admin panel...')
           window.location.href = '/admin'
-        }, 1000)
+        }, 2000) // Increased delay to ensure cookies are set
         
         // Show loading state during redirect
         setIsLoading(true)
