@@ -38,14 +38,11 @@ class PaymentAPI {
   private baseURL: string
 
   constructor() {
-    // Use our backend as proxy to avoid CORS issues
-    this.baseURL = (() => {
-      // Check if we're in the browser
-      if (typeof window === 'undefined') {
-        // Server-side rendering - use environment variable
-        return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
-      }
-
+    // Check if we're in the browser and have access to window.location
+    if (typeof window === 'undefined' || typeof window.location === 'undefined') {
+      // Server-side rendering - use environment variable
+      this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+    } else {
       // Client-side - check current hostname
       const hostname = window.location.hostname
       const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
@@ -53,14 +50,14 @@ class PaymentAPI {
       if (isLocalhost) {
         // Development - use localhost
         console.log('🔧 Payment API: Using localhost for development')
-        return 'http://localhost:5000/api/v1'
+        this.baseURL = 'http://localhost:5000/api/v1'
       } else {
         // Production - use environment variable or production URL
         const productionUrl = process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
         console.log('🔧 Payment API: Using production API:', productionUrl)
-        return productionUrl
+        this.baseURL = productionUrl
       }
-    })()
+    }
   }
 
   // Initialize MTN MoMo Payment

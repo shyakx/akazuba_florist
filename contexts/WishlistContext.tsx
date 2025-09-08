@@ -63,6 +63,12 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   }, [user, isAuthenticated])
 
   const refreshWishlist = async () => {
+    // Early return if not in browser environment (SSR/SSG)
+    if (typeof window === 'undefined') {
+      console.log('Wishlist refresh skipped - server-side rendering')
+      return
+    }
+    
     // Early return if not authenticated or no user
     if (!user || !isAuthenticated) {
       console.log('Wishlist refresh skipped - user not authenticated')
@@ -99,6 +105,12 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
     console.log('❤️ Add to wishlist clicked for product:', product.name, 'ID:', product.id)
     console.log('❤️ User authenticated:', !!user, 'User:', user?.email)
     
+    // Early return if not in browser environment (SSR/SSG)
+    if (typeof window === 'undefined') {
+      console.log('❌ Add to wishlist skipped - server-side rendering')
+      return false
+    }
+    
     try {
       setIsLoading(true)
 
@@ -134,6 +146,12 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   }
 
   const removeFromWishlist = async (productId: string): Promise<boolean> => {
+    // Early return if not in browser environment (SSR/SSG)
+    if (typeof window === 'undefined') {
+      console.log('❌ Remove from wishlist skipped - server-side rendering')
+      return false
+    }
+    
     try {
       setIsLoading(true)
 
@@ -162,6 +180,12 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   }
 
   const clearWishlist = async (): Promise<boolean> => {
+    // Early return if not in browser environment (SSR/SSG)
+    if (typeof window === 'undefined') {
+      console.log('❌ Clear wishlist skipped - server-side rendering')
+      return false
+    }
+    
     try {
       setIsLoading(true)
 

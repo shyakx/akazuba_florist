@@ -131,15 +131,22 @@ const getApiBaseUrl = (): string => {
     return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
   }
 
-  // Client-side - check current hostname
-  const hostname = window.location.hostname
-  const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
-  
-  if (isLocalhost) {
-    // Development - use local backend since it's working perfectly
-    return 'http://localhost:5000/api/v1'
-  } else {
-    // Production - use environment variable or production URL
+  // Additional safety check for location object
+  try {
+    // Client-side - check current hostname
+    const hostname = window.location.hostname
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+    
+    if (isLocalhost) {
+      // Development - use local backend since it's working perfectly
+      return 'http://localhost:5000/api/v1'
+    } else {
+      // Production - use environment variable or production URL
+      return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+    }
+  } catch (error) {
+    // Fallback if window.location access fails
+    console.warn('Failed to access window.location, using fallback API URL')
     return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
   }
 }

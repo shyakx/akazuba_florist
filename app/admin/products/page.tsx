@@ -90,7 +90,7 @@ export default function ProductsPage() {
 
   // Read category parameter from URL on component mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && typeof window.location !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const categoryParam = urlParams.get('category')
       if (categoryParam) {
@@ -232,7 +232,7 @@ export default function ProductsPage() {
               onClick={() => {
                 setFilterCategory('')
                 // Update URL to remove category parameter
-                if (typeof window !== 'undefined') {
+                if (typeof window !== 'undefined' && typeof window.location !== 'undefined') {
                   const url = new URL(window.location.href)
                   url.searchParams.delete('category')
                   window.history.replaceState({}, '', url.toString())

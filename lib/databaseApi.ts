@@ -2,14 +2,21 @@ import { Product } from '@/types'
 
 // API Base URL configuration
 const getApiBaseUrl = (): string => {
-  if (typeof window === 'undefined') {
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
+  // Check if we're in the browser and have access to window.location
+  if (typeof window === 'undefined' || typeof window.location === 'undefined') {
+    // Server-side rendering - use environment variable
+    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
   }
+  
+  // Client-side - check current hostname
   const hostname = window.location.hostname
   const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  
   if (isLocalhost) {
+    // Development - use local backend
     return 'http://localhost:5000/api/v1'
   } else {
+    // Production - use environment variable or production URL
     return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
   }
 }
