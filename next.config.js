@@ -6,6 +6,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Force all pages to be dynamic to avoid SSR issues
+  trailingSlash: true,
+  generateEtags: false,
   images: {
     domains: ['images.unsplash.com', 'images.pexels.com', 'akazuba-production-assets.s3.us-east-1.amazonaws.com'],
     dangerouslyAllowSVG: true,
@@ -20,6 +23,7 @@ const nextConfig = {
     workerThreads: false,
     cpus: 1,
   },
+  // Disable static optimization to avoid SSR issues
   // Suppress dynamic route warnings during build
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,

@@ -35,18 +35,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Cleanup function to clear all authentication data
   const clearAllAuthData = useCallback(() => {
-    // Clear localStorage
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('user')
-    localStorage.removeItem('hasVisitedBefore')
-        
-        // Clear cookies
-        document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-        document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-        
+    // Only clear localStorage and cookies if we're in browser environment
+    if (typeof window !== 'undefined') {
+      // Clear localStorage
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+      localStorage.removeItem('hasVisitedBefore')
+      
+      // Clear cookies
+      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+    }
+    
     // Clear user state
-        setUser(null)
+    setUser(null)
         
     console.log('🧹 All authentication data cleared')
   }, [])
@@ -72,6 +75,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       try {
         console.log('🚀 Initializing authentication system...')
+        
+        // Check if we're in browser environment before accessing localStorage
+        if (typeof window === 'undefined') {
+          console.log('🚀 Skipping auth initialization - server-side rendering')
+          setIsInitialized(true)
+          return
+        }
         
         // Check for existing valid tokens in both development and production
         const token = localStorage.getItem('accessToken')

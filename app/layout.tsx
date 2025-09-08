@@ -11,6 +11,9 @@ import Header from '@/components/Header'
 import ConditionalHeader from '@/components/ConditionalHeader'
 import ErrorBoundary from '@/components/ErrorBoundary'
 
+// Force dynamic rendering to avoid SSR issues
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {

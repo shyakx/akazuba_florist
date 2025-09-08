@@ -2,6 +2,7 @@
 // Connects Next.js frontend with Express backend
 
 import { Product } from '@/types'
+import { getSafeApiBaseUrl } from './ssr-safe'
 
 // Types
 export interface User {
@@ -125,30 +126,7 @@ const getAuthToken = (): string | null => {
 
 // Consolidated API base URL function
 const getApiBaseUrl = (): string => {
-  // Check if we're in the browser and have access to window.location
-  if (typeof window === 'undefined' || typeof window.location === 'undefined') {
-    // Server-side rendering - use environment variable
-    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
-  }
-
-  // Additional safety check for location object
-  try {
-    // Client-side - check current hostname
-    const hostname = window.location.hostname
-    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
-    
-    if (isLocalhost) {
-      // Development - use local backend since it's working perfectly
-      return 'http://localhost:5000/api/v1'
-    } else {
-      // Production - use environment variable or production URL
-      return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
-    }
-  } catch (error) {
-    // Fallback if window.location access fails
-    console.warn('Failed to access window.location, using fallback API URL')
-    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
-  }
+  return getSafeApiBaseUrl()
 }
 
 // Base API request function with proper production handling
