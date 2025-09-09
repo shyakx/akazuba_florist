@@ -313,6 +313,229 @@ This is an automated notification from Akazuba Florist
       return false
     }
   }
+
+  // Send password reset email
+  async sendPasswordResetEmail(userEmail: string, userName: string, resetLink: string): Promise<boolean> {
+    try {
+      // Check if email configuration is available
+      if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        console.warn('⚠️ Email configuration missing, skipping password reset email')
+        return false
+      }
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Password Reset - Akazuba Florist</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #ff6b9d, #ff8fab); color: white; padding: 30px; text-align: center; border-radius: 10px; }
+            .content { background: #f9f9f9; padding: 30px; border-radius: 10px; margin-top: 20px; }
+            .button { display: inline-block; background: #ff6b9d; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+            .warning { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🌸 Password Reset Request</h1>
+              <p>Akazuba Florist</p>
+            </div>
+            <div class="content">
+              <h2>Hello ${userName}!</h2>
+              <p>We received a request to reset your password for your Akazuba Florist account.</p>
+              <p>Click the button below to reset your password:</p>
+              <a href="${resetLink}" class="button">Reset My Password</a>
+              <div class="warning">
+                <strong>⚠️ Important:</strong>
+                <ul>
+                  <li>This link will expire in 1 hour</li>
+                  <li>If you didn't request this reset, please ignore this email</li>
+                  <li>For security, don't share this link with anyone</li>
+                </ul>
+              </div>
+              <p>If the button doesn't work, copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; background: #f0f0f0; padding: 10px; border-radius: 3px;">${resetLink}</p>
+              <p>Thank you for choosing Akazuba Florist!</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+
+      const textContent = `
+Password Reset Request - Akazuba Florist
+
+Hello ${userName}!
+
+We received a request to reset your password for your Akazuba Florist account.
+
+To reset your password, click the link below:
+${resetLink}
+
+⚠️ Important:
+- This link will expire in 1 hour
+- If you didn't request this reset, please ignore this email
+- For security, don't share this link with anyone
+
+Thank you for choosing Akazuba Florist!
+
+---
+This is an automated email from Akazuba Florist
+      `.trim()
+
+      const mailOptions = {
+        from: `"Akazuba Florist" <${process.env.SMTP_USER}>`,
+        to: userEmail,
+        subject: '🌸 Password Reset Request - Akazuba Florist',
+        html: htmlContent,
+        text: textContent
+      }
+
+      const result = await this.transporter.sendMail(mailOptions)
+      console.log('✅ Password reset email sent successfully:', result.messageId)
+      return true
+    } catch (error) {
+      console.error('❌ Failed to send password reset email:', error)
+      // Don't throw the error, just return false
+      return false
+    }
+  }
+
+  // Support ticket notification to admin
+  async sendSupportTicketNotification(ticket: any): Promise<boolean> {
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL || 'info.akazubaflorist@gmail.com'
+      
+      const mailOptions = {
+        from: `"Akazuba Florist Support" <${process.env.SMTP_USER}>`,
+        to: adminEmail,
+        subject: `New Support Ticket: ${ticket.subject}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+              <h1 style="color: white; margin: 0;">🌸 New Support Ticket</h1>
+            </div>
+            
+            <div style="padding: 20px; background: #f8f9fa;">
+              <h2 style="color: #333; margin-top: 0;">Ticket Details</h2>
+              
+              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <p><strong>Subject:</strong> ${ticket.subject}</p>
+                <p><strong>Customer:</strong> ${ticket.customerName}</p>
+                <p><strong>Email:</strong> ${ticket.customerEmail}</p>
+                <p><strong>Priority:</strong> ${ticket.priority}</p>
+                <p><strong>Status:</strong> ${ticket.status}</p>
+                <p><strong>Created:</strong> ${new Date(ticket.createdAt).toLocaleString()}</p>
+              </div>
+              
+              <div style="background: white; padding: 15px; border-radius: 8px;">
+                <h3 style="margin-top: 0; color: #333;">Message:</h3>
+                <p style="white-space: pre-wrap;">${ticket.message}</p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 20px;">
+                <a href="${process.env.FRONTEND_URL}/admin/support" 
+                   style="background: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                  View in Admin Panel
+                </a>
+              </div>
+            </div>
+            
+            <div style="background: #e9ecef; padding: 15px; text-align: center; color: #6c757d; font-size: 12px;">
+              <p>This is an automated notification from Akazuba Florist Support System</p>
+            </div>
+          </div>
+        `
+      }
+
+      await this.transporter.sendMail(mailOptions)
+      console.log('✅ Support ticket notification sent to admin')
+      return true
+    } catch (error) {
+      console.error('❌ Failed to send support ticket notification:', error)
+      return false
+    }
+  }
+
+  // Support ticket status update notification to customer
+  async sendSupportTicketStatusUpdate(customerEmail: string, subject: string, status: string): Promise<boolean> {
+    try {
+      const mailOptions = {
+        from: `"Akazuba Florist Support" <${process.env.SMTP_USER}>`,
+        to: customerEmail,
+        subject: `Support Ticket Update: ${subject}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; text-align: center;">
+              <h1 style="color: white; margin: 0;">🌸 Support Ticket Update</h1>
+            </div>
+            
+            <div style="padding: 20px; background: #f8f9fa;">
+              <h2 style="color: #333; margin-top: 0;">Your Support Ticket Has Been Updated</h2>
+              
+              <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <p><strong>Subject:</strong> ${subject}</p>
+                <p><strong>New Status:</strong> 
+                  <span style="background: ${this.getStatusColor(status)}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                    ${status.replace('_', ' ')}
+                  </span>
+                </p>
+                <p><strong>Updated:</strong> ${new Date().toLocaleString()}</p>
+              </div>
+              
+              <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2196f3;">
+                <p style="margin: 0; color: #1976d2;">
+                  <strong>What this means:</strong><br>
+                  ${this.getStatusMessage(status)}
+                </p>
+              </div>
+              
+              <div style="text-align: center; margin-top: 20px;">
+                <p>If you have any questions, please don't hesitate to contact us.</p>
+                <p><strong>Phone:</strong> +250 784 586 110<br>
+                <strong>Email:</strong> info.akazubaflorist@gmail.com</p>
+              </div>
+            </div>
+            
+            <div style="background: #e9ecef; padding: 15px; text-align: center; color: #6c757d; font-size: 12px;">
+              <p>Thank you for choosing Akazuba Florist! 🌸</p>
+            </div>
+          </div>
+        `
+      }
+
+      await this.transporter.sendMail(mailOptions)
+      console.log('✅ Support ticket status update sent to customer')
+      return true
+    } catch (error) {
+      console.error('❌ Failed to send support ticket status update:', error)
+      return false
+    }
+  }
+
+  private getStatusColor(status: string): string {
+    switch (status) {
+      case 'PENDING': return '#ff9800'
+      case 'IN_PROGRESS': return '#2196f3'
+      case 'RESOLVED': return '#4caf50'
+      case 'CLOSED': return '#9e9e9e'
+      default: return '#6c757d'
+    }
+  }
+
+  private getStatusMessage(status: string): string {
+    switch (status) {
+      case 'PENDING': return 'We have received your support request and it is in our queue. We will review it shortly.'
+      case 'IN_PROGRESS': return 'We are currently working on your support request. You will receive updates as we progress.'
+      case 'RESOLVED': return 'Your support request has been resolved! If you need further assistance, please let us know.'
+      case 'CLOSED': return 'This support ticket has been closed. If you need further assistance, please create a new ticket.'
+      default: return 'Your support request status has been updated.'
+    }
+  }
 }
 
 export const emailService = new EmailService()

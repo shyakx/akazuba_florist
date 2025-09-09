@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Search, Heart, ShoppingCart, User, Menu, X, LogOut, Settings } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/RealAuthContext'
@@ -14,6 +15,7 @@ interface NavigationItem {
 }
 
 const Header = () => {
+  const pathname = usePathname()
   const { state: cartState } = useCart()
   const { user, isAuthenticated, logout } = useAuth()
   const { items: wishlistItems } = useWishlist()
@@ -108,6 +110,14 @@ const Header = () => {
   // Use fallback navigation if dynamic navigation is empty
   const finalNavigation = navigation.length > 0 ? navigation : fallbackNavigation
 
+  // Check if a navigation item is active
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/'
+    }
+    return pathname.startsWith(href)
+  }
+
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -187,7 +197,11 @@ const Header = () => {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-700 hover:text-pink-600 transition-colors duration-200 font-medium"
+                className={`transition-colors duration-200 font-medium ${
+                  isActive(item.href)
+                    ? 'text-pink-600 border-b-2 border-pink-600 pb-1'
+                    : 'text-gray-700 hover:text-pink-600'
+                }`}
               >
                 {item.name}
               </Link>
@@ -297,7 +311,11 @@ const Header = () => {
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-gray-700 hover:text-pink-600 transition-colors duration-200 font-medium py-2"
+                  className={`transition-colors duration-200 font-medium py-2 px-3 rounded-lg ${
+                    isActive(item.href)
+                      ? 'text-pink-600 bg-pink-50 border border-pink-200'
+                      : 'text-gray-700 hover:text-pink-600 hover:bg-gray-50'
+                  }`}
                 >
                   {item.name}
                 </Link>

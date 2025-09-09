@@ -158,8 +158,8 @@ export default function ProductsPage() {
           </div>
           <div className="mt-4 flex items-center text-sm">
             <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600 font-medium">+12%</span>
-            <span className="text-gray-500 ml-1">from last month</span>
+            <span className="text-green-600 font-medium">Live Data</span>
+            <span className="text-gray-500 ml-1">from database</span>
           </div>
         </div>
 
@@ -175,8 +175,8 @@ export default function ProductsPage() {
           </div>
           <div className="mt-4 flex items-center text-sm">
             <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600 font-medium">+8%</span>
-            <span className="text-gray-500 ml-1">from last month</span>
+            <span className="text-green-600 font-medium">Live Data</span>
+            <span className="text-gray-500 ml-1">from database</span>
           </div>
         </div>
 
@@ -192,8 +192,8 @@ export default function ProductsPage() {
           </div>
           <div className="mt-4 flex items-center text-sm">
             <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-            <span className="text-red-600 font-medium">-3%</span>
-            <span className="text-gray-500 ml-1">from last month</span>
+            <span className="text-red-600 font-medium">Live Data</span>
+            <span className="text-gray-500 ml-1">from database</span>
           </div>
         </div>
 
@@ -209,8 +209,8 @@ export default function ProductsPage() {
           </div>
           <div className="mt-4 flex items-center text-sm">
             <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-            <span className="text-green-600 font-medium">+25%</span>
-            <span className="text-gray-500 ml-1">from last month</span>
+            <span className="text-green-600 font-medium">Live Data</span>
+            <span className="text-gray-500 ml-1">from database</span>
           </div>
         </div>
       </div>
@@ -423,20 +423,37 @@ export default function ProductsPage() {
                       onClick={async () => {
                         if (confirm('Are you sure you want to delete this product?')) {
                           try {
+                            // Get the JWT token using the proper utility function
+                            const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+                            const headers: Record<string, string> = {
+                              'Content-Type': 'application/json',
+                            }
+                            
+                            if (token) {
+                              headers['Authorization'] = `Bearer ${token}`
+                            }
+                            
                             const response = await fetch(`/api/admin/products/${product.id}/delete`, {
-                              method: 'DELETE'
+                              method: 'DELETE',
+                              headers
                             })
                             
                             if (response.ok) {
-                              // Remove product from local state
-                              setProducts(prev => prev.filter(p => p.id !== product.id))
-                              alert('Product deleted successfully!')
+                              const result = await response.json()
+                              if (result.success) {
+                                // Remove product from local state
+                                setProducts(prev => prev.filter(p => p.id !== product.id))
+                                alert('Product deleted successfully!')
+                              } else {
+                                throw new Error(result.message || 'Failed to delete product')
+                              }
                             } else {
-                              throw new Error('Failed to delete product')
+                              const errorData = await response.json()
+                              throw new Error(errorData.message || 'Failed to delete product')
                             }
                           } catch (error) {
                             console.error('Error deleting product:', error)
-                            alert('Failed to delete product. Please try again.')
+                            alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`)
                           }
                         }
                       }}

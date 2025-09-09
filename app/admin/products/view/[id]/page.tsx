@@ -34,7 +34,19 @@ export default function ProductViewPage() {
         setLoading(true)
         console.log('🔍 Loading product with ID:', productId)
         
-        const response = await fetch(`/api/admin/products/public`)
+        // Get the JWT token using the proper utility function
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+        
+        const response = await fetch(`/api/admin/products/public`, {
+          headers
+        })
         if (!response.ok) throw new Error('Failed to fetch products')
 
         const result = await response.json()
@@ -61,25 +73,45 @@ export default function ProductViewPage() {
         setLoading(false)
       }
     }
-    loadProduct()
+    
+    if (productId) {
+      loadProduct()
+    }
   }, [productId])
 
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this product?')) {
       try {
+        // Get the JWT token using the proper utility function
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+        
         const response = await fetch(`/api/admin/products/${productId}/delete`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers
         })
         
         if (response.ok) {
-          alert('Product deleted successfully!')
-          router.push('/admin/products')
+          const result = await response.json()
+          if (result.success) {
+            alert('Product deleted successfully!')
+            router.push('/admin/products')
+          } else {
+            throw new Error(result.message || 'Failed to delete product')
+          }
         } else {
-          throw new Error('Failed to delete product')
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Failed to delete product')
         }
       } catch (error) {
         console.error('Error deleting product:', error)
-        alert('Failed to delete product. Please try again.')
+        alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }
   }

@@ -97,30 +97,45 @@ export default function NewProductPage() {
     setLoading(true)
     
     try {
-      // Implement actual API call to create product
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
       const response = await fetch('/api/admin/products', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          description: formData.description,
           price: parseFloat(formData.price),
-          stock: parseInt(formData.stock),
-          categoryId: formData.category
+          categoryId: formData.category,
+          stockQuantity: parseInt(formData.stock),
+          isActive: formData.status === 'active',
+          images: formData.images
         })
       })
       
       if (response.ok) {
         const result = await response.json()
-        alert('Product created successfully!')
-        router.push('/admin/products')
+        if (result.success || result.id) {
+          alert('Product created successfully!')
+          router.push('/admin/products')
+        } else {
+          throw new Error(result.message || 'Failed to create product')
+        }
       } else {
         const error = await response.json()
         throw new Error(error.message || 'Failed to create product')
       }
     } catch (error) {
       console.error('Error creating product:', error)
+      alert(`Failed to create product: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }

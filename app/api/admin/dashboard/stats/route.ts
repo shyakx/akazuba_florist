@@ -31,9 +31,12 @@ export async function GET(request: NextRequest) {
           success: true,
           categories: 2, // We know we have 2 categories from our previous tests
           products: data.data.totalProducts || 0,
-          orders: data.data.totalOrders || 0, // Use totalOrders for consistency with orders page
+          orders: data.data.totalOrders || 0,
           revenue: data.data.totalRevenue || 0,
-          customers: data.data.totalCustomers || 0
+          customers: data.data.totalCustomers || 0,
+          totalWishlistItems: data.data.totalWishlistItems || 0,
+          totalCartItems: data.data.totalCartItems || 0,
+          activeCarts: data.data.activeCarts || 0
         }
         return NextResponse.json(transformedData)
       } else {

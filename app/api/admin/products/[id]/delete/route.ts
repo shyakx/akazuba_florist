@@ -8,13 +8,17 @@ export async function DELETE(
     const { id } = params
 
     const backendUrl = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:5000/api/v1/admin/products/${id}/public`
-      : `https://akazuba-backend-api.onrender.com/api/v1/admin/products/${id}/public`
+      ? `http://localhost:5000/api/v1/admin/products/${id}`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/products/${id}`
+    
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization')
     
     const response = await fetch(backendUrl, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
       },
     })
 
@@ -27,7 +31,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error deleting product:', error)
     return NextResponse.json(
-      { error: 'Failed to delete product' },
+      { success: false, message: 'Failed to delete product' },
       { status: 500 }
     )
   }

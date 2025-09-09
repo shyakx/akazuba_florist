@@ -48,6 +48,8 @@ export default function OrdersPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'>('all')
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
+  const [showOrderModal, setShowOrderModal] = useState(false)
 
   const fetchOrders = async () => {
     try {
@@ -363,10 +365,8 @@ export default function OrdersPage() {
                     <button 
                       className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                       onClick={() => {
-                        // Navigate to order details
-                        if (typeof window !== 'undefined') {
-                          window.location.href = `/admin/orders/${order.id}`
-                        }
+                        setSelectedOrder(order)
+                        setShowOrderModal(true)
                       }}
                     >
                       <Eye className="w-4 h-4" />
@@ -376,14 +376,21 @@ export default function OrdersPage() {
                       onClick={async () => {
                         if (confirm('Mark this order as completed?')) {
                           try {
+                            // Get the JWT token
+                            const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+                            const headers: Record<string, string> = {
+                              'Content-Type': 'application/json',
+                            }
+                            
+                            if (token) {
+                              headers['Authorization'] = `Bearer ${token}`
+                            }
+
                             const response = await fetch(`/api/admin/orders/${order.id}`, {
                               method: 'PUT',
-                              headers: {
-                                'Content-Type': 'application/json',
-                              },
+                              headers,
                               body: JSON.stringify({
-                                status: 'delivered',
-                                deliveryStatus: 'delivered'
+                                status: 'DELIVERED'
                               })
                             })
                             
@@ -396,11 +403,12 @@ export default function OrdersPage() {
                               ))
                               alert('Order marked as completed!')
                             } else {
-                              throw new Error('Failed to update order')
+                              const errorData = await response.json()
+                              throw new Error(errorData.error || 'Failed to update order')
                             }
                           } catch (error) {
                             console.error('Error updating order:', error)
-                            alert('Failed to update order. Please try again.')
+                            alert(`Failed to update order: ${error instanceof Error ? error.message : 'Unknown error'}`)
                           }
                         }
                       }}
@@ -410,16 +418,24 @@ export default function OrdersPage() {
                     <button
                       className="p-2 text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-all duration-200"
                       onClick={async () => {
-                        const newStatus = prompt('Enter new shipping status (pending, preparing, out_for_delivery, delivered):', order.deliveryStatus)
-                        if (newStatus && ['pending', 'preparing', 'out_for_delivery', 'delivered'].includes(newStatus)) {
+                        const newStatus = prompt('Enter new delivery status (PENDING, PREPARING, OUT_FOR_DELIVERY, DELIVERED):', order.deliveryStatus?.toUpperCase() || 'PENDING')
+                        if (newStatus && ['PENDING', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'].includes(newStatus.toUpperCase())) {
                           try {
-                            const response = await fetch(`/api/admin/orders/${order.id}`, {
-                              method: 'PUT',
-                              headers: {
+                            // Get the JWT token
+                            const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+                            const headers: Record<string, string> = {
                                 'Content-Type': 'application/json',
-                              },
+                            }
+                            
+                            if (token) {
+                              headers['Authorization'] = `Bearer ${token}`
+                            }
+
+                            const response = await fetch(`/api/admin/orders/${order.id}/delivery`, {
+                              method: 'PATCH',
+                              headers,
                               body: JSON.stringify({
-                                deliveryStatus: newStatus
+                                deliveryStatus: newStatus.toUpperCase()
                               })
                             })
                             
@@ -427,19 +443,20 @@ export default function OrdersPage() {
                               // Update local state
                               setOrders(prev => prev.map(o => 
                                 o.id === order.id 
-                                  ? { ...o, deliveryStatus: newStatus as 'pending' | 'preparing' | 'out_for_delivery' | 'delivered' }
+                                  ? { ...o, deliveryStatus: newStatus.toLowerCase() as any }
                                   : o
                               ))
-                              alert('Shipping status updated!')
+                              alert('Delivery status updated!')
                             } else {
-                              throw new Error('Failed to update shipping status')
+                              const errorData = await response.json()
+                              throw new Error(errorData.error || 'Failed to update delivery status')
                             }
                           } catch (error) {
-                            console.error('Error updating shipping status:', error)
-                            alert('Failed to update shipping status. Please try again.')
+                            console.error('Error updating delivery status:', error)
+                            alert(`Failed to update delivery status: ${error instanceof Error ? error.message : 'Unknown error'}`)
                           }
                         } else if (newStatus) {
-                          alert('Invalid status. Please use: pending, preparing, out_for_delivery, or delivered')
+                          alert('Invalid status. Please use: PENDING, PREPARING, OUT_FOR_DELIVERY, or DELIVERED')
                         }
                       }}
                     >
@@ -470,6 +487,126 @@ export default function OrdersPage() {
               : 'No orders have been placed yet. Orders will appear here once customers start making purchases.'
             }
           </p>
+        </div>
+      )}
+
+      {/* Order Details Modal */}
+      {showOrderModal && selectedOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
+                <button
+                  onClick={() => setShowOrderModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Order Info */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Order Number</label>
+                    <p className="text-lg font-semibold text-gray-900">{selectedOrder.orderNumber}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Status</label>
+                    <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
+                      {selectedOrder.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Total Amount</label>
+                    <p className="text-lg font-semibold text-gray-900">RWF {selectedOrder.totalAmount.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Payment Status</label>
+                    <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                      selectedOrder.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {selectedOrder.paymentStatus.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Customer Info */}
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Name</label>
+                      <p className="text-gray-900">{selectedOrder.customerName}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Email</label>
+                      <p className="text-gray-900">{selectedOrder.customerEmail}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Phone</label>
+                      <p className="text-gray-900">{selectedOrder.customerPhone}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">Order Date</label>
+                      <p className="text-gray-900">{new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Delivery Address */}
+                {selectedOrder.deliveryAddress && (
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Address</h3>
+                    <p className="text-gray-900">{selectedOrder.deliveryAddress}</p>
+                  </div>
+                )}
+
+                {/* Order Items */}
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+                  <div className="space-y-3">
+                    {selectedOrder.items?.map((item: any, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          {item.image && (
+                            <img 
+                              src={item.image} 
+                              alt={item.name} 
+                              className="w-12 h-12 object-cover rounded-lg"
+                            />
+                          )}
+                          <div>
+                            <p className="font-medium text-gray-900">{item.name}</p>
+                            <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                          </div>
+                        </div>
+                        <p className="font-semibold text-gray-900">RWF {(item.price * item.quantity).toLocaleString()}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Notes */}
+                {selectedOrder.notes && (
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Notes</h3>
+                    <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedOrder.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-8 pt-6 border-t">
+                <button
+                  onClick={() => setShowOrderModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

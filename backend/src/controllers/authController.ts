@@ -5,6 +5,7 @@ import jwt, { Secret, SignOptions } from 'jsonwebtoken'
 import { PrismaClient } from '@prisma/client'
 import { logger } from '../utils/logger'
 import { validateEmail, validatePassword, validatePhone } from '../middleware/auth'
+import { emailService } from '../utils/emailService'
 
 const prisma = new PrismaClient()
 
@@ -589,9 +590,23 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     // For now, we'll use a simple approach
     const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`
 
-    // TODO: Send email with reset link
-    // For now, we'll just log it (in production, use a service like SendGrid, Nodemailer, etc.)
-    console.log(`Password reset link for ${user.email}: ${resetLink}`)
+    // Send password reset email
+    try {
+      const emailSent = await emailService.sendPasswordResetEmail(
+        user.email,
+        `${user.firstName} ${user.lastName}`,
+        resetLink
+      )
+      
+      if (emailSent) {
+        console.log(`✅ Password reset email sent to ${user.email}`)
+      } else {
+        console.log(`⚠️ Failed to send password reset email to ${user.email}`)
+      }
+    } catch (emailError) {
+      console.error('❌ Error sending password reset email:', emailError)
+      // Don't fail the request if email fails, just log it
+    }
 
     res.status(200).json({
       success: true,

@@ -21,6 +21,7 @@ import wishlistRoutes from './routes/wishlist'
 import adminRoutes from './routes/admin'
 import paymentRoutes from './routes/payments'
 import uploadRoutes from './routes/upload'
+import supportRoutes from './routes/support'
 // MoMo routes removed - using simplified payment methods
 import { errorHandler } from './middleware/errorHandler'
 import { logger } from './utils/logger'
@@ -222,6 +223,7 @@ app.use('/api/v1/wishlist', wishlistRoutes)
 app.use('/api/v1/admin', adminRoutes)
 app.use('/api/v1/payments', paymentRoutes)
 app.use('/api/v1/upload', uploadRoutes)
+app.use('/api/v1/support', supportRoutes)
 
 // Error handling middleware
 app.use(errorHandler)

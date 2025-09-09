@@ -17,7 +17,7 @@ const DeliveryInfo = () => {
               <ArrowLeft className="h-5 w-5 mr-2" />
               Back to Home
             </Link>
-          </div>
+              </div>
           <div className="mt-4">
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <Truck className="h-8 w-8 mr-3 text-pink-500" />
@@ -27,6 +27,7 @@ const DeliveryInfo = () => {
           </div>
         </div>
       </div>
+
 
       {/* Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -40,8 +41,8 @@ const DeliveryInfo = () => {
               <p className="text-green-100 mt-1">No delivery fees on any order, regardless of location or amount</p>
             </div>
           </div>
-        </div>
-
+                </div>
+                
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Delivery Areas */}
@@ -71,8 +72,8 @@ const DeliveryInfo = () => {
               <p className="text-sm text-gray-500">
                 Don't see your area? Contact us to check if we can deliver to your location.
               </p>
-            </div>
-          </div>
+                  </div>
+                </div>
 
           {/* Delivery Times */}
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -88,7 +89,7 @@ const DeliveryInfo = () => {
                   <li>Next-day delivery (orders placed after 2 PM)</li>
                   <li>Delivery hours: 8 AM - 6 PM</li>
                 </ul>
-              </div>
+                    </div>
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                 <h3 className="font-semibold text-purple-800 mb-2">Express Delivery</h3>
                 <ul className="list-disc list-inside space-y-1 text-purple-700">
@@ -96,9 +97,9 @@ const DeliveryInfo = () => {
                   <li>Available for urgent orders</li>
                   <li>Additional charges may apply</li>
                 </ul>
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
 
           {/* Delivery Process */}
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -124,16 +125,16 @@ const DeliveryInfo = () => {
                   <h3 className="font-semibold text-gray-900">Preparation</h3>
                   <p className="text-gray-600 text-sm">We carefully prepare your fresh flowers</p>
                 </div>
-              </div>
+          </div>
               <div className="flex items-start space-x-3">
                 <div className="w-8 h-8 bg-pink-500 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Delivery</h3>
                   <p className="text-gray-600 text-sm">Your order is delivered fresh to your door</p>
                 </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
           {/* Delivery Requirements */}
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -159,11 +160,11 @@ const DeliveryInfo = () => {
                   <li>Call before delivery</li>
                   <li>Any specific timing requirements</li>
                 </ul>
-              </div>
-            </div>
           </div>
-
         </div>
+      </div>
+
+          </div>
 
         {/* Important Notes */}
         <div className="mt-8 bg-white rounded-lg shadow-sm p-6">
@@ -172,21 +173,21 @@ const DeliveryInfo = () => {
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Weather Conditions</h3>
               <p className="text-sm">Deliveries may be delayed during severe weather conditions. We'll contact you if there are any delays.</p>
-            </div>
+                      </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Failed Deliveries</h3>
               <p className="text-sm">If we can't deliver, we'll attempt to contact you and arrange a new delivery time.</p>
-            </div>
+                    </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Quality Guarantee</h3>
               <p className="text-sm">All flowers are delivered fresh. If you're not satisfied, contact us within 24 hours.</p>
-            </div>
+                </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Special Events</h3>
               <p className="text-sm">For weddings and special events, we recommend placing orders at least 3 days in advance.</p>
-            </div>
           </div>
         </div>
+      </div>
 
         {/* Contact Information */}
         <div className="mt-8 bg-gradient-to-r from-pink-500 to-pink-600 rounded-lg p-6 text-white">
@@ -200,9 +201,9 @@ const DeliveryInfo = () => {
             <div className="flex items-center space-x-3">
               <Mail className="h-5 w-5" />
               <span>info.akazubaflorist@gmail.com</span>
-            </div>
           </div>
         </div>
+      </div>
 
       </div>
     </div>

@@ -20,13 +20,17 @@ export async function GET(request: NextRequest) {
     params.append('limit', limit)
 
     const backendUrl = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:5000/api/v1/admin/support-tickets/public?${params.toString()}`
-      : `https://akazuba-backend-api.onrender.com/api/v1/admin/support-tickets/public?${params.toString()}`
+      ? `http://localhost:5000/api/v1/admin/support-tickets?${params.toString()}`
+      : `https://akazuba-backend-api.onrender.com/api/v1/admin/support-tickets?${params.toString()}`
+    
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization')
     
     const response = await fetch(backendUrl, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
       },
       cache: 'no-store'
     })

@@ -377,7 +377,7 @@ const DashboardPage = () => {
                     {cartState.items.length}
                   </h3>
                   <p className="text-gray-600">Cart Items</p>
-                    </div>
+                </div>
                 
                 <div className="bg-white rounded-xl shadow-sm p-6 text-center">
                   <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">

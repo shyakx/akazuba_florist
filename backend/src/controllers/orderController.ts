@@ -199,7 +199,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
     // Send admin notifications (SMS and Email) - Don't block order creation if these fail
     try {
-      await smsService.sendOrderNotification(orderNumber, customerName, totalAmount)
+    await smsService.sendOrderNotification(orderNumber, customerName, totalAmount)
     } catch (smsError) {
       console.error('SMS notification failed:', smsError)
     }

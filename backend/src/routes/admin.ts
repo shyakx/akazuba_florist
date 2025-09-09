@@ -1,6 +1,14 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authenticateToken } from '../middleware/auth'
+import {
+  getAllSupportTickets,
+  getSupportTicketById,
+  createSupportTicket,
+  updateSupportTicket,
+  deleteSupportTicket,
+  getSupportTicketStats
+} from '../controllers/supportController'
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -42,6 +50,9 @@ router.get('/analytics', async (req, res) => {
       prisma.orders.aggregate({
         _sum: {
           totalAmount: true
+        },
+        where: {
+          status: 'DELIVERED'
         }
       }),
       
@@ -97,6 +108,7 @@ router.get('/analytics', async (req, res) => {
           totalAmount: true
         },
         where: {
+          status: 'DELIVERED',
           createdAt: {
             gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
           }
@@ -570,10 +582,13 @@ router.get('/dashboard/stats', async (req, res) => {
       }
     })
 
-    // Get total revenue
+    // Get total revenue from completed orders only
     const totalRevenue = await prisma.orders.aggregate({
       _sum: {
         totalAmount: true
+      },
+      where: {
+        status: 'DELIVERED'
       }
     })
 
@@ -761,6 +776,9 @@ router.get('/dashboard/analytics', async (req, res) => {
       prisma.orders.aggregate({
         _sum: {
           totalAmount: true
+        },
+        where: {
+          status: 'DELIVERED'
         }
       }),
       
@@ -816,6 +834,7 @@ router.get('/dashboard/analytics', async (req, res) => {
           totalAmount: true
         },
         where: {
+          status: 'DELIVERED',
           createdAt: {
             gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
           }
@@ -1582,5 +1601,196 @@ router.post('/export/:type', async (req, res) => {
     })
   }
 })
+
+// Support Tickets Routes
+/**
+ * @swagger
+ * /admin/support-tickets:
+ *   get:
+ *     summary: Get all support tickets with filtering
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [PENDING, IN_PROGRESS, RESOLVED, CLOSED]
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [LOW, MEDIUM, HIGH, URGENT]
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Support tickets retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/support-tickets', getAllSupportTickets)
+
+/**
+ * @swagger
+ * /admin/support-tickets/stats:
+ *   get:
+ *     summary: Get support ticket statistics
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Support ticket statistics retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/support-tickets/stats', getSupportTicketStats)
+
+/**
+ * @swagger
+ * /admin/support-tickets:
+ *   post:
+ *     summary: Create new support ticket
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - customerName
+ *               - customerEmail
+ *               - subject
+ *               - message
+ *             properties:
+ *               customerName:
+ *                 type: string
+ *               customerEmail:
+ *                 type: string
+ *               subject:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *                 enum: [LOW, MEDIUM, HIGH, URGENT]
+ *                 default: MEDIUM
+ *               orderId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Support ticket created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/support-tickets', createSupportTicket)
+
+/**
+ * @swagger
+ * /admin/support-tickets/{id}:
+ *   get:
+ *     summary: Get support ticket by ID
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Support ticket retrieved successfully
+ *       404:
+ *         description: Support ticket not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/support-tickets/:id', getSupportTicketById)
+
+/**
+ * @swagger
+ * /admin/support-tickets/{id}:
+ *   put:
+ *     summary: Update support ticket
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, IN_PROGRESS, RESOLVED, CLOSED]
+ *               priority:
+ *                 type: string
+ *                 enum: [LOW, MEDIUM, HIGH, URGENT]
+ *               assignedTo:
+ *                 type: string
+ *               adminNotes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Support ticket updated successfully
+ *       404:
+ *         description: Support ticket not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.put('/support-tickets/:id', updateSupportTicket)
+
+/**
+ * @swagger
+ * /admin/support-tickets/{id}:
+ *   delete:
+ *     summary: Delete support ticket
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Support ticket deleted successfully
+ *       404:
+ *         description: Support ticket not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/support-tickets/:id', deleteSupportTicket)
 
 export default router 

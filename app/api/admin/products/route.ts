@@ -63,37 +63,52 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if user is authenticated and is admin
-    const session = await getServerSession()
-    
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
-    const { name, description, price, category, stock } = body
+    const { name, description, price, categoryId, stockQuantity, isActive, images } = body
 
-    if (!name || !price || !category) {
-      return NextResponse.json({ error: 'Name, price, and category are required' }, { status: 400 })
+    if (!name || !price || !categoryId) {
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Name, price, and category are required' 
+      }, { status: 400 })
     }
 
-    // Mock response - replace with actual database insert
-    const newProduct = {
-      id: Date.now(),
-      name,
-      description: description || '',
-      price: Number(price),
-      category,
-      status: 'active',
-      stock: Number(stock) || 0,
-      image: '/images/default-product.jpg',
-      createdAt: new Date().toISOString()
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000/api/v1/admin/products'
+      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/products'
+    
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization')
+    
+    const response = await fetch(backendUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
+      },
+      body: JSON.stringify({
+        name,
+        description: description || '',
+        price: Number(price),
+        categoryId,
+        stockQuantity: Number(stockQuantity) || 0,
+        isActive: isActive !== false,
+        images: images || []
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with status: ${response.status}`)
     }
 
-    return NextResponse.json(newProduct, { status: 201 })
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Error creating product:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json(
+      { success: false, message: 'Failed to create product' },
+      { status: 500 }
+    )
   }
 }
 

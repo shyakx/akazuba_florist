@@ -17,7 +17,7 @@ const PrivacyPolicy = () => {
               <ArrowLeft className="h-5 w-5 mr-2" />
               Back to Home
             </Link>
-          </div>
+              </div>
           <div className="mt-4">
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <Shield className="h-8 w-8 mr-3 text-pink-500" />
@@ -89,7 +89,7 @@ const PrivacyPolicy = () => {
                 <li>Comply with legal obligations</li>
                 <li>Prevent fraud and ensure security</li>
               </ul>
-            </div>
+          </div>
           </section>
 
           {/* Data Protection */}
@@ -102,7 +102,7 @@ const PrivacyPolicy = () => {
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <h3 className="font-semibold text-green-800 mb-2">🔒 Secure Data Handling</h3>
                 <p>We implement industry-standard security measures to protect your information:</p>
-              </div>
+                  </div>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li>SSL encryption for all data transmission</li>
                 <li>Secure payment processing through trusted providers</li>
@@ -110,7 +110,7 @@ const PrivacyPolicy = () => {
                 <li>Limited access to personal information on a need-to-know basis</li>
                 <li>Secure data storage with regular backups</li>
               </ul>
-            </div>
+                </div>
           </section>
 
           {/* Information Sharing */}
@@ -123,8 +123,8 @@ const PrivacyPolicy = () => {
                 <li><strong>Legal Requirements:</strong> When required by law or to protect our rights and safety</li>
                 <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
                 <li><strong>Consent:</strong> When you have given us explicit permission to share your information</li>
-              </ul>
-            </div>
+                </ul>
+              </div>
           </section>
 
           {/* Your Rights */}
@@ -160,7 +160,7 @@ const PrivacyPolicy = () => {
                 <li>Provide personalized content and recommendations</li>
               </ul>
               <p>You can control cookie settings through your browser preferences.</p>
-            </div>
+          </div>
           </section>
 
           {/* Data Retention */}
@@ -173,8 +173,8 @@ const PrivacyPolicy = () => {
               </p>
               <p>
                 When we no longer need your information, we will securely delete or anonymize it.
-              </p>
-            </div>
+                </p>
+              </div>
           </section>
 
           {/* Children's Privacy */}
@@ -188,8 +188,8 @@ const PrivacyPolicy = () => {
               <p>
                 If you believe we have collected information from a child under 13, 
                 please contact us immediately so we can delete such information.
-              </p>
-            </div>
+                </p>
+              </div>
           </section>
 
           {/* Changes to Privacy Policy */}
@@ -211,27 +211,27 @@ const PrivacyPolicy = () => {
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
             <div className="bg-gray-50 rounded-lg p-6">
               <p className="text-gray-600 mb-4">
-                If you have any questions about this Privacy Policy or our data practices, please contact us:
-              </p>
+              If you have any questions about this Privacy Policy or our data practices, please contact us:
+            </p>
               <div className="space-y-3">
                 <div className="flex items-center space-x-3">
                   <Mail className="h-5 w-5 text-pink-500" />
                   <span><strong>Email:</strong> info.akazubaflorist@gmail.com</span>
-                </div>
+                  </div>
                 <div className="flex items-center space-x-3">
                   <Phone className="h-5 w-5 text-pink-500" />
                   <span><strong>Phone:</strong> +250 784 586 110</span>
-                </div>
+                  </div>
                 <div className="flex items-center space-x-3">
                   <Shield className="h-5 w-5 text-pink-500" />
                   <span><strong>Address:</strong> Kigali, Rwanda</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
+          </div>
         </div>
       </div>
+          </section>
+
+          </div>
+        </div>
     </div>
   )
 }

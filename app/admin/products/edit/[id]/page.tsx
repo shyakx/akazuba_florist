@@ -36,20 +36,33 @@ export default function EditProductPage() {
     const loadProduct = async () => {
       try {
         setInitialLoading(true)
-        const response = await fetch(`/api/admin/products/public`)
+        
+        // Get the JWT token using the proper utility function
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+        
+        const response = await fetch(`/api/admin/products/public`, {
+          headers
+        })
         if (!response.ok) throw new Error('Failed to fetch products')
         
         const result = await response.json()
-        if (result.success && result.data) {
+        if (result.success && result.data && result.data.products) {
           // Find the specific product by ID
-          const foundProduct = result.data.find((p: any) => p.id === productId)
+          const foundProduct = result.data.products.find((p: any) => p.id === productId)
           if (foundProduct) {
             setFormData({
               name: foundProduct.name || '',
               description: foundProduct.description || '',
               price: foundProduct.price?.toString() || '',
-              category: foundProduct.categoryId || '',
-              stock: foundProduct.stockQuantity?.toString() || '',
+              category: foundProduct.category || '',
+              stock: foundProduct.stock?.toString() || '',
               status: foundProduct.status || 'active',
               images: foundProduct.images || []
             })
@@ -61,12 +74,15 @@ export default function EditProductPage() {
         }
       } catch (error) {
         console.error('Error loading product:', error)
+        alert('Failed to load product. Please try again.')
       } finally {
         setInitialLoading(false)
       }
     }
 
-    loadProduct()
+    if (productId) {
+      loadProduct()
+    }
   }, [productId])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -140,11 +156,19 @@ export default function EditProductPage() {
     setLoading(true)
     
     try {
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           name: formData.name,
           description: formData.description,
@@ -157,14 +181,20 @@ export default function EditProductPage() {
       })
       
       if (response.ok) {
-        alert('Product updated successfully!')
-        router.push('/admin/products')
+        const result = await response.json()
+        if (result.success) {
+          alert('Product updated successfully!')
+          router.push('/admin/products')
+        } else {
+          throw new Error(result.message || 'Failed to update product')
+        }
       } else {
-        throw new Error('Failed to update product')
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to update product')
       }
     } catch (error) {
       console.error('Error updating product:', error)
-      alert('Failed to update product. Please try again.')
+      alert(`Failed to update product: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }

@@ -26,6 +26,13 @@ interface DashboardStats {
   activeCarts: number
 }
 
+interface TopProduct {
+  id: string
+  name: string
+  sales: number
+  revenue: number
+}
+
 
 export default function AdminDashboard() {
   console.log('🏠 Admin Dashboard component rendered')
@@ -40,6 +47,7 @@ export default function AdminDashboard() {
     totalCartItems: 0,
     activeCarts: 0
   })
+  const [topProducts, setTopProducts] = useState<TopProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -90,8 +98,38 @@ export default function AdminDashboard() {
     }
   }
 
+  const fetchTopProducts = async () => {
+    try {
+      console.log('📈 Fetching top products...')
+      
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
+      const response = await fetch('/api/admin/dashboard/analytics', { headers })
+      
+      if (!response.ok) throw new Error('Failed to fetch analytics')
+      
+      const data = await response.json()
+      
+      if (data.success && data.data.topProducts) {
+        setTopProducts(data.data.topProducts)
+        console.log('✅ Top products loaded:', data.data.topProducts)
+      }
+    } catch (error) {
+      console.error('❌ Error fetching top products:', error)
+      // Don't set error state for top products, just log it
+    }
+  }
+
   useEffect(() => {
     fetchStats()
+    fetchTopProducts()
   }, [])
 
   if (isLoading) {
@@ -265,9 +303,21 @@ export default function AdminDashboard() {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Total Customers</span>
+              <span className="text-sm text-gray-600">Avg Order Value</span>
               <span className="text-lg font-bold text-purple-600">
-                {stats.customers}
+                RWF {stats.orders > 0 ? Math.round(stats.revenue / stats.orders).toLocaleString() : '0'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Active Carts</span>
+              <span className="text-lg font-bold text-orange-600">
+                {stats.activeCarts}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Wishlist Items</span>
+              <span className="text-lg font-bold text-pink-600">
+                {stats.totalWishlistItems}
               </span>
             </div>
           </div>
@@ -277,20 +327,24 @@ export default function AdminDashboard() {
         <div className="card">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Products</h3>
           <div className="space-y-3">
-            {stats.products > 0 ? (
-              // Placeholder for top products - you can add real product data here later
-              [1, 2, 3].map((index) => {
-                const colors = ['bg-blue-100', 'bg-green-100', 'bg-yellow-100']
-                const textColors = ['text-blue-600', 'text-green-600', 'text-yellow-600']
-  return (
-                  <div key={index} className="flex items-center justify-between">
+            {topProducts.length > 0 ? (
+              topProducts.map((product, index) => {
+                const colors = ['bg-blue-100', 'bg-green-100', 'bg-yellow-100', 'bg-purple-100', 'bg-pink-100']
+                const textColors = ['text-blue-600', 'text-green-600', 'text-yellow-600', 'text-purple-600', 'text-pink-600']
+                return (
+                  <div key={product.id} className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <div className={`w-6 h-6 ${colors[index]} rounded flex items-center justify-center`}>
-                        <Package className={`w-3 h-3 ${textColors[index]}`} />
+                      <div className={`w-6 h-6 ${colors[index % colors.length]} rounded flex items-center justify-center`}>
+                        <Package className={`w-3 h-3 ${textColors[index % textColors.length]}`} />
                       </div>
-                      <span className="text-sm text-gray-900">Product {index}</span>
+                      <span className="text-sm text-gray-900 truncate max-w-[200px]" title={product.name}>
+                        {product.name}
+                      </span>
                     </div>
-                    <span className="text-sm font-medium text-gray-600">{index + 2} sales</span>
+                    <div className="text-right">
+                      <span className="text-sm font-medium text-gray-600">{product.sales} sales</span>
+                      <div className="text-xs text-gray-500">RWF {product.revenue.toLocaleString()}</div>
+                    </div>
                   </div>
                 )
               })

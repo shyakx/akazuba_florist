@@ -1,22 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { id } = params
-    const body = await request.json()
+export const dynamic = 'force-dynamic'
 
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:5000/api/v1/admin/products/${id}`
-      : `https://akazuba-backend-api.onrender.com/api/v1/admin/products/${id}`
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
     
     // Get the authorization header from the request
     const authHeader = request.headers.get('authorization')
     
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000/api/v1/admin/support-tickets'
+      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/support-tickets'
+    
     const response = await fetch(backendUrl, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...(authHeader && { 'Authorization': authHeader }),
@@ -25,15 +23,16 @@ export async function PUT(
     })
 
     if (!response.ok) {
-      throw new Error(`Backend responded with status: ${response.status}`)
+      const errorData = await response.json()
+      throw new Error(errorData.message || `Backend responded with status: ${response.status}`)
     }
 
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Error updating product:', error)
+    console.error('Error creating support ticket:', error)
     return NextResponse.json(
-      { success: false, message: 'Failed to update product' },
+      { error: 'Failed to create support ticket' },
       { status: 500 }
     )
   }
