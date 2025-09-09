@@ -115,6 +115,7 @@ router.post('/', verifyToken, async (req, res) => {
 
     const wishlistItem = await prisma.wishlist.create({
       data: {
+        id: `wishlist_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId,
         productId
       } as any,

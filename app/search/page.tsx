@@ -4,6 +4,8 @@ import React, { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Search, Filter, Grid, List, Flower, Sparkles } from 'lucide-react'
 import { useProducts } from '@/contexts/ProductsContext'
+import { useCart } from '@/contexts/CartContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 import ProductCard from '@/components/ProductCard'
 import SearchBar from '@/components/SearchBar'
 import Footer from '@/components/Footer'
@@ -17,12 +19,15 @@ const SearchContent = () => {
   const router = useRouter()
   const query = searchParams.get('q') || ''
   const { products, getProductsByCategory } = useProducts()
+  const { addToCart } = useCart()
+  const { addToWishlist } = useWishlist()
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState<'name' | 'price-low' | 'price-high' | 'newest'>('name')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [showAllCategories, setShowAllCategories] = useState(false)
+
 
   // Filter and sort products based on search query and filters
   useEffect(() => {
@@ -304,6 +309,9 @@ const SearchContent = () => {
                 <ProductCard
                   key={product.id}
                   product={product}
+                  onAddToCart={addToCart}
+                  onAddToWishlist={addToWishlist}
+                  isAddingToCart={false} // You can track individual product loading states if needed
                 />
               ))}
             </div>

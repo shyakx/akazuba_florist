@@ -32,21 +32,15 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
 // Environment check
-if (process.env.NODE_ENV === 'production') {
-    console.log('🚀 PRODUCTION MODE ENABLED');
-    console.log('- Environment: Production');
-    console.log('- Port:', process.env.PORT);
-    console.log('- Database: Connected');
-    console.log('- CORS: Production origins only');
-    console.log('- Security: Maximum protection enabled');
-}
-else {
-    console.log('🔧 DEVELOPMENT MODE');
-    console.log('- Environment:', process.env.NODE_ENV || 'development');
-    console.log('- Port:', process.env.PORT);
-    console.log('- CORS: Development origins allowed');
-    console.log('- Security: Standard protection');
-}
+const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = !isProduction;
+console.log('🔧 ENVIRONMENT CONFIGURATION:');
+console.log('- NODE_ENV:', process.env.NODE_ENV || 'development');
+console.log('- Is Production:', isProduction);
+console.log('- Is Development:', isDevelopment);
+console.log('- Port:', process.env.PORT || 5000);
+console.log('- CORS: Development origins allowed');
+console.log('- Security: Standard protection');
 // Initialize Prisma with error handling
 let prisma;
 try {
@@ -121,7 +115,7 @@ const corsOptions = {
         if (!origin)
             return callback(null, true);
         // Define allowed origins based on environment
-        const isDevelopment = process.env.NODE_ENV === 'development';
+        const isDevelopment = !isProduction;
         let allowedOrigins = [];
         if (isDevelopment) {
             // Development - allow localhost
@@ -145,7 +139,7 @@ const corsOptions = {
         }
         console.log('🔍 CORS Check:');
         console.log('  - Origin:', origin);
-        console.log('  - Environment:', process.env.NODE_ENV || 'production');
+        console.log('  - Environment:', process.env.NODE_ENV || 'development');
         console.log('  - Allowed origins:', allowedOrigins);
         console.log('  - Is Development:', isDevelopment);
         // Check if origin is in allowed list
@@ -156,7 +150,7 @@ const corsOptions = {
         else {
             console.log('🚫 CORS blocked origin:', origin);
             console.log('✅ Allowed origins:', allowedOrigins);
-            console.log('🌍 Environment:', process.env.NODE_ENV || 'production');
+            console.log('🌍 Environment:', process.env.NODE_ENV || 'development');
             callback(new Error(`Not allowed by CORS - ${isDevelopment ? 'Development' : 'Production'} origins only`));
         }
     },
@@ -180,17 +174,17 @@ app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../
 app.use('/api-docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
 // Health check endpoint
 app.get('/health', (req, res) => {
-    const isDevelopment = process.env.NODE_ENV === 'development';
     res.status(200).json({
         status: 'OK',
         message: `Akazuba Backend - ${isDevelopment ? 'Development' : 'Production'} Ready`,
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'production',
+        environment: process.env.NODE_ENV || 'development',
         database: 'connected',
         cors: isDevelopment ? 'development-allowed' : 'production-only',
         version: '2.0.3',
         corsEnabled: true,
-        developmentMode: isDevelopment
+        developmentMode: isDevelopment,
+        jwtSecret: process.env.JWT_SECRET ? '✅ Configured' : '❌ Missing'
     });
 });
 // CORS test endpoint

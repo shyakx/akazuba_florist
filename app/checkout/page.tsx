@@ -28,7 +28,7 @@ const CheckoutPage = () => {
 
   // Calculate totals
   const subtotal = state.items.reduce((total, item) => total + ((item.product?.price || 0) * item.quantity), 0)
-  const deliveryFee = formData.customerCity === 'Kigali' ? 2000 : 5000
+  const deliveryFee = 0  // Free delivery everywhere
   const totalAmount = subtotal + deliveryFee
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -87,6 +87,12 @@ const CheckoutPage = () => {
     setIsSubmitting(true)
 
     try {
+      // Validate payment proof
+      if (!paymentProof) {
+        toast.error('Please upload a payment proof')
+        return
+      }
+
       // Create FormData for file upload
       const orderFormData = new FormData()
       
@@ -94,10 +100,10 @@ const CheckoutPage = () => {
       orderFormData.append('orderData', JSON.stringify({
         ...formData,
         items: state.items.map(item => ({
-          productId: item.id,
+          productId: item.productId,
+          name: item.product?.name || 'Product',
           quantity: item.quantity,
-          price: item.product?.price || 0,
-          subtotal: (item.product?.price || 0) * item.quantity
+          price: item.product?.price || 0
         })),
         subtotal,
         deliveryFee,
@@ -122,17 +128,18 @@ const CheckoutPage = () => {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create order')
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to create order')
       }
 
       const result = await response.json()
       
-      toast.success(`Order created successfully! Order #${result.order.orderNumber}`)
-    clearCart()
+      toast.success(`Order created successfully! Order #${result.data?.orderNumber || result.orderNumber}`)
+      clearCart()
       router.push(`/dashboard`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Order creation error:', error)
-      toast.error('Failed to create order. Please try again.')
+      toast.error(error.message || 'Failed to create order. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
@@ -191,8 +198,8 @@ const CheckoutPage = () => {
                     </div>
                     <div className="flex justify-between text-gray-600">
                       <span>Delivery Fee</span>
-                      <span>RWF {deliveryFee.toLocaleString()}</span>
-      </div>
+                      <span className="text-green-600 font-semibold">Free</span>
+                    </div>
                     <div className="flex justify-between text-lg font-bold text-gray-900 border-t border-gray-200 pt-2">
                       <span>Total</span>
                       <span>RWF {totalAmount.toLocaleString()}</span>
@@ -269,8 +276,8 @@ const CheckoutPage = () => {
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                     >
-                      <option value="Kigali">Kigali (RWF 2,000 delivery)</option>
-                      <option value="Other">Other Cities (RWF 5,000 delivery)</option>
+                      <option value="Kigali">Kigali (Free delivery)</option>
+                      <option value="Other">Other Cities (Free delivery)</option>
                     </select>
                   </div>
                     </div>

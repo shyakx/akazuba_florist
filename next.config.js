@@ -19,9 +19,6 @@ const nextConfig = {
   },
   experimental: {
     optimizePackageImports: ['@headlessui/react', '@heroicons/react', 'lucide-react'],
-    // Reduce memory usage during build
-    workerThreads: false,
-    cpus: 1,
   },
   // Disable static optimization to avoid SSR issues
   // Suppress dynamic route warnings during build

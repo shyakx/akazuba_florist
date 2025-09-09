@@ -12,6 +12,7 @@ const CategoriesPage = () => {
   const { products } = useProducts()
   const [categoryProductCounts, setCategoryProductCounts] = useState<Record<string, number>>({})
 
+
   // Calculate product counts for each category
   useEffect(() => {
     if (products && products.length > 0) {

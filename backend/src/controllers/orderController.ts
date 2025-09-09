@@ -2,6 +2,7 @@
 import { Request, Response } from 'express'
 import { PrismaClient } from '@prisma/client'
 import { smsService } from '../utils/smsService'
+import { emailService } from '../utils/emailService'
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
@@ -44,12 +45,9 @@ const generateOrderNumber = async (): Promise<string> => {
   return orderNumber
 }
 
-// Calculate delivery fee
+// Calculate delivery fee - FREE DELIVERY EVERYWHERE
 const calculateDeliveryFee = (city: string, subtotal: number): number => {
-  if (city === 'Kigali') {
-    return subtotal >= 50000 ? 0 : 2000  // Free delivery for orders over RWF 50,000
-  }
-  return 5000  // Other provinces
+  return 0  // Free delivery everywhere
 }
 
 // Create new order with payment proof
@@ -178,14 +176,14 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             orderId: order.id,
             productId: item.productId,
             productName: item.name,
-            productImage: item.image,
-            productSku: item.sku,
+            productImage: item.image || '',
+            productSku: item.sku || '',
             quantity: parseInt(item.quantity),
             unitPrice: parseFloat(item.price),
             totalPrice: parseFloat(item.price) * parseInt(item.quantity),
-            color: item.color,
-            type: item.type
-          } as any
+            color: item.color || 'Default',
+            type: item.type || 'Standard'
+          }
         })
       )
     )
@@ -196,11 +194,45 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
             id: crypto.randomUUID(),
             orderId: order.id,
             proofImage: req.file.filename
-          } as any
+          }
         })
 
-    // Send admin notification
-    await smsService.sendOrderNotification(orderNumber, customerName, totalAmount)
+    // Send admin notifications (SMS and Email) - Don't block order creation if these fail
+    try {
+      await smsService.sendOrderNotification(orderNumber, customerName, totalAmount)
+    } catch (smsError) {
+      console.error('SMS notification failed:', smsError)
+    }
+    
+    // Send email notification to admin - Don't block order creation if this fails
+    try {
+      const orderNotificationData = {
+        orderNumber,
+        customerName,
+        customerEmail,
+        customerPhone,
+        customerAddress,
+        customerCity,
+        totalAmount,
+        items: items.map((item: any) => ({
+          name: item.name,
+          quantity: parseInt(item.quantity),
+          price: parseFloat(item.price),
+          image: item.image
+        })),
+        paymentMethod,
+        notes,
+        createdAt: order.createdAt.toISOString(),
+        paymentProof: {
+          filename: paymentProof.proofImage,
+          uploadedAt: paymentProof.uploadedAt.toISOString()
+        }
+      }
+      
+      await emailService.sendOrderNotification(orderNotificationData)
+    } catch (emailError) {
+      console.error('Email notification failed:', emailError)
+    }
 
     res.status(201).json({
       success: true,
@@ -366,6 +398,12 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     const { id } = req.params
     const { status, adminNotes } = req.body
 
+    // Get the order with customer details before updating
+    const existingOrder = await prisma.orders.findUnique({
+      where: { id },
+      select: { customerEmail: true, orderNumber: true }
+    })
+
     const order = await prisma.orders.update({
       where: { id },
       data: {
@@ -374,6 +412,26 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
         updatedAt: new Date()
       }
     })
+
+    // Send email notification to customer about status update - Don't block if this fails
+    if (existingOrder?.customerEmail) {
+      try {
+        await emailService.sendOrderStatusUpdate(
+          existingOrder.orderNumber,
+          existingOrder.customerEmail,
+          status
+        )
+      } catch (emailError) {
+        console.error('Status update email failed:', emailError)
+      }
+    }
+
+    // Send SMS notification to admin - Don't block if this fails
+    try {
+      await smsService.sendStatusUpdateNotification(existingOrder?.orderNumber || '', status)
+    } catch (smsError) {
+      console.error('Status update SMS failed:', smsError)
+    }
 
     res.json({
       success: true,

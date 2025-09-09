@@ -2,11 +2,16 @@
 
 import React from 'react'
 import { useProducts } from '@/contexts/ProductsContext'
+import { useCart } from '@/contexts/CartContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 import ProductsGrid from '@/components/ProductsGrid'
 import Footer from '@/components/Footer'
 
 const ProductsPage = () => {
   const { products, isLoading } = useProducts()
+  const { addToCart } = useCart()
+  const { addToWishlist } = useWishlist()
+
 
   if (isLoading) {
   return (
@@ -24,14 +29,8 @@ const ProductsPage = () => {
       <ProductsGrid
         products={products || []}
         title="Our Complete Collection"
-        onAddToCart={(product) => {
-          // TODO: Connect to existing cart context
-          console.log('Add to cart:', product.name)
-        }}
-        onAddToWishlist={(product) => {
-          // TODO: Connect to existing wishlist context
-          console.log('Add to wishlist:', product.name)
-        }}
+        onAddToCart={addToCart}
+        onAddToWishlist={addToWishlist}
       />
       <Footer />
     </>

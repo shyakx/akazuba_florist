@@ -9,6 +9,7 @@ import Footer from '@/components/Footer'
 const CartPage = () => {
   const { state, updateQuantity, removeFromCart } = useCart()
   
+  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', {
       style: 'currency',
@@ -17,8 +18,9 @@ const CartPage = () => {
     }).format(price)
   }
   
-  const deliveryFee = state.total >= 50000 ? 0 : 2000
+  const deliveryFee = 0  // Free delivery everywhere
   const total = state.total + deliveryFee
+  
   
   if (state.items.length === 0) {
     return (
@@ -94,7 +96,7 @@ const CartPage = () => {
                       {/* Product Info */}
                       <div className="flex-1">
                         <h3 className="text-lg font-semibold text-gray-900">{item.product?.name || 'Product'}</h3>
-                        <p className="text-gray-600 capitalize">{item.product?.category?.name || 'Category'}</p>
+                        <p className="text-gray-600 capitalize">{item.product?.categoryName || 'Category'}</p>
                         <p className="text-xl font-bold text-pink-600">
                           {formatPrice(item.product?.price || 0)}
                         </p>
@@ -154,7 +156,7 @@ const CartPage = () => {
                   
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery Fee</span>
-                    <span>{deliveryFee === 0 ? 'Free' : formatPrice(deliveryFee)}</span>
+                    <span className="text-green-600 font-semibold">Free</span>
                   </div>
                   
                   <div className="border-t border-gray-200 pt-4">
@@ -172,11 +174,9 @@ const CartPage = () => {
                   Proceed to Checkout
                 </Link>
                 
-                {deliveryFee === 0 && (
-                  <p className="text-sm text-green-600 text-center mt-2">
-                    🎉 Free delivery on orders over RWF 50,000!
-                  </p>
-                )}
+                <p className="text-sm text-green-600 text-center mt-2">
+                  🎉 Free delivery on all orders!
+                </p>
               </div>
             </div>
           </div>

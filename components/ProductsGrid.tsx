@@ -22,6 +22,7 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
+
   // Filter products
   const filteredProducts = useMemo(() => {
     let filtered = [...products]

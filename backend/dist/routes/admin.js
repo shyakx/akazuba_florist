@@ -333,7 +333,7 @@ router.get('/orders', async (req, res) => {
             id: orderItem.id,
             orderNumber: orderItem.orderNumber,
             customerName: orderItem.users ? `${orderItem.users.firstName} ${orderItem.users.lastName}` : 'Guest User',
-            customerEmail: orderItem.users?.email || 'guest@akazubaflorist.com',
+            customerEmail: orderItem.users?.email || 'guest.akazubaflorist@gmail.com',
             status: orderItem.status,
             subtotal: orderItem.subtotal,
             taxAmount: 0, // Not in current schema
@@ -386,7 +386,8 @@ router.get('/orders', async (req, res) => {
 router.get('/products', async (req, res) => {
     try {
         const products = await prisma.product.findMany({
-            include: { category: true
+            include: {
+                category: true
             }
         });
         const formattedProducts = products.map(products => ({
@@ -498,11 +499,14 @@ router.get('/wishlists', async (req, res) => {
 router.get('/dashboard/stats', async (req, res) => {
     try {
         // Get real counts from database
-        const [totalOrders, totalProducts, totalCustomers, lowStockProducts] = await Promise.all([
+        const [totalOrders, totalProducts, totalCustomers, lowStockProducts, totalWishlistItems, totalCartItems, activeCarts] = await Promise.all([
             prisma.orders.count(),
             prisma.product.count(),
             prisma.user.count({ where: { role: 'CUSTOMER' } }),
-            prisma.product.count({ where: { stockQuantity: { lte: 10 } } })
+            prisma.product.count({ where: { stockQuantity: { lte: 10 } } }),
+            prisma.wishlist.count(),
+            prisma.cart_items.count(),
+            prisma.cart.count()
         ]);
         // Get new orders (orders created in the last 7 days)
         const sevenDaysAgo = new Date();
@@ -521,12 +525,16 @@ router.get('/dashboard/stats', async (req, res) => {
             }
         });
         const stats = {
+            totalOrders,
             newOrders,
             totalProducts,
             totalCustomers,
             lowStockProducts,
             totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
-            averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0
+            averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0,
+            totalWishlistItems,
+            totalCartItems,
+            activeCarts
         };
         res.json({
             success: true,
@@ -1156,7 +1164,7 @@ router.get('/settings', auth_1.authenticateToken, async (req, res) => {
             storeAddress: 'Kigali, Rwanda',
             minOrderAmount: 5000,
             deliveryFee: 1000,
-            freeDeliveryThreshold: 50000,
+            freeDeliveryThreshold: 0, // Free delivery everywhere
             businessHours: '8:00 AM - 6:00 PM',
             currency: 'RWF',
             taxRate: 0.18,
@@ -1181,16 +1189,82 @@ router.get('/settings', auth_1.authenticateToken, async (req, res) => {
 router.put('/settings', auth_1.authenticateToken, async (req, res) => {
     try {
         const settings = req.body;
-        // Validate required fields
+        // Handle content manager data
+        if (settings.contentManager) {
+            const contentData = settings.contentManager;
+            // Save each content section to the settings table
+            const contentSections = [
+                { key: 'content_general', value: JSON.stringify(contentData.general), description: 'General settings' },
+                { key: 'content_payment', value: JSON.stringify(contentData.payment), description: 'Payment settings' },
+                { key: 'content_hero', value: JSON.stringify(contentData.hero), description: 'Hero section content' },
+                { key: 'content_about', value: JSON.stringify(contentData.about), description: 'About section content' },
+                { key: 'content_social', value: JSON.stringify(contentData.social), description: 'Social media settings' },
+                { key: 'content_about_page', value: JSON.stringify(contentData.aboutPage), description: 'About page content' }
+            ];
+            // Upsert each setting
+            for (const section of contentSections) {
+                await prisma.settings.upsert({
+                    where: { key: section.key },
+                    update: {
+                        value: section.value,
+                        description: section.description,
+                        updatedAt: new Date()
+                    },
+                    create: {
+                        id: `setting_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                        key: section.key,
+                        value: section.value,
+                        description: section.description,
+                        updatedAt: new Date()
+                    }
+                });
+            }
+            console.log('Content manager data saved successfully');
+            return res.json({
+                success: true,
+                message: 'Content saved successfully',
+                data: contentData
+            });
+        }
+        // Handle regular settings (legacy support)
         if (!settings.storeName || !settings.storeEmail) {
             return res.status(400).json({
                 success: false,
                 message: 'Store name and email are required'
             });
         }
-        // In a real application, you would save settings to the database
-        // For now, we'll just return success
-        console.log('Settings updated:', settings);
+        // Save regular settings to database
+        const regularSettings = [
+            { key: 'store_name', value: settings.storeName, description: 'Store name' },
+            { key: 'store_email', value: settings.storeEmail, description: 'Store email' },
+            { key: 'store_phone', value: settings.storePhone || '', description: 'Store phone' },
+            { key: 'store_address', value: settings.storeAddress || '', description: 'Store address' },
+            { key: 'min_order_amount', value: settings.minOrderAmount?.toString() || '5000', description: 'Minimum order amount' },
+            { key: 'delivery_fee', value: settings.deliveryFee?.toString() || '1000', description: 'Delivery fee' },
+            { key: 'free_delivery_threshold', value: settings.freeDeliveryThreshold?.toString() || '0', description: 'Free delivery threshold (0 = free everywhere)' },
+            { key: 'business_hours', value: settings.businessHours || '8:00 AM - 6:00 PM', description: 'Business hours' },
+            { key: 'currency', value: settings.currency || 'RWF', description: 'Currency' },
+            { key: 'tax_rate', value: settings.taxRate?.toString() || '0.18', description: 'Tax rate' }
+        ];
+        // Upsert each setting
+        for (const setting of regularSettings) {
+            await prisma.settings.upsert({
+                where: { key: setting.key },
+                update: {
+                    value: setting.value,
+                    description: setting.description,
+                    updatedAt: new Date()
+                },
+                create: {
+                    id: `setting_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    key: setting.key,
+                    value: setting.value,
+                    description: setting.description,
+                    updatedAt: new Date()
+                }
+            });
+        }
+        console.log('Settings updated successfully:', settings);
         res.json({
             success: true,
             message: 'Settings updated successfully',
@@ -1258,7 +1332,7 @@ router.post('/export/:type', async (req, res) => {
                     orderItem.id,
                     orderItem.orderNumber || `ORD-${orderItem.id.slice(-6)}`,
                     orderItem.users ? `${orderItem.users.firstName} ${orderItem.users.lastName}` : 'Guest User',
-                    orderItem.users?.email || 'guest@akazubaflorist.com',
+                    orderItem.users?.email || 'guest.akazubaflorist@gmail.com',
                     orderItem.status,
                     orderItem.totalAmount,
                     orderItem.paymentMethod,

@@ -11,7 +11,8 @@ import { useAuth } from '@/contexts/RealAuthContext'
 
 export default function HomePage() {
   const { products, isLoading } = useProducts()
-  const { isAuthenticated, logout, forceClearAuth, resetToFirstTime } = useAuth()
+  const { isAuthenticated } = useAuth()
+
 
   // Get featured products
   const featuredProducts = products?.filter(p => p.isFeatured).slice(0, 4) || []
@@ -20,34 +21,9 @@ export default function HomePage() {
   const flowerCount = products?.filter(p => p.categoryName === 'Flowers').length || 0
   const perfumeCount = products?.filter(p => p.categoryName === 'Perfumes').length || 0
 
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Development Tools - Only show in development */}
-      {process.env.NODE_ENV === 'development' && isAuthenticated && (
-        <div className="fixed top-4 right-4 z-50 bg-yellow-100 border border-yellow-300 rounded-lg p-3 shadow-lg">
-          <div className="text-xs text-yellow-800 mb-2">🧪 Dev Tools</div>
-          <div className="space-y-2">
-            <button
-              onClick={logout}
-              className="block w-full bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600 transition-colors"
-            >
-              Logout
-            </button>
-            <button
-              onClick={forceClearAuth}
-              className="block w-full bg-orange-500 text-white text-xs px-3 py-1 rounded hover:bg-orange-600 transition-colors"
-            >
-              Force Clear Auth
-            </button>
-            <button
-              onClick={resetToFirstTime}
-              className="block w-full bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 transition-colors"
-            >
-              Reset to First Time
-            </button>
-          </div>
-        </div>
-      )}
 
 
 

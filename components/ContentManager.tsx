@@ -32,7 +32,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
     momoAccountName: 'Umwali Diane',
     bkAccountNumber: '100161182448',
     bkAccountName: 'Umwali Diane',
-    freeDeliveryThreshold: '50000',
+    freeDeliveryThreshold: '0', // Free delivery everywhere
     deliveryFee: '2000'
   })
 

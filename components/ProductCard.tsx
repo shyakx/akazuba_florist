@@ -9,12 +9,14 @@ interface ProductCardProps {
   product: Product
   onAddToCart?: (product: Product) => void
   onAddToWishlist?: (product: Product) => void
+  isAddingToCart?: boolean
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
-  onAddToWishlist
+  onAddToWishlist,
+  isAddingToCart = false
 }) => {
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('en-RW', {
@@ -78,11 +80,20 @@ const formatPrice = (price: number) => {
         <div className="flex gap-2">
           <button
             onClick={() => onAddToCart?.(product)}
-            disabled={product.stockQuantity === 0}
+            disabled={product.stockQuantity === 0 || isAddingToCart}
             className="flex-1 bg-pink-600 hover:bg-pink-700 disabled:bg-gray-300 text-white py-2 px-3 rounded text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2"
           >
-            <ShoppingCart className="w-4 h-4" />
-            {product.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+            {isAddingToCart ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Adding...
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="w-4 h-4" />
+                {product.stockQuantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+              </>
+            )}
           </button>
           
           <button

@@ -110,7 +110,7 @@ DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0
 
 ### Customer Experience
 - **Same Day Delivery**: Available in Kigali and surrounding areas
-- **Free Delivery**: On orders above RWF 50,000
+- **Free Delivery**: On all orders
 - **Customer Support**: 24/7 support via phone and email
 - **Returns Policy**: 7-day return policy for unused items
 

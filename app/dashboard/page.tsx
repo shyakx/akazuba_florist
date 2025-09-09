@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/RealAuthContext'
+import { useCart } from '@/contexts/CartContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 import { useRouter } from 'next/navigation'
 import { 
   User, 
@@ -38,12 +40,20 @@ interface Order {
 }
 
 const DashboardPage = () => {
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, isAuthenticated, isInitialized, logout } = useAuth()
+  const { state: cartState } = useCart()
+  const { items: wishlistItems } = useWishlist()
   const router = useRouter()
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
+
   useEffect(() => {
+    // Wait for authentication to be initialized before checking auth status
+    if (!isInitialized) {
+      return
+    }
+
     if (!isAuthenticated) {
       router.push('/unified-login')
       return
@@ -79,7 +89,7 @@ const DashboardPage = () => {
     }
 
     fetchRecentOrders()
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, isInitialized, router])
 
   const handleLogout = async () => {
     try {
@@ -127,6 +137,18 @@ const DashboardPage = () => {
 
   if (!isAuthenticated) {
     return null
+  }
+
+  // Show loading while authentication is initializing
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Initializing authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -336,7 +358,7 @@ const DashboardPage = () => {
                 </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white rounded-xl shadow-sm p-6 text-center">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Package className="w-6 h-6 text-blue-600" />
@@ -348,16 +370,28 @@ const DashboardPage = () => {
                 </div>
                 
                 <div className="bg-white rounded-xl shadow-sm p-6 text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ShoppingBag className="w-6 h-6 text-green-600" />
+                    </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {cartState.items.length}
+                  </h3>
+                  <p className="text-gray-600">Cart Items</p>
+                    </div>
+                
+                <div className="bg-white rounded-xl shadow-sm p-6 text-center">
                   <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Heart className="w-6 h-6 text-pink-600" />
                     </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">0</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {wishlistItems.length}
+                  </h3>
                   <p className="text-gray-600">Wishlist Items</p>
                     </div>
                 
                 <div className="bg-white rounded-xl shadow-sm p-6 text-center">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="w-6 h-6 text-green-600" />
+                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-6 h-6 text-yellow-600" />
                     </div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">4.8</h3>
                   <p className="text-gray-600">Average Rating</p>

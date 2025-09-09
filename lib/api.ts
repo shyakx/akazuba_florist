@@ -414,7 +414,7 @@ export const cartAPI = {
 export const ordersAPI = {
   // Get user orders
   getUserOrders: async (): Promise<ApiResponse<Order[]>> => {
-    return apiRequest<Order[]>('/orders')
+    return apiRequest<Order[]>('/orders/my-orders')
   },
 
   // Create order

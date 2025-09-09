@@ -135,7 +135,7 @@ const Header = () => {
     }
   }, [isProfileDropdownOpen])
 
-  const cartItemCount = cartState.itemCount
+  const cartItemCount = cartState.items.length // Show unique items, not total quantity
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -157,7 +157,7 @@ const Header = () => {
             </a>
           </div>
           <div className="hidden sm:flex items-center space-x-4">
-            <span>🚚 Free delivery in Kigali</span>
+            <span>🚚 Free delivery everywhere</span>
             <span>🌸 Fresh flowers daily</span>
           </div>
         </div>

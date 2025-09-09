@@ -149,7 +149,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const refreshCart = async () => {
     // Early return if not authenticated or no user
     if (!isAuthenticated || !user) {
-      console.log('Cart refresh skipped - user not authenticated')
       return
     }
     
@@ -159,7 +158,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Check if we have a valid token before making the API call
       const token = localStorage.getItem('accessToken')
       if (!token) {
-        console.log('Cart refresh skipped - no access token')
         dispatch({ type: 'LOAD_CART', payload: [] })
         return
       }
@@ -167,8 +165,17 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await cartAPI.getCart()
       
       if (response.success && response.data) {
-        const cartItems = response.data.cartItems || []
-        dispatch({ type: 'LOAD_CART', payload: cartItems })
+        // Backend uses cart_items (snake_case), frontend expects cartItems (camelCase)
+        const cartData = response.data as any
+        const cartItems = cartData.cart_items || cartData.cartItems || []
+        
+        // Transform backend data to match frontend expectations
+        const transformedItems = cartItems.map((item: any) => ({
+          ...item,
+          product: item.products || item.product // Backend returns 'products', frontend expects 'product'
+        }))
+        
+        dispatch({ type: 'LOAD_CART', payload: transformedItems })
       } else {
         dispatch({ type: 'LOAD_CART', payload: [] })
       }
@@ -185,39 +192,50 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   const addToCart = async (product: Product) => {
-    console.log('🛒 Add to cart clicked for product:', product.name, 'ID:', product.id)
-    console.log('🛒 User authenticated:', isAuthenticated, 'User:', user?.email)
-    
     if (!isAuthenticated) {
-      console.log('❌ User not authenticated, redirecting to login')
       toast.error('Please sign in to add items to cart')
       router.push('/unified-login')
       return
     }
     
+    // Check if product is in stock
+    if (product.stockQuantity === 0) {
+      toast.error('This product is currently out of stock')
+      return
+    }
+    
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
-      console.log('🛒 Making API call to add item to cart...')
-      
       // Use the product ID directly since backend mapping is unreliable
       const response = await cartAPI.addItem({
         productId: product.id.toString(),
         quantity: 1
       })
       
-      console.log('🛒 Cart API response:', response)
-      
       if (response.success && response.data) {
-        dispatch({ type: 'ADD_ITEM', payload: response.data })
-        toast.success(`${product.name} added to cart!`)
-        console.log('✅ Item successfully added to cart')
+        // Refresh the entire cart to ensure consistency
+        await refreshCart()
+        toast.success(`✅ ${product.name} added to cart!`, {
+          duration: 3000,
+          icon: '🛒',
+        })
       } else {
-        console.log('❌ Failed to add item to cart:', response.message)
-        toast.error('Failed to add item to cart')
+        toast.error(response.message || 'Failed to add item to cart')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error adding to cart:', error)
-      toast.error('Failed to add item to cart')
+      
+      // Provide more specific error messages
+      if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+        toast.error('Please sign in to add items to cart')
+        router.push('/unified-login')
+      } else if (error.message?.includes('404')) {
+        toast.error('Product not found')
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        toast.error('Network error. Please check your connection and try again.')
+      } else {
+        toast.error('Failed to add item to cart. Please try again.')
+      }
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
     }
@@ -231,7 +249,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await cartAPI.removeItem(itemId)
       
       if (response.success) {
-        dispatch({ type: 'REMOVE_ITEM', payload: itemId })
+        // Refresh the entire cart to ensure consistency
+        await refreshCart()
         toast.success('Item removed from cart!')
       } else {
         toast.error('Failed to remove item from cart')
@@ -257,7 +276,8 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await cartAPI.updateItem(itemId, { quantity })
       
       if (response.success && response.data) {
-        dispatch({ type: 'UPDATE_ITEM', payload: response.data })
+        // Refresh the entire cart to ensure consistency
+        await refreshCart()
         toast.success('Cart updated!')
     } else {
         toast.error('Failed to update cart')
@@ -278,8 +298,9 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await cartAPI.clearCart()
       
       if (response.success) {
-    dispatch({ type: 'CLEAR_CART' })
-    toast.success('Cart cleared!')
+        // Refresh the entire cart to ensure consistency
+        await refreshCart()
+        toast.success('Cart cleared!')
       } else {
         toast.error('Failed to clear cart')
       }

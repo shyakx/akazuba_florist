@@ -10,7 +10,7 @@ const client_1 = require("@prisma/client");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
 // Public routes
-router.post('/', orderController_1.createOrder);
+router.post('/', auth_1.verifyToken, orderController_1.createOrder);
 router.post('/:orderId/payment-proof', orderController_1.uploadPaymentProof);
 // Customer routes (protected)
 router.get('/my-orders', auth_1.verifyToken, async (req, res) => {

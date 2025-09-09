@@ -43,7 +43,6 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const loadProducts = useCallback(async () => {
     if (isLoadingRef.current) {
-      console.log('🚫 ProductsContext: Load already in progress, skipping...')
       return
     }
 
@@ -51,11 +50,8 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       isLoadingRef.current = true
       setIsLoading(true)
       setError(null)
-      console.log('🔄 Loading products from database...')
-      
       const productsData = await databaseAPI.getAllProducts()
       setProducts(productsData)
-      console.log('✅ Loaded', productsData.length, 'products from database')
     } catch (err) {
       logger.error('Failed to load products', 'PRODUCTS_CONTEXT', { error: err instanceof Error ? err.message : 'Unknown error' }, err instanceof Error ? err : undefined)
       setError(err instanceof Error ? err.message : 'Failed to load products')
@@ -117,11 +113,8 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Add product (Admin only)
   const addProduct = async (product: Omit<Product, 'id'>): Promise<Product | null> => {
     try {
-      console.log('➕ Adding product:', product.name)
-      
       const newProduct = await databaseAPI.createProduct(product)
       if (newProduct) {
-        console.log('✅ Product added to database successfully:', newProduct.name)
         await loadProducts() // Refresh from database
         return newProduct
       }
@@ -137,11 +130,8 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Update product (Admin only)
   const updateProduct = async (id: string, updates: Partial<Product>): Promise<Product | null> => {
     try {
-      console.log('✏️ Updating product:', id)
-      
       const updatedProduct = await databaseAPI.updateProduct(id, updates)
       if (updatedProduct) {
-        console.log('✅ Product updated in database successfully:', updatedProduct.name)
         await loadProducts() // Refresh from database
         return updatedProduct
       }
@@ -157,11 +147,8 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Delete product (Admin only)
   const deleteProduct = async (id: string): Promise<boolean> => {
     try {
-      console.log('🗑️ Deleting product:', id)
-      
       const success = await databaseAPI.deleteProduct(id)
       if (success) {
-        console.log('✅ Product deleted from database successfully')
         await loadProducts() // Refresh from database
         return true
       }
@@ -182,35 +169,28 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   useEffect(() => {
     // Skip loading on admin pages completely
     if (pathname?.startsWith('/admin')) {
-      console.log('🚫 ProductsContext: Skipping product load on admin page:', pathname)
       return
     }
     
     // Skip loading on auth pages
     if (pathname && ['/register', '/unified-login'].includes(pathname)) {
-      console.log('🚫 ProductsContext: Skipping product load on auth page:', pathname)
       return
     }
     
     // Only load if products are empty
     if (products.length === 0) {
-      console.log('🚀 ProductsContext: Initial load triggered (products empty)')
       loadProducts()
-    } else {
-      console.log('🚫 ProductsContext: Products already loaded, skipping initial load')
     }
   }, [pathname, products.length, loadProducts]) // Depend on pathname, products length, and loadProducts
 
   // Page focus refresh - only if not on admin pages
   useEffect(() => {
     if (pathname?.startsWith('/admin')) {
-      console.log('🚫 ProductsContext: Skipping focus refresh on admin page')
       return
     }
     
     const handleFocus = () => {
       if (products.length > 0) {
-        console.log('🔄 Page focused, refreshing products...')
         loadProducts()
       }
     }
@@ -222,13 +202,11 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Auto-refresh - only if not on admin pages
   useEffect(() => {
     if (pathname?.startsWith('/admin')) {
-      console.log('🚫 ProductsContext: Skipping auto-refresh on admin page')
       return
     }
     
     const interval = setInterval(() => {
       if (products.length > 0) {
-        console.log('🔄 Auto-refreshing products...')
         loadProducts()
       }
     }, 15 * 60 * 1000) // 15 minutes

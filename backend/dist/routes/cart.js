@@ -38,7 +38,9 @@ router.get('/', auth_1.verifyToken, async (req, res) => {
             // Create new cart if doesn't exist
             cart = await prisma.cart.create({
                 data: {
+                    id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     userId,
+                    updatedAt: new Date(),
                     cart_items: {
                         create: []
                     }
@@ -121,7 +123,11 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
         });
         if (!cart) {
             cart = await prisma.cart.create({
-                data: { userId }
+                data: {
+                    id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    userId,
+                    updatedAt: new Date()
+                }
             });
         }
         // Check if item already exists in cart
@@ -136,7 +142,10 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
             // Update quantity
             cartItem = await prisma.cart_items.update({
                 where: { id: existingItem.id },
-                data: { quantity: existingItem.quantity + quantity },
+                data: {
+                    quantity: existingItem.quantity + quantity,
+                    updatedAt: new Date()
+                },
                 include: { products: {
                         include: { category: true
                         }
@@ -148,9 +157,12 @@ router.post('/items', auth_1.verifyToken, async (req, res) => {
             // Add new item
             cartItem = await prisma.cart_items.create({
                 data: {
+                    id: `cart_item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     cartId: cart.id,
                     productId,
-                    quantity
+                    quantity,
+                    createdAt: new Date(),
+                    updatedAt: new Date()
                 },
                 include: { products: {
                         include: { category: true

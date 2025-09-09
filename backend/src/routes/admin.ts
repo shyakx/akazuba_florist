@@ -548,11 +548,14 @@ router.get('/wishlists', async (req, res) => {
 router.get('/dashboard/stats', async (req, res) => {
   try {
     // Get real counts from database
-    const [totalOrders, totalProducts, totalCustomers, lowStockProducts] = await Promise.all([
+    const [totalOrders, totalProducts, totalCustomers, lowStockProducts, totalWishlistItems, totalCartItems, activeCarts] = await Promise.all([
       prisma.orders.count(),
       prisma.product.count(),
       prisma.user.count({ where: { role: 'CUSTOMER' } }),
-      prisma.product.count({ where: { stockQuantity: { lte: 10 } } })
+      prisma.product.count({ where: { stockQuantity: { lte: 10 } } }),
+      prisma.wishlist.count(),
+      prisma.cart_items.count(),
+      prisma.cart.count()
     ])
 
     // Get new orders (orders created in the last 7 days)
@@ -581,7 +584,10 @@ router.get('/dashboard/stats', async (req, res) => {
       totalCustomers,
       lowStockProducts,
       totalRevenue: Number(totalRevenue._sum.totalAmount || 0),
-      averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0
+      averageOrderValue: totalOrders > 0 ? Number(totalRevenue._sum.totalAmount || 0) / totalOrders : 0,
+      totalWishlistItems,
+      totalCartItems,
+      activeCarts
     }
 
     res.json({
@@ -1266,7 +1272,7 @@ router.get('/settings', authenticateToken, async (req, res) => {
       storeAddress: 'Kigali, Rwanda',
       minOrderAmount: 5000,
       deliveryFee: 1000,
-      freeDeliveryThreshold: 50000,
+      freeDeliveryThreshold: 0, // Free delivery everywhere
       businessHours: '8:00 AM - 6:00 PM',
       currency: 'RWF',
       taxRate: 0.18,
@@ -1351,7 +1357,7 @@ router.put('/settings', authenticateToken, async (req, res) => {
       { key: 'store_address', value: settings.storeAddress || '', description: 'Store address' },
       { key: 'min_order_amount', value: settings.minOrderAmount?.toString() || '5000', description: 'Minimum order amount' },
       { key: 'delivery_fee', value: settings.deliveryFee?.toString() || '1000', description: 'Delivery fee' },
-      { key: 'free_delivery_threshold', value: settings.freeDeliveryThreshold?.toString() || '50000', description: 'Free delivery threshold' },
+      { key: 'free_delivery_threshold', value: settings.freeDeliveryThreshold?.toString() || '0', description: 'Free delivery threshold (0 = free everywhere)' },
       { key: 'business_hours', value: settings.businessHours || '8:00 AM - 6:00 PM', description: 'Business hours' },
       { key: 'currency', value: settings.currency || 'RWF', description: 'Currency' },
       { key: 'tax_rate', value: settings.taxRate?.toString() || '0.18', description: 'Tax rate' }

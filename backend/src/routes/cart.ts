@@ -152,7 +152,10 @@ router.post('/items', verifyToken, async (req, res) => {
       // Update quantity
       cartItem = await prisma.cart_items.update({
         where: { id: existingItem.id },
-        data: { quantity: existingItem.quantity + quantity },
+        data: { 
+          quantity: existingItem.quantity + quantity,
+          updatedAt: new Date()
+        },
         include: { products: {
             include: { category: true
             }
@@ -166,7 +169,9 @@ router.post('/items', verifyToken, async (req, res) => {
           id: `cart_item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           cartId: cart.id,
           productId,
-          quantity
+          quantity,
+          createdAt: new Date(),
+          updatedAt: new Date()
         } as any,
         include: { products: {
             include: { category: true

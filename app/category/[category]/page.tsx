@@ -2,6 +2,8 @@
 
 import React from 'react'
 import { useProducts } from '@/contexts/ProductsContext'
+import { useCart } from '@/contexts/CartContext'
+import { useWishlist } from '@/contexts/WishlistContext'
 import Footer from '@/components/Footer'
 import ProductCard from '@/components/ProductCard'
 import { flowerCategories, perfumeCategories, Category } from '@/data/categories'
@@ -10,6 +12,8 @@ import Link from 'next/link'
 
 const CategoryPage = ({ params }: { params: { category: string } }) => {
   const { products, isLoading } = useProducts()
+  const { addToCart } = useCart()
+  const { addToWishlist } = useWishlist()
   const category = params.category
   
   // Simple console log to verify component is working
@@ -201,7 +205,12 @@ const CategoryPage = ({ params }: { params: { category: string } }) => {
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard 
+              key={product.id} 
+              product={product}
+              onAddToCart={addToCart}
+              onAddToWishlist={addToWishlist}
+            />
           ))}
         </div>
 

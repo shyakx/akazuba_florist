@@ -9,7 +9,9 @@ import {
   Users, 
   TrendingUp,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Heart,
+  ShoppingBag
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -19,6 +21,9 @@ interface DashboardStats {
   orders: number
   revenue: number
   customers: number
+  totalWishlistItems: number
+  totalCartItems: number
+  activeCarts: number
 }
 
 
@@ -30,7 +35,10 @@ export default function AdminDashboard() {
     products: 0,
     orders: 0,
     revenue: 0,
-    customers: 0
+    customers: 0,
+    totalWishlistItems: 0,
+    totalCartItems: 0,
+    activeCarts: 0
   })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -67,7 +75,10 @@ export default function AdminDashboard() {
         products: statsData.products || 0,
         orders: statsData.orders || 0,
         revenue: statsData.revenue || 0,
-        customers: statsData.customers || 0
+        customers: statsData.customers || 0,
+        totalWishlistItems: statsData.totalWishlistItems || 0,
+        totalCartItems: statsData.totalCartItems || 0,
+        activeCarts: statsData.activeCarts || 0
       })
       
       console.log('✅ Dashboard data loaded successfully')
@@ -129,6 +140,27 @@ export default function AdminDashboard() {
       icon: DollarSign,
       color: 'bg-purple-500',
       link: '/admin/orders'
+    },
+    {
+      title: 'Customers',
+      value: stats.customers,
+      icon: Users,
+      color: 'bg-blue-500',
+      link: '/admin/customers'
+    },
+    {
+      title: 'Wishlist Items',
+      value: stats.totalWishlistItems,
+      icon: Heart,
+      color: 'bg-pink-500',
+      link: '/admin/customers'
+    },
+    {
+      title: 'Active Carts',
+      value: stats.activeCarts,
+      icon: ShoppingBag,
+      color: 'bg-orange-500',
+      link: '/admin/customers'
     }
   ]
 
@@ -148,7 +180,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {statCards.map((stat) => (
           <Link key={stat.title} href={stat.link} className="block">
             <div className="stat-card h-32">

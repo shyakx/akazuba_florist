@@ -11,13 +11,18 @@ const logger_1 = require("../utils/logger");
 const auth_1 = require("../middleware/auth");
 const prisma = new client_1.PrismaClient();
 // JWT Configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-2024-development';
+const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-2024-development-super-secure-key-for-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d';
 // Ensure JWT_SECRET is defined
 if (!JWT_SECRET) {
     throw new Error('JWT_SECRET environment variable is required');
 }
+// Log JWT configuration for debugging
+console.log('🔐 JWT Configuration:');
+console.log('  - JWT_SECRET:', JWT_SECRET ? '✅ Set' : '❌ Missing');
+console.log('  - JWT_EXPIRES_IN:', JWT_EXPIRES_IN);
+console.log('  - REFRESH_TOKEN_EXPIRES_IN:', REFRESH_TOKEN_EXPIRES_IN);
 // Generate JWT tokens
 const generateTokens = (userId, role) => {
     const accessToken = jsonwebtoken_1.default.sign({ userId, role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });

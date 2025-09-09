@@ -65,13 +65,11 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const refreshWishlist = async () => {
     // Early return if not in browser environment (SSR/SSG)
     if (typeof window === 'undefined') {
-      console.log('Wishlist refresh skipped - server-side rendering')
       return
     }
     
     // Early return if not authenticated or no user
     if (!user || !isAuthenticated) {
-      console.log('Wishlist refresh skipped - user not authenticated')
       return
     }
 
@@ -81,7 +79,6 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       // Check if we have a valid token before making the API call
       const token = localStorage.getItem('accessToken')
       if (!token) {
-        console.log('Wishlist refresh skipped - no access token')
         setItems([])
         return
       }
@@ -89,7 +86,12 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       const response = await wishlistAPI.getWishlist()
       
       if (response.success && response.data) {
-        setItems(response.data as WishlistItem[])
+        // Transform backend data to match frontend expectations
+        const transformedItems = (response.data as any[]).map((item: any) => ({
+          ...item,
+          product: item.products || item.product // Backend returns 'products', frontend expects 'product'
+        }))
+        setItems(transformedItems as WishlistItem[])
       } else {
         setItems([])
       }
@@ -102,12 +104,8 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   }
 
   const addToWishlist = async (product: any): Promise<boolean> => {
-    console.log('❤️ Add to wishlist clicked for product:', product.name, 'ID:', product.id)
-    console.log('❤️ User authenticated:', !!user, 'User:', user?.email)
-    
     // Early return if not in browser environment (SSR/SSG)
     if (typeof window === 'undefined') {
-      console.log('❌ Add to wishlist skipped - server-side rendering')
       return false
     }
     
@@ -115,24 +113,18 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       setIsLoading(true)
 
       if (!user) {
-        console.log('❌ User not authenticated for wishlist')
         toast.error('Please login to add items to your wishlist')
         return false
       }
 
-      console.log('❤️ Making API call to add item to wishlist...')
       // User mode - add to backend
       const response = await wishlistAPI.addToWishlist(product.id)
-      
-      console.log('❤️ Wishlist API response:', response)
       
       if (response.success) {
         await refreshWishlist()
         toast.success(`${product.name} added to wishlist!`)
-        console.log('✅ Item successfully added to wishlist')
         return true
       } else {
-        console.log('❌ Failed to add to wishlist:', response.message)
         toast.error(response.message || 'Failed to add to wishlist')
         return false
       }
@@ -148,7 +140,6 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const removeFromWishlist = async (productId: string): Promise<boolean> => {
     // Early return if not in browser environment (SSR/SSG)
     if (typeof window === 'undefined') {
-      console.log('❌ Remove from wishlist skipped - server-side rendering')
       return false
     }
     
@@ -182,7 +173,6 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
   const clearWishlist = async (): Promise<boolean> => {
     // Early return if not in browser environment (SSR/SSG)
     if (typeof window === 'undefined') {
-      console.log('❌ Clear wishlist skipped - server-side rendering')
       return false
     }
     

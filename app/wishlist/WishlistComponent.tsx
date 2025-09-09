@@ -12,6 +12,7 @@ const WishlistComponent = () => {
   const { items, removeFromWishlist, clearWishlist, isLoading } = useWishlist()
   const { addToCart } = useCart()
   
+  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-RW', {
       style: 'currency',

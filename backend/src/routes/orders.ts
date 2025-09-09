@@ -17,7 +17,7 @@ const router = express.Router()
 const prisma = new PrismaClient()
 
 // Public routes
-router.post('/', createOrder)
+router.post('/', verifyToken, createOrder)
 router.post('/:orderId/payment-proof', uploadPaymentProof)
 
 // Customer routes (protected)
