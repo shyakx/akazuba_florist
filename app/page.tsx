@@ -8,6 +8,7 @@ import { useProducts } from '@/contexts/ProductsContext'
 import { flowerCategories, perfumeCategories } from '@/data/categories'
 import Footer from '@/components/Footer'
 import { useAuth } from '@/contexts/RealAuthContext'
+import StructuredData from '@/components/StructuredData'
 
 export default function HomePage() {
   const { products, isLoading } = useProducts()
@@ -24,6 +25,61 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Structured Data for SEO */}
+      <StructuredData
+        type="LocalBusiness"
+        data={{
+          name: "Akazuba Florist",
+          description: "Rwanda's leading florist delivering fresh flowers, wedding bouquets, and floral arrangements in Kigali",
+          url: "https://akazubaflorist.com",
+          telephone: "+250784586110",
+          email: "info.akazubaflorist@gmail.com",
+          address: {
+            "@type": "PostalAddress",
+            "streetAddress": "Kigali",
+            "addressLocality": "Kigali",
+            "addressCountry": "RW"
+          },
+          openingHours: [
+            "Mo-Sa 08:00-20:00",
+            "Su 10:00-18:00"
+          ],
+          priceRange: "$$",
+          paymentAccepted: ["Mobile Money", "Bank Transfer", "Cash"],
+          currenciesAccepted: "RWF",
+          areaServed: {
+            "@type": "Country",
+            "name": "Rwanda"
+          },
+          serviceArea: {
+            "@type": "GeoCircle",
+            "geoMidpoint": {
+              "@type": "GeoCoordinates",
+              "latitude": -1.9441,
+              "longitude": 30.0619
+            },
+            "geoRadius": "50000"
+          }
+        }}
+      />
+      
+      <StructuredData
+        type="Organization"
+        data={{
+          name: "Akazuba Florist",
+          url: "https://akazubaflorist.com",
+          logo: "https://akazubaflorist.com/images/akazuba-logo.png",
+          sameAs: [
+            "https://www.instagram.com/akazuba_florists"
+          ],
+          contactPoint: {
+            "@type": "ContactPoint",
+            "telephone": "+250784586110",
+            "contactType": "customer service",
+            "availableLanguage": ["English", "Kinyarwanda", "French"]
+          }
+        }}
+      />
 
 
 
@@ -31,11 +87,11 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-gradient-to-br from-pink-50 to-green-50">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Beautiful Flowers &{' '}
+            Rwanda's #1 Florist - Beautiful Flowers &{' '}
             <span className="text-pink-600">Exquisite Perfumes</span>
           </h1>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Discover our carefully curated collection for every occasion
+            Kigali's premier florist delivering fresh flowers, wedding bouquets, and floral arrangements. Same-day delivery with secure MoMo & BK payment options.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
