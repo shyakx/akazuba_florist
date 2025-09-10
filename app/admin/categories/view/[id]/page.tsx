@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Edit, Trash2, Tag, Package, Calendar, Eye } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { flowerCategories, perfumeCategories } from '@/data/categories'
 
 interface Category {
   id: string
@@ -25,26 +26,34 @@ export default function CategoryViewPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadCategory = async () => {
+    const loadCategory = () => {
       try {
         setLoading(true)
-        const response = await fetch(`/api/admin/categories/public`)
-        if (!response.ok) throw new Error('Failed to fetch categories')
-
-        const result = await response.json()
-        if (result.success && result.data) {
-          const foundCategory = result.data.find((c: any) => c.id === categoryId)
-          if (foundCategory) {
-            setCategory(foundCategory)
-          } else {
-            throw new Error('Category not found')
-          }
+        
+        // Combine all categories
+        const allCategories = [...flowerCategories, ...perfumeCategories]
+        
+        // Find the specific category by ID
+        const foundCategory = allCategories.find(c => c.id === categoryId)
+        
+        if (foundCategory) {
+          setCategory({
+            id: foundCategory.id,
+            name: foundCategory.name,
+            description: foundCategory.description,
+            productCount: foundCategory.productCount,
+            status: 'active', // Static categories are always active
+            imageUrl: foundCategory.image,
+            createdAt: new Date().toISOString() // Default creation date
+          })
         } else {
-          throw new Error('Failed to fetch category data')
+          throw new Error('Category not found')
         }
       } catch (error) {
         console.error('Error loading category:', error)
         setCategory(null)
+        // Redirect to categories page if category not found
+        router.push('/admin/categories')
       } finally {
         setLoading(false)
       }

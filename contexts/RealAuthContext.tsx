@@ -137,7 +137,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Set cookies for middleware
         if (response.data.user.role) {
-          document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+          const isProduction = typeof window !== 'undefined' && typeof window.location !== 'undefined' && window.location.hostname !== 'localhost'
+          const roleCookieOptions = isProduction 
+            ? `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; secure`
+            : `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+          document.cookie = roleCookieOptions
+          console.log('🍪 User role cookie set (regular login):', response.data.user.role)
+          
+          // Verify cookie was set
+          setTimeout(() => {
+            const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+              const [key, value] = cookie.trim().split('=')
+              acc[key] = value
+              return acc
+            }, {} as Record<string, string>)
+            console.log('🍪 All cookies after setting userRole (regular login):', cookies)
+            console.log('🍪 userRole cookie value:', cookies.userRole)
+          }, 100)
         }
       } else {
         console.warn('❌ Token validation failed, but keeping user data if available')
@@ -152,7 +168,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.error('❌ Token validation error:', error)
       // Don't clear auth data on network errors - keep user logged in
       // Only clear if it's a clear authentication error
-      if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
+      if (error instanceof Error && (error.message?.includes('401') || error.message?.includes('unauthorized'))) {
         console.warn('❌ Authentication error, clearing auth data')
         clearAllAuthData()
       } else {
@@ -264,11 +280,37 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               : `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
             document.cookie = roleCookieOptions
             console.log('🍪 User role cookie set:', response.data.user.role)
-          }
+          
+          // Verify cookie was set
+          setTimeout(() => {
+            const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+              const [key, value] = cookie.trim().split('=')
+              acc[key] = value
+              return acc
+            }, {} as Record<string, string>)
+            console.log('🍪 All cookies after setting userRole:', cookies)
+            console.log('🍪 userRole cookie value:', cookies.userRole)
+          }, 100)
+        }
         }
         
-        // Force a delay to ensure cookies are set
-        await new Promise(resolve => setTimeout(resolve, 500))
+        // Force a delay to ensure cookies are set and processed by middleware
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Double-check that cookies are set
+        const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+          const [key, value] = cookie.trim().split('=')
+          acc[key] = value
+          return acc
+        }, {} as Record<string, string>)
+        
+        if (!cookies.userRole || cookies.userRole !== 'ADMIN') {
+          console.error('❌ userRole cookie not set correctly after admin login')
+          console.log('🍪 Current cookies:', cookies)
+          // Try setting the cookie again with a different approach
+          document.cookie = `userRole=ADMIN; path=/; max-age=86400; samesite=lax`
+          console.log('🔄 Retried setting userRole cookie')
+        }
         
         // Set visited flag
         localStorage.setItem('hasVisitedBefore', 'true')

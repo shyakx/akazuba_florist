@@ -32,7 +32,6 @@ export default function ProductViewPage() {
     const loadProduct = async () => {
       try {
         setLoading(true)
-        console.log('🔍 Loading product with ID:', productId)
         
         // Get the JWT token using the proper utility function
         const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
@@ -50,13 +49,10 @@ export default function ProductViewPage() {
         if (!response.ok) throw new Error('Failed to fetch products')
 
         const result = await response.json()
-        console.log('📊 API Response:', result)
         
         if (result.success && result.data && result.data.products) {
-          console.log('📦 Available products:', result.data.products.map((p: any) => ({ id: p.id, name: p.name })))
           
           const foundProduct = result.data.products.find((p: any) => p.id === productId)
-          console.log('🎯 Found product:', foundProduct)
           
           if (foundProduct) {
             setProduct(foundProduct)
@@ -107,7 +103,11 @@ export default function ProductViewPage() {
           }
         } else {
           const errorData = await response.json()
-          throw new Error(errorData.message || 'Failed to delete product')
+          if (errorData.backendAvailable === false) {
+            alert('❌ Backend server is not available. Please start the backend server to delete products.')
+          } else {
+            throw new Error(errorData.message || 'Failed to delete product')
+          }
         }
       } catch (error) {
         console.error('Error deleting product:', error)

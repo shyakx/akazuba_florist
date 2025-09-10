@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAdmin } from '@/contexts/AdminContext'
+import { getOrderPrimaryImage, getOrderProductNames, getOrderItemImage } from '@/lib/orderUtils'
 import { 
   ShoppingCart, 
   Search, 
@@ -20,77 +22,110 @@ import {
   DollarSign,
   Package,
   Star,
-  BarChart3
+  BarChart3,
+  Trash2,
+  ZoomIn
 } from 'lucide-react'
 
-interface Order {
-  id: string
-  orderNumber: string
-  customerName: string
-  customerEmail: string
-  customerPhone: string
-  totalAmount: number
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
-  paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded'
-  deliveryStatus: 'pending' | 'preparing' | 'out_for_delivery' | 'delivered'
-  items: any[]
-  itemsCount: number
-  createdAt: string
-  deliveryAddress: string
-  phoneNumber?: string
-  paymentMethod?: string
-  notes?: string
-}
+// Import Order type from orderUtils
+import type { Order } from '@/lib/orderUtils'
 
 export default function OrdersPage() {
   const router = useRouter()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { orders, isLoading, refreshOrders } = useAdmin()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'>('all')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showOrderModal, setShowOrderModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(12) // Limit items per page for memory optimization
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null)
+  const [showImageModal, setShowImageModal] = useState(false)
 
-  const fetchOrders = async () => {
-    try {
-      setIsLoading(true)
-      
-      // Get the JWT token using the proper utility function
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+  // Filter orders based on search and filters
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = filterStatus === 'all' || order.status === filterStatus
+    
+    return matchesSearch && matchesStatus
+  })
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex)
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, filterStatus])
+
+  // Handle ESC key for image modal
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && showImageModal) {
+        closeImageModal()
       }
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
+    }
+
+    if (showImageModal) {
+      document.addEventListener('keydown', handleKeyDown)
+      return () => document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [showImageModal])
+
+  // Delete order function
+  const handleDeleteOrder = async (orderId: string, orderNumber: string) => {
+    if (confirm(`Are you sure you want to delete order ${orderNumber}? This action cannot be undone.`)) {
+      try {
+        // Get the JWT token
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+        
+        const response = await fetch(`/api/admin/orders/${orderId}`, {
+          method: 'DELETE',
+          headers
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success) {
+            alert(`Order ${orderNumber} deleted successfully!`)
+            // Refresh the orders list
+            await refreshOrders()
+          } else {
+            throw new Error(result.message || 'Failed to delete order')
+          }
+        } else {
+          const errorData = await response.json()
+          throw new Error(errorData.message || 'Failed to delete order')
+        }
+      } catch (error) {
+        console.error('Error deleting order:', error)
+        alert(`Failed to delete order: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
-      
-      // Build query parameters
-      const params = new URLSearchParams()
-      if (searchTerm) params.append('search', searchTerm)
-      if (filterStatus !== 'all') params.append('status', filterStatus)
-      
-      const response = await fetch(`/api/admin/orders/public?${params.toString()}`, { headers })
-      if (!response.ok) throw new Error('Failed to fetch orders')
-      
-      const result = await response.json()
-      if (result.success) {
-        setOrders(result.data || [])
-      } else {
-        throw new Error('Failed to fetch orders')
-      }
-    } catch (error) {
-      console.error('Error fetching orders:', error)
-      // Fallback to empty array on error
-      setOrders([])
-    } finally {
-      setIsLoading(false)
     }
   }
 
-  useEffect(() => {
-    fetchOrders()
-  }, [searchTerm, filterStatus])
+  // Image zoom functions
+  const handleImageZoom = (imageUrl: string) => {
+    setZoomedImage(imageUrl)
+    setShowImageModal(true)
+  }
+
+  const closeImageModal = () => {
+    setShowImageModal(false)
+    setZoomedImage(null)
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,7 +138,8 @@ export default function OrdersPage() {
     }
   }
 
-  if (isLoading) {
+
+  if (isLoading.orders) {
     return (
       <div className="loading">
         <div className="spinner"></div>
@@ -135,7 +171,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">RWF {orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString() || '0'}</div>
+                  <div className="text-2xl font-bold">RWF {(orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0) || 0).toLocaleString()}</div>
                   <div className="text-sm text-green-100">Total Revenue</div>
                 </div>
               </div>
@@ -201,7 +237,7 @@ export default function OrdersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-green-600">RWF {orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0).toLocaleString() || '0'}</p>
+              <p className="text-2xl font-bold text-green-600">RWF {(orders?.reduce((sum, o) => sum + (o.totalAmount || 0), 0) || 0).toLocaleString()}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-green-600" />
@@ -291,13 +327,12 @@ export default function OrdersPage() {
               <option value="processing">Processing</option>
               <option value="shipped">Shipped</option>
               <option value="delivered">Delivered</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="cancelled">Canceled</option>
             </select>
             <button 
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
                 // TODO: Implement advanced filters
-                console.log('Open advanced filters')
               }}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -309,13 +344,40 @@ export default function OrdersPage() {
 
       {/* Orders Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(orders || []).map((order) => (
+        {paginatedOrders.map((order) => (
           <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
-            {/* Order Header */}
+            {/* Order Header with Product Image */}
             <div className="h-32 bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center relative">
-              <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                <ShoppingCart className="w-8 h-8 text-green-600" />
-              </div>
+              {(() => {
+                const primaryImage = getOrderPrimaryImage(order)
+                return primaryImage
+              })() ? (
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-lg overflow-hidden cursor-pointer group relative" onClick={() => handleImageZoom(getOrderPrimaryImage(order) ?? '')}>
+                  <img
+                    src={getOrderPrimaryImage(order) ?? ''}
+                    alt={getOrderProductNames(order)}
+                    className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                    loading="lazy"
+                    onError={(e) => {
+                      // Fallback to shopping cart icon if image fails to load
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                      const parent = target.parentElement
+                      if (parent) {
+                        parent.innerHTML = '<div class="w-full h-full flex items-center justify-center"><svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01"></path></svg></div>'
+                      }
+                    }}
+                  />
+                  {/* Zoom overlay */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                    <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  </div>
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                  <ShoppingCart className="w-8 h-8 text-green-600" />
+                </div>
+              )}
               <div className="absolute top-4 right-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                   {order.status}
@@ -329,6 +391,9 @@ export default function OrdersPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">{order.orderNumber}</h3>
                   <p className="text-sm text-gray-500">{order.customerName}</p>
+                  <p className="text-xs text-gray-400 mt-1 truncate" title={getOrderProductNames(order)}>
+                    {getOrderProductNames(order)}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-green-600">RWF {order.totalAmount?.toLocaleString() || '0'}</p>
@@ -395,12 +460,8 @@ export default function OrdersPage() {
                             })
                             
                             if (response.ok) {
-                              // Update local state
-                              setOrders(prev => prev.map(o => 
-                                o.id === order.id 
-                                  ? { ...o, status: 'delivered', deliveryStatus: 'delivered' }
-                                  : o
-                              ))
+                              // Refresh orders from AdminContext
+                              await refreshOrders()
                               alert('Order marked as completed!')
                             } else {
                               const errorData = await response.json()
@@ -440,12 +501,8 @@ export default function OrdersPage() {
                             })
                             
                             if (response.ok) {
-                              // Update local state
-                              setOrders(prev => prev.map(o => 
-                                o.id === order.id 
-                                  ? { ...o, deliveryStatus: newStatus.toLowerCase() as any }
-                                  : o
-                              ))
+                              // Refresh orders from AdminContext
+                              await refreshOrders()
                               alert('Delivery status updated!')
                             } else {
                               const errorData = await response.json()
@@ -462,6 +519,13 @@ export default function OrdersPage() {
                     >
                       <Truck className="w-4 h-4" />
                     </button>
+                    <button
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                      onClick={() => handleDeleteOrder(order.id, order.orderNumber)}
+                      title="Delete Order"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                   <div className="flex items-center text-xs text-gray-500">
                     <Calendar className="w-3 h-3 mr-1" />
@@ -473,6 +537,46 @@ export default function OrdersPage() {
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-4 mt-8">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          
+          <div className="flex items-center space-x-2">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const pageNum = i + 1
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                    currentPage === pageNum
+                      ? 'bg-green-600 text-white'
+                      : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              )
+            })}
+          </div>
+          
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       {/* Empty State */}
       {(orders || []).length === 0 && (
@@ -527,7 +631,7 @@ export default function OrdersPage() {
                     <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
                       selectedOrder.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {selectedOrder.paymentStatus.toUpperCase()}
+                      {(selectedOrder.paymentStatus || 'pending').toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -546,7 +650,7 @@ export default function OrdersPage() {
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">Phone</label>
-                      <p className="text-gray-900">{selectedOrder.customerPhone}</p>
+                      <p className="text-gray-900">{selectedOrder.customerPhone || selectedOrder.phoneNumber || 'N/A'}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">Order Date</label>
@@ -567,24 +671,36 @@ export default function OrdersPage() {
                 <div className="border-t pt-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
                   <div className="space-y-3">
-                    {selectedOrder.items?.map((item: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          {item.image && (
-                            <img 
-                              src={item.image} 
-                              alt={item.name} 
-                              className="w-12 h-12 object-cover rounded-lg"
-                            />
-                          )}
-                          <div>
-                            <p className="font-medium text-gray-900">{item.name}</p>
-                            <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                    {selectedOrder.items?.map((item: any, index: number) => {
+                      const itemImage = getOrderItemImage(item)
+                      return (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            {itemImage ? (
+                              <img 
+                                src={itemImage} 
+                                alt={item.name || item.product?.name} 
+                                className="w-12 h-12 object-cover rounded-lg"
+                                loading="lazy"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement
+                                  target.style.display = 'none'
+                                }}
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                                <Package className="w-6 h-6 text-gray-400" />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium text-gray-900">{item.name || item.product?.name || 'Unknown Product'}</p>
+                              <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                            </div>
                           </div>
+                          <p className="font-semibold text-gray-900">RWF {((item.price || item.product?.price || 0) * item.quantity).toLocaleString()}</p>
                         </div>
-                        <p className="font-semibold text-gray-900">RWF {(item.price * item.quantity).toLocaleString()}</p>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -605,6 +721,28 @@ export default function OrdersPage() {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Zoom Modal */}
+      {showImageModal && zoomedImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="relative max-w-4xl max-h-full">
+            <img
+              src={zoomedImage}
+              alt="Zoomed product image"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            />
+            <button
+              onClick={closeImageModal}
+              className="absolute top-4 right-4 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75 transition-all duration-200"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg text-sm">
+              Click outside or press ESC to close
             </div>
           </div>
         </div>

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAdmin } from '@/contexts/AdminContext'
+import { showProductDeletedNotification, showErrorNotification } from '@/lib/adminNotifications'
 import { 
   Package, 
   Plus, 
@@ -41,52 +43,19 @@ interface Product {
 
 export default function ProductsPage() {
   const router = useRouter()
-  const [products, setProducts] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { 
+    products, 
+    isLoading, 
+    errors, 
+    refreshProducts, 
+    deleteProduct,
+    markChangesSaved 
+  } = useAdmin()
+  
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
   const [filterCategory, setFilterCategory] = useState('')
 
-  const fetchProducts = async () => {
-    try {
-      setIsLoading(true)
-      
-      // Get the JWT token using the proper utility function
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-      
-      // Build query parameters
-      const params = new URLSearchParams()
-      if (searchTerm) params.append('search', searchTerm)
-      if (filterStatus !== 'all') params.append('status', filterStatus)
-      if (filterCategory) params.append('category', filterCategory)
-      
-      const response = await fetch(`/api/admin/products/public?${params.toString()}`, {
-        headers
-      })
-      if (!response.ok) throw new Error('Failed to fetch products')
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        setProducts(result.data.products)
-      } else {
-        throw new Error('Failed to fetch products')
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error)
-      // Fallback to empty array on error
-      setProducts([])
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   // Read category parameter from URL on component mount
   useEffect(() => {
@@ -99,11 +68,17 @@ export default function ProductsPage() {
     }
   }, [])
 
-  useEffect(() => {
-    fetchProducts()
-  }, [searchTerm, filterStatus, filterCategory])
+  // Filter products based on search and filters
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = filterStatus === 'all' || product.status === filterStatus
+    const matchesCategory = !filterCategory || product.category === filterCategory
+    
+    return matchesSearch && matchesStatus && matchesCategory
+  })
 
-  if (isLoading) {
+  if (isLoading.products) {
     return (
       <div className="loading">
         <div className="spinner"></div>
@@ -125,17 +100,17 @@ export default function ProductsPage() {
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
               <div className="flex items-center space-x-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{isLoading ? '...' : (products?.length || 0)}</div>
+                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.length || 0)}</div>
                   <div className="text-sm text-blue-100">Total Products</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{isLoading ? '...' : (products?.filter(p => p.status === 'active').length || 0)}</div>
+                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.filter(p => p.status === 'active').length || 0)}</div>
                   <div className="text-sm text-blue-100">Active</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{isLoading ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</div>
+                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</div>
                   <div className="text-sm text-blue-100">Total Sales</div>
                 </div>
               </div>
@@ -150,7 +125,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Products</p>
-              <p className="text-2xl font-bold text-gray-900">{isLoading ? '...' : (products?.length || 0)}</p>
+              <p className="text-2xl font-bold text-gray-900">{isLoading.products ? '...' : (products?.length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-blue-600" />
@@ -167,7 +142,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Active Products</p>
-              <p className="text-2xl font-bold text-green-600">{isLoading ? '...' : (products?.filter(p => p.status === 'active').length || 0)}</p>
+              <p className="text-2xl font-bold text-green-600">{isLoading.products ? '...' : (products?.filter(p => p.status === 'active').length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <Star className="w-6 h-6 text-green-600" />
@@ -184,7 +159,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Low Stock</p>
-              <p className="text-2xl font-bold text-yellow-600">{isLoading ? '...' : (products?.filter(p => p.stock < 10).length || 0)}</p>
+              <p className="text-2xl font-bold text-yellow-600">{isLoading.products ? '...' : (products?.filter(p => p.stock < 10).length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
               <TrendingDown className="w-6 h-6 text-yellow-600" />
@@ -201,7 +176,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Sales</p>
-              <p className="text-2xl font-bold text-purple-600">{isLoading ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</p>
+              <p className="text-2xl font-bold text-purple-600">{isLoading.products ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
               <BarChart3 className="w-6 h-6 text-purple-600" />
@@ -317,7 +292,6 @@ export default function ProductsPage() {
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
                 // TODO: Implement advanced filters
-                console.log('Open advanced filters')
               }}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -329,7 +303,7 @@ export default function ProductsPage() {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(products || []).map((product) => (
+        {filteredProducts.map((product) => (
           <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Product Image */}
             <div className="h-48 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center relative overflow-hidden">
@@ -381,7 +355,7 @@ export default function ProductsPage() {
                 
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Price</span>
-                  <span className="text-lg font-bold text-blue-600">RWF {product.price.toLocaleString()}</span>
+                  <span className="text-lg font-bold text-blue-600">RWF {(product.price || 0).toLocaleString()}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -441,19 +415,34 @@ export default function ProductsPage() {
                             if (response.ok) {
                               const result = await response.json()
                               if (result.success) {
-                                // Remove product from local state
-                                setProducts(prev => prev.filter(p => p.id !== product.id))
-                                alert('Product deleted successfully!')
+                                // Remove product from global state
+                                deleteProduct(product.id)
+                                // Show success notification
+                                showProductDeletedNotification(product.name)
+                                // Refresh the product list to ensure consistency
+                                await refreshProducts()
+                                // Mark changes as saved
+                                markChangesSaved()
                               } else {
                                 throw new Error(result.message || 'Failed to delete product')
                               }
                             } else {
                               const errorData = await response.json()
-                              throw new Error(errorData.message || 'Failed to delete product')
+                              if (errorData.backendAvailable === false) {
+                                showErrorNotification(
+                                  'Backend Offline',
+                                  'Backend server is not available. Please start the backend server to delete products.'
+                                )
+                              } else {
+                                throw new Error(errorData.message || 'Failed to delete product')
+                              }
                             }
                           } catch (error) {
                             console.error('Error deleting product:', error)
-                            alert(`Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`)
+                            showErrorNotification(
+                              'Delete Failed',
+                              `Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`
+                            )
                           }
                         }
                       }}

@@ -21,6 +21,8 @@ import {
   Edit3
 } from 'lucide-react'
 import { useAuth } from '@/contexts/RealAuthContext'
+import { AdminProvider } from '@/contexts/AdminContext'
+import AdminNotification from '@/components/AdminNotification'
 import './admin-styles.css'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -56,37 +58,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Handle authentication
   useEffect(() => {
-    console.log('🔍 Admin Layout Auth Check:', {
-      isLoading,
-      isInitialized,
-      isLoggingOut,
-      isAuthenticated,
-      userRole: user?.role,
-      userEmail: user?.email
-    })
+    // Also check cookies for debugging
+    const cookies = typeof document !== 'undefined' ? document.cookie.split(';').reduce((acc, cookie) => {
+      const [key, value] = cookie.trim().split('=')
+      acc[key] = value
+      return acc
+    }, {} as Record<string, string>) : {}
+    
     
     if (isLoading || !isInitialized || isLoggingOut) {
-      console.log('⏳ Admin Layout: Waiting for auth initialization...')
       return
     }
 
     if (!isAuthenticated) {
-      console.log('🚫 Admin Layout: Not authenticated, redirecting to login...')
+      // Add a small delay to ensure cookies are processed
+      setTimeout(() => {
       if (typeof window !== 'undefined') {
         window.location.href = '/unified-login'
       }
+      }, 100)
       return
     }
     
     if (user?.role !== 'ADMIN') {
-      console.log('🚫 Admin Layout: Not admin role, redirecting to home...')
+      // Add a small delay to ensure cookies are processed
+      setTimeout(() => {
       if (typeof window !== 'undefined') {
         window.location.href = '/'
       }
+      }, 100)
       return
     }
-    
-    console.log('✅ Admin Layout: Authentication successful, rendering admin panel...')
   }, [isAuthenticated, user?.role, isLoading, isInitialized, isLoggingOut, router])
 
   // Show loading state
@@ -113,6 +115,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <AdminErrorBoundary>
+      <AdminProvider>
       <div className="admin-panel">
         {/* Sidebar */}
       <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -134,15 +137,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Navigation */}
           <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              // More robust active detection - exact match or starts with for sub-routes
+              const isActive = pathname === item.href || 
+                              (item.href !== '/admin' && pathname.startsWith(item.href + '/'))
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`nav-item ${isActive ? 'active' : ''}`}
+                  className={`nav-item group ${isActive ? 'active' : ''} ${isActive ? 'ring-2 ring-blue-300 ring-opacity-50' : ''}`}
+                  title={isActive ? `Currently viewing ${item.name}` : `Go to ${item.name}`}
+                  style={isActive ? {
+                    backgroundColor: '#ffffff !important',
+                    color: '#1e40af !important',
+                    transform: 'scale(1.05) !important',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3) !important',
+                    borderLeft: '4px solid #3b82f6 !important',
+                    borderRadius: '8px !important',
+                    fontWeight: '600 !important',
+                    border: '2px solid #3b82f6 !important',
+                    position: 'relative !important',
+                    zIndex: '10 !important'
+                  } : {}}
                 >
                   <item.icon className="nav-icon" />
                   <span className="font-medium">{item.name}</span>
+                  {isActive && (
+                    <>
+                      <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-lg border-2 border-white"></div>
+                      <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-blue-400 rounded-r-full opacity-90"></div>
+                      <div className="absolute inset-0 bg-blue-50 opacity-30 rounded-lg"></div>
+                      <div className="absolute top-0 right-0 w-0 h-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-blue-500"></div>
+                    </>
+                  )}
                 </Link>
               )
             })}
@@ -196,8 +222,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Menu className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                  {navigation.find(item => item.href === pathname)?.name || 'Dashboard'}
+                <div className="flex items-center space-x-2 text-sm text-gray-500 mb-1">
+                  <span className="flex items-center space-x-1">
+                    <LayoutDashboard className="w-4 h-4" />
+                    <span>Admin</span>
+                  </span>
+                  <span>/</span>
+                  <span className="text-gray-700 font-medium flex items-center space-x-1">
+                    {(() => {
+                      const currentItem = navigation.find(item => item.href === pathname)
+                      return currentItem ? (
+                        <>
+                          <currentItem.icon className="w-4 h-4" />
+                          <span>{currentItem.name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <LayoutDashboard className="w-4 h-4" />
+                          <span>Dashboard</span>
+                        </>
+                      )
+                    })()}
+                  </span>
+                </div>
+                <h1 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
+                  {(() => {
+                    const currentItem = navigation.find(item => item.href === pathname)
+                    return currentItem ? (
+                      <>
+                        <currentItem.icon className="w-5 h-5 text-blue-600" />
+                        <span>{currentItem.name}</span>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      </>
+                    ) : (
+                      <>
+                        <LayoutDashboard className="w-5 h-5 text-blue-600" />
+                        <span>Dashboard</span>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      </>
+                    )
+                  })()}
                 </h1>
                 <p className="text-sm text-gray-600">
                   {pathname === '/admin' ? 'Welcome back! Here\'s your business overview.' : 
@@ -258,6 +322,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
       </div>
+      
+      {/* Admin Notifications */}
+      <AdminNotification />
+      </AdminProvider>
     </AdminErrorBoundary>
   )
 }

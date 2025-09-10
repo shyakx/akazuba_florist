@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Save, Upload, X } from 'lucide-react'
+import { flowerCategories, perfumeCategories } from '@/data/categories'
 
 export default function EditCategoryPage() {
   const router = useRouter()
@@ -20,41 +21,39 @@ export default function EditCategoryPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Real category data will be fetched from API
-
+  // Load category data from static data
   useEffect(() => {
-    const loadCategory = async () => {
+    const loadCategory = () => {
       try {
         setInitialLoading(true)
-        const response = await fetch(`/api/admin/categories/public`)
-        if (!response.ok) throw new Error('Failed to fetch categories')
         
-        const result = await response.json()
-        if (result.success && result.data) {
-          // Find the specific category by ID
-          const foundCategory = result.data.find((c: any) => c.id === categoryId)
-          if (foundCategory) {
-            setFormData({
-              name: foundCategory.name || '',
-              description: foundCategory.description || '',
-              status: foundCategory.status || 'active',
-              image: foundCategory.image || null
-            })
-          } else {
-            throw new Error('Category not found')
-          }
+        // Combine all categories
+        const allCategories = [...flowerCategories, ...perfumeCategories]
+        
+        // Find the specific category by ID
+        const foundCategory = allCategories.find(c => c.id === categoryId)
+        
+        if (foundCategory) {
+          setFormData({
+            name: foundCategory.name || '',
+            description: foundCategory.description || '',
+            status: 'active', // Static categories are always active
+            image: foundCategory.image || null
+          })
         } else {
-          throw new Error('Failed to fetch category data')
+          throw new Error('Category not found')
         }
       } catch (error) {
         console.error('Error loading category:', error)
+        // Redirect to categories page if category not found
+        router.push('/admin/categories')
       } finally {
         setInitialLoading(false)
       }
     }
 
     loadCategory()
-  }, [categoryId])
+  }, [categoryId, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -115,11 +114,19 @@ export default function EditCategoryPage() {
     setLoading(true)
     
     try {
+      // Get the JWT token using the proper utility function
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
       const response = await fetch(`/api/admin/categories/${categoryId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify({
           name: formData.name,
           description: formData.description,
@@ -129,14 +136,20 @@ export default function EditCategoryPage() {
       })
       
       if (response.ok) {
-        alert('Category updated successfully!')
-        router.push('/admin/categories')
+        const result = await response.json()
+        if (result.success) {
+          alert('Category updated successfully!')
+          router.push('/admin/categories')
+        } else {
+          throw new Error(result.message || 'Failed to update category')
+        }
       } else {
-        throw new Error('Failed to update category')
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to update category')
       }
     } catch (error) {
       console.error('Error updating category:', error)
-      alert('Failed to update category. Please try again.')
+      alert(`Failed to update category: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -176,6 +189,18 @@ export default function EditCategoryPage() {
 
       {/* Form */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        {/* Notice about backend saving */}
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <p className="text-sm text-green-700">
+                <strong>Note:</strong> Changes made here will be saved to the backend database. 
+                Make sure you have the backend server running for changes to persist.
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">

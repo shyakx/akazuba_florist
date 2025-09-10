@@ -114,7 +114,7 @@ export default function CustomersPage() {
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">RWF {customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">RWF {(customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0) || 0).toLocaleString()}</div>
                   <div className="text-sm text-purple-100">Total Revenue</div>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-pink-600">RWF {customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-pink-600">RWF {(customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0) || 0).toLocaleString()}</p>
             </div>
             <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-pink-600" />
@@ -263,7 +263,6 @@ export default function CustomersPage() {
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
                 // TODO: Implement advanced filters
-                console.log('Open advanced filters')
               }}
             >
               <Filter className="w-4 h-4 mr-2" />

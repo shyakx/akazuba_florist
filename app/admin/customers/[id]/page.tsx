@@ -176,7 +176,7 @@ export default function CustomerDetailsPage() {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Spent</p>
-                  <p className="text-2xl font-bold text-gray-900">RWF {customer.totalSpent.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900">RWF {(customer.totalSpent || 0).toLocaleString()}</p>
                 </div>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function CustomerDetailsPage() {
                           <p className="text-sm text-gray-600">{order.items} items</p>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-900">RWF {order.total.toLocaleString()}</p>
+                          <p className="text-sm font-medium text-gray-900">RWF {(order.total || 0).toLocaleString()}</p>
                           <p className="text-sm text-gray-600">{new Date(order.date).toLocaleDateString()}</p>
                         </div>
                       </div>

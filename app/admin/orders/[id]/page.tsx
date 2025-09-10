@@ -189,8 +189,8 @@ export default function OrderDetailsPage() {
                       <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">RWF {item.product.price.toLocaleString()}</p>
-                      <p className="text-sm text-gray-600">Total: RWF {item.total.toLocaleString()}</p>
+                      <p className="text-sm font-medium text-gray-900">RWF {(item.product.price || 0).toLocaleString()}</p>
+                      <p className="text-sm text-gray-600">Total: RWF {(item.total || 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -208,16 +208,16 @@ export default function OrderDetailsPage() {
             <div className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="text-gray-900">RWF {order.subtotal.toLocaleString()}</span>
+                <span className="text-gray-900">RWF {(order.subtotal || 0).toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
-                <span className="text-gray-900">RWF {order.shipping.toLocaleString()}</span>
+                <span className="text-gray-900">RWF {(order.shipping || 0).toLocaleString()}</span>
               </div>
               <div className="border-t border-gray-200 pt-3">
                 <div className="flex justify-between">
                   <span className="text-lg font-semibold text-gray-900">Total</span>
-                  <span className="text-lg font-semibold text-gray-900">RWF {order.total.toLocaleString()}</span>
+                  <span className="text-lg font-semibold text-gray-900">RWF {(order.total || 0).toLocaleString()}</span>
                 </div>
               </div>
             </div>

@@ -11,9 +11,12 @@ import {
   RefreshCw,
   AlertCircle,
   Heart,
-  ShoppingBag
+  ShoppingBag,
+  CheckCircle
 } from 'lucide-react'
 import Link from 'next/link'
+import { useAdmin } from '@/contexts/AdminContext'
+import { showBackendOfflineNotification, showBackendOnlineNotification } from '@/lib/adminNotifications'
 
 interface DashboardStats {
   categories: number
@@ -35,104 +38,119 @@ interface TopProduct {
 
 
 export default function AdminDashboard() {
-  console.log('🏠 Admin Dashboard component rendered')
   
-  const [stats, setStats] = useState<DashboardStats>({
-    categories: 0,
-    products: 0,
-    orders: 0,
-    revenue: 0,
-    customers: 0,
-    totalWishlistItems: 0,
-    totalCartItems: 0,
-    activeCarts: 0
-  })
-  const [topProducts, setTopProducts] = useState<TopProduct[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { 
+    stats, 
+    topProducts, 
+    isLoading, 
+    errors, 
+    refreshAll, 
+    hasUnsavedChanges,
+    markChangesSaved 
+  } = useAdmin()
 
-  const fetchStats = async () => {
+  
+  const statCards = [
+    {
+      title: 'Products',
+      value: stats?.products ?? '...',
+      icon: Package,
+      color: 'bg-green-500',
+      link: '/admin/products'
+    },
+    {
+      title: 'Orders',
+      value: stats?.orders ?? '...',
+      icon: ShoppingCart,
+      color: 'bg-yellow-500',
+      link: '/admin/orders'
+    },
+    {
+      title: 'Revenue',
+      value: `RWF ${(stats?.revenue || 0).toLocaleString()}`,
+      icon: DollarSign,
+      color: 'bg-purple-500',
+      link: '/admin/orders'
+    },
+    {
+      title: 'Customers',
+      value: stats?.customers ?? '...',
+      icon: Users,
+      color: 'bg-blue-500',
+      link: '/admin/customers'
+    },
+    {
+      title: 'Wishlist Items',
+      value: stats?.totalWishlistItems ?? '...',
+      icon: Heart,
+      color: 'bg-pink-500',
+      link: '/admin/customers'
+    },
+    {
+      title: 'Active Carts',
+      value: stats?.activeCarts ?? '...',
+      icon: ShoppingBag,
+      color: 'bg-orange-500',
+      link: '/admin/customers'
+    }
+  ]
+  
+  
+  // Manual refresh function
+  const handleManualRefresh = async () => {
     try {
-      console.log('📊 Fetching dashboard stats...')
-      setIsLoading(true)
-      setError(null)
-      
-      // Get the JWT token using the proper utility function
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-      
-      // Fetch dashboard stats
-      const statsResponse = await fetch('/api/admin/dashboard/stats', { headers })
-      
-      console.log('📊 Stats response status:', statsResponse.status)
-      
-      if (!statsResponse.ok) throw new Error('Failed to fetch stats')
-      
-      const statsData = await statsResponse.json()
-      
-      console.log('📊 Stats data received:', statsData)
-      
-      setStats({
-        categories: statsData.categories || 0,
-        products: statsData.products || 0,
-        orders: statsData.orders || 0,
-        revenue: statsData.revenue || 0,
-        customers: statsData.customers || 0,
-        totalWishlistItems: statsData.totalWishlistItems || 0,
-        totalCartItems: statsData.totalCartItems || 0,
-        activeCarts: statsData.activeCarts || 0
-      })
-      
-      console.log('✅ Dashboard data loaded successfully')
+      await refreshAll()
     } catch (error) {
-      console.error('❌ Error fetching stats:', error)
-      setError('Failed to load dashboard data')
-    } finally {
-      setIsLoading(false)
+      console.error('❌ Manual refresh failed:', error)
     }
   }
+  
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'online' | 'offline'>('checking')
 
-  const fetchTopProducts = async () => {
+
+
+  const checkBackendStatus = async () => {
     try {
-      console.log('📈 Fetching top products...')
+      // Try a more reliable endpoint that we know exists
+      const backendUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:5000/api/v1/admin/products'
+        : 'https://akazuba-backend-api.onrender.com/api/v1/admin/products'
       
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
+      const response = await fetch(backendUrl, { 
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
       
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-      
-      const response = await fetch('/api/admin/dashboard/analytics', { headers })
-      
-      if (!response.ok) throw new Error('Failed to fetch analytics')
-      
-      const data = await response.json()
-      
-      if (data.success && data.data.topProducts) {
-        setTopProducts(data.data.topProducts)
-        console.log('✅ Top products loaded:', data.data.topProducts)
+      // If we get any response (even 401/403), the backend is online
+      if (response.status < 500) {
+        const wasOffline = backendStatus === 'offline'
+        setBackendStatus('online')
+        if (wasOffline) {
+          showBackendOnlineNotification()
+        }
+      } else {
+        const wasOnline = backendStatus === 'online'
+        setBackendStatus('offline')
+        if (wasOnline) {
+          showBackendOfflineNotification()
+        }
       }
     } catch (error) {
-      console.error('❌ Error fetching top products:', error)
-      // Don't set error state for top products, just log it
+      const wasOnline = backendStatus === 'online'
+      setBackendStatus('offline')
+      if (wasOnline) {
+        showBackendOfflineNotification()
+      }
     }
   }
 
   useEffect(() => {
-    fetchStats()
-    fetchTopProducts()
+    checkBackendStatus()
   }, [])
 
-  if (isLoading) {
+  if (isLoading.stats || isLoading.topProducts) {
     return (
       <div className="loading">
         <div className="spinner"></div>
@@ -141,15 +159,15 @@ export default function AdminDashboard() {
     )
   }
 
-  if (error) {
+  if (errors.stats) {
     return (
       <div className="card">
         <div className="flex items-center space-x-3 text-red-600">
           <AlertCircle className="w-6 h-6" />
           <h2 className="text-lg font-semibold">Error</h2>
         </div>
-        <p className="mt-2 text-gray-600">{error}</p>
-        <button onClick={fetchStats} className="btn btn-primary mt-4">
+        <p className="mt-2 text-gray-600">{errors.stats}</p>
+        <button onClick={refreshAll} className="btn btn-primary mt-4">
           <RefreshCw className="w-4 h-4 mr-2" />
           Try Again
         </button>
@@ -157,50 +175,6 @@ export default function AdminDashboard() {
     )
   }
 
-  const statCards = [
-    {
-      title: 'Products',
-      value: stats.products,
-      icon: Package,
-      color: 'bg-green-500',
-      link: '/admin/products'
-    },
-    {
-      title: 'Orders',
-      value: stats.orders,
-      icon: ShoppingCart,
-      color: 'bg-yellow-500',
-      link: '/admin/orders'
-    },
-    {
-      title: 'Revenue',
-      value: `RWF ${stats.revenue.toLocaleString()}`,
-      icon: DollarSign,
-      color: 'bg-purple-500',
-      link: '/admin/orders'
-    },
-    {
-      title: 'Customers',
-      value: stats.customers,
-      icon: Users,
-      color: 'bg-blue-500',
-      link: '/admin/customers'
-    },
-    {
-      title: 'Wishlist Items',
-      value: stats.totalWishlistItems,
-      icon: Heart,
-      color: 'bg-pink-500',
-      link: '/admin/customers'
-    },
-    {
-      title: 'Active Carts',
-      value: stats.activeCarts,
-      icon: ShoppingBag,
-      color: 'bg-orange-500',
-      link: '/admin/customers'
-    }
-  ]
 
   return (
     <div className="space-y-6">
@@ -210,12 +184,30 @@ export default function AdminDashboard() {
           <div className="text-sm text-gray-600">
             Last updated: {new Date().toLocaleTimeString()}
           </div>
+          {hasUnsavedChanges && (
+            <div className="flex items-center space-x-2 text-orange-600">
+              <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium">Unsaved changes</span>
+            </div>
+          )}
         </div>
-        <button onClick={fetchStats} className="btn btn-secondary">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          Refresh Data
-        </button>
+        <div className="flex items-center space-x-2">
+          {hasUnsavedChanges && (
+            <button 
+              onClick={markChangesSaved} 
+              className="btn btn-primary bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Mark as Saved
+            </button>
+          )}
+          <button onClick={refreshAll} className="btn btn-secondary">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh Data
+          </button>
+        </div>
       </div>
+
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -293,7 +285,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Total Revenue</span>
               <span className="text-lg font-bold text-green-600">
-                RWF {stats.revenue.toLocaleString()}
+                RWF {(stats.revenue || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -305,7 +297,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Avg Order Value</span>
               <span className="text-lg font-bold text-purple-600">
-                RWF {stats.orders > 0 ? Math.round(stats.revenue / stats.orders).toLocaleString() : '0'}
+                RWF {stats.orders > 0 ? Math.round((stats.revenue || 0) / stats.orders).toLocaleString() : '0'}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -332,7 +324,7 @@ export default function AdminDashboard() {
                 const colors = ['bg-blue-100', 'bg-green-100', 'bg-yellow-100', 'bg-purple-100', 'bg-pink-100']
                 const textColors = ['text-blue-600', 'text-green-600', 'text-yellow-600', 'text-purple-600', 'text-pink-600']
                 return (
-                  <div key={product.id} className="flex items-center justify-between">
+                  <div key={product.id || `product-${index}`} className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className={`w-6 h-6 ${colors[index % colors.length]} rounded flex items-center justify-center`}>
                         <Package className={`w-3 h-3 ${textColors[index % textColors.length]}`} />
@@ -343,7 +335,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-right">
                       <span className="text-sm font-medium text-gray-600">{product.sales} sales</span>
-                      <div className="text-xs text-gray-500">RWF {product.revenue.toLocaleString()}</div>
+                      <div className="text-xs text-gray-500">RWF {(product.revenue || 0).toLocaleString()}</div>
                     </div>
                   </div>
                 )
@@ -361,12 +353,31 @@ export default function AdminDashboard() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">System Status</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Server Status</span>
+              <span className="text-sm text-gray-600">Backend Server</span>
               <span className="flex items-center space-x-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm text-green-600">Online</span>
+                <div className={`w-2 h-2 rounded-full ${
+                  backendStatus === 'online' ? 'bg-green-500' : 
+                  backendStatus === 'offline' ? 'bg-red-500' : 
+                  'bg-yellow-500'
+                }`}></div>
+                <span className={`text-sm ${
+                  backendStatus === 'online' ? 'text-green-600' : 
+                  backendStatus === 'offline' ? 'text-red-600' : 
+                  'text-yellow-600'
+                }`}>
+                  {backendStatus === 'online' ? 'Online' : 
+                   backendStatus === 'offline' ? 'Offline' : 
+                   'Checking...'}
+                </span>
               </span>
             </div>
+            {backendStatus === 'offline' && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-xs text-red-800">
+                  ⚠️ Backend server is offline. Product deletions and other operations may not persist.
+                </p>
+              </div>
+            )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Database</span>
               <span className="flex items-center space-x-1">

@@ -5,13 +5,48 @@ import Link from 'next/link'
 import { flowerCategories, perfumeCategories } from '@/data/categories'
 import { findProductCategories, getAllCategoryMappings } from '@/data/category-product-mapping'
 import { useProducts } from '@/contexts/ProductsContext'
-import { Flower, Sparkles, ArrowRight } from 'lucide-react'
+import { 
+  Flower, 
+  Sparkles, 
+  ArrowRight, 
+  Heart, 
+  Cross, 
+  GraduationCap, 
+  Users, 
+  Calendar, 
+  Gift, 
+  Plane, 
+  Package 
+} from 'lucide-react'
 import Footer from '@/components/Footer'
 
 const CategoriesPage = () => {
   const { products } = useProducts()
   const [categoryProductCounts, setCategoryProductCounts] = useState<Record<string, number>>({})
 
+
+  // Function to get the appropriate icon component for each category
+  const getCategoryIcon = (categoryId: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      'wedding': <Heart className="w-16 h-16 text-pink-500" />,
+      'funerals': <Cross className="w-16 h-16 text-gray-500" />,
+      'graduation': <GraduationCap className="w-16 h-16 text-yellow-500" />,
+      'mothers-day': <Users className="w-16 h-16 text-pink-400" />,
+      'anniversary': <Heart className="w-16 h-16 text-red-500" />,
+      'birthday': <Gift className="w-16 h-16 text-purple-500" />,
+      'valentine': <Heart className="w-16 h-16 text-red-600" />,
+      'date': <Heart className="w-16 h-16 text-rose-400" />,
+      'engagement': <Heart className="w-16 h-16 text-pink-300" />,
+      'airport-pickup': <Plane className="w-16 h-16 text-blue-400" />,
+      'male': <Users className="w-16 h-16 text-blue-600" />,
+      'female': <Users className="w-16 h-16 text-pink-500" />,
+      'strong-scent': <Package className="w-16 h-16 text-purple-600" />,
+      'soft-scent': <Flower className="w-16 h-16 text-green-400" />,
+      'casual-everyday': <Calendar className="w-16 h-16 text-blue-400" />,
+      'special-occasions': <Gift className="w-16 h-16 text-yellow-500" />
+    }
+    return iconMap[categoryId] || <Package className="w-16 h-16 text-gray-500" />
+  }
 
   // Calculate product counts for each category
   useEffect(() => {
@@ -71,19 +106,13 @@ const CategoriesPage = () => {
                   href={`/category/${category.id}`}
                   className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden"
                 >
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.src = '/images/placeholder-flower.jpg'
-                      }}
-                    />
-                    <div className={`absolute top-4 right-4 ${category.color} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                      {category.icon}
+                  <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-pink-50 to-pink-100">
+                    {/* Category Icon */}
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      {getCategoryIcon(category.id)}
+                      <span className="text-2xl">{category.icon}</span>
                     </div>
+                    
                     {/* Product Count Badge */}
                     <div className="absolute top-4 left-4 bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
                       {productCount} product{productCount !== 1 ? 's' : ''}
@@ -139,19 +168,13 @@ const CategoriesPage = () => {
                   href={`/category/${category.id}`}
                   className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden"
                 >
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement
-                        target.src = '/images/placeholder-perfume.jpg'
-                      }}
-                    />
-                    <div className={`absolute top-4 right-4 ${category.color} text-white px-3 py-1 rounded-full text-sm font-medium`}>
-                      {category.icon}
+                  <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100">
+                    {/* Category Icon */}
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      {getCategoryIcon(category.id)}
+                      <span className="text-2xl">{category.icon}</span>
                     </div>
+                    
                     {/* Product Count Badge */}
                     <div className="absolute top-4 left-4 bg-white bg-opacity-90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
                       {productCount} product{productCount !== 1 ? 's' : ''}

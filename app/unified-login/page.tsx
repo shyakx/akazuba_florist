@@ -15,7 +15,6 @@ export default function UnifiedLoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [loginType, setLoginType] = useState<'auto' | 'admin' | 'customer'>('auto')
   const [hasRedirected, setHasRedirected] = useState(false)
   
   // Check if we've already redirected in this session
@@ -29,31 +28,12 @@ export default function UnifiedLoginPage() {
   const router = useRouter()
   const { login, adminLogin, isAuthenticated, user, isLoading: authLoading, isInitialized } = useAuth()
 
-  // Debug authentication states
-  console.log('🔍 Unified Login Debug:', {
-    isInitialized,
-    authLoading,
-    isAuthenticated,
-    userRole: user?.role,
-    userEmail: user?.email,
-    loginType
-  })
 
   // Redirect if already authenticated - with more robust logic
   React.useEffect(() => {
-    console.log('🔄 Auth state changed:', {
-      isInitialized,
-      isAuthenticated,
-      hasUser: !!user,
-      userRole: user?.role,
-      hasRedirected,
-      authLoading
-    })
 
     // Only redirect if we have stable authentication state and haven't redirected in this session
     if (isInitialized && !authLoading && isAuthenticated && user && !hasRedirected && !sessionRedirected) {
-      console.log('✅ User already authenticated, redirecting...')
-      console.log('🔍 User details:', { role: user.role, email: user.email })
       
       setHasRedirected(true) // Prevent multiple redirects
       setSessionRedirected(true) // Mark session as redirected
@@ -63,21 +43,27 @@ export default function UnifiedLoginPage() {
         sessionStorage.setItem('loginRedirected', 'true')
       }
       
-      // Use a more reliable redirect method
-      const redirectUrl = user.role === 'ADMIN' ? '/admin' : '/dashboard'
-      console.log('🚀 Redirecting to:', redirectUrl)
+      // Determine redirect URL based on user role and login type
+      let redirectUrl = '/dashboard' // Default to customer dashboard
       
-      // Use replace instead of href to prevent back button issues
-      if (typeof window !== 'undefined') {
-        window.location.replace(redirectUrl)
+      if (user.role === 'ADMIN') {
+        redirectUrl = '/admin'
+      } else {
       }
+      
+      
+      // Use a small delay to ensure state is fully updated
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.location.replace(redirectUrl)
+        }
+      }, 100)
     }
   }, [isInitialized, authLoading, isAuthenticated, user, hasRedirected, sessionRedirected])
 
   // Clear session redirect flag when user is not authenticated
   React.useEffect(() => {
     if (isInitialized && !isAuthenticated && sessionRedirected) {
-      console.log('🧹 Clearing session redirect flag - user not authenticated')
       setSessionRedirected(false)
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('loginRedirected')
@@ -112,51 +98,46 @@ export default function UnifiedLoginPage() {
     setError('')
     
     try {
-      console.log('🚀 Starting unified login process...')
-      console.log('Login type:', loginType)
       
       let success = false
       
-      if (loginType === 'admin') {
-        // Force admin login
-        console.log('🔐 Attempting admin login...')
+      // Auto-detect: Try admin first, then customer
+      
+      // Enhanced admin detection logic
+      const email = formData.email.toLowerCase()
+      const isLikelyAdmin = email.includes('admin') ||
+                           email.includes('akazuba') ||
+                           email.includes('@akazuba') ||
+                           email.includes('manager') ||
+                           email.includes('staff') ||
+                           email.endsWith('@akazubaflorist.com') ||
+                           email.endsWith('@akazuba.com')
+      
+      if (isLikelyAdmin) {
         success = await adminLogin({ username: formData.email, password: formData.password })
-      } else if (loginType === 'customer') {
-        // Force customer login
-        console.log('👤 Attempting customer login...')
-        success = await login({ email: formData.email, password: formData.password })
-      } else {
-        // Auto-detect: Try admin first, then customer
-        console.log('🔄 Auto-detecting login type...')
         
-        // Try admin login first
-        success = await adminLogin({ username: formData.email, password: formData.password })
-        
-        if (!success) {
-          console.log('❌ Admin login failed, trying customer login...')
-          // Try customer login
+        if (success) {
+          // Admin login successful
+        } else {
           success = await login({ email: formData.email, password: formData.password })
+        }
+      } else {
+        success = await login({ email: formData.email, password: formData.password })
+        
+        if (success) {
+          // Customer login successful
+        } else {
+          success = await adminLogin({ username: formData.email, password: formData.password })
         }
       }
       
-      console.log('🔍 Login result:', success)
       
       if (success) {
-        toast.success('Login successful!')
-        console.log('🎉 Login successful, redirecting...')
+        toast.success('Login successful! Redirecting...')
         
-        // Wait for state to update, then redirect based on login type
-        setTimeout(() => {
-          if (typeof window !== 'undefined') {
-            if (loginType === 'admin' || (loginType === 'auto' && formData.email.includes('admin'))) {
-              console.log('🚀 Redirecting to admin panel...')
-              window.location.href = '/admin'
-            } else {
-              console.log('🚀 Redirecting to dashboard...')
-              window.location.href = '/dashboard'
-            }
-          }
-        }, 2000)
+        // Don't manually redirect here - let the useEffect handle it
+        // The authentication state change will trigger the automatic redirection
+        // This prevents conflicts between manual and automatic redirection
         
       } else {
         toast.error('Invalid credentials. Please check your email and password.')
@@ -182,6 +163,7 @@ export default function UnifiedLoginPage() {
     if (error) {
       setError('')
     }
+    
   }
 
   return (
@@ -206,56 +188,21 @@ export default function UnifiedLoginPage() {
               <Flower2 className="h-12 w-12 text-pink-600 mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">Akazuba Florist</h1>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Welcome Back</h2>
-            <p className="text-gray-600">Sign in to access your account</p>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Unified Login</h2>
+            <p className="text-gray-600">One login for customers and administrators</p>
+            <div className="mt-3 flex items-center justify-center space-x-4 text-sm text-gray-500">
+              <div className="flex items-center">
+                <Shield className="h-4 w-4 mr-1" />
+                <span>Admin Access</span>
+              </div>
+              <div className="w-px h-4 bg-gray-300"></div>
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-1" />
+                <span>Customer Portal</span>
+              </div>
+            </div>
           </div>
 
-          {/* Login Type Selector */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Login Type
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setLoginType('auto')}
-                className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                  loginType === 'auto'
-                    ? 'bg-pink-100 border-pink-300 text-pink-700'
-                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                Auto
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoginType('admin')}
-                className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                  loginType === 'admin'
-                    ? 'bg-blue-100 border-blue-300 text-blue-700'
-                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoginType('customer')}
-                className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
-                  loginType === 'customer'
-                    ? 'bg-green-100 border-green-300 text-green-700'
-                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                Customer
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              {loginType === 'auto' && 'Automatically detects admin or customer'}
-              {loginType === 'admin' && 'Admin panel access only'}
-              {loginType === 'customer' && 'Customer account access only'}
-            </p>
-          </div>
 
           {/* Error Message */}
           {error && (
@@ -358,15 +305,6 @@ export default function UnifiedLoginPage() {
             </div>
           </div>
 
-          {/* Security Notice */}
-          <div className="mt-6 p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center">
-              <Shield className="h-4 w-4 text-gray-500 mr-2" />
-              <p className="text-xs text-gray-600">
-                Secure login with automatic role detection
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -186,7 +186,7 @@ export default function CategoryProductsPage() {
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">${filteredProducts.reduce((sum, p) => sum + p.price, 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">${(filteredProducts.reduce((sum, p) => sum + (p.price || 0), 0) || 0).toLocaleString()}</div>
                   <div className="text-sm text-blue-100">Total Value</div>
                 </div>
               </div>
@@ -276,7 +276,7 @@ export default function CategoryProductsPage() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
                     <DollarSign className="w-4 h-4 text-green-600" />
-                    <span className="font-bold text-green-600">${product.price.toLocaleString()}</span>
+                    <span className="font-bold text-green-600">${(product.price || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <ShoppingBag className="w-4 h-4 text-blue-600" />

@@ -59,12 +59,21 @@ export async function GET(request: NextRequest) {
           discountAmount: order.discountAmount || 0,
           paymentMethod: order.paymentMethod,
           shippingAddress: order.shippingAddress,
-          items: order.items || [],
+          items: (order.items || []).map((item: any) => ({
+            ...item,
+            productImage: item.productImage || item.product?.image || item.product?.images?.[0] || null,
+            product: {
+              ...item.product,
+              image: item.product?.image || item.product?.images?.[0] || null,
+              images: item.product?.images || (item.product?.image ? [item.product.image] : [])
+            }
+          })),
           itemsCount: order.items?.length || 0,
           createdAt: order.createdAt,
           updatedAt: order.updatedAt
         }))
       }
+      
       return NextResponse.json(transformedData)
     }
     
