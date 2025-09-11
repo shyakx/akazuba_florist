@@ -76,10 +76,11 @@ export default function CategoryProductsPage() {
       const productsResult = await productsResponse.json()
       
       if (productsResult.success) {
-        // Filter products by this category
-        const categoryProducts = productsResult.data.filter(
-          (product: Product) => product.category === category?.name
-        )
+        // Filter products by this category - ensure data is an array
+        const productsData = productsResult.data?.products || productsResult.data || []
+        const categoryProducts = Array.isArray(productsData) 
+          ? productsData.filter((product: Product) => product.category === category?.name)
+          : []
         setProducts(categoryProducts)
       }
     } catch (error) {

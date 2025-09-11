@@ -187,20 +187,15 @@ export default function AdminDashboard() {
 
   const checkBackendStatus = async () => {
     try {
-      // Try a more reliable endpoint that we know exists
-      const backendUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:5000/api/v1/admin/products'
-        : 'https://akazuba-backend-api.onrender.com/api/v1/admin/products'
-      
-      const response = await fetch(backendUrl, { 
+      // Check our own health endpoint instead of calling backend directly
+      const response = await fetch('/api/health', { 
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
       })
       
-      // If we get any response (even 401/403), the backend is online
-      if (response.status < 500) {
+      if (response.ok) {
         const wasOffline = backendStatus === 'offline'
         setBackendStatus('online')
         if (wasOffline) {

@@ -209,7 +209,9 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       const result = await response.json()
       
       if (result.success) {
-        setProducts(result.data || [])
+        // Handle both direct data and paginated data structures
+        const productsData = result.data?.products || result.data || []
+        setProducts(Array.isArray(productsData) ? productsData : [])
       } else {
         throw new Error('Failed to fetch products')
       }
@@ -236,7 +238,9 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       const result = await response.json()
       
       if (result.success) {
-        setOrders(result.data || [])
+        // Handle both direct data and paginated data structures
+        const ordersData = result.data?.orders || result.data || []
+        setOrders(Array.isArray(ordersData) ? ordersData : [])
       } else {
         throw new Error('Failed to fetch orders')
       }
@@ -263,7 +267,9 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       const result = await response.json()
       
       if (result.success) {
-        setCustomers(result.data || [])
+        // Handle both direct data and paginated data structures
+        const customersData = result.data?.customers || result.data || []
+        setCustomers(Array.isArray(customersData) ? customersData : [])
       } else {
         throw new Error('Failed to fetch customers')
       }
