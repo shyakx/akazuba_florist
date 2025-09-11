@@ -204,12 +204,12 @@ export const generateStructuredData = (metadata: SEOMetadata, type: 'product' | 
         },
         contactPoint: {
           '@type': 'ContactPoint',
-          telephone: '+250-XXX-XXXX',
+          telephone: '+250-784-586-110',
           contactType: 'customer service'
         },
         sameAs: [
           'https://www.facebook.com/akazubaflorist',
-          'https://www.instagram.com/akazubaflorist',
+          'https://www.instagram.com/akazuba_florists/',
           'https://twitter.com/akazubaflorist'
         ]
       }

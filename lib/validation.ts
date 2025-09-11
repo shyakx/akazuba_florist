@@ -1,449 +1,232 @@
-/**
- * Validation utilities for the Akazuba Florist application
- * 
- * This module provides:
- * - Form validation rules
- * - Input sanitization
- * - Error message generation
- * - Type-safe validation
- * - Custom validation rules
- * 
- * @fileoverview Validation and error handling utilities
- * @author Akazuba Development Team
- * @version 1.0.0
- */
-
-/**
- * Validation rule interface
- */
-export interface ValidationRule<T = any> {
+export interface ValidationRule {
   required?: boolean
   minLength?: number
   maxLength?: number
+  pattern?: RegExp
   min?: number
   max?: number
-  pattern?: RegExp
   email?: boolean
-  phone?: boolean
   url?: boolean
-  custom?: (value: T) => string | null
-  message?: string
+  custom?: (value: any) => string | null
 }
 
-/**
- * Validation result interface
- */
+export interface ValidationSchema {
+  [key: string]: ValidationRule
+}
+
 export interface ValidationResult {
   isValid: boolean
   errors: Record<string, string>
-  values: Record<string, any>
 }
 
-/**
- * Common validation patterns
- */
-export const patterns = {
-  email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  phone: /^(\+250|0)[0-9]{9}$/,
-  url: /^https?:\/\/.+/,
-  rwandanPhone: /^(\+250|0)[0-9]{9}$/,
-  strongPassword: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-  alphanumeric: /^[a-zA-Z0-9]+$/,
-  name: /^[a-zA-Z\s'-]+$/,
-  price: /^\d+(\.\d{1,2})?$/
-}
-
-/**
- * Default error messages
- */
-export const errorMessages = {
-  required: (field: string) => `${field} is required`,
-  minLength: (field: string, min: number) => `${field} must be at least ${min} characters long`,
-  maxLength: (field: string, max: number) => `${field} must be no more than ${max} characters long`,
-  min: (field: string, min: number) => `${field} must be at least ${min}`,
-  max: (field: string, max: number) => `${field} must be no more than ${max}`,
-  pattern: (field: string) => `${field} format is invalid`,
-  email: (field: string) => `${field} must be a valid email address`,
-  phone: (field: string) => `${field} must be a valid phone number`,
-  url: (field: string) => `${field} must be a valid URL`,
-  unique: (field: string) => `${field} already exists`,
-  match: (field: string, target: string) => `${field} must match ${target}`,
-  custom: (field: string, message: string) => message
-}
-
-/**
- * Sanitize input values
- */
-export const sanitize = {
-  /**
-   * Remove HTML tags and trim whitespace
-   */
-  text: (value: string): string => {
-    return value
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .trim() // Remove leading/trailing whitespace
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+// Validation functions
+export const validators = {
+  required: (value: any): string | null => {
+    if (value === undefined || value === null || value === '') {
+      return 'This field is required'
+    }
+    return null
   },
 
-  /**
-   * Sanitize email address
-   */
-  email: (value: string): string => {
-    return sanitize.text(value).toLowerCase()
+  minLength: (min: number) => (value: string): string | null => {
+    if (value && value.length < min) {
+      return `Must be at least ${min} characters long`
+    }
+    return null
   },
 
-  /**
-   * Sanitize phone number
-   */
-  phone: (value: string): string => {
-    return value.replace(/[^\d+]/g, '') // Keep only digits and +
+  maxLength: (max: number) => (value: string): string | null => {
+    if (value && value.length > max) {
+      return `Must be no more than ${max} characters long`
+    }
+    return null
   },
 
-  /**
-   * Sanitize price/number
-   */
-  number: (value: string | number): number => {
-    const num = typeof value === 'string' ? parseFloat(value) : value
-    return isNaN(num) ? 0 : Math.max(0, num)
+  pattern: (regex: RegExp, message: string) => (value: string): string | null => {
+    if (value && !regex.test(value)) {
+      return message
+    }
+    return null
   },
 
-  /**
-   * Sanitize URL
-   */
-  url: (value: string): string => {
-    return sanitize.text(value).toLowerCase()
-  }
-}
+  min: (min: number) => (value: number): string | null => {
+    if (value !== undefined && value < min) {
+      return `Must be at least ${min}`
+    }
+    return null
+  },
 
-/**
- * Validate a single field
- */
-export const validateField = <T>(
-  value: T,
-  rules: ValidationRule<T>,
-  fieldName: string
-): string | null => {
-  // Required validation
-  if (rules.required && (value === null || value === undefined || value === '')) {
-    return errorMessages.required(fieldName)
-  }
+  max: (max: number) => (value: number): string | null => {
+    if (value !== undefined && value > max) {
+      return `Must be no more than ${max}`
+    }
+    return null
+  },
 
-  // Skip other validations if value is empty and not required
-  if (!rules.required && (value === null || value === undefined || value === '')) {
+  email: (value: string): string | null => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (value && !emailRegex.test(value)) {
+      return 'Must be a valid email address'
+    }
+    return null
+  },
+
+  url: (value: string): string | null => {
+    try {
+      if (value) {
+        new URL(value)
+      }
+      return null
+    } catch {
+      return 'Must be a valid URL'
+    }
+  },
+
+  phone: (value: string): string | null => {
+    const phoneRegex = /^\+?[\d\s\-\(\)]+$/
+    if (value && !phoneRegex.test(value)) {
+      return 'Must be a valid phone number'
+    }
+    return null
+  },
+
+  positiveNumber: (value: number): string | null => {
+    if (value !== undefined && value <= 0) {
+      return 'Must be a positive number'
+    }
+    return null
+  },
+
+  integer: (value: number): string | null => {
+    if (value !== undefined && !Number.isInteger(value)) {
+      return 'Must be a whole number'
+    }
     return null
   }
+}
 
-  const stringValue = String(value)
-
-  // Length validations
-  if (rules.minLength && stringValue.length < rules.minLength) {
-    return errorMessages.minLength(fieldName, rules.minLength)
+// Validate a single field
+export function validateField(value: any, rules: ValidationRule): string | null {
+  if (rules.required) {
+    const error = validators.required(value)
+    if (error) return error
   }
 
-  if (rules.maxLength && stringValue.length > rules.maxLength) {
-    return errorMessages.maxLength(fieldName, rules.maxLength)
+  if (value === undefined || value === null || value === '') {
+    return null // Skip other validations if field is empty and not required
   }
 
-  // Numeric validations
-  if (typeof value === 'number' || !isNaN(Number(value))) {
-    const numValue = Number(value)
-    
-    if (rules.min !== undefined && numValue < rules.min) {
-      return errorMessages.min(fieldName, rules.min)
-    }
-
-    if (rules.max !== undefined && numValue > rules.max) {
-      return errorMessages.max(fieldName, rules.max)
-    }
+  if (rules.minLength !== undefined) {
+    const error = validators.minLength(rules.minLength)(value)
+    if (error) return error
   }
 
-  // Pattern validations
-  if (rules.pattern && !rules.pattern.test(stringValue)) {
-    return errorMessages.pattern(fieldName)
+  if (rules.maxLength !== undefined) {
+    const error = validators.maxLength(rules.maxLength)(value)
+    if (error) return error
   }
 
-  // Email validation
-  if (rules.email && !patterns.email.test(stringValue)) {
-    return errorMessages.email(fieldName)
+  if (rules.pattern) {
+    const error = validators.pattern(rules.pattern, 'Invalid format')(value)
+    if (error) return error
   }
 
-  // Phone validation
-  if (rules.phone && !patterns.phone.test(stringValue)) {
-    return errorMessages.phone(fieldName)
+  if (rules.min !== undefined) {
+    const error = validators.min(rules.min)(value)
+    if (error) return error
   }
 
-  // URL validation
-  if (rules.url && !patterns.url.test(stringValue)) {
-    return errorMessages.url(fieldName)
+  if (rules.max !== undefined) {
+    const error = validators.max(rules.max)(value)
+    if (error) return error
   }
 
-  // Custom validation
+  if (rules.email) {
+    const error = validators.email(value)
+    if (error) return error
+  }
+
+  if (rules.url) {
+    const error = validators.url(value)
+    if (error) return error
+  }
+
   if (rules.custom) {
-    const customError = rules.custom(value)
-    if (customError) {
-      return errorMessages.custom(fieldName, customError)
-    }
+    const error = rules.custom(value)
+    if (error) return error
   }
 
   return null
 }
 
-/**
- * Validate multiple fields
- */
-export const validateForm = <T extends Record<string, any>>(
-  data: T,
-  rules: Record<keyof T, ValidationRule>
-): ValidationResult => {
+// Validate an object against a schema
+export function validate(data: Record<string, any>, schema: ValidationSchema): ValidationResult {
   const errors: Record<string, string> = {}
-  const values: Record<string, any> = {}
 
-  for (const [fieldName, fieldRules] of Object.entries(rules)) {
-    const value = data[fieldName]
-    const error = validateField(value, fieldRules, fieldName as string)
-    
+  for (const [field, rules] of Object.entries(schema)) {
+    const error = validateField(data[field], rules)
     if (error) {
-      errors[fieldName] = error
+      errors[field] = error
     }
-    
-    values[fieldName] = value
   }
 
   return {
     isValid: Object.keys(errors).length === 0,
-    errors,
-    values
+    errors
   }
 }
 
-/**
- * Predefined validation rules for common fields
- */
-export const rules = {
-  email: {
-    required: true,
-    email: true,
-    maxLength: 255
-  } as ValidationRule,
-
-  password: {
-    required: true,
-    minLength: 8,
-    maxLength: 128,
-    pattern: patterns.strongPassword,
-    message: 'Password must contain at least 8 characters with uppercase, lowercase, number, and special character'
-  } as ValidationRule,
-
-  confirmPassword: {
-    required: true,
-    minLength: 8
-  } as ValidationRule,
-
-  firstName: {
-    required: true,
-    minLength: 2,
-    maxLength: 50,
-    pattern: patterns.name
-  } as ValidationRule,
-
-  lastName: {
-    required: true,
-    minLength: 2,
-    maxLength: 50,
-    pattern: patterns.name
-  } as ValidationRule,
-
-  phone: {
-    required: true,
-    pattern: patterns.rwandanPhone
-  } as ValidationRule,
-
-  productName: {
-    required: true,
-    minLength: 3,
-    maxLength: 100
-  } as ValidationRule,
-
-  productDescription: {
-    required: true,
-    minLength: 10,
-    maxLength: 1000
-  } as ValidationRule,
-
-  productPrice: {
-    required: true,
-    min: 0.01,
-    max: 1000000,
-    pattern: patterns.price
-  } as ValidationRule,
-
-  productStock: {
-    required: true,
-    min: 0,
-    max: 10000
-  } as ValidationRule,
-
-  categoryName: {
-    required: true,
-    minLength: 2,
-    maxLength: 50
-  } as ValidationRule,
-
-  address: {
-    required: true,
-    minLength: 10,
-    maxLength: 200
-  } as ValidationRule,
-
-  city: {
-    required: true,
-    minLength: 2,
-    maxLength: 50
-  } as ValidationRule,
-
-  orderNotes: {
-    required: false,
-    maxLength: 500
-  } as ValidationRule
-}
-
-/**
- * Custom validation functions
- */
-export const customValidators = {
-  /**
-   * Validate password confirmation
-   */
-  passwordMatch: (password: string, confirmPassword: string): string | null => {
-    if (password !== confirmPassword) {
-      return 'Passwords do not match'
-    }
-    return null
+// Common validation schemas
+export const schemas = {
+  product: {
+    name: { required: true, minLength: 2, maxLength: 100 },
+    description: { required: true, minLength: 10, maxLength: 1000 },
+    price: { required: true, min: 0, custom: validators.positiveNumber },
+    stock: { required: true, min: 0, custom: validators.integer },
+    category: { required: true, minLength: 2, maxLength: 50 }
   },
 
-  /**
-   * Validate unique email
-   */
-  uniqueEmail: async (email: string): Promise<string | null> => {
-    try {
-      // This would typically make an API call to check if email exists
-      // For now, return null (no error)
-      return null
-    } catch (error) {
-      return 'Unable to verify email uniqueness'
-    }
+  user: {
+    email: { required: true, email: true },
+    firstName: { required: true, minLength: 2, maxLength: 50 },
+    lastName: { required: true, minLength: 2, maxLength: 50 },
+    phone: { required: true, custom: validators.phone }
   },
 
-  /**
-   * Validate product SKU uniqueness
-   */
-  uniqueSku: async (sku: string): Promise<string | null> => {
-    try {
-      // This would typically make an API call to check if SKU exists
-      // For now, return null (no error)
-      return null
-    } catch (error) {
-      return 'Unable to verify SKU uniqueness'
-    }
+  order: {
+    customerName: { required: true, minLength: 2, maxLength: 100 },
+    customerEmail: { required: true, email: true },
+    customerPhone: { required: true, custom: validators.phone },
+    deliveryAddress: { required: true, minLength: 10, maxLength: 500 },
+    paymentMethod: { required: true, pattern: /^(MoMo|Bank Transfer|Cash)$/, message: 'Must be MoMo, Bank Transfer, or Cash' }
   },
 
-  /**
-   * Validate age (must be 18+)
-   */
-  adultAge: (birthDate: string): string | null => {
-    const birth = new Date(birthDate)
-    const today = new Date()
-    const age = today.getFullYear() - birth.getFullYear()
-    
-    if (age < 18) {
-      return 'You must be at least 18 years old'
-    }
-    
-    return null
+  category: {
+    name: { required: true, minLength: 2, maxLength: 50 },
+    description: { required: true, minLength: 10, maxLength: 200 },
+    icon: { required: true, minLength: 1, maxLength: 10 }
   },
 
-  /**
-   * Validate future date
-   */
-  futureDate: (date: string): string | null => {
-    const inputDate = new Date(date)
-    const today = new Date()
-    
-    if (inputDate <= today) {
-      return 'Date must be in the future'
-    }
-    
-    return null
+  settings: {
+    businessName: { required: true, minLength: 2, maxLength: 100 },
+    businessEmail: { required: true, email: true },
+    businessPhone: { required: true, custom: validators.phone },
+    currency: { required: true, pattern: /^[A-Z]{3}$/, message: 'Must be a 3-letter currency code' }
   }
 }
 
-/**
- * Form validation hook
- */
-export const useFormValidation = <T extends Record<string, any>>(
-  initialData: T,
-  validationRules: Record<keyof T, ValidationRule>
-) => {
-  const [data, setData] = React.useState<T>(initialData)
-  const [errors, setErrors] = React.useState<Record<string, string>>({})
-  const [touched, setTouched] = React.useState<Record<string, boolean>>({})
+// Sanitize input data
+export function sanitizeInput(data: Record<string, any>): Record<string, any> {
+  const sanitized: Record<string, any> = {}
 
-  const validate = React.useCallback(() => {
-    const result = validateForm(data, validationRules)
-    setErrors(result.errors)
-    return result.isValid
-  }, [data, validationRules])
-
-  const validateField = React.useCallback((fieldName: keyof T) => {
-    const fieldRules = validationRules[fieldName]
-    if (!fieldRules) return
-
-    const error = validateField(data[fieldName], fieldRules, fieldName as string)
-    setErrors(prev => ({
-      ...prev,
-      [fieldName]: error || ''
-    }))
-  }, [data, validationRules])
-
-  const setValue = React.useCallback((fieldName: keyof T, value: any) => {
-    setData(prev => ({ ...prev, [fieldName]: value }))
-    
-    // Validate field if it has been touched
-    if (touched[fieldName as string]) {
-      validateField(fieldName)
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value === 'string') {
+      // Trim whitespace and remove potentially dangerous characters
+      sanitized[key] = value.trim().replace(/[<>]/g, '')
+    } else {
+      sanitized[key] = value
     }
-  }, [touched, validateField])
-
-  const setTouched = React.useCallback((fieldName: keyof T) => {
-    setTouched(prev => ({ ...prev, [fieldName]: true }))
-    validateField(fieldName)
-  }, [validateField])
-
-  const reset = React.useCallback(() => {
-    setData(initialData)
-    setErrors({})
-    setTouched({})
-  }, [initialData])
-
-  return {
-    data,
-    errors,
-    touched,
-    isValid: Object.keys(errors).length === 0,
-    setValue,
-    setTouched,
-    validate,
-    reset
   }
-}
 
-export default {
-  patterns,
-  errorMessages,
-  sanitize,
-  validateField,
-  validateForm,
-  rules,
-  customValidators,
-  useFormValidation
+  return sanitized
 }

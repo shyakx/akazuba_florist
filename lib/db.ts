@@ -2,11 +2,11 @@ import { Pool } from 'pg'
 
 // Database configuration
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'akazuba_user',
+  host: process.env.DB_HOST || 'dpg-d2o0b8ripnbc73d1n3pg-a.oregon-postgres.render.com',
   database: process.env.DB_NAME || 'akazuba_florist',
-  password: process.env.DB_PASSWORD || 'password',
-  port: parseInt(process.env.DB_PORT || '5434'),
+  password: process.env.DB_PASSWORD || 'WVkNIzcYTDXNAmOn893o1byvf7j6wDxN',
+  port: parseInt(process.env.DB_PORT || '5432'),
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 })
 

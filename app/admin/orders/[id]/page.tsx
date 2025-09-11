@@ -18,7 +18,7 @@ export default function OrderDetailsPage() {
     const loadOrder = async () => {
       try {
         setLoading(true)
-        const response = await fetch(`/api/admin/orders/public`)
+        const response = await fetch(`/api/orders`)
         if (!response.ok) throw new Error('Failed to fetch orders')
         
         const result = await response.json()

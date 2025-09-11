@@ -162,7 +162,7 @@ const Header = () => {
             <a href="https://wa.me/250784586110" className="flex items-center space-x-1 hover:text-green-200 transition-colors">
               <span>WhatsApp</span>
             </a>
-            <a href="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:text-green-200 transition-colors">
+            <a href="https://www.instagram.com/akazuba_florists/" target="_blank" rel="noopener noreferrer" className="flex items-center space-x-1 hover:text-green-200 transition-colors">
               <span>@akazuba_florists</span>
             </a>
           </div>

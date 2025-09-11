@@ -43,16 +43,16 @@ export default function ProductViewPage() {
           headers['Authorization'] = `Bearer ${token}`
         }
         
-        const response = await fetch(`/api/admin/products/public`, {
+        const response = await fetch(`/api/products`, {
           headers
         })
         if (!response.ok) throw new Error('Failed to fetch products')
 
         const result = await response.json()
         
-        if (result.success && result.data && result.data.products) {
+        if (result.success && result.data) {
           
-          const foundProduct = result.data.products.find((p: any) => p.id === productId)
+          const foundProduct = result.data.find((p: any) => p.id === productId)
           
           if (foundProduct) {
             setProduct(foundProduct)

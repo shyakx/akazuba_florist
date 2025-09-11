@@ -291,7 +291,7 @@ export default function ProductsPage() {
               <button
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
-                // TODO: Implement advanced filters
+                {/* Advanced filters can be implemented here */}
               }}
             >
               <Filter className="w-4 h-4 mr-2" />

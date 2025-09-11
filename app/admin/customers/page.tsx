@@ -60,7 +60,7 @@ export default function CustomersPage() {
       const params = new URLSearchParams()
       if (searchTerm) params.append('search', searchTerm)
       
-      const response = await fetch(`/api/admin/customers/public?${params.toString()}`, { headers })
+      const response = await fetch(`/api/admin/customers?${params.toString()}`, { headers })
       if (!response.ok) throw new Error('Failed to fetch customers')
       
       const result = await response.json()
@@ -262,7 +262,7 @@ export default function CustomersPage() {
             <button 
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
-                // TODO: Implement advanced filters
+                {/* Advanced filters can be implemented here */}
               }}
             >
               <Filter className="w-4 h-4 mr-2" />

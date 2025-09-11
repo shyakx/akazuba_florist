@@ -12,11 +12,14 @@ import {
   AlertCircle,
   Heart,
   ShoppingBag,
-  CheckCircle
+  CheckCircle,
+  Star,
+  MessageSquare
 } from 'lucide-react'
 import Link from 'next/link'
 import { useAdmin } from '@/contexts/AdminContext'
 import { showBackendOfflineNotification, showBackendOnlineNotification } from '@/lib/adminNotifications'
+import EmailTest from '@/components/EmailTest'
 
 interface DashboardStats {
   categories: number
@@ -36,6 +39,19 @@ interface TopProduct {
   revenue: number
 }
 
+interface RatingAnalytics {
+  totalRatings: number
+  averageRating: number
+  recentRatings: Array<{
+    id: string
+    productName: string
+    userName: string
+    rating: number
+    comment: string
+    createdAt: string
+  }>
+}
+
 
 export default function AdminDashboard() {
   
@@ -48,6 +64,53 @@ export default function AdminDashboard() {
     hasUnsavedChanges,
     markChangesSaved 
   } = useAdmin()
+
+  const [ratingAnalytics, setRatingAnalytics] = useState<RatingAnalytics>({
+    totalRatings: 0,
+    averageRating: 0,
+    recentRatings: []
+  })
+  const [ratingLoading, setRatingLoading] = useState(true)
+
+  // Load rating analytics
+  const loadRatingAnalytics = async () => {
+    try {
+      setRatingLoading(true)
+      
+      // Fetch rating analytics from backend
+      const response = await fetch('/api/admin/ratings/analytics')
+      
+      if (response.ok) {
+        const data = await response.json()
+        setRatingAnalytics({
+          totalRatings: data.totalRatings || 0,
+          averageRating: data.averageRating || 0,
+          recentRatings: data.recentRatings || []
+        })
+      } else {
+        // Fallback to empty state if backend is not available
+        setRatingAnalytics({
+          totalRatings: 0,
+          averageRating: 0,
+          recentRatings: []
+        })
+      }
+    } catch (error) {
+      console.error('Error loading rating analytics:', error)
+      // Fallback to empty state on error
+      setRatingAnalytics({
+        totalRatings: 0,
+        averageRating: 0,
+        recentRatings: []
+      })
+    } finally {
+      setRatingLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadRatingAnalytics()
+  }, [])
 
   
   const statCards = [
@@ -92,6 +155,20 @@ export default function AdminDashboard() {
       icon: ShoppingBag,
       color: 'bg-orange-500',
       link: '/admin/customers'
+    },
+    {
+      title: 'Total Ratings',
+      value: ratingLoading ? '...' : ratingAnalytics.totalRatings,
+      icon: Star,
+      color: 'bg-yellow-500',
+      link: '/admin/ratings'
+    },
+    {
+      title: 'Avg Rating',
+      value: ratingLoading ? '...' : ratingAnalytics.averageRating.toFixed(1),
+      icon: MessageSquare,
+      color: 'bg-indigo-500',
+      link: '/admin/ratings'
     }
   ]
   
@@ -274,6 +351,56 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+
+        {/* Recent Ratings */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Ratings</h2>
+          <div className="space-y-3">
+            {ratingLoading ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">Loading ratings...</p>
+              </div>
+            ) : ratingAnalytics.recentRatings.length > 0 ? (
+              ratingAnalytics.recentRatings.map((rating) => (
+                <div key={rating.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <Star className="w-4 h-4 text-yellow-600" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <p className="text-sm font-medium text-gray-900">{rating.userName}</p>
+                      <div className="flex items-center space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-3 h-3 ${
+                              star <= rating.rating
+                                ? 'text-yellow-400 fill-current'
+                                : 'text-gray-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-1">{rating.productName}</p>
+                    {rating.comment && (
+                      <p className="text-xs text-gray-500 italic">"{rating.comment}"</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(rating.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <Star className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No ratings yet</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Performance Overview */}
@@ -395,6 +522,11 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Email Notification System */}
+      <div className="mt-8">
+        <EmailTest />
       </div>
     </div>
   )

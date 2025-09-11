@@ -200,7 +200,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     setErrors(prev => ({ ...prev, products: null }))
     
     try {
-      const response = await fetch('/api/admin/products/public', {
+      const response = await fetch('/api/products', {
         headers: getAuthHeaders()
       })
       
@@ -209,7 +209,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       const result = await response.json()
       
       if (result.success) {
-        setProducts(result.data.products || [])
+        setProducts(result.data || [])
       } else {
         throw new Error('Failed to fetch products')
       }
@@ -227,7 +227,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     setErrors(prev => ({ ...prev, orders: null }))
     
     try {
-      const response = await fetch('/api/admin/orders/public', {
+      const response = await fetch('/api/orders', {
         headers: getAuthHeaders()
       })
       
@@ -254,7 +254,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     setErrors(prev => ({ ...prev, customers: null }))
     
     try {
-      const response = await fetch('/api/admin/customers/public', {
+      const response = await fetch('/api/admin/customers', {
         headers: getAuthHeaders()
       })
       

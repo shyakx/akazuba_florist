@@ -24,7 +24,7 @@ const Footer = () => {
             <div className="flex space-x-4">
               {[
                 { icon: Facebook, href: "#", label: "Facebook" },
-                { icon: Instagram, href: "https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4", label: "Instagram" },
+                { icon: Instagram, href: "https://www.instagram.com/akazuba_florists/", label: "Instagram" },
                 { icon: Twitter, href: "#", label: "Twitter" }
               ].map((social, index) => (
                 <a

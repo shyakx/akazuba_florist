@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     canonical: 'https://akazubaflorist.com',
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: 'akazuba-google-verification-2024',
   },
 }
 

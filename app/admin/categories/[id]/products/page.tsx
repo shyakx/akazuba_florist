@@ -57,7 +57,7 @@ export default function CategoryProductsPage() {
       setIsLoading(true)
       
       // Fetch categories to find the specific category
-      const categoriesResponse = await fetch('/api/admin/categories/public')
+      const categoriesResponse = await fetch('/api/admin/categories')
       if (!categoriesResponse.ok) throw new Error('Failed to fetch categories')
       const categoriesResult = await categoriesResponse.json()
       
@@ -71,13 +71,13 @@ export default function CategoryProductsPage() {
       }
       
       // Fetch all products
-      const productsResponse = await fetch('/api/admin/products/public')
+      const productsResponse = await fetch('/api/products')
       if (!productsResponse.ok) throw new Error('Failed to fetch products')
       const productsResult = await productsResponse.json()
       
       if (productsResult.success) {
         // Filter products by this category
-        const categoryProducts = productsResult.data.products.filter(
+        const categoryProducts = productsResult.data.filter(
           (product: Product) => product.category === category?.name
         )
         setProducts(categoryProducts)

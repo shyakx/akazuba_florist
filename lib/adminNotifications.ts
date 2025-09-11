@@ -1,113 +1,240 @@
-// Admin notification utilities for cross-tab communication
-
-export interface AdminNotificationData {
-  type: 'success' | 'error' | 'info' | 'warning'
+export interface AdminNotification {
+  id: string
+  type: 'new_rating' | 'new_order' | 'new_customer' | 'low_stock' | 'system_alert'
   title: string
   message: string
-  autoHide?: boolean
+  details?: any
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  read: boolean
+  createdAt: string
+  readAt?: string
 }
 
-// Show notification in all admin tabs
-export const showAdminNotification = (notification: AdminNotificationData) => {
-  // Store in localStorage to trigger cross-tab communication
-  localStorage.setItem('admin-notification', JSON.stringify(notification))
-  
-  // Also call the global function if available
-  if (typeof window !== 'undefined' && (window as any).showAdminNotification) {
-    (window as any).showAdminNotification(notification)
+class AdminNotificationManager {
+  private notifications: AdminNotification[] = []
+  private listeners: ((notifications: AdminNotification[]) => void)[] = []
+
+  // Add a new notification
+  addNotification(notification: Omit<AdminNotification, 'id' | 'createdAt' | 'read'>): AdminNotification {
+    const newNotification: AdminNotification = {
+      ...notification,
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      read: false
+    }
+
+    this.notifications.unshift(newNotification)
+    
+    // Keep only last 100 notifications
+    if (this.notifications.length > 100) {
+      this.notifications = this.notifications.slice(0, 100)
+    }
+
+    this.notifyListeners()
+    
+    // Store in localStorage for persistence
+    this.saveToStorage()
+    
+    return newNotification
   }
-  
-  // Clear the storage after a short delay to allow other tabs to pick it up
-  setTimeout(() => {
-    localStorage.removeItem('admin-notification')
-  }, 100)
+
+  // Get all notifications
+  getNotifications(): AdminNotification[] {
+    return this.notifications
+  }
+
+  // Get unread notifications
+  getUnreadNotifications(): AdminNotification[] {
+    return this.notifications.filter(n => !n.read)
+  }
+
+  // Get unread count
+  getUnreadCount(): number {
+    return this.notifications.filter(n => !n.read).length
+  }
+
+  // Mark notification as read
+  markAsRead(notificationId: string): void {
+    const notification = this.notifications.find(n => n.id === notificationId)
+    if (notification && !notification.read) {
+      notification.read = true
+      notification.readAt = new Date().toISOString()
+      this.notifyListeners()
+      this.saveToStorage()
+    }
+  }
+
+  // Mark all notifications as read
+  markAllAsRead(): void {
+    this.notifications.forEach(notification => {
+      if (!notification.read) {
+        notification.read = true
+        notification.readAt = new Date().toISOString()
+      }
+    })
+    this.notifyListeners()
+    this.saveToStorage()
+  }
+
+  // Delete notification
+  deleteNotification(notificationId: string): void {
+    this.notifications = this.notifications.filter(n => n.id !== notificationId)
+    this.notifyListeners()
+    this.saveToStorage()
+  }
+
+  // Clear all notifications
+  clearAllNotifications(): void {
+    this.notifications = []
+    this.notifyListeners()
+    this.saveToStorage()
+  }
+
+  // Subscribe to notification changes
+  subscribe(listener: (notifications: AdminNotification[]) => void): () => void {
+    this.listeners.push(listener)
+    
+    // Return unsubscribe function
+    return () => {
+      this.listeners = this.listeners.filter(l => l !== listener)
+    }
+  }
+
+  // Notify all listeners
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => listener([...this.notifications]))
+  }
+
+  // Save to localStorage
+  private saveToStorage(): void {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('admin-notifications', JSON.stringify(this.notifications))
+      } catch (error) {
+        console.error('Error saving notifications to localStorage:', error)
+      }
+    }
+  }
+
+  // Load from localStorage
+  loadFromStorage(): void {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem('admin-notifications')
+        if (stored) {
+          this.notifications = JSON.parse(stored)
+          this.notifyListeners()
+        }
+      } catch (error) {
+        console.error('Error loading notifications from localStorage:', error)
+      }
+    }
+  }
+
+  // Create notification for new rating
+  createRatingNotification(data: {
+    productName: string
+    rating: number
+    userName: string
+    comment: string
+  }): AdminNotification {
+    const stars = '★'.repeat(data.rating) + '☆'.repeat(5 - data.rating)
+    
+    return this.addNotification({
+      type: 'new_rating',
+      title: 'New Product Rating',
+      message: `${data.userName} rated "${data.productName}" ${stars} (${data.rating}/5)`,
+      details: {
+        productName: data.productName,
+        rating: data.rating,
+        userName: data.userName,
+        comment: data.comment,
+        stars
+      },
+      priority: data.rating <= 2 ? 'high' : 'medium'
+    })
+  }
+
+  // Create notification for new order
+  createOrderNotification(data: {
+    orderNumber: string
+    customerName: string
+    total: number
+  }): AdminNotification {
+    return this.addNotification({
+      type: 'new_order',
+      title: 'New Order Received',
+      message: `Order #${data.orderNumber} from ${data.customerName} - RWF ${data.total.toLocaleString()}`,
+      details: {
+        orderNumber: data.orderNumber,
+        customerName: data.customerName,
+        total: data.total
+      },
+      priority: 'high'
+    })
+  }
+
+  // Create notification for low stock
+  createLowStockNotification(data: {
+    productName: string
+    currentStock: number
+    minStock: number
+  }): AdminNotification {
+    return this.addNotification({
+      type: 'low_stock',
+      title: 'Low Stock Alert',
+      message: `${data.productName} is running low (${data.currentStock} remaining)`,
+      details: {
+        productName: data.productName,
+        currentStock: data.currentStock,
+        minStock: data.minStock
+      },
+      priority: 'medium'
+    })
+  }
 }
 
-// Success notification
-export const showSuccessNotification = (title: string, message: string) => {
-  showAdminNotification({
-    type: 'success',
-    title,
-    message
-  })
+// Create singleton instance
+export const adminNotifications = new AdminNotificationManager()
+
+// Load from storage on initialization
+if (typeof window !== 'undefined') {
+  adminNotifications.loadFromStorage()
 }
 
-// Error notification
-export const showErrorNotification = (title: string, message: string) => {
-  showAdminNotification({
-    type: 'error',
-    title,
-    message
-  })
-}
-
-// Warning notification
-export const showWarningNotification = (title: string, message: string) => {
-  showAdminNotification({
-    type: 'warning',
-    title,
-    message
-  })
-}
-
-// Info notification
-export const showInfoNotification = (title: string, message: string) => {
-  showAdminNotification({
-    type: 'info',
-    title,
-    message
-  })
-}
-
-// Product-specific notifications
-export const showProductDeletedNotification = (productName: string) => {
-  showSuccessNotification(
-    'Product Deleted',
-    `"${productName}" has been successfully deleted.`
-  )
-}
-
-export const showProductUpdatedNotification = (productName: string) => {
-  showSuccessNotification(
-    'Product Updated',
-    `"${productName}" has been successfully updated.`
-  )
-}
-
-export const showProductCreatedNotification = (productName: string) => {
-  showSuccessNotification(
-    'Product Created',
-    `"${productName}" has been successfully created.`
-  )
-}
-
-// Order-specific notifications
-export const showOrderUpdatedNotification = (orderNumber: string) => {
-  showSuccessNotification(
-    'Order Updated',
-    `Order #${orderNumber} has been successfully updated.`
-  )
-}
-
-// Customer-specific notifications
-export const showCustomerUpdatedNotification = (customerName: string) => {
-  showSuccessNotification(
-    'Customer Updated',
-    `Customer "${customerName}" has been successfully updated.`
-  )
-}
-
-// Backend status notifications
+// Convenience functions for common notifications
 export const showBackendOfflineNotification = () => {
-  showWarningNotification(
-    'Backend Offline',
-    'The backend server is not available. Changes may not persist.'
-  )
+  adminNotifications.addNotification({
+    type: 'system_alert',
+    title: 'Backend Offline',
+    message: 'Backend service is currently unavailable. Running in demo mode.',
+    priority: 'high'
+  })
 }
 
 export const showBackendOnlineNotification = () => {
-  showSuccessNotification(
-    'Backend Online',
-    'The backend server is now available. All operations will persist.'
-  )
+  adminNotifications.addNotification({
+    type: 'system_alert',
+    title: 'Backend Online',
+    message: 'Backend service is now available. All features restored.',
+    priority: 'medium'
+  })
+}
+
+export const showErrorNotification = (message: string) => {
+  adminNotifications.addNotification({
+    type: 'system_alert',
+    title: 'Error',
+    message: message,
+    priority: 'high'
+  })
+}
+
+export const showProductDeletedNotification = (productName: string) => {
+  adminNotifications.addNotification({
+    type: 'system_alert',
+    title: 'Product Deleted',
+    message: `Product "${productName}" has been successfully deleted.`,
+    priority: 'medium'
+  })
 }

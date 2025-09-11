@@ -101,7 +101,7 @@ export default function UnifiedLoginPage() {
       
       let success = false
       
-      // Auto-detect: Try admin first, then customer
+        // Auto-detect: Try admin first, then customer
       
       // Enhanced admin detection logic
       const email = formData.email.toLowerCase()
@@ -112,22 +112,22 @@ export default function UnifiedLoginPage() {
                            email.includes('staff') ||
                            email.endsWith('@akazubaflorist.com') ||
                            email.endsWith('@akazuba.com')
-      
-      if (isLikelyAdmin) {
-        success = await adminLogin({ username: formData.email, password: formData.password })
         
-        if (success) {
+        if (isLikelyAdmin) {
+          success = await adminLogin({ username: formData.email, password: formData.password })
+          
+          if (success) {
           // Admin login successful
+          } else {
+            success = await login({ email: formData.email, password: formData.password })
+          }
         } else {
           success = await login({ email: formData.email, password: formData.password })
-        }
-      } else {
-        success = await login({ email: formData.email, password: formData.password })
-        
-        if (success) {
+          
+          if (success) {
           // Customer login successful
-        } else {
-          success = await adminLogin({ username: formData.email, password: formData.password })
+          } else {
+            success = await adminLogin({ username: formData.email, password: formData.password })
         }
       }
       
@@ -194,13 +194,13 @@ export default function UnifiedLoginPage() {
               <div className="flex items-center">
                 <Shield className="h-4 w-4 mr-1" />
                 <span>Admin Access</span>
-              </div>
+          </div>
               <div className="w-px h-4 bg-gray-300"></div>
-              <div className="flex items-center">
+                <div className="flex items-center">
                 <User className="h-4 w-4 mr-1" />
                 <span>Customer Portal</span>
+                </div>
               </div>
-            </div>
           </div>
 
 

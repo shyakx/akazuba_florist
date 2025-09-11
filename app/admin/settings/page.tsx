@@ -59,7 +59,7 @@ export default function SettingsPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
       
-      const response = await fetch('/api/admin/settings/public', { headers })
+      const response = await fetch('/api/admin/settings', { headers })
       if (!response.ok) throw new Error('Failed to fetch settings')
       
       const result = await response.json()
@@ -90,7 +90,7 @@ export default function SettingsPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
       
-      const response = await fetch('/api/admin/settings/public', {
+      const response = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers,
         body: JSON.stringify(settings)

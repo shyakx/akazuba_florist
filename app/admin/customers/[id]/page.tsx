@@ -18,7 +18,7 @@ export default function CustomerDetailsPage() {
     const loadCustomer = async () => {
       try {
         setLoading(true)
-        const response = await fetch(`/api/admin/customers/public`)
+        const response = await fetch(`/api/admin/customers`)
         if (!response.ok) throw new Error('Failed to fetch customers')
         
         const result = await response.json()

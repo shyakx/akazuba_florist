@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
+import { emailService, OrderEmailData } from '@/lib/emailService'
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,60 +11,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Mock data for now - replace with actual database query
-    const orders = [
-      {
-        id: 1,
-        orderNumber: 'ORD-001',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
-        customerPhone: '0781234567',
-        items: [
-          { productId: 1, name: 'Red Rose Bouquet', quantity: 1, price: 25000 }
-        ],
-        total: 25000,
-        status: 'pending',
-        paymentMethod: 'MoMo',
-        deliveryAddress: 'Kigali, Rwanda',
-        createdAt: '2025-01-03T10:00:00Z',
-        updatedAt: '2025-01-03T10:00:00Z'
-      },
-      {
-        id: 2,
-        orderNumber: 'ORD-002',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane@example.com',
-        customerPhone: '0789876543',
-        items: [
-          { productId: 2, name: 'Lavender Perfume', quantity: 1, price: 45000 },
-          { productId: 3, name: 'Gift Basket', quantity: 1, price: 35000 }
-        ],
-        total: 80000,
-        status: 'completed',
-        paymentMethod: 'BK',
-        deliveryAddress: 'Kigali, Rwanda',
-        createdAt: '2025-01-02T15:30:00Z',
-        updatedAt: '2025-01-03T09:00:00Z'
-      },
-      {
-        id: 3,
-        orderNumber: 'ORD-003',
-        customerName: 'Robert Johnson',
-        customerEmail: 'robert@example.com',
-        customerPhone: '0785555555',
-        items: [
-          { productId: 4, name: 'Wedding Package', quantity: 1, price: 150000 }
-        ],
-        total: 150000,
-        status: 'processing',
-        paymentMethod: 'MoMo',
-        deliveryAddress: 'Kigali, Rwanda',
-        createdAt: '2025-01-01T12:00:00Z',
-        updatedAt: '2025-01-02T14:00:00Z'
-      }
-    ]
+    // Fetch orders from backend
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000/api/v1/admin/orders'
+      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/orders'
 
-    return NextResponse.json(orders)
+    try {
+      const response = await fetch(backendUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Backend responded with status: ${response.status}`)
+      }
+
+      const orders = await response.json()
+      return NextResponse.json(orders)
+    } catch (backendError) {
+      console.warn('Backend not available for orders, returning empty array:', backendError)
+      
+      // Return empty array when backend is not available
+      return NextResponse.json([])
+    }
   } catch (error) {
     console.error('Error fetching orders:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
@@ -86,20 +59,84 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Customer details, items, and total are required' }, { status: 400 })
     }
 
-    // Mock response - replace with actual database insert
-    const newOrder = {
-      id: Date.now(),
-      orderNumber: `ORD-${String(Date.now()).slice(-6)}`,
+    // Create order in backend
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000/api/v1/admin/orders'
+      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/orders'
+
+    const orderData = {
       customerName,
       customerEmail,
       customerPhone: body.customerPhone || '',
       items,
       total: Number(total),
-      status: 'pending',
       paymentMethod: body.paymentMethod || 'MoMo',
       deliveryAddress: deliveryAddress || '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      status: 'pending'
+    }
+
+    let newOrder
+    try {
+      const response = await fetch(backendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.token}`
+        },
+        body: JSON.stringify(orderData),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Backend responded with status: ${response.status}`)
+      }
+
+      newOrder = await response.json()
+    } catch (backendError) {
+      console.warn('Backend not available for order creation, creating local order:', backendError)
+      
+      // Fallback: create order locally when backend is not available
+      newOrder = {
+        id: Date.now(),
+        orderNumber: `ORD-${String(Date.now()).slice(-6)}`,
+        customerName,
+        customerEmail,
+        customerPhone: body.customerPhone || '',
+        items,
+        total: Number(total),
+        status: 'pending',
+        paymentMethod: body.paymentMethod || 'MoMo',
+        deliveryAddress: deliveryAddress || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+    }
+
+    // Send email notification to admin
+    try {
+      const emailData: OrderEmailData = {
+        orderNumber: newOrder.orderNumber,
+        customerName: newOrder.customerName,
+        customerEmail: newOrder.customerEmail,
+        customerPhone: newOrder.customerPhone,
+        total: newOrder.total,
+        items: newOrder.items.map((item: any) => ({
+          id: item.productId || item.id || '',
+          name: item.name || 'Unknown Product',
+          price: item.price || 0,
+          quantity: item.quantity || 1,
+          image: item.image || item.imageUrl || '/images/placeholder-product.jpg'
+        })),
+        orderDate: newOrder.createdAt,
+        deliveryAddress: newOrder.deliveryAddress,
+        paymentMethod: newOrder.paymentMethod,
+        orderStatus: newOrder.status
+      }
+
+      const emailSent = await emailService.sendOrderNotificationEmail(emailData)
+      console.log('📧 Order notification email sent:', emailSent)
+    } catch (emailError) {
+      console.error('❌ Failed to send order notification email:', emailError)
+      // Don't fail the order creation if email fails
     }
 
     return NextResponse.json(newOrder, { status: 201 })

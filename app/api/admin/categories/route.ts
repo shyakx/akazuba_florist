@@ -74,11 +74,11 @@ export async function POST(request: NextRequest) {
         message: 'Category creation simulated (backend not available)',
         data: {
           id: Date.now().toString(),
-          name,
-          description: description || '',
+      name,
+      description: description || '',
           isActive: true,
-          createdAt: new Date().toISOString()
-        }
+      createdAt: new Date().toISOString()
+    }
       })
     }
   } catch (error) {

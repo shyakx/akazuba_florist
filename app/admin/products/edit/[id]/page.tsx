@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useAdmin } from '@/contexts/AdminContext'
 import { ArrowLeft, Save, Upload, X } from 'lucide-react'
 
 export default function EditProductPage() {
   const router = useRouter()
   const params = useParams()
   const productId = params.id as string
+  const { updateProduct, refreshProducts } = useAdmin()
   
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
@@ -24,10 +26,10 @@ export default function EditProductPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const categories = [
-    { id: '1', name: 'Flowers' },
-    { id: '2', name: 'Perfumes' },
-    { id: '3', name: 'Wedding' },
-    { id: '4', name: 'Funeral' }
+    { id: 'Flowers', name: 'Flowers' },
+    { id: 'Perfumes', name: 'Perfumes' },
+    { id: 'Wedding', name: 'Wedding' },
+    { id: 'Funeral', name: 'Funeral' }
   ]
 
   // Real product data will be fetched from API
@@ -47,28 +49,23 @@ export default function EditProductPage() {
           headers['Authorization'] = `Bearer ${token}`
         }
         
-        const response = await fetch(`/api/admin/products/public`, {
+        const response = await fetch(`/api/admin/products/${productId}`, {
           headers
         })
-        if (!response.ok) throw new Error('Failed to fetch products')
+        if (!response.ok) throw new Error('Failed to fetch product')
         
         const result = await response.json()
-        if (result.success && result.data && result.data.products) {
-          // Find the specific product by ID
-          const foundProduct = result.data.products.find((p: any) => p.id === productId)
-          if (foundProduct) {
-            setFormData({
-              name: foundProduct.name || '',
-              description: foundProduct.description || '',
-              price: foundProduct.price?.toString() || '',
-              category: foundProduct.category || '',
-              stock: foundProduct.stock?.toString() || '',
-              status: foundProduct.status || 'active',
-              images: foundProduct.images || []
-            })
-          } else {
-            throw new Error('Product not found')
-          }
+        if (result.success && result.data) {
+          const product = result.data
+          setFormData({
+            name: product.name || '',
+            description: product.description || '',
+            price: product.price?.toString() || '',
+            category: product.category || '',
+            stock: product.stock?.toString() || '',
+            status: product.status || 'active',
+            images: product.images || []
+          })
         } else {
           throw new Error('Failed to fetch product data')
         }
@@ -173,9 +170,9 @@ export default function EditProductPage() {
           name: formData.name,
           description: formData.description,
           price: parseFloat(formData.price),
-          categoryId: formData.category,
-          stockQuantity: parseInt(formData.stock),
-          isActive: formData.status === 'active',
+          category: formData.category,
+          stock: parseInt(formData.stock),
+          status: formData.status,
           images: formData.images
         })
       })
@@ -183,6 +180,20 @@ export default function EditProductPage() {
       if (response.ok) {
         const result = await response.json()
         if (result.success) {
+          // Update the product in the AdminContext
+          updateProduct(productId, {
+            name: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            category: formData.category,
+            stock: parseInt(formData.stock),
+            status: formData.status as 'active' | 'inactive',
+            images: formData.images
+          })
+          
+          // Refresh the products list to ensure consistency
+          await refreshProducts()
+          
           alert('Product updated successfully!')
           router.push('/admin/products')
         } else {

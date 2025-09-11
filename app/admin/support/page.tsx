@@ -53,7 +53,7 @@ export default function AdminSupportPage() {
       if (filters.status !== 'all') params.append('status', filters.status)
       if (filters.priority !== 'all') params.append('priority', filters.priority)
       
-      const response = await fetch(`/api/admin/support-tickets/public?${params.toString()}`)
+      const response = await fetch(`/api/admin/support-tickets?${params.toString()}`)
       if (!response.ok) throw new Error('Failed to fetch support tickets')
       
       const result = await response.json()

@@ -332,7 +332,7 @@ export default function OrdersPage() {
             <button 
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
-                // TODO: Implement advanced filters
+                {/* Advanced filters can be implemented here */}
               }}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -374,9 +374,9 @@ export default function OrdersPage() {
                   </div>
                 </div>
               ) : (
-                <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
-                  <ShoppingCart className="w-8 h-8 text-green-600" />
-                </div>
+              <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+                <ShoppingCart className="w-8 h-8 text-green-600" />
+              </div>
               )}
               <div className="absolute top-4 right-4">
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
@@ -674,27 +674,27 @@ export default function OrdersPage() {
                     {selectedOrder.items?.map((item: any, index: number) => {
                       const itemImage = getOrderItemImage(item)
                       return (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-3">
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-3">
                             {itemImage ? (
-                              <img 
+                            <img 
                                 src={itemImage} 
                                 alt={item.name || item.product?.name} 
-                                className="w-12 h-12 object-cover rounded-lg"
+                              className="w-12 h-12 object-cover rounded-lg"
                                 loading="lazy"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement
                                   target.style.display = 'none'
                                 }}
-                              />
+                            />
                             ) : (
                               <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                                 <Package className="w-6 h-6 text-gray-400" />
                               </div>
-                            )}
-                            <div>
+                          )}
+                          <div>
                               <p className="font-medium text-gray-900">{item.name || item.product?.name || 'Unknown Product'}</p>
-                              <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                            <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                             </div>
                           </div>
                           <p className="font-semibold text-gray-900">RWF {((item.price || item.product?.price || 0) * item.quantity).toLocaleString()}</p>

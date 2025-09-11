@@ -30,18 +30,18 @@ export default function EditCategoryPage() {
         // Combine all categories
         const allCategories = [...flowerCategories, ...perfumeCategories]
         
-        // Find the specific category by ID
+          // Find the specific category by ID
         const foundCategory = allCategories.find(c => c.id === categoryId)
         
-        if (foundCategory) {
-          setFormData({
-            name: foundCategory.name || '',
-            description: foundCategory.description || '',
+          if (foundCategory) {
+            setFormData({
+              name: foundCategory.name || '',
+              description: foundCategory.description || '',
             status: 'active', // Static categories are always active
-            image: foundCategory.image || null
-          })
-        } else {
-          throw new Error('Category not found')
+              image: foundCategory.image || null
+            })
+          } else {
+            throw new Error('Category not found')
         }
       } catch (error) {
         console.error('Error loading category:', error)
@@ -138,9 +138,9 @@ export default function EditCategoryPage() {
       if (response.ok) {
         const result = await response.json()
         if (result.success) {
-          alert('Category updated successfully!')
-          router.push('/admin/categories')
-        } else {
+        alert('Category updated successfully!')
+        router.push('/admin/categories')
+      } else {
           throw new Error(result.message || 'Failed to update category')
         }
       } else {

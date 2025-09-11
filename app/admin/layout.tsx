@@ -147,16 +147,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   className={`nav-item group ${isActive ? 'active' : ''} ${isActive ? 'ring-2 ring-blue-300 ring-opacity-50' : ''}`}
                   title={isActive ? `Currently viewing ${item.name}` : `Go to ${item.name}`}
                   style={isActive ? {
-                    backgroundColor: '#ffffff !important',
-                    color: '#1e40af !important',
-                    transform: 'scale(1.05) !important',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3) !important',
-                    borderLeft: '4px solid #3b82f6 !important',
-                    borderRadius: '8px !important',
-                    fontWeight: '600 !important',
-                    border: '2px solid #3b82f6 !important',
-                    position: 'relative !important',
-                    zIndex: '10 !important'
+                    backgroundColor: '#ffffff',
+                    color: '#1e40af',
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                    borderLeft: '4px solid #3b82f6',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    border: '2px solid #3b82f6',
+                    position: 'relative',
+                    zIndex: 10
                   } : {}}
                 >
                   <item.icon className="nav-icon" />
@@ -270,6 +270,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              <AdminNotification />
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">Admin User</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>
@@ -322,9 +323,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
       </div>
-      
-      {/* Admin Notifications */}
-      <AdminNotification />
       </AdminProvider>
     </AdminErrorBoundary>
   )

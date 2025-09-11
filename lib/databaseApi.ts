@@ -138,7 +138,6 @@ class DatabaseAPI {
   private getCachedData(key: string): any | null {
     const cached = this.cache.get(key)
     if (cached && (Date.now() - cached.timestamp) < this.CACHE_DURATION) {
-      console.log('📦 Database API: Using cached data for:', key)
       return cached.data
     }
     return null
@@ -146,13 +145,11 @@ class DatabaseAPI {
 
   private setCachedData(key: string, data: any): void {
     this.cache.set(key, { data, timestamp: Date.now() })
-    console.log('📦 Database API: Cached data for:', key)
   }
 
   // Invalidate cache for admin operations
   private invalidateCache(): void {
     this.cache.clear()
-    console.log('🗑️ Database API: Cache invalidated')
   }
 
   // Get all products with caching
@@ -165,35 +162,25 @@ class DatabaseAPI {
 
     try {
       const timestamp = Date.now()
-      const url = `${this.baseURL}/products?limit=1000&_t=${timestamp}`
-      console.log('🌐 Database API: Fetching from:', url)
+      // Use the public products API endpoint instead of backend directly
+      const url = `/api/products?limit=1000&_t=${timestamp}`
       
       const response = await fetch(url)
       const data = await response.json()
-      
-      console.log('📊 Database API Response:', {
-        success: data.success,
-        dataLength: data.data?.length || 0,
-        pagination: data.pagination,
-        sampleProducts: data.data?.slice(0, 3).map((p: any) => ({ id: p.id, name: p.name, category: p.category }))
-      })
       
       if (data.success && data.data) {
         const convertedProducts = data.data.map((dbProduct: DatabaseProduct) => {
           return convertDatabaseProductToProduct(dbProduct)
         })
         
-        console.log(`✅ Database API: Converted ${convertedProducts.length} products`)
-        
         // Cache the result
         this.setCachedData(cacheKey, convertedProducts)
         return convertedProducts
       }
       
-      console.log('⚠️ Database API: No data or success false')
       return []
     } catch (error) {
-      console.error('❌ Database API: Get all products error:', error)
+      console.error('Database API: Get all products error:', error)
       return []
     }
   }

@@ -298,7 +298,7 @@ export default function CategoriesPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-pink-500 group-hover:translate-x-1 transition-all duration-300" />
+                    <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-pink-500 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
                   </div>
                 </div>
@@ -402,7 +402,7 @@ export default function CategoriesPage() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all duration-300" />
+                    <ArrowRight className="h-5 w-5 text-gray-400 group-hover:text-purple-500 group-hover:translate-x-1 transition-all duration-300" />
                     </div>
                   </div>
                 </div>

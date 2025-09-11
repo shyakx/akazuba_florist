@@ -163,7 +163,7 @@ export default function OfflinePage() {
             Need help? Contact us when you're back online:
           </p>
           <p className="font-medium">
-            📞 +250 XXX XXX XXX
+            📞 +250 784 586 110
           </p>
           <p className="font-medium">
             ✉️ info@akazuba.com

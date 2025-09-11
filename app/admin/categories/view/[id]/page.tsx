@@ -36,7 +36,7 @@ export default function CategoryViewPage() {
         // Find the specific category by ID
         const foundCategory = allCategories.find(c => c.id === categoryId)
         
-        if (foundCategory) {
+          if (foundCategory) {
           setCategory({
             id: foundCategory.id,
             name: foundCategory.name,
@@ -46,8 +46,8 @@ export default function CategoryViewPage() {
             imageUrl: foundCategory.image,
             createdAt: new Date().toISOString() // Default creation date
           })
-        } else {
-          throw new Error('Category not found')
+          } else {
+            throw new Error('Category not found')
         }
       } catch (error) {
         console.error('Error loading category:', error)

@@ -1,136 +1,157 @@
-// Error handling utilities for the application
+import { NextResponse } from 'next/server'
 
-export interface AppError {
+export interface ApiError {
+  success: false
   message: string
+  error?: string
   code?: string
-  statusCode?: number
   details?: any
 }
 
-export class CustomError extends Error {
-  public code: string
-  public statusCode: number
-  public details?: any
-
-  constructor(message: string, code: string = 'UNKNOWN_ERROR', statusCode: number = 500, details?: any) {
-    super(message)
-    this.name = 'CustomError'
-    this.code = code
-    this.statusCode = statusCode
-    this.details = details
+export interface ApiSuccess<T = any> {
+  success: true
+  message: string
+  data?: T
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    pages: number
   }
 }
 
-// API Error Handler
-export const handleApiError = (error: unknown): AppError => {
-  if (error instanceof CustomError) {
-    return {
-      message: error.message,
-      code: error.code,
-      statusCode: error.statusCode,
-      details: error.details
-    }
+export type ApiResponse<T = any> = ApiSuccess<T> | ApiError
+
+// Standard error responses
+export const createErrorResponse = (
+  message: string,
+  status: number = 500,
+  error?: string,
+  code?: string,
+  details?: any
+): NextResponse<ApiError> => {
+  const errorResponse: ApiError = {
+    success: false,
+    message,
+    ...(error && { error }),
+    ...(code && { code }),
+    ...(details && { details })
   }
 
-  if (error instanceof Error) {
-    return {
-      message: error.message,
-      code: 'UNKNOWN_ERROR',
-      statusCode: 500
-    }
-  }
-
-  return {
-    message: 'An unexpected error occurred',
-    code: 'UNKNOWN_ERROR',
-    statusCode: 500
-  }
+  return NextResponse.json(errorResponse, { status })
 }
 
-// Frontend Error Handler
-export const handleFrontendError = (error: unknown): string => {
-  if (error instanceof CustomError) {
-    return error.message
+// Standard success responses
+export const createSuccessResponse = <T>(
+  data: T,
+  message: string = 'Success',
+  pagination?: {
+    page: number
+    limit: number
+    total: number
+    pages: number
+  }
+): NextResponse<ApiSuccess<T>> => {
+  const successResponse: ApiSuccess<T> = {
+    success: true,
+    message,
+    data,
+    ...(pagination && { pagination })
   }
 
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  if (typeof error === 'string') {
-    return error
-  }
-
-  return 'An unexpected error occurred. Please try again.'
+  return NextResponse.json(successResponse)
 }
 
-// Validation Error Handler
-export const handleValidationError = (errors: Record<string, string[]>): string => {
-  const errorMessages = Object.entries(errors)
-    .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
-    .join('; ')
+// Common error types
+export const ErrorTypes = {
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  NOT_FOUND: 'NOT_FOUND',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  BACKEND_ERROR: 'BACKEND_ERROR',
+  NETWORK_ERROR: 'NETWORK_ERROR'
+} as const
+
+// Predefined error responses
+export const ErrorResponses = {
+  unauthorized: (message: string = 'Unauthorized access') =>
+    createErrorResponse(message, 401, 'Authentication required', ErrorTypes.UNAUTHORIZED),
   
-  return `Validation failed: ${errorMessages}`
+  forbidden: (message: string = 'Insufficient permissions') =>
+    createErrorResponse(message, 403, 'Access denied', ErrorTypes.FORBIDDEN),
+  
+  notFound: (message: string = 'Resource not found') =>
+    createErrorResponse(message, 404, 'Resource not found', ErrorTypes.NOT_FOUND),
+  
+  validationError: (message: string = 'Validation failed', details?: any) =>
+    createErrorResponse(message, 400, 'Invalid input', ErrorTypes.VALIDATION_ERROR, details),
+  
+  internalError: (message: string = 'Internal server error') =>
+    createErrorResponse(message, 500, 'Server error', ErrorTypes.INTERNAL_ERROR),
+  
+  backendError: (message: string = 'Backend service unavailable') =>
+    createErrorResponse(message, 503, 'Service unavailable', ErrorTypes.BACKEND_ERROR),
+  
+  networkError: (message: string = 'Network error') =>
+    createErrorResponse(message, 502, 'Network error', ErrorTypes.NETWORK_ERROR)
 }
 
-// Network Error Handler
-export const handleNetworkError = (error: unknown): string => {
-  if (error instanceof TypeError && error.message.includes('fetch')) {
-    return 'Network error. Please check your internet connection and try again.'
+// Input validation helper
+export function validateRequired(data: Record<string, any>, requiredFields: string[]): string[] {
+  const missingFields: string[] = []
+  
+  for (const field of requiredFields) {
+    if (data[field] === undefined || data[field] === null || data[field] === '') {
+      missingFields.push(field)
+    }
   }
-
-  return handleFrontendError(error)
+  
+  return missingFields
 }
 
-// Database Error Handler
-export const handleDatabaseError = (error: unknown): AppError => {
-  if (error instanceof Error) {
-    // Prisma errors
-    if (error.message.includes('Unique constraint')) {
-      return {
-        message: 'This record already exists',
-        code: 'DUPLICATE_ENTRY',
-        statusCode: 409
+// Async error handler wrapper
+export function withErrorHandling<T extends any[], R>(
+  handler: (...args: T) => Promise<NextResponse<ApiResponse<R>>>
+) {
+  return async (...args: T): Promise<NextResponse<ApiResponse<R>>> => {
+    try {
+      return await handler(...args)
+    } catch (error) {
+      console.error('Unhandled error:', error)
+      
+      if (error instanceof Error) {
+        return ErrorResponses.internalError(error.message)
       }
-    }
-
-    if (error.message.includes('Foreign key constraint')) {
-      return {
-        message: 'Referenced record not found',
-        code: 'FOREIGN_KEY_CONSTRAINT',
-        statusCode: 400
-      }
-    }
-
-    if (error.message.includes('Record to update not found')) {
-      return {
-        message: 'Record not found',
-        code: 'NOT_FOUND',
-        statusCode: 404
-      }
+      
+      return ErrorResponses.internalError('An unexpected error occurred')
     }
   }
-
-  return handleApiError(error)
 }
 
-// Logging utility
-export const logError = (error: unknown, context?: string): void => {
-  const timestamp = new Date().toISOString()
-  const errorInfo = {
-    timestamp,
-    context,
-    error: error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    } : error
+// Backend API error handler
+export function handleBackendError(error: any, fallbackMessage: string = 'Backend service unavailable') {
+  console.error('Backend error:', error)
+  
+  if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+    return ErrorResponses.backendError('Backend service is not available')
   }
-
-  if (process.env.NODE_ENV === 'development') {
-    console.error('Error logged:', errorInfo)
-  } else {
-    // In production, you would send this to a logging service
-    console.error('Error logged:', errorInfo)
+  
+  if (error.status === 401) {
+    return ErrorResponses.unauthorized('Backend authentication failed')
   }
+  
+  if (error.status === 403) {
+    return ErrorResponses.forbidden('Backend access denied')
+  }
+  
+  if (error.status === 404) {
+    return ErrorResponses.notFound('Backend resource not found')
+  }
+  
+  if (error.status >= 500) {
+    return ErrorResponses.backendError('Backend server error')
+  }
+  
+  return ErrorResponses.backendError(fallbackMessage)
 }

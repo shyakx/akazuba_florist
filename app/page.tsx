@@ -70,7 +70,7 @@ export default function HomePage() {
           url: "https://akazubaflorist.com",
           logo: "https://akazubaflorist.com/images/akazuba-logo.png",
           sameAs: [
-            "https://www.instagram.com/akazuba_florists"
+            "https://www.instagram.com/akazuba_florists/"
           ],
           contactPoint: {
             "@type": "ContactPoint",

@@ -58,7 +58,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
 
   // Social Media
   const [socialMedia, setSocialMedia] = useState({
-    instagram: 'https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4',
+    instagram: 'https://www.instagram.com/akazuba_florists/',
     facebook: '',
     twitter: '',
     whatsapp: '0784586110'
@@ -168,7 +168,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
   const loadContent = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/admin/settings/public', {
+      const response = await fetch('/api/admin/settings', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         }
@@ -208,7 +208,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
       }
 
       // Save to backend
-      const response = await fetch('/api/admin/settings/public', {
+      const response = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -580,7 +580,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                     value={socialMedia.instagram}
                     onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4"
+                    placeholder="https://www.instagram.com/akazuba_florists/"
                   />
                 </div>
                 
@@ -613,7 +613,7 @@ const ContentManager = ({ isOpen, onClose }: ContentManagerProps) => {
                     value={socialMedia.whatsapp}
                     onChange={(e) => handleSocialMediaChange('whatsapp', e.target.value)}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder="0784586110"
+                    placeholder="+250784586110"
                   />
                 </div>
               </div>

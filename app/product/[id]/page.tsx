@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { Product } from '@/types'
 import Footer from '@/components/Footer'
+import RatingSystem from '@/components/RatingSystem'
 import toast from 'react-hot-toast'
 
 const ProductDetailPage = () => {
@@ -344,6 +345,19 @@ const ProductDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Rating System */}
+      {product && (
+        <div className="container mx-auto px-4 py-8">
+          <RatingSystem
+            productId={product.id}
+            productName={product.name}
+            onRatingSubmit={(rating) => {
+              console.log('New rating submitted:', rating)
+            }}
+          />
+        </div>
+      )}
 
       <Footer />
     </div>
