@@ -51,8 +51,8 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       isLoadingRef.current = true
       setIsLoading(true)
       setError(null)
-      console.log('🔄 Loading products via unified service')
-      const productsData = await unifiedProductService.getAllProducts()
+      console.log('🔄 Loading products via unified service (admin context for full sync)')
+      const productsData = await unifiedProductService.getAllProducts(false, true)
       console.log('✅ Products loaded via unified service:', productsData.length)
       setProducts(productsData)
     } catch (err) {

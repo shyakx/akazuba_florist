@@ -264,7 +264,7 @@ const Header = () => {
                         <User className="w-4 h-4 mr-2" />
                         Profile
                       </Link>
-
+                      
                       {/* Admin Panel Link - Only show for admin users */}
                       {user?.role === 'ADMIN' && (
                         <Link

@@ -46,7 +46,7 @@ export async function PUT(
   try {
     const { id } = params
     console.log('🔄 Updating product:', id)
-    
+
     const body = await request.json()
     console.log('📝 Update data received:', body)
     

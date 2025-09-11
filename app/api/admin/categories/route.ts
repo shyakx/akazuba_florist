@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
     // For now, we'll return a success response since category creation
     // through the unified service would need backend implementation
     const newCategory = {
-      id: Date.now().toString(),
+          id: Date.now().toString(),
       name,
       description: description || '',
-      isActive: true,
+          isActive: true,
       createdAt: new Date().toISOString()
     }
     

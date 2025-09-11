@@ -25,21 +25,21 @@ export async function GET(request: NextRequest) {
       try {
         console.log('🔍 Trying backend endpoint:', backendUrl)
         
-        const response = await fetch(backendUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
+      const response = await fetch(backendUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
             ...(authHeader && { 'Authorization': authHeader }),
-          },
-        })
+        },
+      })
 
         if (response.ok) {
-          const data = await response.json()
+      const data = await response.json()
           console.log('✅ Rating analytics fetched successfully from:', backendUrl)
-          return NextResponse.json({
-            success: true,
-            data: data
-          })
+      return NextResponse.json({
+        success: true,
+        data: data
+      })
         } else {
           console.log(`❌ Endpoint ${backendUrl} returned status: ${response.status}`)
           lastError = new Error(`Backend responded with status: ${response.status}`)
@@ -54,9 +54,9 @@ export async function GET(request: NextRequest) {
     console.warn('⚠️ All rating analytics endpoints failed, returning mock data:', lastError)
     
     // Return realistic mock analytics data
-    return NextResponse.json({
-      success: true,
-      data: {
+      return NextResponse.json({
+        success: true,
+        data: {
         totalRatings: 47,
         averageRating: 4.2,
         recentRatings: [

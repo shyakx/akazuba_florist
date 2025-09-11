@@ -301,30 +301,30 @@ export default function EditProductPage() {
       }
       
       const updateData = {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        category: formData.category,
-        stock: parseInt(formData.stock),
-        status: formData.status,
-        images: formData.images
+          name: formData.name,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          category: formData.category,
+          stock: parseInt(formData.stock),
+          status: formData.status,
+          images: formData.images
       }
       
       console.log('🔄 Updating product with data:', updateData)
-      
+          
       // Use the unified service via AdminContext
       await updateProduct(productId, {
-        name: formData.name,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        category: formData.category,
-        stock: parseInt(formData.stock),
-        status: formData.status as 'active' | 'inactive',
-        images: formData.images
-      })
-      
-      alert('Product updated successfully!')
-      router.push('/admin/products')
+            name: formData.name,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            category: formData.category,
+            stock: parseInt(formData.stock),
+            status: formData.status as 'active' | 'inactive',
+            images: formData.images
+          })
+          
+          alert('Product updated successfully!')
+          router.push('/admin/products')
     } catch (error) {
       console.error('Error updating product:', error)
       alert(`Failed to update product: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -542,30 +542,30 @@ export default function EditProductPage() {
                       <div className="text-sm text-gray-600">
                         Drag and drop images here, or{' '}
                         <label className={`inline-flex items-center space-x-1 px-3 py-1 rounded-md transition-colors ${
-                          uploadingImages 
+                  uploadingImages 
                             ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
                             : 'bg-blue-600 hover:bg-blue-700 cursor-pointer text-white'
                         }`}>
-                          {uploadingImages ? (
-                            <>
+                  {uploadingImages ? (
+                    <>
                               <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                              <span>Uploading...</span>
-                            </>
-                          ) : (
-                            <>
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
                               <Upload className="w-3 h-3" />
-                              <span>Choose Files</span>
-                            </>
-                          )}
-                          <input
-                            type="file"
-                            multiple
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            disabled={uploadingImages}
-                            className="hidden"
-                          />
-                        </label>
+                  <span>Choose Files</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploadingImages}
+                    className="hidden"
+                  />
+                </label>
                       </div>
                       <div className="text-xs text-gray-500 mt-2">
                         PNG, JPG up to 5MB each
@@ -580,9 +580,9 @@ export default function EditProductPage() {
             {formData.images.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-600">
-                    {formData.images.length} image(s) selected
-                  </p>
+                <p className="text-sm text-gray-600">
+                  {formData.images.length} image(s) selected
+                </p>
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, images: [] }))}
@@ -591,34 +591,34 @@ export default function EditProductPage() {
                     Clear All
                   </button>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <img
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {formData.images.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <img
                         src={image.startsWith('blob:') ? image : image}
-                        alt={`Preview ${index + 1}`}
+                      alt={`Preview ${index + 1}`}
                         className="w-full h-32 object-cover rounded-md border border-gray-200 hover:border-blue-300 transition-colors"
                         onError={(e) => {
                           // Fallback to placeholder if image fails to load
                           e.currentTarget.src = '/images/placeholder-product.jpg'
                         }}
                         loading="lazy"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
                         className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
                         title="Remove image"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                       <div className="absolute bottom-2 left-2 right-2">
                         <p className="text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded truncate">
                           {image.includes('/uploads/') ? 'New Upload' : 'Existing'}
                         </p>
                       </div>
-                    </div>
-                  ))}
+                  </div>
+                ))}
                 </div>
               </div>
             )}

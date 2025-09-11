@@ -478,7 +478,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       }
     } catch (error) {
       console.error('❌ Error creating product:', error)
-      markChangesUnsaved()
+    markChangesUnsaved()
       throw error
     }
   }, [markChangesUnsaved, markChangesSaved, refreshProducts, refreshStats])
@@ -518,7 +518,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         console.log('✅ Product updated successfully:', updatedProduct)
       } else {
         // Fallback to local update if backend fails
-        setProducts(prev => {
+    setProducts(prev => {
           const updated = prev.map(product => {
             if (product.id === id) {
               const updatedProduct = { ...product, ...updates }
@@ -527,9 +527,9 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
             }
             return product
           })
-          return updated
-        })
-        markChangesUnsaved()
+      return updated
+    })
+    markChangesUnsaved()
       }
     } catch (error) {
       console.error('❌ Error updating product:', error)
@@ -565,7 +565,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     } catch (error) {
       console.error('❌ Error deleting product:', error)
       // Don't remove from local state if there's an error
-      markChangesUnsaved()
+    markChangesUnsaved()
     }
   }, [markChangesUnsaved, markChangesSaved, refreshProducts, refreshStats])
   
