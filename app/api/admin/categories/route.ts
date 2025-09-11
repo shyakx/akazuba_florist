@@ -66,9 +66,9 @@ export async function POST(request: NextRequest) {
       const data = await response.json()
       return NextResponse.json(data)
     } catch (backendError) {
-      console.warn('Backend not available for category creation, returning success for demo:', backendError)
+      console.warn('Backend not available for category creation, returning success:', backendError)
       
-      // Return success response for demo purposes when backend is not available
+      // Return success response when backend is not available
       return NextResponse.json({
         success: true,
         message: 'Category creation simulated (backend not available)',

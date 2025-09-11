@@ -188,19 +188,8 @@ export default function UnifiedLoginPage() {
               <Flower2 className="h-12 w-12 text-pink-600 mr-3" />
               <h1 className="text-2xl font-bold text-gray-900">Akazuba Florist</h1>
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Unified Login</h2>
-            <p className="text-gray-600">One login for customers and administrators</p>
-            <div className="mt-3 flex items-center justify-center space-x-4 text-sm text-gray-500">
-              <div className="flex items-center">
-                <Shield className="h-4 w-4 mr-1" />
-                <span>Admin Access</span>
-          </div>
-              <div className="w-px h-4 bg-gray-300"></div>
-                <div className="flex items-center">
-                <User className="h-4 w-4 mr-1" />
-                <span>Customer Portal</span>
-                </div>
-              </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Sign In</h2>
+            <p className="text-gray-600">Access your account</p>
           </div>
 
 

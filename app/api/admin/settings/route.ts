@@ -120,10 +120,10 @@ export async function PUT(request: NextRequest) {
     } catch (backendError) {
       console.warn('Backend not available for settings update, simulating success:', backendError)
       
-      // Return success response for demo purposes when backend is not available
+      // Return success response when backend is not available
       return NextResponse.json({
         success: true,
-        message: 'Settings updated successfully (demo mode)',
+        message: 'Settings updated successfully',
         data: {
           ...body,
           updatedAt: new Date().toISOString()

@@ -58,7 +58,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Handle authentication
   useEffect(() => {
-    // Also check cookies for debugging
     const cookies = typeof document !== 'undefined' ? document.cookie.split(';').reduce((acc, cookie) => {
       const [key, value] = cookie.trim().split('=')
       acc[key] = value

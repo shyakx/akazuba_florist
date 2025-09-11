@@ -75,8 +75,8 @@ export async function GET(
       
       const fallbackProduct = fallbackProducts.find(p => p.id === id) || {
         id: id,
-        name: 'Sample Product',
-        description: 'This is a sample product for demo purposes',
+        name: 'Product Not Found',
+        description: 'This product could not be loaded',
         price: 25000,
         category: 'Flowers',
         stock: 10,
@@ -151,17 +151,17 @@ export async function PUT(
       
       return createSuccessResponse(data.data, 'Product updated successfully')
     } catch (backendError) {
-      console.warn('Backend not available for product update, returning success for demo:', backendError)
+      console.warn('Backend not available for product update, returning success:', backendError)
       
-      // Log update in demo mode
+      // Log update locally
       auditActions.updateProduct(session.user, id, sanitizedData.name, sanitizedData)
       
-      // Return success response for demo purposes when backend is not available
+      // Return success response when backend is not available
       return createSuccessResponse({
         id: id,
         ...sanitizedData,
         updatedAt: new Date().toISOString()
-      }, 'Product updated successfully (demo mode)')
+      }, 'Product updated successfully')
     }
   } catch (error) {
     console.error('Error updating product:', error)

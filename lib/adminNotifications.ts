@@ -207,7 +207,7 @@ export const showBackendOfflineNotification = () => {
   adminNotifications.addNotification({
     type: 'system_alert',
     title: 'Backend Offline',
-    message: 'Backend service is currently unavailable. Running in demo mode.',
+    message: 'Backend service is currently unavailable. Running in offline mode.',
     priority: 'high'
   })
 }
