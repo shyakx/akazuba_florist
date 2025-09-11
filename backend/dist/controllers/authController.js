@@ -9,6 +9,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const client_1 = require("@prisma/client");
 const logger_1 = require("../utils/logger");
 const auth_1 = require("../middleware/auth");
+const emailService_1 = require("../utils/emailService");
 const prisma = new client_1.PrismaClient();
 // JWT Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-2024-development-super-secure-key-for-production';
@@ -528,9 +529,20 @@ const forgotPassword = async (req, res) => {
         // Store reset token in database (you might want to create a separate table for this)
         // For now, we'll use a simple approach
         const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-        // TODO: Send email with reset link
-        // For now, we'll just log it (in production, use a service like SendGrid, Nodemailer, etc.)
-        console.log(`Password reset link for ${user.email}: ${resetLink}`);
+        // Send password reset email
+        try {
+            const emailSent = await emailService_1.emailService.sendPasswordResetEmail(user.email, `${user.firstName} ${user.lastName}`, resetLink);
+            if (emailSent) {
+                console.log(`✅ Password reset email sent to ${user.email}`);
+            }
+            else {
+                console.log(`⚠️ Failed to send password reset email to ${user.email}`);
+            }
+        }
+        catch (emailError) {
+            console.error('❌ Error sending password reset email:', emailError);
+            // Don't fail the request if email fails, just log it
+        }
         res.status(200).json({
             success: true,
             message: 'If an account with that email exists, a password reset link has been sent.',

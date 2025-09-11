@@ -29,6 +29,9 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!accessToken
   const isAdmin = userRole === 'ADMIN'
   
+  // Additional security check - ensure token is not empty string
+  const hasValidToken = accessToken && accessToken.trim() !== ''
+  
   // Only log important middleware checks (not every request)
   if (pathname.startsWith('/admin')) {
     console.log('🔒 Admin route check:', {
@@ -50,8 +53,8 @@ export function middleware(request: NextRequest) {
   
   // Handle admin routes - STRICT SECURITY
   if (adminRoutes.some(route => pathname.startsWith(route))) {
-    if (!isAuthenticated) {
-      console.log('❌ Admin access denied - not authenticated')
+    if (!hasValidToken) {
+      console.log('❌ Admin access denied - no valid token')
       return NextResponse.redirect(new URL('/unified-login', request.url))
     }
     

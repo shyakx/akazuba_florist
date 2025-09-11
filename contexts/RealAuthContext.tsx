@@ -33,6 +33,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false)
   const router = useRouter()
 
+  // Check if token is expired
+  const isTokenExpired = useCallback((token: string): boolean => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const isExpired = payload.exp * 1000 < Date.now()
+      if (isExpired) {
+        console.log('⏰ Token expired at:', new Date(payload.exp * 1000).toISOString())
+      }
+      return isExpired
+    } catch (error) {
+      console.error('❌ Error parsing token:', error)
+      return true // Consider invalid tokens as expired
+    }
+  }, [])
+
   // Cleanup function to clear all authentication data
   const clearAllAuthData = useCallback(() => {
     // Only clear localStorage and cookies if we're in browser environment
@@ -42,6 +57,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('user')
       localStorage.removeItem('hasVisitedBefore')
+      
+      // Clear sessionStorage
+      sessionStorage.removeItem('authSessionStarted')
+      sessionStorage.removeItem('loginRedirected')
       
       // Clear cookies
       document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
@@ -87,26 +106,71 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const token = localStorage.getItem('accessToken')
         const storedUser = localStorage.getItem('user')
         
-        if (token && storedUser) {
-          console.log('🔍 Found existing token and user data, validating...')
+        // Check if this is a fresh session (no sessionStorage flag)
+        const hasSessionFlag = sessionStorage.getItem('authSessionStarted')
+        if (!hasSessionFlag) {
+          console.log('🆕 Fresh session detected, checking for valid tokens...')
+          
+          // Only clear data if there's no valid token OR if token is expired
+          if (!token) {
+            console.log('🔓 No token found, clearing any stale auth data')
+            clearAllAuthData()
+            setUser(null)
+          } else if (isTokenExpired(token)) {
+            console.log('⏰ Token is expired, clearing auth data')
+            clearAllAuthData()
+            setUser(null)
+          } else {
+            console.log('🔑 Valid token found, will validate it')
+          }
+          
+          // Mark this session as started
+          sessionStorage.setItem('authSessionStarted', 'true')
+        }
+        
+        // For security, always validate token on initialization
+        if (token) {
+          console.log('🔍 Found existing token, validating...')
           try {
-            const userData = JSON.parse(storedUser)
-            // Set user immediately from stored data
-            setUser(userData)
-            console.log('✅ User restored from localStorage:', userData.email)
+            // Check if token is expired first
+            if (isTokenExpired(token)) {
+              console.log('⏰ Token is expired, clearing auth data')
+              clearAllAuthData()
+              setUser(null)
+              return
+            }
             
-            // Then validate token in background
+            // Always validate token first before setting user
             await validateAndSetUser(token)
           } catch (error) {
-            console.error('❌ Error parsing stored user data:', error)
+            console.error('❌ Token validation failed:', error)
+            
+            // If validation failed but it's a network error, try using stored user data
+            if (error instanceof Error && error.message.includes('Network error')) {
+              console.log('🌐 Backend unavailable during initialization, using stored user data')
+              const storedUser = localStorage.getItem('user')
+              if (storedUser) {
+                try {
+                  const user = JSON.parse(storedUser)
+                  setUser(user)
+                  console.log('👤 Using stored user data during initialization:', user.email)
+                  return // Don't clear auth data for network errors
+                } catch (parseError) {
+                  console.error('❌ Failed to parse stored user data:', parseError)
+                }
+              }
+            }
+            
+            // Only clear auth data for actual authentication errors
+            console.warn('❌ Clearing auth data due to validation failure')
             clearAllAuthData()
+            setUser(null)
           }
-        } else if (token) {
-          console.log('🔍 Found token but no user data, validating...')
-          await validateAndSetUser(token)
         } else {
           console.log('🔓 No existing token found')
           setUser(null)
+          // Clear any stale data
+          clearAllAuthData()
         }
       } catch (error) {
         console.error('❌ Authentication initialization failed:', error)
@@ -156,24 +220,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }, 100)
         }
       } else {
-        console.warn('❌ Token validation failed, but keeping user data if available')
-        // Don't clear auth data immediately - let the user try to use the app
-        // The token might be temporarily invalid but could be refreshed
-        const storedUser = localStorage.getItem('user')
-        if (!storedUser) {
-          clearAllAuthData()
-        }
+        console.warn('❌ Token validation failed - invalid response')
+        throw new Error('Invalid token response')
       }
     } catch (error) {
       console.error('❌ Token validation error:', error)
-      // Don't clear auth data on network errors - keep user logged in
-      // Only clear if it's a clear authentication error
-      if (error instanceof Error && (error.message?.includes('401') || error.message?.includes('unauthorized'))) {
-        console.warn('❌ Authentication error, clearing auth data')
-        clearAllAuthData()
-      } else {
-        console.warn('❌ Network error during token validation, keeping user logged in')
+      
+      // Check if this is a network/backend error vs actual auth error
+      if (error instanceof Error && error.message.includes('Network error')) {
+        console.log('🌐 Backend unavailable, using stored user data temporarily')
+        // Don't clear auth data if backend is just unavailable
+        const storedUser = localStorage.getItem('user')
+        if (storedUser) {
+          try {
+            const user = JSON.parse(storedUser)
+            setUser(user)
+            console.log('👤 Using stored user data:', user.email)
+            return // Don't throw error, just use stored data
+          } catch (parseError) {
+            console.error('❌ Failed to parse stored user data:', parseError)
+          }
+        }
       }
+      
+      // Only clear auth data for actual authentication errors, not network errors
+      console.warn('❌ Authentication validation failed, clearing auth data')
+      clearAllAuthData()
+      setUser(null)
+      throw error // Re-throw to trigger the catch in initialization
     }
   }
 

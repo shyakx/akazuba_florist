@@ -220,7 +220,7 @@ export default function CategoriesPage() {
                 className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden border border-gray-200 cursor-pointer"
                 onClick={() => handleCategoryClick(category)}
               >
-                <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="relative h-48 flex items-center justify-center bg-gray-100">
                   {/* Category Icon */}
                   <div className="flex flex-col items-center justify-center space-y-2">
                     {getCategoryIcon(category.id)}
@@ -324,7 +324,7 @@ export default function CategoriesPage() {
                 className="group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-105 overflow-hidden border border-gray-200 cursor-pointer"
                 onClick={() => handleCategoryClick(category)}
               >
-                <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100">
+                <div className="relative h-48 flex items-center justify-center bg-purple-100">
                   {/* Category Icon */}
                   <div className="flex flex-col items-center justify-center space-y-2">
                     {getCategoryIcon(category.id)}

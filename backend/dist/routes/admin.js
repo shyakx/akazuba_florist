@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const client_1 = require("@prisma/client");
 const auth_1 = require("../middleware/auth");
+const productService_1 = require("../services/productService");
+const supportController_1 = require("../controllers/supportController");
 const router = express_1.default.Router();
 const prisma = new client_1.PrismaClient();
 // Apply authentication middleware to all admin routes
@@ -34,6 +36,9 @@ router.get('/analytics', async (req, res) => {
             prisma.orders.aggregate({
                 _sum: {
                     totalAmount: true
+                },
+                where: {
+                    status: 'DELIVERED'
                 }
             }),
             // Total customers
@@ -84,6 +89,7 @@ router.get('/analytics', async (req, res) => {
                     totalAmount: true
                 },
                 where: {
+                    status: 'DELIVERED',
                     createdAt: {
                         gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
                     }
@@ -518,10 +524,13 @@ router.get('/dashboard/stats', async (req, res) => {
                 }
             }
         });
-        // Get total revenue
+        // Get total revenue from completed orders only
         const totalRevenue = await prisma.orders.aggregate({
             _sum: {
                 totalAmount: true
+            },
+            where: {
+                status: 'DELIVERED'
             }
         });
         const stats = {
@@ -692,6 +701,9 @@ router.get('/dashboard/analytics', async (req, res) => {
             prisma.orders.aggregate({
                 _sum: {
                     totalAmount: true
+                },
+                where: {
+                    status: 'DELIVERED'
                 }
             }),
             // Total customers
@@ -742,6 +754,7 @@ router.get('/dashboard/analytics', async (req, res) => {
                     totalAmount: true
                 },
                 where: {
+                    status: 'DELIVERED',
                     createdAt: {
                         gte: new Date(new Date().setMonth(new Date().getMonth() - 6))
                     }
@@ -885,22 +898,31 @@ router.get('/products/:id', async (req, res) => {
 router.post('/products', async (req, res) => {
     try {
         const productsData = req.body;
-        const products = await prisma.product.create({
-            data: productsData,
-            include: { category: true
-            }
-        });
-        res.status(201).json({
-            success: true,
-            message: 'Product created successfully',
-            data: products
-        });
+        // Transform frontend data to service format
+        const productData = {
+            name: productsData.name,
+            description: productsData.description,
+            price: productsData.price,
+            stockQuantity: productsData.stock,
+            categoryId: productsData.category?.id || productsData.categoryId,
+            images: productsData.images || [],
+            isActive: productsData.status === 'active',
+            isFeatured: productsData.isFeatured || false
+        };
+        const result = await (0, productService_1.createProduct)(productData);
+        if (result.success) {
+            res.status(201).json(result);
+        }
+        else {
+            res.status(400).json(result);
+        }
     }
     catch (error) {
         console.error('Error creating products:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to create products'
+            message: 'Failed to create products',
+            errors: [error instanceof Error ? error.message : 'Unknown error']
         });
     }
 });
@@ -908,23 +930,31 @@ router.put('/products/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = req.body;
-        const products = await prisma.product.update({
-            where: { id },
-            data: updateData,
-            include: { category: true
-            }
-        });
-        res.json({
-            success: true,
-            message: 'Product updated successfully',
-            data: products
-        });
+        // Transform frontend data to service format
+        const productData = {
+            name: updateData.name,
+            description: updateData.description,
+            price: updateData.price,
+            stockQuantity: updateData.stock,
+            categoryId: updateData.category?.id || updateData.categoryId,
+            images: updateData.images || [],
+            isActive: updateData.status === 'active',
+            isFeatured: updateData.isFeatured || false
+        };
+        const result = await (0, productService_1.updateProduct)(id, productData);
+        if (result.success) {
+            res.json(result);
+        }
+        else {
+            res.status(400).json(result);
+        }
     }
     catch (error) {
         console.error('Error updating products:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to update products'
+            message: 'Failed to update products',
+            errors: [error instanceof Error ? error.message : 'Unknown error']
         });
     }
 });
@@ -1443,4 +1473,189 @@ router.post('/export/:type', async (req, res) => {
         });
     }
 });
+// Support Tickets Routes
+/**
+ * @swagger
+ * /admin/support-tickets:
+ *   get:
+ *     summary: Get all support tickets with filtering
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [PENDING, IN_PROGRESS, RESOLVED, CLOSED]
+ *       - in: query
+ *         name: priority
+ *         schema:
+ *           type: string
+ *           enum: [LOW, MEDIUM, HIGH, URGENT]
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Support tickets retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/support-tickets', supportController_1.getAllSupportTickets);
+/**
+ * @swagger
+ * /admin/support-tickets/stats:
+ *   get:
+ *     summary: Get support ticket statistics
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Support ticket statistics retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/support-tickets/stats', supportController_1.getSupportTicketStats);
+/**
+ * @swagger
+ * /admin/support-tickets:
+ *   post:
+ *     summary: Create new support ticket
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - customerName
+ *               - customerEmail
+ *               - subject
+ *               - message
+ *             properties:
+ *               customerName:
+ *                 type: string
+ *               customerEmail:
+ *                 type: string
+ *               subject:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *               priority:
+ *                 type: string
+ *                 enum: [LOW, MEDIUM, HIGH, URGENT]
+ *                 default: MEDIUM
+ *               orderId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Support ticket created successfully
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ */
+router.post('/support-tickets', supportController_1.createSupportTicket);
+/**
+ * @swagger
+ * /admin/support-tickets/{id}:
+ *   get:
+ *     summary: Get support ticket by ID
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Support ticket retrieved successfully
+ *       404:
+ *         description: Support ticket not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/support-tickets/:id', supportController_1.getSupportTicketById);
+/**
+ * @swagger
+ * /admin/support-tickets/{id}:
+ *   put:
+ *     summary: Update support ticket
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [PENDING, IN_PROGRESS, RESOLVED, CLOSED]
+ *               priority:
+ *                 type: string
+ *                 enum: [LOW, MEDIUM, HIGH, URGENT]
+ *               assignedTo:
+ *                 type: string
+ *               adminNotes:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Support ticket updated successfully
+ *       404:
+ *         description: Support ticket not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.put('/support-tickets/:id', supportController_1.updateSupportTicket);
+/**
+ * @swagger
+ * /admin/support-tickets/{id}:
+ *   delete:
+ *     summary: Delete support ticket
+ *     tags: [Admin, Support]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Support ticket deleted successfully
+ *       404:
+ *         description: Support ticket not found
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete('/support-tickets/:id', supportController_1.deleteSupportTicket);
 exports.default = router;

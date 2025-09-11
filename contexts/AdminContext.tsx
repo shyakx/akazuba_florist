@@ -1,6 +1,8 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
+import { convertImageUrl } from '@/lib/imageUtils'
+import { unifiedProductService } from '@/lib/unifiedProductService'
 
 // Types
 interface Product {
@@ -62,6 +64,7 @@ interface Customer {
   totalOrders: number
   totalSpent: number
   lastOrder?: string
+  createdAt?: string
 }
 
 interface DashboardStats {
@@ -70,9 +73,6 @@ interface DashboardStats {
   orders: number
   revenue: number
   customers: number
-  totalWishlistItems: number
-  totalCartItems: number
-  activeCarts: number
 }
 
 interface AdminContextType {
@@ -110,9 +110,9 @@ interface AdminContextType {
   refreshAll: () => Promise<void>
   
   // Product operations
-  addProduct: (product: Product) => void
-  updateProduct: (id: string, updates: Partial<Product>) => void
-  deleteProduct: (id: string) => void
+  addProduct: (product: Product) => Promise<void>
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>
+  deleteProduct: (id: string) => Promise<void>
   
   // Order operations
   updateOrder: (id: string, updates: Partial<Order>) => void
@@ -124,6 +124,10 @@ interface AdminContextType {
   hasUnsavedChanges: boolean
   markChangesSaved: () => void
   markChangesUnsaved: () => void
+  
+  // Backend status
+  backendStatus: 'checking' | 'online' | 'offline'
+  checkBackendStatus: () => Promise<void>
 }
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined)
@@ -170,6 +174,9 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   // Change tracking
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   
+  // Backend status
+  const [backendStatus, setBackendStatus] = useState<'checking' | 'online' | 'offline'>('checking')
+  
   // Helper function to get auth headers
   const getAuthHeaders = useCallback(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
@@ -183,6 +190,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     
     return headers
   }, [])
+
   
   // Mark changes as unsaved
   const markChangesUnsaved = useCallback(() => {
@@ -194,34 +202,71 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     setHasUnsavedChanges(false)
   }, [])
   
+  // Check backend status
+  const checkBackendStatus = useCallback(async () => {
+    try {
+      const response = await fetch('/api/health', {
+        method: 'GET',
+        headers: getAuthHeaders()
+      })
+      
+      if (response.ok) {
+        setBackendStatus('online')
+        console.log('✅ Backend is online')
+      } else {
+        setBackendStatus('offline')
+        console.log('❌ Backend is offline')
+      }
+    } catch (error) {
+      setBackendStatus('offline')
+      console.log('❌ Backend is offline:', error)
+    }
+  }, [getAuthHeaders])
+  
   // Fetch products
   const refreshProducts = useCallback(async () => {
+    console.log('🔄 Refreshing products via unified service...')
     setIsLoading(prev => ({ ...prev, products: true }))
     setErrors(prev => ({ ...prev, products: null }))
     
     try {
-      const response = await fetch('/api/products', {
-        headers: getAuthHeaders()
-      })
+      // Use unified product service with force refresh to ensure fresh data
+      const productsData = await unifiedProductService.getAllProducts(true, true)
+      console.log('✅ Products loaded via unified service (forced refresh):', productsData.length)
+      console.log('📦 AdminContext products data:', productsData.map(p => ({ id: p.id, name: p.name })))
       
-      if (!response.ok) throw new Error('Failed to fetch products')
-      
-      const result = await response.json()
-      
-      if (result.success) {
-        // Handle both direct data and paginated data structures
-        const productsData = result.data?.products || result.data || []
-        setProducts(Array.isArray(productsData) ? productsData : [])
-      } else {
-        throw new Error('Failed to fetch products')
-      }
+      // Transform unified service products to admin format
+      const transformedProducts: Product[] = productsData.map((product) => {
+        // Convert image URLs to API format
+        const convertedImages = (product.images || []).map((img: string) => convertImageUrl(img))
+        const convertedImage = convertImageUrl(product.images?.[0] || '')
+        
+        return {
+          id: product.id,
+          name: product.name,
+          description: product.description || '',
+          price: product.price || 0,
+          category: product.categoryName || 'Unknown',
+          stock: product.stockQuantity || 0,
+          status: (product.isActive ? 'active' : 'inactive') as 'active' | 'inactive',
+          images: convertedImages,
+          image: convertedImage,
+          createdAt: product.createdAt || new Date().toISOString(),
+          sales: 0
+          }
+        })
+        
+        console.log('✅ Setting products:', transformedProducts.length, 'products')
+        setProducts(transformedProducts)
+      console.log('✅ Products transformed and set in AdminContext:', transformedProducts.length)
+      console.log('📦 Transformed products:', transformedProducts.map(p => ({ id: p.id, name: p.name })))
     } catch (error) {
       console.error('❌ Error fetching products:', error)
       setErrors(prev => ({ ...prev, products: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setIsLoading(prev => ({ ...prev, products: false }))
     }
-  }, [getAuthHeaders])
+  }, [])
   
   // Fetch orders
   const refreshOrders = useCallback(async () => {
@@ -236,11 +281,23 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       if (!response.ok) throw new Error('Failed to fetch orders')
       
       const result = await response.json()
+      console.log('🔍 Orders API response:', result)
       
       if (result.success) {
         // Handle both direct data and paginated data structures
         const ordersData = result.data?.orders || result.data || []
-        setOrders(Array.isArray(ordersData) ? ordersData : [])
+        
+        // Convert image URLs in order items
+        const processedOrders = ordersData.map((order: any) => ({
+          ...order,
+          order_items: (order.order_items || []).map((item: any) => ({
+            ...item,
+            productImage: item.productImage ? convertImageUrl(item.productImage) : item.productImage
+          }))
+        }))
+        
+        console.log('🔍 Processed orders data:', processedOrders)
+        setOrders(Array.isArray(processedOrders) ? processedOrders : [])
       } else {
         throw new Error('Failed to fetch orders')
       }
@@ -265,10 +322,12 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       if (!response.ok) throw new Error('Failed to fetch customers')
       
       const result = await response.json()
+      console.log('🔍 Customers API response:', result)
       
       if (result.success) {
         // Handle both direct data and paginated data structures
         const customersData = result.data?.customers || result.data || []
+        console.log('🔍 Processed customers data:', customersData)
         setCustomers(Array.isArray(customersData) ? customersData : [])
       } else {
         throw new Error('Failed to fetch customers')
@@ -283,30 +342,34 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   
   // Fetch stats
   const refreshStats = useCallback(async () => {
+    console.log('🔄 Refreshing dashboard stats...')
     setIsLoading(prev => ({ ...prev, stats: true }))
     setErrors(prev => ({ ...prev, stats: null }))
     
     try {
-      const response = await fetch('/api/admin/dashboard/stats', {
+      // Add cache-busting parameter to prevent caching
+      const timestamp = Date.now()
+      const response = await fetch(`/api/admin/dashboard/stats?t=${timestamp}`, {
         headers: getAuthHeaders()
       })
       
       if (!response.ok) throw new Error('Failed to fetch stats')
       
       const result = await response.json()
-      
+      console.log('📊 Stats API response:', result)
       
       if (result.success) {
-        setStats({
+        const newStats = {
           categories: result.categories || 0,
           products: result.products || 0,
           orders: result.orders || 0,
           revenue: result.revenue || 0,
-          customers: result.customers || 0,
-          totalWishlistItems: result.totalWishlistItems || 0,
-          totalCartItems: result.totalCartItems || 0,
-          activeCarts: result.activeCarts || 0
-        })
+          customers: result.customers || 0
+        }
+        console.log('✅ Setting stats:', newStats)
+        console.log('📊 Previous stats:', stats)
+        setStats(newStats)
+        console.log('🔄 Stats state updated')
       } else {
         throw new Error(result.message || 'Failed to fetch stats')
       }
@@ -356,22 +419,155 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   }, [refreshProducts, refreshOrders, refreshCustomers, refreshStats, refreshTopProducts])
   
   // Product operations
-  const addProduct = useCallback((product: Product) => {
-    setProducts(prev => [product, ...prev])
-    markChangesUnsaved()
-  }, [markChangesUnsaved])
+  const addProduct = useCallback(async (product: Product): Promise<void> => {
+    try {
+      console.log('➕ Creating product via unified service:', product)
+      
+      // Convert to unified service format
+      const productData = {
+        name: product.name,
+        description: product.description || '',
+        price: product.price,
+        stockQuantity: product.stock,
+        isActive: product.status === 'active',
+        images: product.images || [],
+        categoryName: typeof product.category === 'string' ? product.category : (product.category as any)?.name || 'Unknown',
+        type: 'flower', // Default type
+        color: 'mixed', // Default color
+        brand: 'Akazuba',
+        tags: ['admin-created'],
+        sku: `ADMIN-${Date.now()}`,
+        weight: 1,
+        isFeatured: false,
+        salePrice: null
+      }
+
+      console.log('🔄 Sending product data to unified service:', productData)
+      const newProduct = await unifiedProductService.createProduct(productData)
+      console.log('📝 Unified service response:', newProduct)
+      
+      if (newProduct) {
+        console.log('🔄 Refreshing products and stats after creation...')
+        console.log('📦 New product created with ID:', newProduct.id)
+        
+        // First refresh products to ensure cache is cleared
+        console.log('🔄 Step 1: Refreshing products...')
+        await refreshProducts()
+        
+        // Small delay to ensure cache is properly cleared and backend is updated
+        console.log('⏳ Waiting 500ms for backend to process...')
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        // Then refresh stats to get updated count
+        console.log('🔄 Step 2: Refreshing stats...')
+        await refreshStats()
+        
+        console.log('✅ Products and stats refreshed successfully')
+        markChangesSaved() // Mark as saved since it's persisted
+        
+        // Notify customer context to refresh data
+        window.dispatchEvent(new CustomEvent('admin-product-added', { 
+          detail: { product: newProduct } 
+        }))
+        
+        console.log('✅ Product created successfully:', newProduct)
+        return // Explicitly return void
+      } else {
+        console.error('❌ Unified service returned null/undefined')
+        throw new Error('Failed to create product - no product returned')
+      }
+    } catch (error) {
+      console.error('❌ Error creating product:', error)
+      markChangesUnsaved()
+      throw error
+    }
+  }, [markChangesUnsaved, markChangesSaved, refreshProducts, refreshStats])
   
-  const updateProduct = useCallback((id: string, updates: Partial<Product>) => {
-    setProducts(prev => prev.map(product => 
-      product.id === id ? { ...product, ...updates } : product
-    ))
-    markChangesUnsaved()
-  }, [markChangesUnsaved])
+  const updateProduct = useCallback(async (id: string, updates: Partial<Product>) => {
+    try {
+      console.log('🔄 Updating product via unified service:', id, updates)
+      
+      // Convert to unified service format
+      const productUpdates = {
+        name: updates.name,
+        description: updates.description,
+        price: updates.price,
+        stockQuantity: updates.stock,
+        isActive: updates.status === 'active',
+        images: updates.images,
+        tags: (updates as any).tags,
+        sku: (updates as any).sku,
+        weight: (updates as any).weight
+      }
+
+      const updatedProduct = await unifiedProductService.updateProduct(id, productUpdates)
+      
+      if (updatedProduct) {
+        // Refresh products and stats to get updated counts
+        await Promise.all([
+          refreshProducts(),
+          refreshStats()
+        ])
+        markChangesSaved() // Mark as saved since it's persisted
+        
+        // Notify customer context to refresh data
+        window.dispatchEvent(new CustomEvent('admin-product-updated', { 
+          detail: { productId: id, updates } 
+        }))
+        
+        console.log('✅ Product updated successfully:', updatedProduct)
+      } else {
+        // Fallback to local update if backend fails
+        setProducts(prev => {
+          const updated = prev.map(product => {
+            if (product.id === id) {
+              const updatedProduct = { ...product, ...updates }
+              console.log('✅ Product updated locally (backend unavailable):', updatedProduct)
+              return updatedProduct
+            }
+            return product
+          })
+          return updated
+        })
+        markChangesUnsaved()
+      }
+    } catch (error) {
+      console.error('❌ Error updating product:', error)
+      markChangesUnsaved()
+    }
+  }, [markChangesUnsaved, markChangesSaved, refreshProducts, refreshStats])
   
-  const deleteProduct = useCallback((id: string) => {
-    setProducts(prev => prev.filter(product => product.id !== id))
-    markChangesUnsaved()
-  }, [markChangesUnsaved])
+  const deleteProduct = useCallback(async (id: string) => {
+    try {
+      console.log('🗑️ Deleting product via unified service:', id)
+      
+      const success = await unifiedProductService.deleteProduct(id)
+      
+      if (success) {
+        // Refresh products and stats to get updated counts
+        await Promise.all([
+          refreshProducts(),
+          refreshStats()
+        ])
+        markChangesSaved() // Mark as saved since it's persisted
+        
+        // Notify customer context to refresh data
+        window.dispatchEvent(new CustomEvent('admin-product-deleted', { 
+          detail: { productId: id } 
+        }))
+        
+        console.log('✅ Product deleted successfully from backend')
+      } else {
+        // Don't remove from local state if backend deletion failed
+        console.warn('⚠️ Backend deletion failed, keeping product in local state')
+        markChangesUnsaved()
+      }
+    } catch (error) {
+      console.error('❌ Error deleting product:', error)
+      // Don't remove from local state if there's an error
+      markChangesUnsaved()
+    }
+  }, [markChangesUnsaved, markChangesSaved, refreshProducts, refreshStats])
   
   // Order operations
   const updateOrder = useCallback((id: string, updates: Partial<Order>) => {
@@ -391,8 +587,9 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   
   // Initialize data on mount
   useEffect(() => {
+    checkBackendStatus()
     refreshAll()
-  }, [refreshAll])
+  }, [checkBackendStatus, refreshAll])
   
   // Auto-refresh data every 5 minutes (reduced frequency to prevent memory issues)
   useEffect(() => {
@@ -443,7 +640,11 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     // Change tracking
     hasUnsavedChanges,
     markChangesSaved,
-    markChangesUnsaved
+    markChangesUnsaved,
+    
+    // Backend status
+    backendStatus,
+    checkBackendStatus
   }
   
   return (

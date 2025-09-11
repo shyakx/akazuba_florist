@@ -159,7 +159,7 @@ export default function CategoryProductsPage() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-6 text-white">
+      <div className="bg-blue-600 rounded-2xl p-6 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -210,7 +210,7 @@ export default function CategoryProductsPage() {
         </div>
         <Link 
           href="/admin/products/new" 
-          className="btn btn-primary bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          className="btn btn-primary bg-blue-600 hover:bg-blue-700"
         >
           <Package className="w-4 h-4 mr-2" />
           Add Product

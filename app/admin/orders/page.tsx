@@ -151,7 +151,7 @@ export default function OrdersPage() {
     return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 text-white">
+      <div className="bg-green-600 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Order Management</h1>
@@ -255,7 +255,7 @@ export default function OrdersPage() {
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center space-x-4">
           <button 
-            className="btn btn-primary bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 shadow-lg"
+            className="btn btn-primary bg-green-600 hover:bg-green-700 shadow-lg"
             onClick={() => {
               // Export orders data as CSV
               const csvContent = [
@@ -347,7 +347,7 @@ export default function OrdersPage() {
         {paginatedOrders.map((order) => (
           <div key={order.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Order Header with Product Image */}
-            <div className="h-32 bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center relative">
+            <div className="h-32 bg-gray-100 flex items-center justify-center relative">
               {(() => {
                 const primaryImage = getOrderPrimaryImage(order)
                 return primaryImage

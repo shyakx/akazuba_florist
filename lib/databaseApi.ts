@@ -128,7 +128,7 @@ const convertDatabaseProductToProduct = (dbProduct: DatabaseProduct): Product =>
 class DatabaseAPI {
   private baseURL: string
   private cache: Map<string, { data: any; timestamp: number }> = new Map()
-  private readonly CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+  private readonly CACHE_DURATION = 30 * 1000 // 30 seconds (reduced from 5 minutes)
 
   constructor() {
     this.baseURL = getApiBaseUrl()
@@ -150,6 +150,24 @@ class DatabaseAPI {
   // Invalidate cache for admin operations
   private invalidateCache(): void {
     this.cache.clear()
+  }
+
+  // Public method to force refresh all data
+  public forceRefresh(): void {
+    this.invalidateCache()
+  }
+
+  // Listen for admin changes and invalidate cache
+  public setupAdminChangeListener(): void {
+    const handleAdminChange = () => {
+      console.log('🔄 Admin change detected, invalidating customer cache')
+      this.invalidateCache()
+    }
+
+    window.addEventListener('admin-product-saved', handleAdminChange)
+    window.addEventListener('admin-product-updated', handleAdminChange)
+    window.addEventListener('admin-product-added', handleAdminChange)
+    window.addEventListener('admin-product-deleted', handleAdminChange)
   }
 
   // Get all products with caching

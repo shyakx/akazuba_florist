@@ -28,6 +28,14 @@ export default function ProductViewPage() {
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Helper function to safely get category name
+  const getCategoryName = (category: string | { id: string; name: string; slug: string }): string => {
+    if (typeof category === 'object' && category && 'name' in category) {
+      return (category as { id: string; name: string; slug: string }).name
+    }
+    return category as string
+  }
+
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -78,36 +86,16 @@ export default function ProductViewPage() {
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this product?')) {
       try {
-        // Get the JWT token using the proper utility function
-        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        }
+        // Import unified service
+        const { unifiedProductService } = await import('@/lib/unifiedProductService')
         
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`
-        }
+        const success = await unifiedProductService.deleteProduct(productId)
         
-        const response = await fetch(`/api/admin/products/${productId}/delete`, {
-          method: 'DELETE',
-          headers
-        })
-        
-        if (response.ok) {
-          const result = await response.json()
-          if (result.success) {
-            alert('Product deleted successfully!')
-            router.push('/admin/products')
-          } else {
-            throw new Error(result.message || 'Failed to delete product')
-          }
+        if (success) {
+          alert('Product deleted successfully!')
+          router.push('/admin/products')
         } else {
-          const errorData = await response.json()
-          if (errorData.backendAvailable === false) {
-            alert('❌ Backend server is not available. Please start the backend server to delete products.')
-          } else {
-            throw new Error(errorData.message || 'Failed to delete product')
-          }
+          throw new Error('Failed to delete product from backend')
         }
       } catch (error) {
         console.error('Error deleting product:', error)
@@ -216,7 +204,7 @@ export default function ProductViewPage() {
                 <span className="text-gray-600">Category</span>
                 <span className="flex items-center">
                   <Tag className="w-4 h-4 mr-1 text-blue-600" />
-                  {product.category}
+                  {getCategoryName(product.category)}
                 </span>
               </div>
               <div className="flex items-center justify-between">

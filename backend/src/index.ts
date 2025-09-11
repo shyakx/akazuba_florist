@@ -23,7 +23,7 @@ import paymentRoutes from './routes/payments'
 import uploadRoutes from './routes/upload'
 import supportRoutes from './routes/support'
 // MoMo routes removed - using simplified payment methods
-import { errorHandler } from './middleware/errorHandler'
+import { handleError } from './middleware/errorHandler'
 import { logger } from './utils/logger'
 
 // Load environment variables
@@ -226,7 +226,7 @@ app.use('/api/v1/upload', uploadRoutes)
 app.use('/api/v1/support', supportRoutes)
 
 // Error handling middleware
-app.use(errorHandler)
+app.use(handleError)
 
 // Start server with error handling
 async function startServer() {

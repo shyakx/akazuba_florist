@@ -44,26 +44,34 @@ export const safeGetDocument = () => {
 
 // Safe API base URL function
 export const getSafeApiBaseUrl = (): string => {
+  // Check if we have an explicit API URL set
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
+  }
+
   if (!isBrowser) {
-    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+    // Server-side: default to production URL
+    return 'https://akazuba-backend-api.onrender.com/api/v1'
   }
 
   try {
     const location = safeGetLocation()
     if (!location) {
-      return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+      return 'https://akazuba-backend-api.onrender.com/api/v1'
     }
 
     const hostname = location.hostname
     const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
     
     if (isLocalhost) {
+      // Always use local backend when running on localhost
       return 'http://localhost:5000/api/v1'
     } else {
-      return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+      // Production environment
+      return 'https://akazuba-backend-api.onrender.com/api/v1'
     }
   } catch (error) {
     console.warn('Failed to determine API base URL, using fallback:', error)
-    return process.env.NEXT_PUBLIC_API_URL || 'https://akazuba-backend-api.onrender.com/api/v1'
+    return 'https://akazuba-backend-api.onrender.com/api/v1'
   }
 }

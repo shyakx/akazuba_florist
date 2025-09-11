@@ -1,135 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from '@/lib/auth'
+import { unifiedProductService } from '@/lib/unifiedProductService'
+
+// Force dynamic rendering - this route needs access to request headers
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // Check if user is authenticated and is admin
-    const session = await getServerSession(request)
+    console.log('📦 Admin products API called')
     
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Mock data for now - replace with actual database query
-    const products = [
-      {
-        id: 1,
-        name: 'Red Rose Bouquet',
-        description: 'Beautiful red rose arrangement, perfect for romantic occasions',
-        price: 25000,
-        category: 'Flowers',
-        status: 'active',
-        stock: 15,
-        image: '/images/red-rose.jpg'
-      },
-      {
-        id: 2,
-        name: 'Lavender Perfume',
-        description: 'Elegant lavender fragrance with long-lasting scent',
-        price: 45000,
-        category: 'Perfumes',
-        status: 'active',
-        stock: 8,
-        image: '/images/lavender-perfume.jpg'
-      },
-      {
-        id: 3,
-        name: 'Gift Basket',
-        description: 'Luxury gift basket with flowers and chocolates',
-        price: 35000,
-        category: 'Gifts',
-        status: 'active',
-        stock: 12,
-        image: '/images/gift-basket.jpg'
-      },
-      {
-        id: 4,
-        name: 'Wedding Package',
-        description: 'Complete wedding floral arrangement service',
-        price: 150000,
-        category: 'Wedding',
-        status: 'active',
-        stock: 5,
-        image: '/images/wedding-package.jpg'
-      }
-    ]
-
-    return NextResponse.json(products)
+    // Get the authorization header from the request
+    const authHeader = request.headers.get('authorization')
+    console.log('🔑 Auth header present:', !!authHeader)
+    
+    // Get all products using unified service (admin context to get all products)
+    const headers = authHeader ? { 'Authorization': authHeader, 'Content-Type': 'application/json' } : undefined
+    const products = await unifiedProductService.getAllProducts(true, true, headers)
+    console.log('📦 Products from unified service:', products.length)
+    
+    return NextResponse.json({
+      success: true,
+      data: products,
+      count: products.length
+    })
+    
   } catch (error) {
-    console.error('Error fetching products:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('❌ Error fetching products:', error)
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Failed to fetch products',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { name, description, price, categoryId, stockQuantity, isActive, images } = body
-
-    if (!name || !price || !categoryId) {
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Name, price, and category are required' 
-      }, { status: 400 })
-    }
-
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api/v1/admin/products'
-      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/products'
+    console.log('➕ Creating product via admin API')
     
     // Get the authorization header from the request
     const authHeader = request.headers.get('authorization')
+    console.log('🔑 Auth header present:', !!authHeader)
     
-    try {
-      const response = await fetch(backendUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authHeader && { 'Authorization': authHeader }),
-        },
-        body: JSON.stringify({
-          name,
-          description: description || '',
-          price: Number(price),
-          categoryId,
-          stockQuantity: Number(stockQuantity) || 0,
-          isActive: isActive !== false,
-          images: images || []
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(`Backend responded with status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      return NextResponse.json(data)
-    } catch (backendError) {
-      console.warn('Backend not available for product creation, returning success for demo:', backendError)
-      
-      // Return success response for demo purposes when backend is not available
+    const body = await request.json()
+    console.log('📝 Product data received:', body)
+    
+    // Create product using unified service
+    const newProduct = await unifiedProductService.createProduct(body)
+    
+    if (newProduct) {
+      console.log('✅ Product created successfully:', newProduct.id)
       return NextResponse.json({
         success: true,
-        message: 'Product creation simulated (backend not available)',
-        data: {
-          id: Date.now().toString(),
-          name,
-          description: description || '',
-          price: Number(price),
-          categoryId,
-          stockQuantity: Number(stockQuantity) || 0,
-          isActive: isActive !== false,
-          images: images || [],
-          createdAt: new Date().toISOString()
-        }
+        data: newProduct,
+        message: 'Product created successfully'
       })
+    } else {
+      console.error('❌ Failed to create product')
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Failed to create product'
+      }, { status: 500 })
     }
+    
   } catch (error) {
-    console.error('Error creating product:', error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to create product' },
-      { status: 500 }
-    )
+    console.error('❌ Error creating product:', error)
+    return NextResponse.json({ 
+      success: false, 
+      message: 'Failed to create product',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
-

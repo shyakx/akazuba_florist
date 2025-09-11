@@ -138,14 +138,18 @@ export default function EditCategoryPage() {
       if (response.ok) {
         const result = await response.json()
         if (result.success) {
-        alert('Category updated successfully!')
-        router.push('/admin/categories')
-      } else {
+          alert('Category updated successfully!')
+          router.push('/admin/categories')
+        } else {
           throw new Error(result.message || 'Failed to update category')
         }
       } else {
         const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to update category')
+        if (errorData.backendAvailable === false) {
+          alert('Backend server is not available. Changes are saved locally but may not persist.')
+        } else {
+          throw new Error(errorData.message || 'Failed to update category')
+        }
       }
     } catch (error) {
       console.error('Error updating category:', error)

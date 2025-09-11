@@ -90,7 +90,7 @@ export default function AdminSupportPage() {
     }
 
     try {
-      const token = localStorage.getItem('token')
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
       const response = await fetch('/api/admin/support-tickets', {
         method: 'POST',
         headers: {
@@ -102,22 +102,26 @@ export default function AdminSupportPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create support ticket')
-      }
-
-      const result = await response.json()
-      if (result.success) {
-        // Refresh the tickets list
-        await fetchTickets()
-        setShowAddForm(false)
-        setSuccess('Support ticket created successfully!')
-        setError(null)
-        // Reset form
-        ;(e.target as HTMLFormElement).reset()
-        // Clear success message after 3 seconds
-        setTimeout(() => setSuccess(null), 3000)
+        if (errorData.backendAvailable === false) {
+          setError('Backend server is not available. Changes are saved locally but may not persist.')
+        } else {
+          throw new Error(errorData.error || 'Failed to create support ticket')
+        }
       } else {
-        throw new Error(result.message || 'Failed to create support ticket')
+        const result = await response.json()
+        if (result.success) {
+          // Refresh the tickets list
+          await fetchTickets()
+          setShowAddForm(false)
+          setSuccess('Support ticket created successfully!')
+          setError(null)
+          // Reset form
+          ;(e.target as HTMLFormElement).reset()
+          // Clear success message after 3 seconds
+          setTimeout(() => setSuccess(null), 3000)
+        } else {
+          throw new Error(result.message || 'Failed to create support ticket')
+        }
       }
     } catch (error) {
       console.error('Error creating support ticket:', error)
@@ -140,7 +144,7 @@ export default function AdminSupportPage() {
     }
 
     try {
-      const token = localStorage.getItem('token')
+      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
       const response = await fetch(`/api/admin/support-tickets/${editingTicket.id}`, {
         method: 'PUT',
         headers: {
@@ -152,20 +156,24 @@ export default function AdminSupportPage() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to update support ticket')
-      }
-
-      const result = await response.json()
-      if (result.success) {
-        // Refresh the tickets list
-        await fetchTickets()
-        setEditingTicket(null)
-        setSuccess('Support ticket updated successfully!')
-        setError(null)
-        // Clear success message after 3 seconds
-        setTimeout(() => setSuccess(null), 3000)
+        if (errorData.backendAvailable === false) {
+          setError('Backend server is not available. Changes are saved locally but may not persist.')
+        } else {
+          throw new Error(errorData.error || 'Failed to update support ticket')
+        }
       } else {
-        throw new Error(result.message || 'Failed to update support ticket')
+        const result = await response.json()
+        if (result.success) {
+          // Refresh the tickets list
+          await fetchTickets()
+          setEditingTicket(null)
+          setSuccess('Support ticket updated successfully!')
+          setError(null)
+          // Clear success message after 3 seconds
+          setTimeout(() => setSuccess(null), 3000)
+        } else {
+          throw new Error(result.message || 'Failed to update support ticket')
+        }
       }
     } catch (error) {
       console.error('Error updating support ticket:', error)
@@ -177,7 +185,7 @@ export default function AdminSupportPage() {
     if (confirm('Are you sure you want to delete this ticket?')) {
       setError(null)
       try {
-        const token = localStorage.getItem('token')
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
         const response = await fetch(`/api/admin/support-tickets/${ticketId}`, {
           method: 'DELETE',
           headers: {
@@ -304,7 +312,7 @@ export default function AdminSupportPage() {
       )}
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+      <div className="bg-blue-600 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Customer Support</h1>
@@ -419,7 +427,7 @@ export default function AdminSupportPage() {
       <div className="flex justify-end">
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="btn btn-primary bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg"
+          className="btn btn-primary bg-blue-600 hover:bg-blue-700 shadow-lg"
         >
           <Plus className="w-5 h-5 mr-2" />
           Add Ticket

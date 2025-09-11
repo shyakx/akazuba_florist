@@ -1,69 +1,92 @@
+/**
+ * Centralized error handling middleware
+ */
+
 import { Request, Response, NextFunction } from 'express'
-import { logger } from '../utils/logger'
 
 export interface AppError extends Error {
   statusCode?: number
   isOperational?: boolean
-  code?: string
 }
 
-export const errorHandler = (
-  err: AppError,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  let error = { ...err }
-  error.message = err.message
+/**
+ * Create a custom error
+ */
+export function createError(message: string, statusCode: number = 500): AppError {
+  const error: AppError = new Error(message)
+  error.statusCode = statusCode
+  error.isOperational = true
+  return error
+}
 
-  // Log error
-  logger.error({
-    message: err.message,
-    stack: err.stack,
+/**
+ * Handle different types of errors
+ */
+export function handleError(error: any, req: Request, res: Response, next: NextFunction) {
+  let statusCode = 500
+  let message = 'Internal Server Error'
+  let errors: string[] = []
+
+  // Log error for debugging
+  console.error('Error occurred:', {
+    message: error.message,
+    stack: error.stack,
     url: req.url,
     method: req.method,
-    ip: req.ip,
-    userAgent: req.get('User-Agent'),
+    timestamp: new Date().toISOString()
   })
 
-  // Prisma record not found
-  if (err.code === 'P2025') {
-    const message = 'Resource not found'
-    error = { message, statusCode: 404 } as AppError
+  // Handle different error types
+  if (error.name === 'ValidationError') {
+    statusCode = 400
+    message = 'Validation Error'
+    errors = Object.values(error.errors).map((err: any) => err.message)
+  } else if (error.name === 'CastError') {
+    statusCode = 400
+    message = 'Invalid ID format'
+    errors = ['The provided ID is not valid']
+  } else if (error.name === 'MongoError' && error.code === 11000) {
+    statusCode = 409
+    message = 'Duplicate Entry'
+    errors = ['A record with this information already exists']
+  } else if (error.name === 'JsonWebTokenError') {
+    statusCode = 401
+    message = 'Invalid Token'
+    errors = ['The provided token is invalid']
+  } else if (error.name === 'TokenExpiredError') {
+    statusCode = 401
+    message = 'Token Expired'
+    errors = ['The provided token has expired']
+  } else if (error.statusCode) {
+    statusCode = error.statusCode
+    message = error.message
   }
 
-  // Prisma unique constraint violation
-  if (err.code === 'P2002') {
-    const message = 'Duplicate field value entered'
-    error = { message, statusCode: 400 } as AppError
-  }
-
-  // Prisma validation error
-  if (err.code === 'P2003') {
-    const message = 'Invalid reference to related record'
-    error = { message, statusCode: 400 } as AppError
-  }
-
-  // Prisma foreign key constraint
-  if (err.code === 'P2004') {
-    const message = 'Constraint violation'
-    error = { message, statusCode: 400 } as AppError
-  }
-
-  // JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    const message = 'Invalid token'
-    error = { message, statusCode: 401 } as AppError
-  }
-
-  if (err.name === 'TokenExpiredError') {
-    const message = 'Token expired'
-    error = { message, statusCode: 401 } as AppError
-  }
-
-  res.status(error.statusCode || 500).json({
+  // Send error response
+  res.status(statusCode).json({
     success: false,
-    error: error.message || 'Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    message,
+    errors: errors.length > 0 ? errors : [message],
+    ...(process.env.NODE_ENV === 'development' && {
+      stack: error.stack,
+      details: error
+    })
   })
-} 
+}
+
+/**
+ * Handle 404 errors
+ */
+export function handleNotFound(req: Request, res: Response, next: NextFunction) {
+  const error = createError(`Route ${req.originalUrl} not found`, 404)
+  next(error)
+}
+
+/**
+ * Async error wrapper
+ */
+export function asyncHandler(fn: Function) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next)
+  }
+}

@@ -1,6 +1,7 @@
 import express from 'express'
 import { PrismaClient } from '@prisma/client'
 import { authenticateToken } from '../middleware/auth'
+import { createProduct, updateProduct, getProducts, getProductById, deleteProduct } from '../services/productService'
 import {
   getAllSupportTickets,
   getSupportTicketById,
@@ -989,22 +990,31 @@ router.post('/products', async (req, res) => {
   try {
     const productsData = req.body
     
-    const products = await prisma.product.create({
-      data: productsData,
-      include: { category: true
-      }
-    }) as any
+    // Transform frontend data to service format
+    const productData = {
+      name: productsData.name,
+      description: productsData.description,
+      price: productsData.price,
+      stockQuantity: productsData.stockQuantity || productsData.stock,
+      categoryId: productsData.category?.id || productsData.categoryId,
+      images: productsData.images || [],
+      isActive: productsData.status === 'active',
+      isFeatured: productsData.isFeatured || false
+    }
     
-    res.status(201).json({
-      success: true,
-      message: 'Product created successfully',
-      data: products
-    })
+    const result = await createProduct(productData)
+    
+    if (result.success) {
+      res.status(201).json(result)
+    } else {
+      res.status(400).json(result)
+    }
   } catch (error) {
     console.error('Error creating products:', error)
     res.status(500).json({
       success: false,
-      message: 'Failed to create products'
+      message: 'Failed to create products',
+      errors: [error instanceof Error ? error.message : 'Unknown error']
     })
   }
 })
@@ -1014,23 +1024,31 @@ router.put('/products/:id', async (req, res) => {
     const { id } = req.params
     const updateData = req.body
     
-    const products = await prisma.product.update({
-      where: { id },
-      data: updateData,
-      include: { category: true
-      }
-    })
+    // Transform frontend data to service format
+    const productData = {
+      name: updateData.name,
+      description: updateData.description,
+      price: updateData.price,
+      stockQuantity: updateData.stockQuantity || updateData.stock,
+      categoryId: updateData.category?.id || updateData.categoryId,
+      images: updateData.images || [],
+      isActive: updateData.status === 'active',
+      isFeatured: updateData.isFeatured || false
+    }
     
-    res.json({
-      success: true,
-      message: 'Product updated successfully',
-      data: products
-    })
+    const result = await updateProduct(id, productData)
+    
+    if (result.success) {
+      res.json(result)
+    } else {
+      res.status(400).json(result)
+    }
   } catch (error) {
     console.error('Error updating products:', error)
     res.status(500).json({
       success: false,
-      message: 'Failed to update products'
+      message: 'Failed to update products',
+      errors: [error instanceof Error ? error.message : 'Unknown error']
     })
   }
 })

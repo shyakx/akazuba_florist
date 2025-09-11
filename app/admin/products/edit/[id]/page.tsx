@@ -5,14 +5,28 @@ import { useRouter, useParams } from 'next/navigation'
 import { useAdmin } from '@/contexts/AdminContext'
 import { ArrowLeft, Save, Upload, X } from 'lucide-react'
 
+interface Category {
+  id: string
+  name: string
+  slug: string
+  description: string
+  imageUrl?: string
+  isActive: boolean
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
 export default function EditProductPage() {
   const router = useRouter()
   const params = useParams()
   const productId = params.id as string
-  const { updateProduct, refreshProducts } = useAdmin()
+  const { updateProduct, refreshProducts, markChangesSaved } = useAdmin()
   
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(true)
+  const [uploadingImages, setUploadingImages] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -25,15 +39,40 @@ export default function EditProductPage() {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const categories = [
-    { id: 'Flowers', name: 'Flowers' },
-    { id: 'Perfumes', name: 'Perfumes' },
-    { id: 'Wedding', name: 'Wedding' },
-    { id: 'Funeral', name: 'Funeral' }
-  ]
+  // Load categories from backend
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+        
+        const response = await fetch('/api/admin/categories', {
+          method: 'GET',
+          headers
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          if (result.success && result.data) {
+            // Backend returns data directly as array, not wrapped in categories property
+            setCategories(Array.isArray(result.data) ? result.data : result.data.categories || [])
+          }
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error)
+      }
+    }
+    
+    loadCategories()
+  }, [])
 
-  // Real product data will be fetched from API
-
+  // Load product data from API
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -98,14 +137,112 @@ export default function EditProductPage() {
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files) {
-      const newImages = Array.from(files).map(file => URL.createObjectURL(file))
+  const handleDragDropUpload = async (files: File[]) => {
+    if (files.length === 0) return
+    
+    setUploadingImages(true)
+    const uploadPromises = Array.from(files).map(async (file) => {
+      // Create FormData for file upload
+      const formData = new FormData()
+      formData.append('image', file)
+      
+      try {
+        // Upload to backend
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        const headers: Record<string, string> = {}
+        
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`
+        }
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers,
+          body: formData
+        })
+        
+        if (response.ok) {
+          const result = await response.json()
+          const imageUrl = result.data?.url || result.url
+          console.log('✅ Upload successful, returned URL:', imageUrl)
+          return imageUrl
+        } else {
+          console.error('Upload failed:', response.statusText)
+          // Fallback to a placeholder image
+          return '/api/uploads/placeholder-product.jpg'
+        }
+      } catch (error) {
+        console.error('Upload error:', error)
+        // Fallback to a placeholder image
+        return '/api/uploads/placeholder-product.jpg'
+      }
+    })
+    
+    try {
+      const uploadedUrls = await Promise.all(uploadPromises)
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...newImages]
+        images: [...prev.images, ...uploadedUrls]
       }))
+    } catch (error) {
+      console.error('Error uploading images:', error)
+      alert('Failed to upload some images. Please try again.')
+    } finally {
+      setUploadingImages(false)
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      setUploadingImages(true)
+      const uploadPromises = Array.from(files).map(async (file) => {
+        // Create FormData for file upload
+        const formData = new FormData()
+        formData.append('image', file)
+        
+        try {
+          // Upload to backend
+          const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+          const headers: Record<string, string> = {}
+          
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`
+          }
+          
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers,
+            body: formData
+          })
+          
+          if (response.ok) {
+            const result = await response.json()
+            return result.data?.url || result.url
+          } else {
+            console.error('Upload failed:', response.statusText)
+            // Fallback to a placeholder image
+            return '/api/uploads/placeholder-product.jpg'
+          }
+        } catch (error) {
+          console.error('Upload error:', error)
+          // Fallback to a placeholder image
+          return '/api/uploads/placeholder-product.jpg'
+        }
+      })
+      
+      try {
+        const uploadedUrls = await Promise.all(uploadPromises)
+      setFormData(prev => ({
+        ...prev,
+          images: [...prev.images, ...uploadedUrls]
+        }))
+      } catch (error) {
+        console.error('Error uploading images:', error)
+        alert('Failed to upload some images. Please try again.')
+      } finally {
+        setUploadingImages(false)
+      }
     }
   }
 
@@ -163,46 +300,31 @@ export default function EditProductPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
       
-      const response = await fetch(`/api/admin/products/${productId}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          category: formData.category,
-          stock: parseInt(formData.stock),
-          status: formData.status,
-          images: formData.images
-        })
+      const updateData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        stock: parseInt(formData.stock),
+        status: formData.status,
+        images: formData.images
+      }
+      
+      console.log('🔄 Updating product with data:', updateData)
+      
+      // Use the unified service via AdminContext
+      await updateProduct(productId, {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        stock: parseInt(formData.stock),
+        status: formData.status as 'active' | 'inactive',
+        images: formData.images
       })
       
-      if (response.ok) {
-        const result = await response.json()
-        if (result.success) {
-          // Update the product in the AdminContext
-          updateProduct(productId, {
-            name: formData.name,
-            description: formData.description,
-            price: parseFloat(formData.price),
-            category: formData.category,
-            stock: parseInt(formData.stock),
-            status: formData.status as 'active' | 'inactive',
-            images: formData.images
-          })
-          
-          // Refresh the products list to ensure consistency
-          await refreshProducts()
-          
-          alert('Product updated successfully!')
-          router.push('/admin/products')
-        } else {
-          throw new Error(result.message || 'Failed to update product')
-        }
-      } else {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to update product')
-      }
+      alert('Product updated successfully!')
+      router.push('/admin/products')
     } catch (error) {
       console.error('Error updating product:', error)
       alert(`Failed to update product: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -285,7 +407,7 @@ export default function EditProductPage() {
                   }`}
                 >
                   <option value="">Select a category</option>
-                  {categories.map(category => (
+                  {categories.map((category: Category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
                     </option>
@@ -389,41 +511,115 @@ export default function EditProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Images
               </label>
-              <div className="flex items-center space-x-4">
-                <label className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer transition-colors">
-                  <Upload className="w-4 h-4" />
-                  <span>Choose Files</span>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                </label>
-                <span className="text-sm text-gray-500">PNG, JPG up to 10MB each</span>
+              
+              {/* Drag and Drop Area */}
+              <div 
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  e.currentTarget.classList.add('border-blue-400', 'bg-blue-50')
+                }}
+                onDragLeave={(e) => {
+                  e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50')
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  e.currentTarget.classList.remove('border-blue-400', 'bg-blue-50')
+                  
+                  const files = Array.from(e.dataTransfer.files).filter(file => 
+                    file.type.startsWith('image/')
+                  )
+                  
+                  if (files.length > 0) {
+                    handleDragDropUpload(files)
+                  }
+                }}
+              >
+                <div className="space-y-4">
+                  <div className="flex flex-col items-center space-y-2">
+                    <Upload className="w-8 h-8 text-gray-400" />
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">
+                        Drag and drop images here, or{' '}
+                        <label className={`inline-flex items-center space-x-1 px-3 py-1 rounded-md transition-colors ${
+                          uploadingImages 
+                            ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
+                            : 'bg-blue-600 hover:bg-blue-700 cursor-pointer text-white'
+                        }`}>
+                          {uploadingImages ? (
+                            <>
+                              <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                              <span>Uploading...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-3 h-3" />
+                              <span>Choose Files</span>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={uploadingImages}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-2">
+                        PNG, JPG up to 5MB each
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Image Preview */}
             {formData.images.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {formData.images.map((image, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={image}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-md border border-gray-200"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-600">
+                    {formData.images.length} image(s) selected
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, images: [] }))}
+                    className="text-sm text-red-600 hover:text-red-700 transition-colors"
+                  >
+                    Clear All
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {formData.images.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={image.startsWith('blob:') ? image : image}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-md border border-gray-200 hover:border-blue-300 transition-colors"
+                        onError={(e) => {
+                          // Fallback to placeholder if image fails to load
+                          e.currentTarget.src = '/images/placeholder-product.jpg'
+                        }}
+                        loading="lazy"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        title="Remove image"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      <div className="absolute bottom-2 left-2 right-2">
+                        <p className="text-xs text-white bg-black bg-opacity-50 px-2 py-1 rounded truncate">
+                          {image.includes('/uploads/') ? 'New Upload' : 'Existing'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

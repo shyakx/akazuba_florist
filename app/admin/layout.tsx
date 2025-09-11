@@ -18,7 +18,9 @@ import {
   Bell,
   HelpCircle,
   FileText,
-  Edit3
+  Edit3,
+  ExternalLink,
+  Eye
 } from 'lucide-react'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { AdminProvider } from '@/contexts/AdminContext'
@@ -171,6 +173,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </Link>
               )
             })}
+
+            {/* Customer View Link */}
+            <div className="border-t border-blue-700/30 my-4"></div>
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-item group bg-green-600 hover:bg-green-700 text-white border border-green-500 hover:border-green-400 transition-all duration-200"
+              title="View customer website in new tab"
+            >
+              <Eye className="nav-icon" />
+              <span className="font-medium">Customer View</span>
+              <ExternalLink className="w-4 h-4 ml-auto opacity-70" />
+            </a>
           </nav>
 
 
@@ -208,6 +224,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Menu className="w-6 h-6" />
           </button>
           <h1 className="text-lg font-semibold text-gray-900">Admin Panel</h1>
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-1 px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+            title="View customer website"
+          >
+            <Eye className="w-3 h-3" />
+            <span>View</span>
+          </a>
         </header>
 
         {/* Desktop Header with Breadcrumbs */}
@@ -270,6 +296,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <div className="flex items-center space-x-4">
               <AdminNotification />
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 px-3 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                title="View customer website in new tab"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Customer View</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">Admin User</p>
                 <p className="text-xs text-gray-500">{user?.email}</p>

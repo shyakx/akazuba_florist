@@ -25,6 +25,7 @@ const wishlist_1 = __importDefault(require("./routes/wishlist"));
 const admin_1 = __importDefault(require("./routes/admin"));
 const payments_1 = __importDefault(require("./routes/payments"));
 const upload_1 = __importDefault(require("./routes/upload"));
+const support_1 = __importDefault(require("./routes/support"));
 // MoMo routes removed - using simplified payment methods
 const errorHandler_1 = require("./middleware/errorHandler");
 // Load environment variables
@@ -206,8 +207,9 @@ app.use('/api/v1/wishlist', wishlist_1.default);
 app.use('/api/v1/admin', admin_1.default);
 app.use('/api/v1/payments', payments_1.default);
 app.use('/api/v1/upload', upload_1.default);
+app.use('/api/v1/support', support_1.default);
 // Error handling middleware
-app.use(errorHandler_1.errorHandler);
+app.use(errorHandler_1.handleError);
 // Start server with error handling
 async function startServer() {
     try {

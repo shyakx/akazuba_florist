@@ -12,9 +12,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch orders from backend
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api/v1/admin/orders'
-      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/orders'
+    // Try local backend first, then fallback to production
+    let backendUrl = 'http://localhost:5000/api/v1/admin/orders'
+    
+    // If we're in production environment, use production backend
+    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
+      backendUrl = 'https://akazuba-backend-api.onrender.com/api/v1/admin/orders'
+    }
 
     try {
       const response = await fetch(backendUrl, {
@@ -60,9 +64,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create order in backend
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api/v1/admin/orders'
-      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/orders'
+    // Try local backend first, then fallback to production
+    let backendUrl = 'http://localhost:5000/api/v1/admin/orders'
+    
+    // If we're in production environment, use production backend
+    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
+      backendUrl = 'https://akazuba-backend-api.onrender.com/api/v1/admin/orders'
+    }
 
     const orderData = {
       customerName,

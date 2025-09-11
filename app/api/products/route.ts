@@ -9,11 +9,17 @@ export async function GET(request: NextRequest) {
     const page = searchParams.get('page') || '1'
     const limit = searchParams.get('limit') || '1000'
 
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? `http://localhost:5000/api/v1/products?page=${page}&limit=${limit}`
-      : `https://akazuba-backend-api.onrender.com/api/v1/products?page=${page}&limit=${limit}`
+    // Try local backend first, then fallback to production
+    let backendUrl = `http://localhost:5000/api/v1/products?page=${page}&limit=${limit}`
+    
+    // If we're in production environment, use production backend
+    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
+      backendUrl = `https://akazuba-backend-api.onrender.com/api/v1/products?page=${page}&limit=${limit}`
+    }
 
     try {
+      console.log('🔄 Fetching products from backend:', backendUrl)
+      
       const response = await fetch(backendUrl, {
         method: 'GET',
         headers: {
@@ -21,14 +27,19 @@ export async function GET(request: NextRequest) {
         },
       })
 
+      console.log('📡 Backend response status:', response.status)
+
       if (!response.ok) {
-        throw new Error(`Backend responded with status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('❌ Backend error response:', errorText)
+        throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
+      console.log('✅ Backend products response:', data)
       return NextResponse.json(data)
     } catch (backendError) {
-      console.warn('Backend not available, using fallback products data:', backendError)
+      console.warn('⚠️ Backend not available, using fallback products data:', backendError)
       
       // Fallback products data with proper categorization
       const fallbackProducts = {

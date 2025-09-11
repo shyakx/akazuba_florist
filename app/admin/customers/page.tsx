@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAdmin } from '@/contexts/AdminContext'
 import { 
   Users, 
   Search, 
@@ -22,67 +23,18 @@ import {
   Download
 } from 'lucide-react'
 
-interface Customer {
-  id: string
-  firstName: string
-  lastName: string
-  email: string
-  phone?: string
-  address?: string
-  totalOrders?: number
-  totalSpent?: number
-  lastOrder?: string
-  createdAt: string
-  status: 'active' | 'inactive'
-}
+// Using Customer type from AdminContext
 
 export default function CustomersPage() {
   const router = useRouter()
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { customers, isLoading, refreshCustomers } = useAdmin()
   const [searchTerm, setSearchTerm] = useState('')
 
-  const fetchCustomers = async () => {
-    try {
-      setIsLoading(true)
-      
-      // Get the JWT token using the proper utility function
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
-      
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-      
-      // Build query parameters
-      const params = new URLSearchParams()
-      if (searchTerm) params.append('search', searchTerm)
-      
-      const response = await fetch(`/api/admin/customers?${params.toString()}`, { headers })
-      if (!response.ok) throw new Error('Failed to fetch customers')
-      
-      const result = await response.json()
-      if (result.success) {
-        setCustomers(result.data.customers)
-      } else {
-        throw new Error('Failed to fetch customers')
-      }
-    } catch (error) {
-      console.error('Error fetching customers:', error)
-      // Fallback to empty array on error
-      setCustomers([])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
-    fetchCustomers()
-  }, [searchTerm])
+    refreshCustomers()
+  }, [refreshCustomers])
 
-  if (isLoading) {
+  if (isLoading.customers) {
     return (
       <div className="loading">
         <div className="spinner"></div>
@@ -94,7 +46,7 @@ export default function CustomersPage() {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white">
+      <div className="bg-purple-600 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">Customer Management</h1>
@@ -104,17 +56,17 @@ export default function CustomersPage() {
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
               <div className="flex items-center space-x-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{customers.length}</div>
+                  <div className="text-2xl font-bold">{isLoading.customers ? '...' : (customers?.length || 0)}</div>
                   <div className="text-sm text-purple-100">Total Customers</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{customers.filter(c => c.status === 'active').length}</div>
+                  <div className="text-2xl font-bold">{isLoading.customers ? '...' : (customers?.filter(c => c.status === 'active').length || 0)}</div>
                   <div className="text-sm text-purple-100">Active</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">RWF {(customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0) || 0).toLocaleString()}</div>
+                  <div className="text-2xl font-bold">RWF {isLoading.customers ? '...' : (customers?.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0) || 0).toLocaleString()}</div>
                   <div className="text-sm text-purple-100">Total Revenue</div>
                 </div>
               </div>
@@ -129,7 +81,7 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Customers</p>
-              <p className="text-2xl font-bold text-gray-900">{customers.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{isLoading.customers ? '...' : (customers?.length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
               <Users className="w-6 h-6 text-purple-600" />
@@ -146,7 +98,7 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Active Customers</p>
-              <p className="text-2xl font-bold text-green-600">{customers.filter(c => c.status === 'active').length}</p>
+              <p className="text-2xl font-bold text-green-600">{isLoading.customers ? '...' : (customers?.filter(c => c.status === 'active').length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <Heart className="w-6 h-6 text-green-600" />
@@ -163,7 +115,7 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Orders</p>
-              <p className="text-2xl font-bold text-blue-600">{customers.reduce((sum, c) => sum + (c.totalOrders ?? 0), 0)}</p>
+              <p className="text-2xl font-bold text-blue-600">{isLoading.customers ? '...' : (customers?.reduce((sum, c) => sum + (c.totalOrders ?? 0), 0) || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 text-blue-600" />
@@ -180,7 +132,7 @@ export default function CustomersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-pink-600">RWF {(customers.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0) || 0).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-pink-600">RWF {isLoading.customers ? '...' : (customers?.reduce((sum, c) => sum + (c.totalSpent ?? 0), 0) || 0).toLocaleString()}</p>
             </div>
             <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
               <DollarSign className="w-6 h-6 text-pink-600" />
@@ -198,19 +150,19 @@ export default function CustomersPage() {
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center space-x-4">
           <button 
-            className="btn btn-primary bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg"
+            className="btn btn-primary bg-purple-600 hover:bg-purple-700 shadow-lg"
             onClick={() => {
               // Export customers data as CSV
               const csvContent = [
                 ['Name', 'Email', 'Phone', 'Status', 'Orders', 'Total Spent', 'Created At'],
-                ...customers.map(customer => [
+                ...(customers || []).map(customer => [
                   `${customer.firstName} ${customer.lastName}`,
                   customer.email,
                   customer.phone || 'N/A',
                   customer.status,
                   customer.totalOrders || 0,
                   customer.totalSpent || 0,
-                  new Date(customer.createdAt).toLocaleDateString()
+                  (customer as any).createdAt ? new Date((customer as any).createdAt).toLocaleDateString() : 'N/A'
                 ])
               ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n')
               
@@ -274,10 +226,10 @@ export default function CustomersPage() {
 
       {/* Customers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {customers.map((customer) => (
+        {(customers || []).map((customer) => (
           <div key={customer.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Customer Header */}
-            <div className="h-32 bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center relative">
+            <div className="h-32 bg-gray-100 flex items-center justify-center relative">
               <div className="w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center">
                 <Users className="w-8 h-8 text-purple-600" />
               </div>
@@ -381,7 +333,7 @@ export default function CustomersPage() {
                   </div>
                   <div className="flex items-center text-xs text-gray-500">
                     <Calendar className="w-3 h-3 mr-1" />
-                    Joined {new Date(customer.createdAt).toLocaleDateString()}
+                    Joined {(customer as any).createdAt ? new Date((customer as any).createdAt).toLocaleDateString() : 'N/A'}
                   </div>
                 </div>
               </div>
@@ -391,7 +343,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Empty State */}
-      {customers.length === 0 && (
+      {(customers?.length || 0) === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Users className="w-12 h-12 text-gray-400" />

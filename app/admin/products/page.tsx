@@ -21,7 +21,8 @@ import {
   Calendar,
   DollarSign,
   BarChart3,
-  Tag
+  Tag,
+  RefreshCw
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -30,7 +31,7 @@ interface Product {
   id: string
   name: string
   price: number
-  category: string
+  category: string | { id: string; name: string; slug: string }
   stock: number
   status: 'active' | 'inactive'
   image?: string
@@ -42,6 +43,7 @@ interface Product {
 }
 
 export default function ProductsPage() {
+  console.log('🚀 ProductsPage component rendering...')
   const router = useRouter()
   const { 
     products, 
@@ -56,6 +58,30 @@ export default function ProductsPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
   const [filterCategory, setFilterCategory] = useState('')
 
+  // Helper function to safely get category name
+  const getCategoryName = (category: string | { id: string; name: string; slug: string }): string => {
+    if (typeof category === 'object' && category && 'name' in category) {
+      return (category as { id: string; name: string; slug: string }).name
+    }
+    return category as string
+  }
+
+
+  // Refresh products when component mounts to ensure fresh data
+  useEffect(() => {
+    console.log('🔄 Products page mounted, refreshing products...')
+    console.log('🔄 Current products count before refresh:', products.length)
+    console.log('🔄 refreshProducts function available:', typeof refreshProducts)
+    // Force refresh with a small delay to ensure it happens
+    setTimeout(() => {
+      console.log('🔄 Delayed refresh executing...')
+      refreshProducts().then(() => {
+        console.log('✅ Refresh completed, new products count:', products.length)
+      }).catch((error) => {
+        console.error('❌ Refresh failed:', error)
+      })
+    }, 100)
+  }, []) // Empty dependency array to run only once on mount
 
   // Read category parameter from URL on component mount
   useEffect(() => {
@@ -68,12 +94,19 @@ export default function ProductsPage() {
     }
   }, [])
 
+  // Debug: Log products count
+  useEffect(() => {
+    console.log('📦 Products page - Total products:', products.length)
+    console.log('📦 Products page - Product IDs:', products.map(p => p.id))
+    console.log('📦 Products page - Product names:', products.map(p => p.name))
+  }, [products])
+
   // Filter products based on search and filters
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = filterStatus === 'all' || product.status === filterStatus
-    const matchesCategory = !filterCategory || product.category === filterCategory
+    const matchesCategory = !filterCategory || getCategoryName(product.category) === filterCategory
     
     return matchesSearch && matchesStatus && matchesCategory
   })
@@ -87,14 +120,20 @@ export default function ProductsPage() {
     )
   }
 
+  // Debug logging for products display
+  console.log('🔄 Products page render - Products count:', products.length)
+  console.log('🔄 Products page render - Product IDs:', products.map(p => p.id))
+  console.log('🔄 Products page render - Product names:', products.map(p => p.name))
+
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+      <div className="bg-blue-600 rounded-2xl p-8 text-white">
         <div className="flex items-center justify-between">
         <div>
             <h1 className="text-3xl font-bold mb-2">Product Management</h1>
             <p className="text-blue-100 text-lg">Manage your beautiful flower products with ease</p>
+            <p className="text-blue-200 text-sm">Total Products: {products.length}</p>
           </div>
           <div className="hidden md:block">
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
@@ -224,7 +263,7 @@ export default function ProductsPage() {
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Link href="/admin/products/new" className="btn btn-primary bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg">
+          <Link href="/admin/products/new" className="btn btn-primary bg-blue-600 hover:bg-blue-700 shadow-lg">
             <Plus className="w-5 h-5 mr-2" />
             Add New Product
           </Link>
@@ -236,7 +275,7 @@ export default function ProductsPage() {
                 ['Name', 'Category', 'Price', 'Stock', 'Status', 'Sales', 'Rating', 'Created At'],
                 ...(products || []).map(product => [
                   product.name,
-                  product.category,
+                  getCategoryName(product.category),
                   product.price,
                   product.stock,
                   product.status,
@@ -259,6 +298,14 @@ export default function ProductsPage() {
           >
             <Download className="w-4 h-4 mr-2" />
             Export Data
+          </button>
+          <button 
+            onClick={refreshProducts}
+            className="btn btn-secondary"
+            disabled={isLoading.products}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading.products ? 'animate-spin' : ''}`} />
+            Refresh ({products.length})
           </button>
         </div>
       </div>
@@ -306,7 +353,7 @@ export default function ProductsPage() {
         {filteredProducts.map((product) => (
           <div key={product.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
             {/* Product Image */}
-            <div className="h-48 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center relative overflow-hidden">
+            <div className="h-48 bg-gray-100 flex items-center justify-center relative overflow-hidden">
               {product.images && product.images.length > 0 ? (
                 <Image
                   src={product.images[0]}
@@ -350,7 +397,7 @@ export default function ProductsPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Category</span>
-                  <span className="text-sm font-medium text-gray-900">{product.category}</span>
+                  <span className="text-sm font-medium text-gray-900">{getCategoryName(product.category)}</span>
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -397,50 +444,13 @@ export default function ProductsPage() {
                       onClick={async () => {
                         if (confirm('Are you sure you want to delete this product?')) {
                           try {
-                            // Get the JWT token using the proper utility function
-                            const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-                            const headers: Record<string, string> = {
-                              'Content-Type': 'application/json',
-                            }
-                            
-                            if (token) {
-                              headers['Authorization'] = `Bearer ${token}`
-                            }
-                            
-                            const response = await fetch(`/api/admin/products/${product.id}/delete`, {
-                              method: 'DELETE',
-                              headers
-                            })
-                            
-                            if (response.ok) {
-                              const result = await response.json()
-                              if (result.success) {
-                                // Remove product from global state
-                                deleteProduct(product.id)
-                                // Show success notification
-                                showProductDeletedNotification(product.name)
-                                // Refresh the product list to ensure consistency
-                                await refreshProducts()
-                                // Mark changes as saved
-                                markChangesSaved()
-                              } else {
-                                throw new Error(result.message || 'Failed to delete product')
-                              }
-                            } else {
-                              const errorData = await response.json()
-                              if (errorData.backendAvailable === false) {
-                                showErrorNotification(
-                                  'Backend Offline',
-                                  'Backend server is not available. Please start the backend server to delete products.'
-                                )
-                              } else {
-                                throw new Error(errorData.message || 'Failed to delete product')
-                              }
-                            }
+                            // Use the unified service via AdminContext
+                            await deleteProduct(product.id)
+                            // Show success notification
+                            showProductDeletedNotification(product.name)
                           } catch (error) {
                             console.error('Error deleting product:', error)
                             showErrorNotification(
-                              'Delete Failed',
                               `Failed to delete product: ${error instanceof Error ? error.message : 'Unknown error'}`
                             )
                           }
@@ -475,7 +485,7 @@ export default function ProductsPage() {
             }
           </p>
           {!searchTerm && filterStatus === 'all' && (
-            <Link href="/admin/products/new" className="btn btn-primary bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg">
+            <Link href="/admin/products/new" className="btn btn-primary bg-blue-600 hover:bg-blue-700 shadow-lg">
               <Plus className="w-5 h-5 mr-2" />
               Add Your First Product
             </Link>

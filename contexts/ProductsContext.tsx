@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react'
 import { Product } from '@/types'
 import { logger } from '@/lib/logger'
-import { databaseAPI } from '@/lib/databaseApi'
+import { unifiedProductService } from '@/lib/unifiedProductService'
 import { usePathname } from 'next/navigation'
 
 interface ProductsContextType {
@@ -12,6 +12,7 @@ interface ProductsContextType {
   error: string | null
   loadProducts: () => Promise<void>
   refreshProducts: () => Promise<void>
+  forceRefresh: () => Promise<void>
   getAllProducts: () => Product[]
   getProductById: (id: string) => Product | null
   getProductsByCategory: (category: string) => Product[]
@@ -50,7 +51,9 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       isLoadingRef.current = true
       setIsLoading(true)
       setError(null)
-      const productsData = await databaseAPI.getAllProducts()
+      console.log('🔄 Loading products via unified service')
+      const productsData = await unifiedProductService.getAllProducts()
+      console.log('✅ Products loaded via unified service:', productsData.length)
       setProducts(productsData)
     } catch (err) {
       logger.error('Failed to load products', 'PRODUCTS_CONTEXT', { error: err instanceof Error ? err.message : 'Unknown error' }, err instanceof Error ? err : undefined)
@@ -62,6 +65,12 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []) // Empty dependency array since this function doesn't depend on any state
 
   const refreshProducts = async () => {
+    await loadProducts()
+  }
+
+  const forceRefresh = async () => {
+    console.log('🔄 Force refreshing customer data...')
+    await unifiedProductService.forceRefresh()
     await loadProducts()
   }
 
@@ -113,7 +122,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Add product (Admin only)
   const addProduct = async (product: Omit<Product, 'id'>): Promise<Product | null> => {
     try {
-      const newProduct = await databaseAPI.createProduct(product)
+      const newProduct = await unifiedProductService.createProduct(product)
       if (newProduct) {
         await loadProducts() // Refresh from database
         return newProduct
@@ -130,7 +139,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Update product (Admin only)
   const updateProduct = async (id: string, updates: Partial<Product>): Promise<Product | null> => {
     try {
-      const updatedProduct = await databaseAPI.updateProduct(id, updates)
+      const updatedProduct = await unifiedProductService.updateProduct(id, updates)
       if (updatedProduct) {
         await loadProducts() // Refresh from database
         return updatedProduct
@@ -147,7 +156,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   // Delete product (Admin only)
   const deleteProduct = async (id: string): Promise<boolean> => {
     try {
-      const success = await databaseAPI.deleteProduct(id)
+      const success = await unifiedProductService.deleteProduct(id)
       if (success) {
         await loadProducts() // Refresh from database
         return true
@@ -177,11 +186,23 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       return
     }
     
-    // Only load if products are empty
-    if (products.length === 0) {
+    // Unified service handles cache invalidation automatically
+    
+    // If products exist but we're coming from admin, force refresh
+    if (products.length > 0) {
+      // Check if we just came from an admin page
+      const lastPath = sessionStorage.getItem('lastPathname')
+      if (lastPath?.startsWith('/admin')) {
+        console.log('🔄 Refreshing customer data after admin navigation')
+        forceRefresh()
+      }
+    } else {
       loadProducts()
     }
-  }, [pathname, products.length, loadProducts]) // Depend on pathname, products length, and loadProducts
+    
+    // Store current pathname for next navigation
+    sessionStorage.setItem('lastPathname', pathname || '')
+  }, [pathname, products.length, loadProducts, forceRefresh]) // Depend on pathname, products length, loadProducts, and forceRefresh
 
   // Page focus refresh - only if not on admin pages
   useEffect(() => {
@@ -191,13 +212,25 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
     
     const handleFocus = () => {
       if (products.length > 0) {
-        loadProducts()
+        // Force refresh when page becomes visible to get latest data
+        forceRefresh()
+      }
+    }
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden && products.length > 0) {
+        // Force refresh when tab becomes visible
+        forceRefresh()
       }
     }
 
     window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
-  }, [pathname, products.length, loadProducts]) // Add pathname dependency
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [pathname, products.length, forceRefresh]) // Add pathname dependency
 
   // Auto-refresh - only if not on admin pages
   useEffect(() => {
@@ -209,10 +242,49 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (products.length > 0) {
         loadProducts()
       }
-    }, 15 * 60 * 1000) // 15 minutes
+    }, 2 * 60 * 1000) // 2 minutes (reduced from 15 minutes)
 
     return () => clearInterval(interval)
   }, [pathname, products.length, loadProducts]) // Add pathname dependency
+
+  // Listen for admin changes and refresh customer data
+  useEffect(() => {
+    if (pathname?.startsWith('/admin')) {
+      return // Don't listen on admin pages
+    }
+
+    const handleAdminProductUpdate = () => {
+      console.log('🔄 Admin product updated, refreshing customer data')
+      forceRefresh()
+    }
+
+    const handleAdminProductAdd = () => {
+      console.log('➕ Admin product added, refreshing customer data')
+      forceRefresh()
+    }
+
+    const handleAdminProductDelete = () => {
+      console.log('🗑️ Admin product deleted, refreshing customer data')
+      forceRefresh()
+    }
+
+    const handleAdminProductSaved = () => {
+      console.log('💾 Admin product saved to backend, refreshing customer data')
+      forceRefresh()
+    }
+
+    // Listen for admin changes
+    window.addEventListener('admin-product-updated', handleAdminProductUpdate)
+    window.addEventListener('admin-product-added', handleAdminProductAdd)
+    window.addEventListener('admin-product-deleted', handleAdminProductDelete)
+    window.addEventListener('admin-product-saved', handleAdminProductSaved)
+
+    return () => {
+      window.removeEventListener('admin-product-updated', handleAdminProductUpdate)
+      window.removeEventListener('admin-product-added', handleAdminProductAdd)
+      window.removeEventListener('admin-product-deleted', handleAdminProductDelete)
+    }
+  }, [pathname, forceRefresh])
 
   const value: ProductsContextType = {
     products,
@@ -220,6 +292,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
     error,
     loadProducts,
     refreshProducts,
+    forceRefresh,
     getAllProducts,
     getProductById,
     getProductsByCategory,

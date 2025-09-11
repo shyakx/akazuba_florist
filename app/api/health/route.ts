@@ -20,9 +20,13 @@ interface HealthStatus {
 // Check backend health
 async function checkBackendHealth(): Promise<'up' | 'down' | 'unknown'> {
   try {
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api/v1/health'
-      : 'https://akazuba-backend-api.onrender.com/api/v1/health'
+    // Try local backend first, then fallback to production
+    let backendUrl = 'http://localhost:5000/health'
+    
+    // If we're in production environment, use production backend
+    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
+      backendUrl = 'https://akazuba-backend-api.onrender.com/health'
+    }
 
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 5000) // 5 second timeout

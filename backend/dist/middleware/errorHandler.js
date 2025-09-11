@@ -1,52 +1,89 @@
 "use strict";
+/**
+ * Centralized error handling middleware
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.errorHandler = void 0;
-const logger_1 = require("../utils/logger");
-const errorHandler = (err, req, res, next) => {
-    let error = { ...err };
-    error.message = err.message;
-    // Log error
-    logger_1.logger.error({
-        message: err.message,
-        stack: err.stack,
+exports.createError = createError;
+exports.handleError = handleError;
+exports.handleNotFound = handleNotFound;
+exports.asyncHandler = asyncHandler;
+/**
+ * Create a custom error
+ */
+function createError(message, statusCode = 500) {
+    const error = new Error(message);
+    error.statusCode = statusCode;
+    error.isOperational = true;
+    return error;
+}
+/**
+ * Handle different types of errors
+ */
+function handleError(error, req, res, next) {
+    let statusCode = 500;
+    let message = 'Internal Server Error';
+    let errors = [];
+    // Log error for debugging
+    console.error('Error occurred:', {
+        message: error.message,
+        stack: error.stack,
         url: req.url,
         method: req.method,
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
+        timestamp: new Date().toISOString()
     });
-    // Prisma record not found
-    if (err.code === 'P2025') {
-        const message = 'Resource not found';
-        error = { message, statusCode: 404 };
+    // Handle different error types
+    if (error.name === 'ValidationError') {
+        statusCode = 400;
+        message = 'Validation Error';
+        errors = Object.values(error.errors).map((err) => err.message);
     }
-    // Prisma unique constraint violation
-    if (err.code === 'P2002') {
-        const message = 'Duplicate field value entered';
-        error = { message, statusCode: 400 };
+    else if (error.name === 'CastError') {
+        statusCode = 400;
+        message = 'Invalid ID format';
+        errors = ['The provided ID is not valid'];
     }
-    // Prisma validation error
-    if (err.code === 'P2003') {
-        const message = 'Invalid reference to related record';
-        error = { message, statusCode: 400 };
+    else if (error.name === 'MongoError' && error.code === 11000) {
+        statusCode = 409;
+        message = 'Duplicate Entry';
+        errors = ['A record with this information already exists'];
     }
-    // Prisma foreign key constraint
-    if (err.code === 'P2004') {
-        const message = 'Constraint violation';
-        error = { message, statusCode: 400 };
+    else if (error.name === 'JsonWebTokenError') {
+        statusCode = 401;
+        message = 'Invalid Token';
+        errors = ['The provided token is invalid'];
     }
-    // JWT errors
-    if (err.name === 'JsonWebTokenError') {
-        const message = 'Invalid token';
-        error = { message, statusCode: 401 };
+    else if (error.name === 'TokenExpiredError') {
+        statusCode = 401;
+        message = 'Token Expired';
+        errors = ['The provided token has expired'];
     }
-    if (err.name === 'TokenExpiredError') {
-        const message = 'Token expired';
-        error = { message, statusCode: 401 };
+    else if (error.statusCode) {
+        statusCode = error.statusCode;
+        message = error.message;
     }
-    res.status(error.statusCode || 500).json({
+    // Send error response
+    res.status(statusCode).json({
         success: false,
-        error: error.message || 'Server Error',
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+        message,
+        errors: errors.length > 0 ? errors : [message],
+        ...(process.env.NODE_ENV === 'development' && {
+            stack: error.stack,
+            details: error
+        })
     });
-};
-exports.errorHandler = errorHandler;
+}
+/**
+ * Handle 404 errors
+ */
+function handleNotFound(req, res, next) {
+    const error = createError(`Route ${req.originalUrl} not found`, 404);
+    next(error);
+}
+/**
+ * Async error wrapper
+ */
+function asyncHandler(fn) {
+    return (req, res, next) => {
+        Promise.resolve(fn(req, res, next)).catch(next);
+    };
+}
