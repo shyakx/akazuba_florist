@@ -4,7 +4,7 @@ import { getServerSession } from '@/lib/auth'
 export async function GET(request: NextRequest) {
   try {
     // Check if user is authenticated and is admin
-    const session = await getServerSession()
+    const session = await getServerSession(request)
     
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

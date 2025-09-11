@@ -5,7 +5,7 @@ import { emailService, OrderEmailData } from '@/lib/emailService'
 export async function GET(request: NextRequest) {
   try {
     // Check if user is authenticated and is admin
-    const session = await getServerSession()
+    const session = await getServerSession(request)
     
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check if user is authenticated and is admin
-    const session = await getServerSession()
+    const session = await getServerSession(request)
     
     if (!session?.user || session.user.role !== 'ADMIN') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
