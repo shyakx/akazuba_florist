@@ -137,9 +137,9 @@ const corsOptions = {
     } else {
       // Production - allow production origins and localhost for development
       allowedOrigins = [
-        'https://online-shopping-by-diane.vercel.app',
         'https://akazuba-florist.vercel.app',
         'https://akazubaflorist.com',
+        'https://www.akazubaflorist.com',
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         process.env.FRONTEND_URL

@@ -25,6 +25,9 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:3001',
     'http://localhost:3002',
+    'https://akazuba-florist.vercel.app',
+    'https://akazubaflorist.com',
+    'https://www.akazubaflorist.com',
     process.env.FRONTEND_URL
   ].filter((url): url is string => Boolean(url)),
   credentials: true,
