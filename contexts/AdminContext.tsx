@@ -146,10 +146,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     products: 0,
     orders: 0,
     revenue: 0,
-    customers: 0,
-    totalWishlistItems: 0,
-    totalCartItems: 0,
-    activeCarts: 0
+    customers: 0
   })
   const [topProducts, setTopProducts] = useState<Array<{ id: string; name: string; sales: number; revenue: number }>>([])
   
@@ -360,15 +357,22 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       console.log('📊 Stats API response:', result)
       
       if (result.success) {
+        // Calculate real-time revenue from current orders if available
+        const realTimeRevenue = orders.length > 0 
+          ? orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0)
+          : result.revenue || 0
+        
         const newStats = {
           categories: result.categories || 0,
           products: result.products || 0,
           orders: result.orders || 0,
-          revenue: result.revenue || 0,
+          revenue: realTimeRevenue, // Use real-time calculated revenue
           customers: result.customers || 0
         }
         console.log('✅ Setting stats:', newStats)
         console.log('📊 Previous stats:', stats)
+        console.log('💰 Real-time revenue calculated:', realTimeRevenue)
+        console.log('📦 Orders used for calculation:', orders.length)
         setStats(newStats)
         console.log('🔄 Stats state updated')
       } else {
@@ -381,7 +385,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     } finally {
       setIsLoading(prev => ({ ...prev, stats: false }))
     }
-  }, [getAuthHeaders])
+  }, [getAuthHeaders, orders]) // Add orders as dependency
   
   // Fetch top products
   const refreshTopProducts = useCallback(async () => {
@@ -625,6 +629,22 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     checkBackendStatus()
     refreshAll()
   }, [checkBackendStatus, refreshAll])
+  
+  // Real-time revenue calculation when orders change
+  useEffect(() => {
+    if (orders.length > 0) {
+      const realTimeRevenue = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0)
+      console.log('💰 Real-time revenue update:', realTimeRevenue)
+      console.log('📦 Orders count for revenue:', orders.length)
+      
+      // Update stats with real-time revenue
+      setStats(prev => ({
+        ...prev,
+        revenue: realTimeRevenue,
+        orders: orders.length
+      }))
+    }
+  }, [orders]) // This will trigger whenever orders change
   
   // Listen for order events from customer side
   useEffect(() => {
