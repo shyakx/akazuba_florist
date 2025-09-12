@@ -106,6 +106,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const token = localStorage.getItem('accessToken')
         const storedUser = localStorage.getItem('user')
         
+        // Cross-domain authentication sync
+        const currentDomain = window.location.hostname
+        const isCustomDomain = currentDomain === 'akazubaflorist.com' || currentDomain === 'www.akazubaflorist.com'
+        const isVercelDomain = currentDomain.includes('vercel.app')
+        
+        if ((isCustomDomain || isVercelDomain) && token && storedUser) {
+          console.log('🌐 Cross-domain auth sync for:', currentDomain)
+          // Ensure cookies are set for current domain
+          const userData = JSON.parse(storedUser)
+          if (userData.role) {
+            const isProduction = currentDomain !== 'localhost'
+            const roleCookieOptions = isProduction 
+              ? `userRole=${userData.role}; path=/; max-age=86400; samesite=lax; secure`
+              : `userRole=${userData.role}; path=/; max-age=86400; samesite=lax`
+            document.cookie = roleCookieOptions
+            
+            const tokenCookieOptions = isProduction 
+              ? `accessToken=${token}; path=/; max-age=86400; samesite=lax; secure`
+              : `accessToken=${token}; path=/; max-age=86400; samesite=lax`
+            document.cookie = tokenCookieOptions
+            
+            console.log('🍪 Cross-domain cookies synced for:', currentDomain)
+          }
+        }
+        
         // Check if this is a fresh session (no sessionStorage flag)
         const hasSessionFlag = sessionStorage.getItem('authSessionStarted')
         if (!hasSessionFlag) {
@@ -199,14 +224,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Update stored user data
         localStorage.setItem('user', JSON.stringify(response.data.user))
         
-        // Set cookies for middleware
+        // Set cookies for middleware with cross-domain support
         if (response.data.user.role) {
           const isProduction = typeof window !== 'undefined' && typeof window.location !== 'undefined' && window.location.hostname !== 'localhost'
+          const currentDomain = typeof window !== 'undefined' ? window.location.hostname : ''
+          
+          // Set cookie for current domain
           const roleCookieOptions = isProduction 
             ? `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; secure`
             : `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
           document.cookie = roleCookieOptions
+          
+          // Also set access token cookie for current domain
+          const accessToken = localStorage.getItem('accessToken')
+          if (accessToken) {
+            const tokenCookieOptions = isProduction 
+              ? `accessToken=${accessToken}; path=/; max-age=86400; samesite=lax; secure`
+              : `accessToken=${accessToken}; path=/; max-age=86400; samesite=lax`
+            document.cookie = tokenCookieOptions
+          }
+          
           console.log('🍪 User role cookie set (regular login):', response.data.user.role)
+          console.log('🍪 Access token cookie set for domain:', currentDomain)
           
           // Verify cookie was set
           setTimeout(() => {
@@ -471,6 +510,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       // Clear all local authentication data
       clearAllAuthData()
+      
+      // Clear cookies for all possible domains
+      const domains = ['akazubaflorist.com', 'www.akazubaflorist.com', 'akazuba-florist.vercel.app']
+      domains.forEach(domain => {
+        document.cookie = `accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain}`
+        document.cookie = `userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain}`
+      })
+      console.log('🍪 Cross-domain cookies cleared')
       
       // Redirect to home page
         router.push('/')
