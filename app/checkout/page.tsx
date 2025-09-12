@@ -113,13 +113,8 @@ const CheckoutPage = () => {
       // Add payment proof file
       orderFormData.append('paymentProof', paymentProof)
 
-      // Use the same dynamic API URL logic as the main API
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
-        (typeof window !== 'undefined' && typeof window.location !== 'undefined' && window.location.hostname === 'localhost' 
-          ? 'http://localhost:5000/api/v1' 
-          : 'https://akazuba-backend-api.onrender.com/api/v1')
-
-      const response = await fetch(`${API_BASE_URL}/orders`, {
+      // Use frontend API route for better synchronization
+      const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
@@ -133,6 +128,11 @@ const CheckoutPage = () => {
       }
 
       const result = await response.json()
+      
+      // Dispatch event to notify admin panel of new order
+      window.dispatchEvent(new CustomEvent('customer-order-created', { 
+        detail: { order: result.data || result } 
+      }))
       
       toast.success(`Order created successfully! Order #${result.data?.orderNumber || result.orderNumber}`)
       clearCart()

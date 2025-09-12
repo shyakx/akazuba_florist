@@ -115,7 +115,7 @@ interface AdminContextType {
   deleteProduct: (id: string) => Promise<void>
   
   // Order operations
-  updateOrder: (id: string, updates: Partial<Order>) => void
+  updateOrder: (id: string, updates: Partial<Order>) => Promise<void>
   
   // Customer operations
   updateCustomer: (id: string, updates: Partial<Customer>) => void
@@ -274,14 +274,15 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     setErrors(prev => ({ ...prev, orders: null }))
     
     try {
-      const response = await fetch('/api/orders', {
+      // Use admin orders endpoint instead of customer orders endpoint
+      const response = await fetch('/api/admin/orders', {
         headers: getAuthHeaders()
       })
       
       if (!response.ok) throw new Error('Failed to fetch orders')
       
       const result = await response.json()
-      console.log('🔍 Orders API response:', result)
+      console.log('🔍 Admin Orders API response:', result)
       
       if (result.success) {
         // Handle both direct data and paginated data structures
@@ -296,13 +297,13 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
           }))
         }))
         
-        console.log('🔍 Processed orders data:', processedOrders)
+        console.log('🔍 Processed admin orders data:', processedOrders)
         setOrders(Array.isArray(processedOrders) ? processedOrders : [])
       } else {
         throw new Error('Failed to fetch orders')
       }
     } catch (error) {
-      console.error('❌ Error fetching orders:', error)
+      console.error('❌ Error fetching admin orders:', error)
       setErrors(prev => ({ ...prev, orders: error instanceof Error ? error.message : 'Unknown error' }))
     } finally {
       setIsLoading(prev => ({ ...prev, orders: false }))
@@ -570,12 +571,46 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   }, [markChangesUnsaved, markChangesSaved, refreshProducts, refreshStats])
   
   // Order operations
-  const updateOrder = useCallback((id: string, updates: Partial<Order>) => {
-    setOrders(prev => prev.map(order => 
-      order.id === id ? { ...order, ...updates } : order
-    ))
-    markChangesUnsaved()
-  }, [markChangesUnsaved])
+  const updateOrder = useCallback(async (id: string, updates: Partial<Order>) => {
+    try {
+      // Update order in backend first
+      const response = await fetch(`/api/admin/orders/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(updates)
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update order')
+      }
+      
+      const result = await response.json()
+      if (result.success) {
+        // Update local state
+        setOrders(prev => prev.map(order => 
+          order.id === id ? { ...order, ...updates } : order
+        ))
+        
+        // Dispatch event for other components to refresh
+        window.dispatchEvent(new CustomEvent('admin-order-updated', { 
+          detail: { orderId: id, updates } 
+        }))
+        
+        // Refresh orders to ensure sync
+        await refreshOrders()
+        await refreshStats()
+        
+        markChangesSaved()
+        console.log('✅ Order updated successfully:', id)
+      } else {
+        throw new Error(result.message || 'Failed to update order')
+      }
+    } catch (error) {
+      console.error('❌ Error updating order:', error)
+      markChangesUnsaved()
+      throw error
+    }
+  }, [getAuthHeaders, refreshOrders, refreshStats, markChangesSaved, markChangesUnsaved])
   
   // Customer operations
   const updateCustomer = useCallback((id: string, updates: Partial<Customer>) => {
@@ -590,6 +625,30 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     checkBackendStatus()
     refreshAll()
   }, [checkBackendStatus, refreshAll])
+  
+  // Listen for order events from customer side
+  useEffect(() => {
+    const handleOrderCreated = () => {
+      console.log('🔄 Order created event received, refreshing admin orders...')
+      refreshOrders()
+      refreshStats()
+    }
+    
+    const handleOrderUpdated = () => {
+      console.log('🔄 Order updated event received, refreshing admin orders...')
+      refreshOrders()
+      refreshStats()
+    }
+    
+    // Listen for order events
+    window.addEventListener('customer-order-created', handleOrderCreated)
+    window.addEventListener('customer-order-updated', handleOrderUpdated)
+    
+    return () => {
+      window.removeEventListener('customer-order-created', handleOrderCreated)
+      window.removeEventListener('customer-order-updated', handleOrderUpdated)
+    }
+  }, [refreshOrders, refreshStats])
   
   // Auto-refresh data every 5 minutes (reduced frequency to prevent memory issues)
   useEffect(() => {
