@@ -271,12 +271,21 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     setErrors(prev => ({ ...prev, orders: null }))
     
     try {
+      const headers = getAuthHeaders()
+      console.log('🔍 AdminContext calling /api/admin/orders with headers:', headers)
+      
       // Use admin orders endpoint instead of customer orders endpoint
       const response = await fetch('/api/admin/orders', {
-        headers: getAuthHeaders()
+        headers
       })
       
-      if (!response.ok) throw new Error('Failed to fetch orders')
+      console.log('📡 Admin orders response status:', response.status)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Admin orders error response:', errorText)
+        throw new Error(`Failed to fetch orders: ${response.status} - ${errorText}`)
+      }
       
       const result = await response.json()
       console.log('🔍 Admin Orders API response:', result)

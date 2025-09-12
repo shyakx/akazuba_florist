@@ -4,11 +4,48 @@ import { emailService, OrderEmailData } from '@/lib/emailService'
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 Admin orders API called')
+    console.log('🔑 Auth header:', request.headers.get('authorization'))
+    console.log('🍪 Cookies:', request.headers.get('cookie'))
+    
     // Check if user is authenticated and is admin
     const session = await getServerSession(request)
+    console.log('👤 Session:', session ? { user: session.user, hasToken: !!session.token } : 'No session')
     
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // If no session found, try to extract token from headers directly
+    let authToken = null
+    if (!session) {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        authToken = authHeader.substring(7)
+        console.log('🔑 Found token in headers, attempting direct validation')
+      }
+    } else {
+      authToken = session.token
+    }
+    
+    if (!authToken) {
+      console.log('❌ No authentication token found')
+      return NextResponse.json({ error: 'Unauthorized - No token' }, { status: 401 })
+    }
+    
+    // Verify the token directly if session is not available
+    if (!session) {
+      try {
+        const { verifyToken } = await import('@/lib/auth')
+        const payload = verifyToken(authToken)
+        if (!payload || payload.role !== 'ADMIN') {
+          console.log('❌ Token validation failed or insufficient role')
+          return NextResponse.json({ error: 'Unauthorized - Invalid token' }, { status: 401 })
+        }
+        console.log('✅ Token validated directly:', { userId: payload.userId, role: payload.role })
+      } catch (error) {
+        console.log('❌ Token verification error:', error)
+        return NextResponse.json({ error: 'Unauthorized - Token verification failed' }, { status: 401 })
+      }
+    } else if (session.user.role !== 'ADMIN') {
+      console.log('❌ User role is not ADMIN:', session.user.role)
+      return NextResponse.json({ error: 'Unauthorized - Insufficient role' }, { status: 401 })
     }
 
     // Fetch orders from backend
@@ -25,7 +62,7 @@ export async function GET(request: NextRequest) {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.token}`
+          'Authorization': `Bearer ${authToken}`
         },
       })
 

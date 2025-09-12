@@ -62,9 +62,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       sessionStorage.removeItem('authSessionStarted')
       sessionStorage.removeItem('loginRedirected')
       
-      // Clear cookies
-      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-      document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+      // Clear cookies for current domain and parent domains
+      const domain = window.location.hostname
+      document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
+      document.cookie = `userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
+      
+      // Also clear for parent domain (akazubaflorist.com)
+      if (domain.includes('akazubaflorist.com')) {
+        document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=akazubaflorist.com'
+        document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=akazubaflorist.com'
+      }
     }
     
     // Clear user state
@@ -304,7 +311,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Store tokens
         if (response.data.accessToken) {
           localStorage.setItem('accessToken', response.data.accessToken)
-          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax`
+          // Set cookie for current domain
+          const domain = window.location.hostname
+          document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax; domain=${domain}`
         }
         
         if (response.data.refreshToken) {
@@ -320,7 +329,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Set user role cookie for middleware
           if (response.data.user.role) {
-            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+            const domain = window.location.hostname
+            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; domain=${domain}`
           }
         }
         
