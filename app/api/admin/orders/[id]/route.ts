@@ -29,25 +29,25 @@ export async function PUT(
     
     try {
       console.log('🔄 Updating order status in backend:', backendUrl, body)
-      
-      const response = await fetch(backendUrl, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authHeader && { 'Authorization': authHeader }),
-        },
-        body: JSON.stringify(body)
-      })
+    
+    const response = await fetch(backendUrl, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
+      },
+      body: JSON.stringify(body)
+    })
 
       console.log('📡 Backend response status:', response.status)
 
-      if (!response.ok) {
+    if (!response.ok) {
         const errorText = await response.text()
         console.error('❌ Backend error response:', errorText)
         throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
-      }
+    }
 
-      const data = await response.json()
+    const data = await response.json()
       console.log('✅ Backend order update successful:', data)
       
       return NextResponse.json({
@@ -138,9 +138,9 @@ export async function DELETE(
       
       // Return fallback response when backend is not available
       const fallbackResponse = {
-        id: id,
-        deletedAt: new Date().toISOString()
-      }
+          id: id,
+          deletedAt: new Date().toISOString()
+        }
       
       console.log('📝 Returning fallback response:', fallbackResponse)
       
@@ -185,24 +185,24 @@ export async function GET(
     
     try {
       console.log('🔄 Fetching order from backend:', backendUrl)
-      
-      const response = await fetch(backendUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authHeader && { 'Authorization': authHeader }),
-        }
-      })
+    
+    const response = await fetch(backendUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader && { 'Authorization': authHeader }),
+      }
+    })
 
       console.log('📡 Backend response status:', response.status)
 
-      if (!response.ok) {
+    if (!response.ok) {
         const errorText = await response.text()
         console.error('❌ Backend error response:', errorText)
         throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
-      }
+    }
 
-      const data = await response.json()
+    const data = await response.json()
       console.log('✅ Backend order fetch successful:', data)
       
       return NextResponse.json({

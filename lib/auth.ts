@@ -22,7 +22,8 @@ export interface JWTPayload {
   exp?: number
 }
 
-// JWT Secret - should be in environment variables
+// JWT Secret - should match the backend secret
+// For production, this should be the same as the backend's JWT_SECRET
 const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-1757247557229-development'
 
 // Verify JWT token

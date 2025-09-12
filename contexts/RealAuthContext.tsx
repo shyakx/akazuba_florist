@@ -62,6 +62,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       sessionStorage.removeItem('authSessionStarted')
       sessionStorage.removeItem('loginRedirected')
       
+      // Clear domain-specific session flags
+      const currentDomain = window.location.hostname
+      sessionStorage.removeItem(`authSession_${currentDomain}`)
+      
       // Clear cookies for current domain and parent domains
       const domain = window.location.hostname
       document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
@@ -113,14 +117,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const token = localStorage.getItem('accessToken')
         const storedUser = localStorage.getItem('user')
         
-        // Cross-domain authentication sync
+        // SECURITY FIX: Prevent cross-domain session leakage
+        // Only sync authentication within the same domain family
         const currentDomain = window.location.hostname
         const isCustomDomain = currentDomain === 'akazubaflorist.com' || currentDomain === 'www.akazubaflorist.com'
         const isVercelDomain = currentDomain.includes('vercel.app')
         
-        if ((isCustomDomain || isVercelDomain) && token && storedUser) {
+        // Check if this domain has its own valid session
+        const domainSpecificSession = sessionStorage.getItem(`authSession_${currentDomain}`)
+        
+        if ((isCustomDomain || isVercelDomain) && token && storedUser && domainSpecificSession) {
           console.log('🌐 Cross-domain auth sync for:', currentDomain)
-          // Ensure cookies are set for current domain
+          // Only sync if this domain already has a valid session
           const userData = JSON.parse(storedUser)
           if (userData.role) {
             const isProduction = currentDomain !== 'localhost'
@@ -136,6 +144,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             console.log('🍪 Cross-domain cookies synced for:', currentDomain)
           }
+        } else if ((isCustomDomain || isVercelDomain) && !domainSpecificSession) {
+          // SECURITY: Clear any cross-domain tokens if no valid session exists for this domain
+          console.log('🔒 Clearing cross-domain tokens for:', currentDomain)
+          clearAllAuthData()
+          setUser(null)
+          return // Exit early to prevent unauthorized access
         }
         
         // Check if this is a fresh session (no sessionStorage flag)
@@ -163,6 +177,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // For security, always validate token on initialization
         if (token) {
           console.log('🔍 Found existing token, validating...')
+          
+          // SECURITY: Check if this domain has a valid session
+          const currentDomain = window.location.hostname
+          const domainSpecificSession = sessionStorage.getItem(`authSession_${currentDomain}`)
+          
+          if (!domainSpecificSession) {
+            console.log('🔒 No domain-specific session found, clearing tokens for security')
+            clearAllAuthData()
+            setUser(null)
+            return
+          }
+          
           try {
             // Check if token is expired first
             if (isTokenExpired(token)) {
@@ -336,6 +362,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Set visited flag
         localStorage.setItem('hasVisitedBefore', 'true')
+        
+        // Set domain-specific session flag for security
+        const currentDomain = window.location.hostname
+        sessionStorage.setItem(`authSession_${currentDomain}`, 'true')
+        console.log('🔒 Domain-specific session set for:', currentDomain)
         
         // Mark as authenticated immediately after successful login
         console.log('✅ Authentication state updated after login')
@@ -521,6 +552,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // Clear all local authentication data
       clearAllAuthData()
       
+      // Clear domain-specific session flags
+      const currentDomain = window.location.hostname
+      sessionStorage.removeItem(`authSession_${currentDomain}`)
+      
       // Clear cookies for all possible domains
       const domains = ['akazubaflorist.com', 'www.akazubaflorist.com', 'akazuba-florist.vercel.app']
       domains.forEach(domain => {
@@ -528,6 +563,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         document.cookie = `userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain}`
       })
       console.log('🍪 Cross-domain cookies cleared')
+      console.log('🔒 Domain-specific session cleared for:', currentDomain)
       
       // Redirect to home page
         router.push('/')

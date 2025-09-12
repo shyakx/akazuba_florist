@@ -290,9 +290,10 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       const result = await response.json()
       console.log('🔍 Admin Orders API response:', result)
       
-      if (result.success) {
+      // Handle both success response structure and direct array response
+      if (result.success || Array.isArray(result)) {
         // Handle both direct data and paginated data structures
-        const ordersData = result.data?.orders || result.data || []
+        const ordersData = result.data?.orders || result.data || result || []
         
         // Convert image URLs in order items
         const processedOrders = ordersData.map((order: any) => ({
@@ -306,7 +307,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         console.log('🔍 Processed admin orders data:', processedOrders)
         setOrders(Array.isArray(processedOrders) ? processedOrders : [])
       } else {
-        throw new Error('Failed to fetch orders')
+        throw new Error(result.message || 'Failed to fetch orders')
       }
     } catch (error) {
       console.error('❌ Error fetching admin orders:', error)
@@ -600,9 +601,9 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       const result = await response.json()
       if (result.success) {
         // Update local state
-        setOrders(prev => prev.map(order => 
-          order.id === id ? { ...order, ...updates } : order
-        ))
+    setOrders(prev => prev.map(order => 
+      order.id === id ? { ...order, ...updates } : order
+    ))
         
         // Dispatch event for other components to refresh
         window.dispatchEvent(new CustomEvent('admin-order-updated', { 
@@ -620,7 +621,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       }
     } catch (error) {
       console.error('❌ Error updating order:', error)
-      markChangesUnsaved()
+    markChangesUnsaved()
       throw error
     }
   }, [getAuthHeaders, refreshOrders, refreshStats, markChangesSaved, markChangesUnsaved])

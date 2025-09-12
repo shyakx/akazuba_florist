@@ -105,22 +105,22 @@ export default function AdminSupportPage() {
         if (errorData.backendAvailable === false) {
           setError('Backend server is not available. Changes are saved locally but may not persist.')
         } else {
-          throw new Error(errorData.error || 'Failed to create support ticket')
-        }
+        throw new Error(errorData.error || 'Failed to create support ticket')
+      }
       } else {
-        const result = await response.json()
-        if (result.success) {
-          // Refresh the tickets list
-          await fetchTickets()
-          setShowAddForm(false)
-          setSuccess('Support ticket created successfully!')
-          setError(null)
-          // Reset form
-          ;(e.target as HTMLFormElement).reset()
-          // Clear success message after 3 seconds
-          setTimeout(() => setSuccess(null), 3000)
-        } else {
-          throw new Error(result.message || 'Failed to create support ticket')
+      const result = await response.json()
+      if (result.success) {
+        // Refresh the tickets list
+        await fetchTickets()
+        setShowAddForm(false)
+        setSuccess('Support ticket created successfully!')
+        setError(null)
+        // Reset form
+        ;(e.target as HTMLFormElement).reset()
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(null), 3000)
+      } else {
+        throw new Error(result.message || 'Failed to create support ticket')
         }
       }
     } catch (error) {
@@ -159,20 +159,20 @@ export default function AdminSupportPage() {
         if (errorData.backendAvailable === false) {
           setError('Backend server is not available. Changes are saved locally but may not persist.')
         } else {
-          throw new Error(errorData.error || 'Failed to update support ticket')
-        }
+        throw new Error(errorData.error || 'Failed to update support ticket')
+      }
       } else {
-        const result = await response.json()
-        if (result.success) {
-          // Refresh the tickets list
-          await fetchTickets()
-          setEditingTicket(null)
-          setSuccess('Support ticket updated successfully!')
-          setError(null)
-          // Clear success message after 3 seconds
-          setTimeout(() => setSuccess(null), 3000)
-        } else {
-          throw new Error(result.message || 'Failed to update support ticket')
+      const result = await response.json()
+      if (result.success) {
+        // Refresh the tickets list
+        await fetchTickets()
+        setEditingTicket(null)
+        setSuccess('Support ticket updated successfully!')
+        setError(null)
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(null), 3000)
+      } else {
+        throw new Error(result.message || 'Failed to update support ticket')
         }
       }
     } catch (error) {

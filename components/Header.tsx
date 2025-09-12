@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Search, Heart, ShoppingCart, User, Menu, X, LogOut, Settings, Shield } from 'lucide-react'
+import { Search, Heart, ShoppingCart, User, Menu, X, LogOut, Settings } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { useWishlist } from '@/contexts/WishlistContext'
@@ -265,17 +265,6 @@ const Header = () => {
                         Profile
                       </Link>
                       
-                      {/* Admin Panel Link - Only show for admin users */}
-                      {user?.role === 'ADMIN' && (
-                        <Link
-                          href="/admin"
-                          onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 transition-colors duration-200 border-t border-gray-100"
-                        >
-                          <Shield className="w-4 h-4 mr-2" />
-                          Admin Panel
-                        </Link>
-                      )}
                       
                       <button
                         onClick={() => {
