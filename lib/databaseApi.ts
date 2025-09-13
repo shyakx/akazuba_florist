@@ -1,5 +1,25 @@
 import { Product } from '@/types'
 
+// Helper function to get auth token from localStorage or cookies
+const getAuthToken = (): string | null => {
+  if (typeof window !== 'undefined') {
+    // First try localStorage
+    let token = localStorage.getItem('accessToken')
+    
+    // If not found in localStorage, try cookies as fallback
+    if (!token) {
+      const cookies = document.cookie.split(';')
+      const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='))
+      if (accessTokenCookie) {
+        token = accessTokenCookie.split('=')[1]
+      }
+    }
+    
+    return token
+  }
+  return null
+}
+
 // API Base URL configuration
 const getApiBaseUrl = (): string => {
   // Check if we're in the browser and have access to window.location
@@ -271,7 +291,7 @@ class DatabaseAPI {
   // Create product (Admin only)
   async createProduct(product: Omit<Product, 'id'>): Promise<Product | null> {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = getAuthToken()
       if (!token) {
         throw new Error('Authentication required')
       }
@@ -323,7 +343,7 @@ class DatabaseAPI {
   // Update product (Admin only)
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = getAuthToken()
       if (!token) {
         throw new Error('Authentication required')
       }
@@ -375,7 +395,7 @@ class DatabaseAPI {
   // Delete product (Admin only)
   async deleteProduct(id: string): Promise<boolean> {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = getAuthToken()
       if (!token) {
         throw new Error('Authentication required')
       }
@@ -420,7 +440,7 @@ class DatabaseAPI {
   // Upload image
   async uploadImage(file: File): Promise<string> {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = getAuthToken()
       if (!token) {
         throw new Error('Authentication required')
       }

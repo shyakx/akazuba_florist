@@ -15,8 +15,10 @@ export default function HomePage() {
   const { isAuthenticated } = useAuth()
 
 
-  // Get featured products
-  const featuredProducts = products?.filter(p => p.isFeatured).slice(0, 4) || []
+  // Get featured products (show all featured, or fallback to all products if no featured)
+  const featuredProducts = products?.filter(p => p.isFeatured).length > 0 
+    ? products?.filter(p => p.isFeatured).slice(0, 8) || []
+    : products?.slice(0, 8) || []
   
   // Get counts
   const flowerCount = products?.filter(p => p.categoryName === 'Flowers').length || 0
@@ -137,10 +139,10 @@ export default function HomePage() {
           <div className="container mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
-              <p className="text-gray-600">Our most popular selections</p>
+              <p className="text-gray-600">Our most popular selections ({featuredProducts.length} products)</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
               {featuredProducts.map((product) => (
                 <div key={product.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                   <div className="relative h-40 bg-gray-100">

@@ -27,8 +27,7 @@ const colors = [
 export default function RealFlowerShowcase() {
   const [selectedColor, setSelectedColor] = useState('red');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const { state } = useProducts();
-  const { products, isLoading } = state;
+  const { products, isLoading } = useProducts();
 
   const filteredProducts = products.filter((product: any) => product.color === selectedColor);
   const currentColor = colors.find(c => c.value === selectedColor);
@@ -161,7 +160,7 @@ export default function RealFlowerShowcase() {
             {/* Thumbnail Gallery */}
             {filteredProducts.length > 1 && (
               <div className="flex gap-3 mt-6 justify-center">
-                {filteredProducts.map((product, index) => (
+                {filteredProducts.map((product: any, index: number) => (
                   <motion.button
                     key={product.id}
                     whileHover={{ scale: 1.1 }}

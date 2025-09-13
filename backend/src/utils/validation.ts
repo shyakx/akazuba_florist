@@ -1,10 +1,47 @@
 /**
- * Data validation utilities for product management
+ * Data validation utilities for product management and authentication
  */
 
 export interface ValidationResult {
   isValid: boolean
   errors: string[]
+}
+
+/**
+ * Validate email address
+ */
+export function validateEmail(email: string): { isValid: boolean; message?: string } {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const isValid = emailRegex.test(email)
+  return {
+    isValid,
+    message: isValid ? undefined : 'Please enter a valid email address'
+  }
+}
+
+/**
+ * Validate password strength
+ */
+export function validatePassword(password: string): { isValid: boolean; message?: string } {
+  // At least 8 characters, 1 uppercase, 1 lowercase, 1 number
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/
+  const isValid = passwordRegex.test(password)
+  return {
+    isValid,
+    message: isValid ? undefined : 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number'
+  }
+}
+
+/**
+ * Validate phone number
+ */
+export function validatePhone(phone: string): { isValid: boolean; message?: string } {
+  const phoneRegex = /^\+?[\d\s\-\(\)]+$/
+  const isValid = phoneRegex.test(phone)
+  return {
+    isValid,
+    message: isValid ? undefined : 'Please enter a valid phone number'
+  }
 }
 
 /**

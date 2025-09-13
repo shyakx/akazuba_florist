@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateToken } from '@/lib/auth'
 
+/**
+ * Login API Route
+ * 
+ * Handles user authentication by validating credentials and generating
+ * JWT tokens for authenticated sessions.
+ * 
+ * Features:
+ * - Credential validation
+ * - JWT token generation
+ * - Secure cookie handling
+ * - Error handling and logging
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { email, password } = body
 
+    // Validate required fields
     if (!email || !password) {
       return NextResponse.json(
         { success: false, message: 'Email and password are required' },
@@ -13,7 +26,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Admin credentials - production ready
+    /**
+     * Valid Admin Credentials
+     * 
+     * Production-ready admin credentials for system access.
+     * In a production environment, these should be stored securely
+     * and validated against a database.
+     */
     const validCredentials = [
       {
         email: 'info.akazubaflorist@gmail.com',

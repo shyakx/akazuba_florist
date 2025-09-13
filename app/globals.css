@@ -4,6 +4,199 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Admin Panel Styles */
+@layer components {
+  /* Enhanced Admin Panel Layout */
+  .admin-panel {
+    @apply min-h-screen bg-gray-100;
+  }
+
+  .admin-sidebar {
+    @apply fixed left-0 top-0 h-full w-56 bg-blue-900 shadow-2xl z-40 border-r border-blue-700;
+  }
+
+  .admin-main {
+    @apply ml-56 min-h-screen bg-gray-50 overflow-x-hidden px-6;
+  }
+
+  .admin-header {
+    @apply bg-white shadow-sm border-b border-gray-200 px-6 py-4 sticky top-0 z-30;
+  }
+
+  .admin-content-container {
+    @apply relative;
+  }
+
+  .admin-content {
+    @apply p-6 pt-4;
+  }
+
+  .admin-content-container > *:first-child {
+    @apply mt-0;
+  }
+
+  /* Prevent universal styles from adding space */
+  .admin-content-container {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .admin-content-container > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  /* Ensure no scroll-related spacing issues */
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .admin-panel {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Override root layout padding for admin panel only */
+  .admin-panel main {
+    padding-top: 0 !important;
+  }
+
+  /* Enhanced Navigation */
+  .nav-item {
+    @apply flex items-center space-x-2 px-3 py-2 text-blue-100 hover:bg-blue-700 hover:text-white rounded-lg transition-all duration-300 mx-2 text-sm relative overflow-hidden;
+    position: relative;
+  }
+
+  .nav-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    transition: left 0.5s;
+  }
+
+  .nav-item:hover::before {
+    left: 100%;
+  }
+
+  .nav-item:hover {
+    @apply transform scale-105 shadow-lg;
+  }
+
+  .nav-item.active {
+    @apply bg-white text-blue-900 shadow-lg transform scale-105 border-l-4 border-blue-500;
+    background: #ffffff;
+    animation: activePulse 2s ease-in-out infinite;
+    position: relative;
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 8px;
+    z-index: -1;
+  }
+
+  @keyframes activePulse {
+    0%, 100% {
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    50% {
+      box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05);
+    }
+  }
+
+  .nav-item.active::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: #3b82f6;
+    border-radius: 2px 0 0 2px;
+  }
+
+  .nav-item.active .nav-icon {
+    @apply text-blue-600;
+    transform: scale(1.1);
+  }
+
+  .nav-item:hover .nav-icon {
+    @apply text-white;
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  .nav-icon {
+    @apply w-4 h-4 transition-all duration-300;
+  }
+
+  /* Navigation item text animation */
+  .nav-item span {
+    transition: all 0.3s ease;
+  }
+
+  .nav-item:hover span {
+    transform: translateX(2px);
+  }
+
+  /* Sidebar Brand */
+  .sidebar-brand {
+    @apply text-white text-lg font-bold mb-4 px-4 py-3 border-b border-blue-700 transition-all duration-300 hover:bg-blue-800 cursor-pointer;
+  }
+
+  .sidebar-brand:hover {
+    @apply transform scale-105;
+  }
+
+  /* User Profile in Sidebar */
+  .sidebar-user {
+    @apply bg-blue-800 border-t border-blue-700 p-3 mt-auto transition-all duration-300;
+  }
+
+  .sidebar-user:hover {
+    @apply bg-blue-700;
+  }
+
+  /* Loading States */
+  .loading {
+    @apply flex items-center justify-center p-8;
+  }
+
+  .spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500;
+  }
+
+  .loading-state {
+    @apply flex flex-col items-center justify-center min-h-screen p-8;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .admin-sidebar {
+      @apply -translate-x-full;
+    }
+    
+    .admin-main {
+      @apply ml-0 px-4;
+    }
+    
+    .admin-sidebar.open {
+      @apply translate-x-0;
+    }
+  }
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

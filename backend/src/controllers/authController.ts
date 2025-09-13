@@ -1,10 +1,10 @@
-/// <reference types="node" />
 import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt, { Secret, SignOptions } from 'jsonwebtoken'
+import crypto from 'crypto'
 import { PrismaClient } from '@prisma/client'
 import { logger } from '../utils/logger'
-import { validateEmail, validatePassword, validatePhone } from '../middleware/auth'
+import { validateEmail, validatePassword, validatePhone } from '../utils/validation'
 import { emailService } from '../utils/emailService'
 
 const prisma = new PrismaClient()
@@ -32,13 +32,13 @@ const generateTokens = (userId: string, role: string) => {
     JWT_SECRET as Secret,
     { expiresIn: JWT_EXPIRES_IN } as SignOptions
   )
-  
+
   const refreshToken = jwt.sign(
     { userId, role, type: 'refresh' },
     JWT_SECRET as Secret,
     { expiresIn: REFRESH_TOKEN_EXPIRES_IN } as SignOptions
   )
-  
+
   return { accessToken, refreshToken }
 }
 
@@ -336,7 +336,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     const authHeader = req.headers.authorization
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7)
-      
+
       // Invalidate refresh token
       await prisma.refresh_tokens.deleteMany({
         where: {
@@ -359,7 +359,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 }
 
 // Refresh token
-export const refreshToken = async (req: Request, res: Response): Promise<void> => {
+export const refreshToken = async (req: Request, res: Response): Promise<void> => {        
   try {
     const { refreshToken } = req.body
 
@@ -373,7 +373,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
 
     // Verify refresh token
     const decoded = jwt.verify(refreshToken, JWT_SECRET as Secret) as { userId: string; role: string; type: string }
-    
+
     if (decoded.type !== 'refresh') {
       res.status(401).json({
         success: false,
@@ -417,7 +417,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     }
 
     // Generate new tokens
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens(
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens( 
       storedToken.users.id,
       storedToken.users.role
     )
@@ -496,7 +496,7 @@ export const getProfile = async (req: Request, res: Response): Promise<void> => 
 }
 
 // Update user profile
-export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {       
   try {
     const { firstName, lastName, phone } = req.body
 
@@ -546,7 +546,7 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
 }
 
 // Forgot password
-export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {      
   try {
     const { email } = req.body
 
@@ -586,7 +586,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       { expiresIn: '1h' } as SignOptions
     )
 
-    // Store reset token in database (you might want to create a separate table for this)
+    // Store reset token in database (you might want to create a separate table for this)  
     // For now, we'll use a simple approach
     const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`
 
@@ -597,7 +597,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
         `${user.firstName} ${user.lastName}`,
         resetLink
       )
-      
+
       if (emailSent) {
         console.log(`✅ Password reset email sent to ${user.email}`)
       } else {
@@ -624,7 +624,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
 }
 
 // Reset password
-export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {       
   try {
     const { token, newPassword } = req.body
 
@@ -648,7 +648,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
     // Verify reset token
     const decoded = jwt.verify(token, JWT_SECRET as Secret) as { userId: string; role: string; type: string }
-    
+
     if (decoded.type !== 'password_reset') {
       res.status(401).json({
         success: false,
@@ -707,7 +707,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 }
 
 // Change password
-export const changePassword = async (req: Request, res: Response): Promise<void> => {
+export const changePassword = async (req: Request, res: Response): Promise<void> => {      
   try {
     const { currentPassword, newPassword } = req.body
 
@@ -778,4 +778,4 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       message: 'Internal server error'
     })
   }
-} 
+}

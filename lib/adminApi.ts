@@ -2,6 +2,26 @@
 import { apiRequest } from './api'
 import { realFlowerProducts } from '@/data/real-flowers'
 
+// Helper function to get auth token from localStorage or cookies
+const getAuthToken = (): string | null => {
+  if (typeof window !== 'undefined') {
+    // First try localStorage
+    let token = getAuthToken()
+    
+    // If not found in localStorage, try cookies as fallback
+    if (!token) {
+      const cookies = document.cookie.split(';')
+      const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='))
+      if (accessTokenCookie) {
+        token = accessTokenCookie.split('=')[1]
+      }
+    }
+    
+    return token
+  }
+  return null
+}
+
 // Dashboard Stats Interface
 export interface DashboardStats {
   newOrders: number
@@ -533,7 +553,7 @@ class AdminAPI {
       // Try to fetch from backend first
       const response = await fetch(`${this.baseURL}/api/v1/admin/orders/${orderId}/invoice`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          'Authorization': `Bearer ${getAuthToken()}`
         }
       })
 
@@ -853,7 +873,7 @@ class AdminAPI {
     try {
       const response = await fetch(`${this.baseURL}/api/v1/admin/customers/export?format=${format}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          'Authorization': `Bearer ${getAuthToken()}`
         }
       })
 
@@ -910,7 +930,7 @@ class AdminAPI {
         method: 'POST',
       headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          'Authorization': `Bearer ${getAuthToken()}`
       },
         body: JSON.stringify(options)
     })

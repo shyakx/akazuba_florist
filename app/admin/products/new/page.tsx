@@ -269,7 +269,7 @@ export default function NewProductPage() {
             price: parseFloat(formData.price),
             category: formData.category,
             stock: parseInt(formData.stock),
-            status: formData.status as 'active' | 'inactive',
+            status: formData.status as 'active',
             images: formData.images,
             createdAt: new Date().toISOString()
           }
@@ -436,7 +436,6 @@ export default function NewProductPage() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
                 </select>
               </div>
             </div>

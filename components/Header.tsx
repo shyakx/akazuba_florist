@@ -9,11 +9,27 @@ import { useAuth } from '@/contexts/RealAuthContext'
 import { useWishlist } from '@/contexts/WishlistContext'
 import { realFlowerProducts } from '@/data/real-flowers'
 
+/**
+ * Navigation Item Interface
+ * 
+ * Defines the structure for navigation menu items
+ * with name and href properties.
+ */
 interface NavigationItem {
   name: string
   href: string
 }
 
+/**
+ * Header Component
+ * 
+ * Main navigation header for the website featuring:
+ * - Dynamic navigation based on product data
+ * - User authentication controls
+ * - Shopping cart and wishlist integration
+ * - Responsive mobile menu
+ * - Search functionality
+ */
 const Header = () => {
   const pathname = usePathname()
   const { state: cartState } = useCart()
@@ -23,7 +39,14 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false)
 
-  // Generate dynamic navigation based on real flower data
+  /**
+   * Generate Dynamic Navigation
+   * 
+   * Creates navigation menu items based on available flower products,
+   * including main categories and flower types with sufficient products.
+   * 
+   * @returns Array of navigation items
+   */
   const generateNavigation = (): NavigationItem[] => {
     // Extract unique flower types and colors
     const flowerTypes = Array.from(new Set(realFlowerProducts.map(product => product.type)))

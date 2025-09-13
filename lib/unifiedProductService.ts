@@ -5,6 +5,8 @@ class UnifiedProductService {
   private baseURL: string
   private cache: Map<string, { data: Product[], timestamp: number }> = new Map()
   private readonly CACHE_DURATION = 2 * 60 * 1000 // 2 minutes
+  private lastRequestTime = 0
+  private requestCooldown = 2000 // 2 seconds between requests to prevent 429 errors
 
   constructor() {
     // Use same logic as databaseApi for consistency
@@ -27,7 +29,22 @@ class UnifiedProductService {
   }
 
   private getAuthHeaders(): Record<string, string> {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+    let token = null
+    
+    if (typeof window !== 'undefined') {
+      // First try localStorage
+      token = localStorage.getItem('accessToken')
+      
+      // If not found in localStorage, try cookies as fallback
+      if (!token) {
+        const cookies = document.cookie.split(';')
+        const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='))
+        if (accessTokenCookie) {
+          token = accessTokenCookie.split('=')[1]
+        }
+      }
+    }
+    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
@@ -36,7 +53,8 @@ class UnifiedProductService {
       headers['Authorization'] = `Bearer ${token}`
       console.log('🔑 Token found for authentication:', token.substring(0, 20) + '...')
     } else {
-      console.warn('⚠️ No authentication token found')
+      // This is normal for public endpoints - no need to warn
+      console.log('ℹ️ No authentication token found - using public access')
     }
     
     return headers
@@ -61,6 +79,20 @@ class UnifiedProductService {
     console.log(`🗑️ Invalidating cache (size before: ${this.cache.size})`)
     this.cache.clear()
     console.log(`🗑️ Product cache invalidated (size after: ${this.cache.size})`)
+  }
+
+  // Invalidate specific cache key
+  private invalidateCacheKey(cacheKey: string): void {
+    console.log(`🗑️ Invalidating specific cache key: ${cacheKey}`)
+    this.cache.delete(cacheKey)
+  }
+
+  // Invalidate all product-related caches
+  private invalidateAllProductCaches(): void {
+    console.log(`🗑️ Invalidating all product caches (size before: ${this.cache.size})`)
+    this.cache.delete('all-products')
+    this.cache.delete('admin-products')
+    console.log(`🗑️ All product caches invalidated (size after: ${this.cache.size})`)
   }
 
   // Convert backend product to frontend Product type
@@ -341,6 +373,16 @@ class UnifiedProductService {
     }
 
     try {
+      // Rate limiting to prevent 429 errors
+      const now = Date.now()
+      const timeSinceLastRequest = now - this.lastRequestTime
+      if (timeSinceLastRequest < this.requestCooldown) {
+        const waitTime = this.requestCooldown - timeSinceLastRequest
+        console.log(`⏳ Rate limiting: waiting ${waitTime}ms before next request`)
+        await new Promise(resolve => setTimeout(resolve, waitTime))
+      }
+      this.lastRequestTime = Date.now()
+
       // Use admin endpoint for admin context to get all products (active + inactive)
       const endpoint = adminContext ? `${this.baseURL}/admin/products` : `${this.baseURL}/products`
       console.log('🔄 Fetching products from backend:', endpoint)
@@ -457,8 +499,8 @@ class UnifiedProductService {
       
       if (data.success && data.data) {
         console.log('✅ Product created successfully in backend')
-        // Invalidate cache after creating product
-        this.invalidateCache()
+        // Invalidate all product caches after creating product
+        this.invalidateAllProductCaches()
         const convertedProduct = this.convertBackendProduct(data.data)
         console.log('🔄 Converted product:', convertedProduct)
         return convertedProduct
@@ -504,6 +546,12 @@ class UnifiedProductService {
         weight: updates.weight
       }
 
+      console.log('🔄 UnifiedService: Sending update request to backend:', {
+        url: `${this.baseURL}/products/${id}`,
+        method: 'PUT',
+        updates: backendUpdates
+      })
+      
       const response = await fetch(`${this.baseURL}/products/${id}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
@@ -517,8 +565,8 @@ class UnifiedProductService {
       const data = await response.json()
       
       if (data.success && data.data) {
-        // Invalidate cache after updating product
-        this.invalidateCache()
+        // Invalidate all product caches after updating product
+        this.invalidateAllProductCaches()
         return this.convertBackendProduct(data.data)
       }
       
@@ -529,33 +577,45 @@ class UnifiedProductService {
     }
   }
 
-  // Delete product (Admin only)
+  /**
+   * Delete Product (Admin Only)
+   * 
+   * Deletes a product by ID directly from the backend API.
+   * This function is called by the frontend API route to avoid circular dependencies.
+   * 
+   * @param id - Product ID to delete
+   * @returns Promise resolving to true if successful, false otherwise
+   */
   async deleteProduct(id: string): Promise<boolean> {
     try {
       console.log('🗑️ Deleting product from backend:', id)
       
+      // Call backend API directly to avoid circular dependency with frontend API route
       const response = await fetch(`${this.baseURL}/products/${id}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders()
       })
 
       if (!response.ok) {
-        throw new Error(`Backend responded with status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('❌ Backend delete error:', response.status, errorText)
+        throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()
       
       if (data.success) {
-        // Invalidate cache after deleting product
-        this.invalidateCache()
+        // Invalidate all product caches after deleting product
+        this.invalidateAllProductCaches()
         console.log('✅ Product deleted successfully from backend')
         return true
       }
       
+      console.warn('⚠️ Backend deletion returned success: false')
       return false
     } catch (error) {
-      console.warn('⚠️ Backend not available for product deletion:', error)
-      // Don't delete from local state if backend is not available
+      console.error('❌ Failed to delete product from backend:', error)
+      // Don't delete from local state if backend call fails
       return false
     }
   }
@@ -563,7 +623,7 @@ class UnifiedProductService {
   // Force refresh - clears cache and refetches
   async forceRefresh(): Promise<Product[]> {
     console.log('🔄 Force refreshing products...')
-    this.invalidateCache()
+    this.invalidateAllProductCaches()
     return this.getAllProducts(true)
   }
 

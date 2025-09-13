@@ -119,7 +119,19 @@ export interface ApiResponse<T> {
 
 const getAuthToken = (): string | null => {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('accessToken')
+    // First try localStorage
+    let token = localStorage.getItem('accessToken')
+    
+    // If not found in localStorage, try cookies as fallback
+    if (!token) {
+      const cookies = document.cookie.split(';')
+      const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='))
+      if (accessTokenCookie) {
+        token = accessTokenCookie.split('=')[1]
+      }
+    }
+    
+    return token
   }
   return null
 }
@@ -462,7 +474,7 @@ export const apiUtils = {
   getAccessToken: (): string | null => {
     if (typeof window !== 'undefined') {
       // First try localStorage
-      const localToken = localStorage.getItem('accessToken')
+      const localToken = getAuthToken()
       if (localToken) {
         return localToken
       }
@@ -530,7 +542,7 @@ export const apiUtils = {
   // Check if user is authenticated
   isAuthenticated: (): boolean => {
     if (typeof window !== 'undefined') {
-      return !!localStorage.getItem('accessToken')
+      return !!getAuthToken()
     }
     return false
   },

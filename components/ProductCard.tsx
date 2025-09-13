@@ -5,6 +5,12 @@ import Image from 'next/image'
 import { ShoppingCart, Heart } from 'lucide-react'
 import { Product } from '@/types'
 
+/**
+ * Product Card Props Interface
+ * 
+ * Defines the properties for the ProductCard component including
+ * product data and callback functions for user interactions.
+ */
 interface ProductCardProps {
   product: Product
   onAddToCart?: (product: Product) => void
@@ -12,18 +18,37 @@ interface ProductCardProps {
   isAddingToCart?: boolean
 }
 
+/**
+ * Product Card Component
+ * 
+ * Displays individual product information in a card format with:
+ * - Product image with sale badge
+ * - Product name and description
+ * - Price display with sale pricing
+ * - Add to cart and wishlist functionality
+ * - Responsive design
+ */
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
   onAddToWishlist,
   isAddingToCart = false
 }) => {
-const formatPrice = (price: number) => {
-  return new Intl.NumberFormat('en-RW', {
-    style: 'currency',
-    currency: 'RWF',
+  /**
+   * Format Price for Display
+   * 
+   * Formats numeric price values into Rwandan Franc currency format
+   * with proper localization and no decimal places.
+   * 
+   * @param price - Numeric price value
+   * @returns Formatted currency string
+   */
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-RW', {
+      style: 'currency',
+      currency: 'RWF',
       minimumFractionDigits: 0
-  }).format(price)
+    }).format(price)
   }
 
   return (

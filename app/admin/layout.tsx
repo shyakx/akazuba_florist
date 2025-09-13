@@ -15,17 +15,24 @@ import {
   X,
   LogOut,
   User,
-  Bell,
-  HelpCircle,
-  FileText,
-  Edit3,
   ExternalLink,
-  Eye
+  Eye,
+  Edit3
 } from 'lucide-react'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { AdminProvider } from '@/contexts/AdminContext'
 import AdminNotification from '@/components/AdminNotification'
-import './admin-styles.css'
+
+/**
+ * Admin Layout Component
+ * 
+ * Provides the main layout structure for the admin panel including:
+ * - Sidebar navigation
+ * - Authentication handling
+ * - Error boundaries
+ * - Admin context provider
+ * - Responsive design
+ */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -34,8 +41,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const { user, isAuthenticated, isLoading, logout, isInitialized } = useAuth()
 
-  // Admin layout applies to all admin pages
-
+  /**
+   * Admin Navigation Configuration
+   * 
+   * Defines the main navigation items for the admin panel with their
+   * respective icons and routes.
+   */
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: Package },
@@ -46,69 +57,57 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ]
 
-  const quickActions = [
-    { name: 'Notifications', href: '/admin/notifications', icon: Bell },
-    { name: 'Help & Support', href: '/admin/help', icon: HelpCircle },
-    { name: 'Documentation', href: '/admin/docs', icon: FileText },
-  ]
-
+  /**
+   * Handle Admin Logout
+   * 
+   * Performs logout operation with loading state management
+   * and proper error handling.
+   */
   const handleLogout = async () => {
-    setIsLoggingOut(true)
-    await logout()
-    // Redirect is handled in the logout function in RealAuthContext
+    try {
+      setIsLoggingOut(true)
+      await logout()
+      console.log('✅ Admin logout successful')
+    } catch (error) {
+      console.error('❌ Logout failed:', error)
+    } finally {
+      setIsLoggingOut(false)
+    }
   }
 
-  // Handle authentication
+  /**
+   * Handle Authentication State
+   * 
+   * Monitors authentication state and redirects unauthenticated users
+   * to the login page. Only executes after authentication is initialized.
+   */
   useEffect(() => {
-    const cookies = typeof document !== 'undefined' ? document.cookie.split(';').reduce((acc, cookie) => {
-      const [key, value] = cookie.trim().split('=')
-      acc[key] = value
-      return acc
-    }, {} as Record<string, string>) : {}
-    
-    
-    if (isLoading || !isInitialized || isLoggingOut) {
-      return
-    }
+    if (!isInitialized) return
 
     if (!isAuthenticated) {
-      // Add a small delay to ensure cookies are processed
-      setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/unified-login'
-      }
-      }, 100)
-      return
+      router.push('/unified-login')
     }
-    
-    if (user?.role !== 'ADMIN') {
-      // Add a small delay to ensure cookies are processed
-      setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/'
-      }
-      }, 100)
-      return
-    }
-  }, [isAuthenticated, user?.role, isLoading, isInitialized, isLoggingOut, router])
+  }, [isAuthenticated, isInitialized, router])
 
   // Show loading state
   if (isLoading || !isInitialized) {
     return (
-      <div className="admin-panel">
-        <div className="loading">
-          <div className="spinner"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading admin panel...</p>
         </div>
       </div>
     )
   }
 
-  // Show redirecting state
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
     return (
-      <div className="admin-panel">
-        <div className="loading">
-          <div className="spinner"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Redirecting to login...</p>
         </div>
       </div>
     )
@@ -123,180 +122,99 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex flex-col h-full">
           {/* Brand Header */}
           <div className="sidebar-brand">
-            <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-white">Admin Panel</h1>
+              <div className="flex items-center justify-between p-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">A</span>
+                  </div>
+                  <div>
+                    <h1 className="text-white font-bold text-lg">Akazuba</h1>
+                    <p className="text-blue-200 text-xs">Admin Panel</p>
+                  </div>
+                </div>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="lg:hidden p-2 rounded-lg hover:bg-blue-700 text-white"
+                  className="lg:hidden text-white hover:text-blue-200"
               >
-                <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
               </button>
-            </div>
-            <p className="text-blue-200 text-sm mt-1">Akazuba Florist</p>
+              </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+            <nav className="flex-1 px-4 pb-4">
+              <ul className="space-y-2">
             {navigation.map((item) => {
-              // More robust active detection - exact match or starts with for sub-routes
-              const isActive = pathname === item.href || 
-                              (item.href !== '/admin' && pathname.startsWith(item.href + '/'))
+                  const Icon = item.icon
+                  const isActive = pathname === item.href
+                  
               return (
+                    <li key={item.name}>
                 <Link
-                  key={item.name}
                   href={item.href}
-                  className={`nav-item group ${isActive ? 'active' : ''} ${isActive ? 'ring-2 ring-blue-300 ring-opacity-50' : ''}`}
-                  title={isActive ? `Currently viewing ${item.name}` : `Go to ${item.name}`}
-                  style={isActive ? {
-                    backgroundColor: '#ffffff',
-                    color: '#1e40af',
-                    transform: 'scale(1.05)',
-                    boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
-                    borderLeft: '4px solid #3b82f6',
-                    borderRadius: '8px',
-                    fontWeight: '600',
-                    border: '2px solid #3b82f6',
-                    position: 'relative',
-                    zIndex: 10
-                  } : {}}
-                >
-                  <item.icon className="nav-icon" />
+                        className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                          isActive
+                            ? 'bg-blue-700 text-white'
+                            : 'text-blue-200 hover:bg-blue-800 hover:text-white'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.name}</span>
-                  {isActive && (
-                    <>
-                      <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-lg border-2 border-white"></div>
-                      <div className="absolute -left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-blue-400 rounded-r-full opacity-90"></div>
-                      <div className="absolute inset-0 bg-blue-50 opacity-30 rounded-lg"></div>
-                      <div className="absolute top-0 right-0 w-0 h-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-blue-500"></div>
-                    </>
-                  )}
                 </Link>
-              )
-            })}
-
-            {/* Customer View Link */}
-            <div className="border-t border-blue-700/30 my-4"></div>
-            <a
-              href="/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="nav-item group bg-green-600 hover:bg-green-700 text-white border border-green-500 hover:border-green-400 transition-all duration-200"
-              title="View customer website in new tab"
-            >
-              <Eye className="nav-icon" />
-              <span className="font-medium">Customer View</span>
-              <ExternalLink className="w-4 h-4 ml-auto opacity-70" />
-            </a>
+                    </li>
+                  )
+                })}
+              </ul>
           </nav>
 
-
-
-          {/* User Profile */}
-          <div className="sidebar-user">
-            <div className="flex items-center space-x-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                <User className="w-4 h-4 text-blue-600" />
+            {/* User Section */}
+            <div className="p-4 border-t border-blue-700">
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-800">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <p className="text-xs font-medium text-white">Admin User</p>
-                <p className="text-xs text-blue-200 truncate">{user?.email}</p>
-              </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-medium truncate">Admin User</p>
+                  <p className="text-blue-200 text-xs truncate">{user?.email}</p>
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center space-x-2 px-3 py-1 text-xs text-blue-100 hover:bg-blue-700 hover:text-white rounded-lg transition-colors"
+                  disabled={isLoggingOut}
+                  className="text-blue-200 hover:text-white transition-colors disabled:opacity-50"
+                  title="Logout"
             >
-              <LogOut className="w-3 h-3" />
-              <span>Logout</span>
+                  <LogOut className="w-4 h-4" />
             </button>
+              </div>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="admin-main">
-        {/* Mobile Header */}
-        <header className="admin-header lg:hidden">
+          {/* Header */}
+          <header className="admin-header">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg hover:bg-gray-100"
+                  className="lg:hidden text-gray-600 hover:text-gray-900"
           >
             <Menu className="w-6 h-6" />
-          </button>
-          <h1 className="text-lg font-semibold text-gray-900">Admin Panel</h1>
-          <a
-            href="/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center space-x-1 px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
-            title="View customer website"
-          >
-            <Eye className="w-3 h-3" />
-            <span>View</span>
-          </a>
-        </header>
-
-        {/* Desktop Header with Breadcrumbs */}
-        <header className="admin-header hidden lg:block">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <Menu className="w-5 h-5" />
               </button>
               <div>
-                <div className="flex items-center space-x-2 text-sm text-gray-500 mb-1">
-                  <span className="flex items-center space-x-1">
-                    <LayoutDashboard className="w-4 h-4" />
-                    <span>Admin</span>
-                  </span>
-                  <span>/</span>
-                  <span className="text-gray-700 font-medium flex items-center space-x-1">
-                    {(() => {
-                      const currentItem = navigation.find(item => item.href === pathname)
-                      return currentItem ? (
-                        <>
-                          <currentItem.icon className="w-4 h-4" />
-                          <span>{currentItem.name}</span>
-                        </>
-                      ) : (
-                        <>
-                          <LayoutDashboard className="w-4 h-4" />
-                          <span>Dashboard</span>
-                        </>
-                      )
-                    })()}
-                  </span>
-                </div>
-                <h1 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
-                  {(() => {
-                    const currentItem = navigation.find(item => item.href === pathname)
-                    return currentItem ? (
-                      <>
-                        <currentItem.icon className="w-5 h-5 text-blue-600" />
-                        <span>{currentItem.name}</span>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                      </>
-                    ) : (
-                      <>
-                        <LayoutDashboard className="w-5 h-5 text-blue-600" />
-                        <span>Dashboard</span>
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                      </>
-                    )
-                  })()}
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    {navigation.find(item => item.href === pathname)?.name || 'Admin Panel'}
                 </h1>
-                <p className="text-sm text-gray-600">
+                  <p className="text-gray-600">
                   {pathname === '/admin' ? 'Welcome back! Here\'s your business overview.' : 
                    `Manage your ${navigation.find(item => item.href === pathname)?.name.toLowerCase() || 'content'}`}
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <AdminNotification />
-              <a
+              <div className="flex items-center space-x-4">
+                <AdminNotification />
+                <a
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -313,43 +231,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  disabled={isLoggingOut}
+                  className="flex items-center space-x-2 px-3 py-2 text-sm bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50"
               >
                 <LogOut className="w-4 h-4" />
-                <span>Logout</span>
+                  <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
               </button>
             </div>
           </div>
         </header>
 
-        {/* Content Container */}
+          {/* Content */}
         <div className="admin-content-container">
           {children}
         </div>
       </main>
-
-      {/* Admin Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 py-4 px-6">
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
-          <div className="text-sm text-gray-600">
-            © 2024 Akazuba Florist Admin Panel
-          </div>
-          <div className="flex items-center space-x-3 text-sm text-gray-500">
-            <span className="whitespace-nowrap">Developed by</span>
-            <div className="flex items-center space-x-3">
-              <img 
-                src="/images/cloud-sync-logo.png" 
-                alt="Cloud Sync Logo" 
-                className="h-8 w-auto object-contain flex-shrink-0"
-              />
-              <div className="text-left min-w-0">
-                <div className="text-gray-400 font-semibold whitespace-nowrap">Cloud Sync</div>
-                <div className="text-gray-500 text-xs italic whitespace-nowrap">Crafting Digital Experiences That Sync</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
 
       {/* Mobile Overlay */}
       {sidebarOpen && (
@@ -357,8 +253,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
-      )}
-      </div>
+        )}
+        </div>
       </AdminProvider>
     </AdminErrorBoundary>
   )

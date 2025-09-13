@@ -23,9 +23,9 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
     const limitNum = limit ? (parseInt(limit as string) || 1000) : 1000
     const skip = (pageNum - 1) * limitNum
 
-    // Build where clause
+    // Build where clause - show all products (treating all as active)
     const where: any = {
-      isActive: true
+      // Remove isActive filter to show all products
     }
 
     if (categories) {
@@ -467,6 +467,9 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       updateData.weight = weight
     }
 
+    // Ensure all products are always active
+    updateData.isActive = true
+    
     const product = await prisma.product.update({
       where: { id },
       data: updateData,
@@ -506,10 +509,33 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
       return
     }
 
-    // Soft delete by setting isActive to false
-    await prisma.product.update({
-      where: { id },
-      data: { isActive: false }
+    // Hard delete - actually remove from database
+    // First delete related records to avoid foreign key constraints
+    await prisma.$transaction(async (tx) => {
+      // Delete cart items that reference this product
+      await tx.cart_items.deleteMany({
+        where: { productId: id }
+      })
+      
+      // Delete order items that reference this product
+      await tx.order_items.deleteMany({
+        where: { productId: id }
+      })
+      
+      // Delete reviews that reference this product (already has onDelete: Cascade)
+      await tx.reviews.deleteMany({
+        where: { productId: id }
+      })
+      
+      // Delete wishlist items that reference this product (already has onDelete: Cascade)
+      await tx.wishlist.deleteMany({
+        where: { productId: id }
+      })
+      
+      // Finally delete the product
+      await tx.product.delete({
+        where: { id }
+      })
     })
 
     res.json({

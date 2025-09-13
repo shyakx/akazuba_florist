@@ -100,7 +100,7 @@ export const usePerformanceMonitor = (componentName: string) => {
 
 // Hook for measuring async operations
 export const useAsyncPerformance = () => {
-  const measureAsync = async <T>(
+  const measureAsync = async <T,>(
     operation: () => Promise<T>,
     operationName: string
   ): Promise<T> => {

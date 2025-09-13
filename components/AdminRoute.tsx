@@ -66,7 +66,9 @@ export const withAdminRoute = <P extends object>(
   return AdminComponent
 }
 
-// Dynamically imported admin components with code splitting
+// Temporarily disable dynamic imports to fix webpack error
+// TODO: Re-enable dynamic imports once webpack issue is resolved
+/*
 export const AdminCategoriesPage = dynamic(
   () => import('@/app/admin/categories/page'),
   {
@@ -98,9 +100,11 @@ export const AdminCustomersPage = dynamic(
     ssr: false
   }
 )
+*/
 
 
-// Admin form components
+// Admin form components - temporarily disabled
+/*
 export const AdminNewCategoryPage = dynamic(
   () => import('@/app/admin/categories/new/page'),
   {
@@ -116,8 +120,10 @@ export const AdminNewProductPage = dynamic(
     ssr: false
   }
 )
+*/
 
-// Utility function to preload admin routes
+// Utility function to preload admin routes - temporarily disabled
+/*
 export const preloadAdminRoute = (route: string) => {
   const routeMap: Record<string, () => Promise<any>> = {
     categories: () => import('@/app/admin/categories/page'),
@@ -135,8 +141,10 @@ export const preloadAdminRoute = (route: string) => {
     })
   }
 }
+*/
 
-// Hook for admin route management
+// Hook for admin route management - temporarily disabled
+/*
 export const useAdminRoute = () => {
   const preloadRoute = (route: string) => {
     // Preload on hover or focus
@@ -159,5 +167,6 @@ export const useAdminRoute = () => {
     preloadAllRoutes
   }
 }
+*/
 
 export default withAdminRoute

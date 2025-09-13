@@ -4,18 +4,43 @@ import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
 import Link from 'next/link'
 
+/**
+ * Error Boundary Props Interface
+ * 
+ * Defines the properties for the ErrorBoundary component including
+ * children to wrap, optional fallback UI, and error handler callback.
+ */
 interface Props {
   children: ReactNode
   fallback?: ReactNode
   onError?: (error: Error, errorInfo: ErrorInfo) => void
 }
 
+/**
+ * Error Boundary State Interface
+ * 
+ * Defines the internal state of the ErrorBoundary component
+ * for tracking error status and error information.
+ */
 interface State {
   hasError: boolean
   error: Error | null
   errorInfo: ErrorInfo | null
 }
 
+/**
+ * Error Boundary Component
+ * 
+ * React error boundary that catches JavaScript errors anywhere in the child
+ * component tree, logs those errors, and displays a fallback UI instead of
+ * the component tree that crashed.
+ * 
+ * Features:
+ * - Catches and handles component errors gracefully
+ * - Provides fallback UI for better user experience
+ * - Logs errors for debugging in development
+ * - Supports custom error handlers
+ */
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props)
@@ -26,6 +51,14 @@ class ErrorBoundary extends Component<Props, State> {
     }
   }
 
+  /**
+   * Get Derived State From Error
+   * 
+   * Updates state to render fallback UI when an error is caught.
+   * 
+   * @param error - The error that was caught
+   * @returns Updated state with error information
+   */
   static getDerivedStateFromError(error: Error): State {
     return {
       hasError: true,
@@ -34,15 +67,24 @@ class ErrorBoundary extends Component<Props, State> {
     }
   }
 
+  /**
+   * Component Did Catch
+   * 
+   * Called when an error is caught by the error boundary.
+   * Logs the error and calls any custom error handler.
+   * 
+   * @param error - The error that was caught
+   * @param errorInfo - Additional error information
+   */
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({
       error,
       errorInfo
     })
 
-    // Log error to console in development
+    // Log error to console in development environment
     if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo)
+      console.error('❌ ErrorBoundary caught an error:', error, errorInfo)
     }
 
     // Call custom error handler if provided

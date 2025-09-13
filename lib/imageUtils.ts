@@ -48,5 +48,5 @@ export function convertImageUrls(urls: string[]): string[] {
  * @returns True if the URL needs conversion
  */
 export function needsImageUrlConversion(url: string): boolean {
-  return url && url.startsWith('/uploads/') && !url.startsWith('/api/uploads/')
+  return Boolean(url && url.startsWith('/uploads/') && !url.startsWith('/api/uploads/'))
 }

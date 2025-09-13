@@ -2,17 +2,33 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
-// GET all products (public endpoint for both customer and admin use)
+/**
+ * Products API Route
+ * 
+ * Handles product data retrieval with backend integration and fallback support.
+ * Provides a unified interface for both customer and admin product access.
+ * 
+ * Features:
+ * - Backend integration with fallback data
+ * - Pagination support
+ * - Environment-aware URL handling
+ * - Comprehensive error handling
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const page = searchParams.get('page') || '1'
     const limit = searchParams.get('limit') || '1000'
 
-    // Try local backend first, then fallback to production
+    /**
+     * Backend URL Configuration
+     * 
+     * Determines the appropriate backend URL based on environment
+     * and configuration settings.
+     */
     let backendUrl = `http://localhost:5000/api/v1/products?page=${page}&limit=${limit}`
     
-    // If we're in production environment, use production backend
+    // Use production backend in production environment
     if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
       backendUrl = `https://akazuba-backend-api.onrender.com/api/v1/products?page=${page}&limit=${limit}`
     }

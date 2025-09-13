@@ -33,7 +33,7 @@ interface Product {
   price: number
   category: string | { id: string; name: string; slug: string }
   stock: number
-  status: 'active' | 'inactive'
+  status: 'active'
   image?: string
   images?: string[]
   createdAt: string
@@ -55,7 +55,7 @@ export default function ProductsPage() {
   } = useAdmin()
   
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
+  // Removed status filter since all products are now active
   const [filterCategory, setFilterCategory] = useState('')
 
   // Helper function to safely get category name
@@ -105,10 +105,10 @@ export default function ProductsPage() {
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || product.status === filterStatus
+    // All products are now active, no status filtering needed
     const matchesCategory = !filterCategory || getCategoryName(product.category) === filterCategory
     
-    return matchesSearch && matchesStatus && matchesCategory
+    return matchesSearch && matchesCategory
   })
 
   if (isLoading.products) {
@@ -144,8 +144,8 @@ export default function ProductsPage() {
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.filter(p => p.status === 'active').length || 0)}</div>
-                  <div className="text-sm text-blue-100">Active</div>
+                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.length || 0)}</div>
+                  <div className="text-sm text-blue-100">Total</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
@@ -180,8 +180,8 @@ export default function ProductsPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all duration-300">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Active Products</p>
-              <p className="text-2xl font-bold text-green-600">{isLoading.products ? '...' : (products?.filter(p => p.status === 'active').length || 0)}</p>
+              <p className="text-sm font-medium text-gray-600">Total Products</p>
+              <p className="text-2xl font-bold text-green-600">{isLoading.products ? '...' : (products?.length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <Star className="w-6 h-6 text-green-600" />
@@ -278,7 +278,7 @@ export default function ProductsPage() {
                   getCategoryName(product.category),
                   product.price,
                   product.stock,
-                  product.status,
+                  'Active', // All products are now active
                   product.sales || 0,
                   product.rating || 0,
                   new Date(product.createdAt).toLocaleDateString()
@@ -326,15 +326,7 @@ export default function ProductsPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as 'all' | 'active' | 'inactive')}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200"
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active Only</option>
-              <option value="inactive">Inactive Only</option>
-            </select>
+            {/* Status filter removed - all products are now active */}
               <button
               className="btn btn-secondary px-6 py-3"
               onClick={() => {
@@ -368,15 +360,7 @@ export default function ProductsPage() {
                   <Package className="w-10 h-10 text-blue-600" />
                 </div>
               )}
-              <div className="absolute top-4 right-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  product.status === 'active' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {product.status}
-                </span>
-              </div>
+              {/* Status badge removed - all products are now active */}
             </div>
 
             {/* Product Info */}

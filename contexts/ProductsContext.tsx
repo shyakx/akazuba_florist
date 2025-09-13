@@ -2,9 +2,10 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react'
 import { Product } from '@/types'
-import { logger } from '@/lib/logger'
+// import { logger } from '@/lib/logger' // Temporarily disabled to fix webpack error
 import { unifiedProductService } from '@/lib/unifiedProductService'
 import { usePathname } from 'next/navigation'
+import { useAuth } from './RealAuthContext'
 
 interface ProductsContextType {
   products: Product[]
@@ -41,6 +42,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [error, setError] = useState<string | null>(null)
   const isLoadingRef = useRef(false)
   const pathname = usePathname()
+  const { user, isAuthenticated } = useAuth()
 
   const loadProducts = useCallback(async () => {
     if (isLoadingRef.current) {
@@ -51,18 +53,22 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       isLoadingRef.current = true
       setIsLoading(true)
       setError(null)
-      console.log('🔄 Loading products via unified service (admin context for full sync)')
-      const productsData = await unifiedProductService.getAllProducts(false, true)
+      
+      // Only use admin context if user is authenticated and has admin role
+      const shouldUseAdminContext = isAuthenticated && user?.role === 'ADMIN'
+      console.log('🔄 Loading products via unified service', shouldUseAdminContext ? '(admin context for full sync)' : '(public context)')
+      
+      const productsData = await unifiedProductService.getAllProducts(false, shouldUseAdminContext)
       console.log('✅ Products loaded via unified service:', productsData.length)
       setProducts(productsData)
     } catch (err) {
-      logger.error('Failed to load products', 'PRODUCTS_CONTEXT', { error: err instanceof Error ? err.message : 'Unknown error' }, err instanceof Error ? err : undefined)
+      console.error('❌ Failed to load products:', err instanceof Error ? err.message : 'Unknown error', err)
       setError(err instanceof Error ? err.message : 'Failed to load products')
     } finally {
       setIsLoading(false)
       isLoadingRef.current = false
     }
-  }, []) // Empty dependency array since this function doesn't depend on any state
+  }, [isAuthenticated, user?.role]) // Dependencies: authentication state and user role
 
   const refreshProducts = async () => {
     await loadProducts()
@@ -130,7 +136,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       return null
       
     } catch (err) {
-      logger.error('Failed to add product', 'PRODUCTS_CONTEXT', { productName: product.name, error: err instanceof Error ? err.message : 'Unknown error' }, err instanceof Error ? err : undefined)
+      console.error('❌ Failed to add product:', product.name, err instanceof Error ? err.message : 'Unknown error', err)
       setError('Failed to add product. Please try again.')
       throw err
     }
@@ -204,6 +210,30 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
     sessionStorage.setItem('lastPathname', pathname || '')
   }, [pathname, products.length, loadProducts, forceRefresh]) // Depend on pathname, products length, loadProducts, and forceRefresh
 
+  // Reload products when authentication state changes
+  useEffect(() => {
+    // Skip loading on admin pages completely
+    if (pathname?.startsWith('/admin')) {
+      return
+    }
+    
+    // Skip loading on auth pages
+    if (pathname && ['/register', '/unified-login'].includes(pathname)) {
+      return
+    }
+    
+    // Reload products when authentication state changes (with debounce)
+    if (isAuthenticated !== undefined) {
+      console.log('🔄 Authentication state changed, reloading products')
+      // Add a small delay to prevent rapid re-initialization
+      const timeoutId = setTimeout(() => {
+        loadProducts()
+      }, 100)
+      
+      return () => clearTimeout(timeoutId)
+    }
+  }, [isAuthenticated, user?.role, pathname, loadProducts])
+
   // Page focus refresh - only if not on admin pages
   useEffect(() => {
     if (pathname?.startsWith('/admin')) {
@@ -218,10 +248,11 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
 
     const handleVisibilityChange = () => {
-      if (!document.hidden && products.length > 0) {
-        // Force refresh when tab becomes visible
-        forceRefresh()
-      }
+      // DISABLED: This was causing too many API calls and 429 errors
+      // if (!document.hidden && products.length > 0) {
+      //   // Force refresh when tab becomes visible
+      //   forceRefresh()
+      // }
     }
 
     window.addEventListener('focus', handleFocus)
@@ -263,8 +294,8 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       forceRefresh()
     }
 
-    const handleAdminProductDelete = () => {
-      console.log('🗑️ Admin product deleted, refreshing customer data')
+    const handleAdminProductDelete = (event?: CustomEvent) => {
+      console.log('🗑️ Admin product deleted, refreshing customer data', event?.detail)
       forceRefresh()
     }
 

@@ -124,7 +124,7 @@ const WishlistComponent = () => {
                 {/* Product Image */}
                 <div className="relative h-64 bg-gradient-to-br from-pink-100 to-rose-100">
                   <img
-                    src={item.product?.images?.[0] || item.product?.image || '/images/placeholder-flower.jpg'}
+                    src={item.product?.images?.[0] || '/images/placeholder-flower.jpg'}
                     alt={item.product?.name || 'Product'}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -147,13 +147,13 @@ const WishlistComponent = () => {
                     {item.product?.name || 'Product Name Not Available'}
                   </h3>
                   <p className="text-gray-600 text-sm mb-3 capitalize">
-                    {item.product?.category?.name || 'Flowers'}
+                    {item.product?.categoryName || 'Flowers'}
                   </p>
                   <p className="text-xl font-bold text-red-600 mb-2">
                     {item.product?.price ? formatPrice(Number(item.product.price)) : 'Price Not Available'}
                   </p>
                   <p className="text-sm text-gray-500 mb-4">
-                    Added {formatDate(item.createdAt)}
+                    Added {formatDate(item.addedAt)}
                   </p>
 
                   {/* Action Buttons */}

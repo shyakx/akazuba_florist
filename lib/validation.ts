@@ -1,3 +1,9 @@
+/**
+ * Validation Rule Interface
+ * 
+ * Defines the structure for individual validation rules that can be
+ * applied to form fields and data validation.
+ */
 export interface ValidationRule {
   required?: boolean
   minLength?: number
@@ -10,10 +16,22 @@ export interface ValidationRule {
   custom?: (value: any) => string | null
 }
 
+/**
+ * Validation Schema Interface
+ * 
+ * Defines a collection of validation rules mapped to field names
+ * for comprehensive form and data validation.
+ */
 export interface ValidationSchema {
   [key: string]: ValidationRule
 }
 
+/**
+ * Validation Result Interface
+ * 
+ * Represents the result of a validation operation including
+ * validity status and any error messages.
+ */
 export interface ValidationResult {
   isValid: boolean
   errors: Record<string, string>

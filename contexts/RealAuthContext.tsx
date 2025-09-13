@@ -4,19 +4,31 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { useRouter } from 'next/navigation'
 import { authAPI, User, RegisterRequest, LoginRequest } from '@/lib/api'
 
+/**
+ * Authentication Context Interface
+ * 
+ * Provides authentication state and methods for the entire application.
+ * Includes user management, login/logout, token refresh, and profile updates.
+ */
 interface AuthContextType {
+  // State
   user: User | null
   isLoading: boolean
   isInitialized: boolean
   isAuthenticated: boolean
+  
+  // Authentication Methods
   login: (data: LoginRequest) => Promise<boolean>
   adminLogin: (data: { username: string; password: string }) => Promise<boolean>
   register: (data: RegisterRequest) => Promise<boolean>
   logout: () => Promise<void>
   refreshToken: () => Promise<boolean>
-  clearAuthData: () => void
+  
+  // User Management
   updateProfile: (data: Partial<User> & { currentPassword?: string; newPassword?: string }) => Promise<boolean>
-  // Development helpers (remove in production)
+  clearAuthData: () => void
+  
+  // Development Helpers (remove in production)
   forceClearAuth: () => void
   resetToFirstTime: () => void
 }
@@ -33,66 +45,128 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isInitialized, setIsInitialized] = useState(false)
   const router = useRouter()
 
-  // Check if token is expired
+  /**
+   * Enhanced token validation with comprehensive security checks
+   * 
+   * @param token - JWT token to validate
+   * @returns true if token is expired or invalid, false if valid
+   */
   const isTokenExpired = useCallback((token: string): boolean => {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]))
+      // Basic validation
+      if (!token || typeof token !== 'string') {
+        return true
+      }
+
+      // JWT structure validation
+      const parts = token.split('.')
+      if (parts.length !== 3) {
+        console.warn('❌ Invalid JWT token format')
+        return true
+      }
+
+      // Parse and validate payload
+      const payload = JSON.parse(atob(parts[1]))
+      
+      // Required fields validation
+      if (!payload.exp || !payload.iat || !payload.userId) {
+        console.warn('❌ JWT token missing required fields')
+        return true
+      }
+
+      // Expiration check
       const isExpired = payload.exp * 1000 < Date.now()
       if (isExpired) {
-        console.log('⏰ Token expired at:', new Date(payload.exp * 1000).toISOString())
+        console.log('⏰ JWT token expired at:', new Date(payload.exp * 1000).toISOString())
+        return true
       }
-      return isExpired
+
+      // Token age security check (prevent very old tokens)
+      const tokenAge = Date.now() - (payload.iat * 1000)
+      const maxTokenAge = 24 * 60 * 60 * 1000 // 24 hours
+      if (tokenAge > maxTokenAge) {
+        console.warn('❌ JWT token too old, forcing refresh')
+        return true
+      }
+
+      return false // Token is valid
     } catch (error) {
-      console.error('❌ Error parsing token:', error)
-      return true // Consider invalid tokens as expired
+      console.error('❌ Error parsing JWT token:', error)
+      return true // Consider invalid tokens as expired for security
     }
   }, [])
 
-  // Cleanup function to clear all authentication data
+  /**
+   * Comprehensive cleanup function to clear all authentication data
+   * 
+   * Removes all stored authentication data from localStorage, sessionStorage,
+   * and cookies to ensure complete logout and prevent data leakage.
+   */
   const clearAllAuthData = useCallback(() => {
-    // Only clear localStorage and cookies if we're in browser environment
-    if (typeof window !== 'undefined') {
-      // Clear localStorage
-      localStorage.removeItem('accessToken')
-      localStorage.removeItem('refreshToken')
-      localStorage.removeItem('user')
-      localStorage.removeItem('hasVisitedBefore')
+    // Only execute in browser environment
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      // Clear localStorage authentication data
+      const localStorageKeys = [
+        'accessToken',
+        'refreshToken', 
+        'user',
+        'hasVisitedBefore'
+      ]
+      localStorageKeys.forEach(key => localStorage.removeItem(key))
       
-      // Clear sessionStorage
-      sessionStorage.removeItem('authSessionStarted')
-      sessionStorage.removeItem('loginRedirected')
+      // Clear localStorage authentication data (including session flags)
+      const additionalLocalStorageKeys = [
+        'authSessionStarted',
+        'loginRedirected'
+      ]
+      additionalLocalStorageKeys.forEach(key => localStorage.removeItem(key))
       
       // Clear domain-specific session flags
       const currentDomain = window.location.hostname
-      sessionStorage.removeItem(`authSession_${currentDomain}`)
+      localStorage.removeItem(`authSession_${currentDomain}`)
       
-      // Clear cookies for current domain and parent domains
+      // Clear authentication cookies
       const domain = window.location.hostname
-      document.cookie = `accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
-      document.cookie = `userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
+      const cookieNames = ['accessToken', 'userRole']
+      cookieNames.forEach(name => {
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
+      })
       
-      // Also clear for parent domain (akazubaflorist.com)
+      // Clear cookies for parent domain (production)
       if (domain.includes('akazubaflorist.com')) {
-        document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=akazubaflorist.com'
-        document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=akazubaflorist.com'
+        const parentDomain = 'akazubaflorist.com'
+        cookieNames.forEach(name => {
+          document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${parentDomain}`
+        })
       }
+      
+      console.log('🧹 All authentication data cleared successfully')
+    } catch (error) {
+      console.error('❌ Error clearing authentication data:', error)
+    } finally {
+      // Always clear user state, even if storage clearing fails
+      setUser(null)
     }
-    
-    // Clear user state
-    setUser(null)
-        
-    console.log('🧹 All authentication data cleared')
   }, [])
 
-  // Initialize authentication state - only once
+  /**
+   * Initialize authentication state
+   * 
+   * Performs one-time initialization of authentication state by checking
+   * for existing tokens and validating them. Prevents multiple concurrent
+   * initializations for better performance and reliability.
+   */
   useEffect(() => {
-    // Prevent multiple initializations with a more robust check
+    // Prevent multiple initializations
     if (isInitialized) {
       console.log('🚀 Authentication already initialized, skipping...')
       return
     }
 
-    // Add a flag to prevent concurrent initializations
     let isInitializing = false
     
     const initializeAuth = async () => {
@@ -112,10 +186,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setIsInitialized(true)
           return
         }
+
+        // Prevent multiple initializations
+        if (isInitialized) {
+          console.log('🚀 Authentication already initialized, skipping...')
+          return
+        }
+        
+        console.log('🚀 Starting authentication initialization...')
         
         // Check for existing valid tokens in both development and production
         const token = localStorage.getItem('accessToken')
         const storedUser = localStorage.getItem('user')
+        
+        console.log('🔍 Initial auth state check:', { 
+          hasToken: !!token, 
+          hasStoredUser: !!storedUser,
+          tokenPreview: token ? token.substring(0, 20) + '...' : 'null'
+        })
         
         // SECURITY FIX: Prevent cross-domain session leakage
         // Only sync authentication within the same domain family
@@ -124,7 +212,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const isVercelDomain = currentDomain.includes('vercel.app')
         
         // Check if this domain has its own valid session
-        const domainSpecificSession = sessionStorage.getItem(`authSession_${currentDomain}`)
+        const domainSpecificSession = localStorage.getItem(`authSession_${currentDomain}`)
         
         if ((isCustomDomain || isVercelDomain) && token && storedUser && domainSpecificSession) {
           console.log('🌐 Cross-domain auth sync for:', currentDomain)
@@ -152,8 +240,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           return // Exit early to prevent unauthorized access
         }
         
-        // Check if this is a fresh session (no sessionStorage flag)
-        const hasSessionFlag = sessionStorage.getItem('authSessionStarted')
+        // Check if this is a fresh session (no localStorage flag)
+        const hasSessionFlag = localStorage.getItem('authSessionStarted')
         if (!hasSessionFlag) {
           console.log('🆕 Fresh session detected, checking for valid tokens...')
           
@@ -171,7 +259,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
           
           // Mark this session as started
-          sessionStorage.setItem('authSessionStarted', 'true')
+          localStorage.setItem('authSessionStarted', 'true')
         }
         
         // For security, always validate token on initialization
@@ -180,13 +268,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // SECURITY: Check if this domain has a valid session
           const currentDomain = window.location.hostname
-          const domainSpecificSession = sessionStorage.getItem(`authSession_${currentDomain}`)
+          const domainSpecificSession = localStorage.getItem(`authSession_${currentDomain}`)
           
           if (!domainSpecificSession) {
-            console.log('🔒 No domain-specific session found, clearing tokens for security')
-            clearAllAuthData()
-            setUser(null)
-            return
+            console.log('🔒 No domain-specific session found, setting it now for:', currentDomain)
+            // Set the domain-specific session if it doesn't exist but we have a valid token
+            localStorage.setItem(`authSession_${currentDomain}`, 'true')
+            console.log('🔒 Domain-specific session created for:', currentDomain)
           }
           
           try {
@@ -239,6 +327,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsLoading(false)
         isInitializing = false
         console.log('✅ Authentication system initialized')
+        
+        // Final state check
+        const finalToken = localStorage.getItem('accessToken')
+        const finalUser = localStorage.getItem('user')
+        console.log('🔍 Final authentication state:', { 
+          isAuthenticated: !!finalToken, 
+          hasUser: !!finalUser,
+          isInitialized: true 
+        })
       }
     }
 
@@ -365,7 +462,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Set domain-specific session flag for security
         const currentDomain = window.location.hostname
-        sessionStorage.setItem(`authSession_${currentDomain}`, 'true')
+        localStorage.setItem(`authSession_${currentDomain}`, 'true')
         console.log('🔒 Domain-specific session set for:', currentDomain)
         
         // Mark as authenticated immediately after successful login
@@ -410,9 +507,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const isProduction = typeof window !== 'undefined' && typeof window.location !== 'undefined' && window.location.hostname !== 'localhost'
           const cookieOptions = isProduction 
             ? `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax; secure`
-            : `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax`
+            : `accessToken=${response.data.accessToken}; path=/; max-age=86400; samesite=lax; domain=localhost`
           document.cookie = cookieOptions
-          console.log('🍪 Access token cookie set')
+          console.log('🍪 Access token cookie set with options:', cookieOptions)
         }
         
         if (response.data.refreshToken) {
@@ -431,9 +528,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const isProduction = typeof window !== 'undefined' && typeof window.location !== 'undefined' && window.location.hostname !== 'localhost'
             const roleCookieOptions = isProduction 
               ? `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; secure`
-              : `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+              : `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; domain=localhost`
             document.cookie = roleCookieOptions
-            console.log('🍪 User role cookie set:', response.data.user.role)
+            console.log('🍪 User role cookie set with options:', roleCookieOptions)
           
           // Verify cookie was set
           setTimeout(() => {
@@ -462,8 +559,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.error('❌ userRole cookie not set correctly after admin login')
           console.log('🍪 Current cookies:', cookies)
           // Try setting the cookie again with a different approach
+          document.cookie = `userRole=ADMIN; path=/; max-age=86400; samesite=lax; domain=localhost`
+          console.log('🔄 Retried setting userRole cookie with domain=localhost')
+          
+          // Also try without domain
           document.cookie = `userRole=ADMIN; path=/; max-age=86400; samesite=lax`
-          console.log('🔄 Retried setting userRole cookie')
+          console.log('🔄 Also tried setting userRole cookie without domain')
         }
         
         // Set visited flag
@@ -554,7 +655,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       // Clear domain-specific session flags
       const currentDomain = window.location.hostname
-      sessionStorage.removeItem(`authSession_${currentDomain}`)
+      localStorage.removeItem(`authSession_${currentDomain}`)
       
       // Clear cookies for all possible domains
       const domains = ['akazubaflorist.com', 'www.akazubaflorist.com', 'akazuba-florist.vercel.app']

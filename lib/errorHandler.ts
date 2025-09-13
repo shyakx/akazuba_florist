@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server'
 
+/**
+ * API Error Response Interface
+ * 
+ * Defines the structure for error responses from API endpoints
+ * with consistent error handling and detailed error information.
+ */
 export interface ApiError {
   success: false
   message: string
@@ -8,6 +14,12 @@ export interface ApiError {
   details?: any
 }
 
+/**
+ * API Success Response Interface
+ * 
+ * Defines the structure for successful responses from API endpoints
+ * with optional data and pagination information.
+ */
 export interface ApiSuccess<T = any> {
   success: true
   message: string
@@ -20,6 +32,11 @@ export interface ApiSuccess<T = any> {
   }
 }
 
+/**
+ * API Response Union Type
+ * 
+ * Represents either a successful or error response from API endpoints.
+ */
 export type ApiResponse<T = any> = ApiSuccess<T> | ApiError
 
 // Standard error responses

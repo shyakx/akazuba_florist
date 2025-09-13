@@ -3,6 +3,12 @@ import { createSuccessResponse, createErrorResponse } from '@/lib/errorHandler'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Health Status Interface
+ * 
+ * Defines the structure of the health check response including
+ * system status, service availability, and system information.
+ */
 interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy'
   timestamp: string
@@ -17,13 +23,25 @@ interface HealthStatus {
   environment: string
 }
 
-// Check backend health
+/**
+ * Check Backend Health Status
+ * 
+ * Performs health check on the backend service with timeout handling
+ * and environment-aware URL selection.
+ * 
+ * @returns Promise resolving to backend health status
+ */
 async function checkBackendHealth(): Promise<'up' | 'down' | 'unknown'> {
   try {
-    // Try local backend first, then fallback to production
+    /**
+     * Backend URL Configuration
+     * 
+     * Determines the appropriate backend health endpoint based on
+     * environment and configuration settings.
+     */
     let backendUrl = 'http://localhost:5000/health'
     
-    // If we're in production environment, use production backend
+    // Use production backend in production environment
     if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
       backendUrl = 'https://akazuba-backend-api.onrender.com/health'
     }

@@ -16,6 +16,12 @@ import {
 import Link from 'next/link'
 import { useAdmin } from '@/contexts/AdminContext'
 
+/**
+ * Dashboard Statistics Interface
+ * 
+ * Defines the structure of statistics data displayed on the admin dashboard.
+ * Includes counts for categories, products, orders, revenue, and customers.
+ */
 interface DashboardStats {
   categories: number
   products: number
@@ -24,6 +30,18 @@ interface DashboardStats {
   customers: number
 }
 
+/**
+ * Admin Dashboard Component
+ * 
+ * Main dashboard page for the admin panel displaying key statistics,
+ * system status, and quick access to admin functions.
+ * 
+ * Features:
+ * - Real-time statistics display
+ * - System status monitoring
+ * - Quick navigation to admin sections
+ * - Manual refresh functionality
+ */
 export default function AdminDashboard() {
   const { 
     stats, 
@@ -36,12 +54,17 @@ export default function AdminDashboard() {
     checkBackendStatus
   } = useAdmin()
 
-  // Debug: Log stats changes
+  // Monitor stats changes for debugging
   useEffect(() => {
-    console.log('📊 Dashboard stats changed:', stats)
+    console.log('📊 Dashboard stats updated:', stats)
   }, [stats])
   
-  // Essential stat cards only
+  /**
+   * Dashboard Statistics Cards Configuration
+   * 
+   * Defines the statistics cards displayed on the dashboard with their
+   * respective icons, colors, and navigation links.
+   */
   const statCards = [
     {
       title: 'Products',
@@ -73,10 +96,16 @@ export default function AdminDashboard() {
     }
   ]
   
-  // Manual refresh function
+  /**
+   * Handle Manual Dashboard Refresh
+   * 
+   * Manually refreshes all dashboard data including statistics,
+   * system status, and other real-time information.
+   */
   const handleManualRefresh = async () => {
     try {
       await refreshAll()
+      console.log('✅ Dashboard data refreshed successfully')
     } catch (error) {
       console.error('❌ Manual refresh failed:', error)
     }
@@ -109,150 +138,130 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Welcome to your admin panel</p>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          {/* Backend Status */}
-          <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${backendStatus ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span className="text-sm text-gray-600">
-              {backendStatus ? 'Backend Online' : 'Backend Offline'}
-            </span>
+      {/* Welcome Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Welcome to Admin Dashboard</h1>
+            <p className="text-gray-600 mt-1">Manage your Akazuba Florist store</p>
           </div>
-          
-          {/* Unsaved Changes Indicator */}
-          {hasUnsavedChanges && (
-            <div className="flex items-center space-x-2 text-orange-600">
-              <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium">Unsaved changes</span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm text-gray-500">
+              <TrendingUp className="w-4 h-4" />
+              <span>Store is running</span>
             </div>
-          )}
-          
-          {/* Refresh Button */}
-          <button 
-            onClick={handleManualRefresh}
-            className="btn btn-secondary"
-            disabled={isLoading.stats}
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading.stats ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+            <button
+              onClick={handleManualRefresh}
+              className="flex items-center space-x-2 px-3 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>Refresh</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card, index) => (
-          <Link key={index} href={card.link}>
-            <div className="stat-card group">
+        {statCards.map((stat, index) => {
+          const Icon = stat.icon
+          return (
+            <Link
+              key={index}
+              href={stat.link}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
                 </div>
-                <div className={`stat-icon ${card.color} group-hover:scale-110 transition-transform`}>
-                  <card.icon className="w-6 h-6 text-white" />
+                <div className={`${stat.color} p-3 rounded-lg`}>
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          )
+        })}
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Add Product */}
-        <Link href="/admin/products/new">
-          <div className="card hover:shadow-lg transition-shadow cursor-pointer group">
-            <div className="flex items-center space-x-4">
-              <div className="stat-icon bg-green-500 group-hover:scale-110 transition-transform">
-                <Plus className="w-6 h-6 text-white" />
-          </div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/admin/products/new"
+            className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              <Plus className="w-6 h-6" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Add New Product</h3>
-                <p className="text-gray-600">Create a new flower or perfume product</p>
+                <h3 className="font-medium">Add New Product</h3>
+                <p className="text-sm opacity-90">Create a new product listing</p>
               </div>
             </div>
-          </div>
-        </Link>
-
-        {/* Manage Categories */}
-        <Link href="/admin/categories">
-          <div className="card hover:shadow-lg transition-shadow cursor-pointer group">
-            <div className="flex items-center space-x-4">
-              <div className="stat-icon bg-blue-500 group-hover:scale-110 transition-transform">
-                <Tag className="w-6 h-6 text-white" />
-              </div>
+          </Link>
+          <Link
+            href="/admin/categories"
+            className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              <Tag className="w-6 h-6" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Manage Categories</h3>
-                <p className="text-gray-600">Organize your product categories</p>
+                <h3 className="font-medium">Manage Categories</h3>
+                <p className="text-sm opacity-90">Organize your product categories</p>
               </div>
             </div>
-            </div>
-        </Link>
-
-        {/* Settings */}
-        <Link href="/admin/settings">
-          <div className="card hover:shadow-lg transition-shadow cursor-pointer group">
-            <div className="flex items-center space-x-4">
-              <div className="stat-icon bg-gray-500 group-hover:scale-110 transition-transform">
-                <Settings className="w-6 h-6 text-white" />
-            </div>
+          </Link>
+          <Link
+            href="/admin/orders"
+            className="bg-yellow-500 hover:bg-yellow-600 text-white p-4 rounded-lg transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              <ShoppingCart className="w-6 h-6" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Settings</h3>
-                <p className="text-gray-600">Configure your store settings</p>
+                <h3 className="font-medium">View Orders</h3>
+                <p className="text-sm opacity-90">Check recent orders and status</p>
+              </div>
             </div>
+          </Link>
+          <Link
+            href="/admin/settings"
+            className="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-lg transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              <Settings className="w-6 h-6" />
+              <div>
+                <h3 className="font-medium">Settings</h3>
+                <p className="text-sm opacity-90">Configure your store settings</p>
+              </div>
             </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-          <TrendingUp className="w-5 h-5 text-gray-400" />
-        </div>
-
-          <div className="space-y-3">
-          <div className="flex items-center space-x-3 text-sm">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-gray-600">Dashboard loaded successfully</span>
-            <span className="text-gray-400 ml-auto">{new Date().toLocaleTimeString()}</span>
-        </div>
-
-          {backendStatus ? (
-            <div className="flex items-center space-x-3 text-sm">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-gray-600">Backend connection established</span>
-              <span className="text-gray-400 ml-auto">Connected</span>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-3 text-sm">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              <span className="text-gray-600">Backend connection failed</span>
-              <span className="text-gray-400 ml-auto">Offline</span>
-            </div>
-          )}
-          
-          <div className="flex items-center space-x-3 text-sm">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-gray-600">Admin panel ready</span>
-            <span className="text-gray-400 ml-auto">Ready</span>
-          </div>
+          </Link>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="text-center text-sm text-gray-500 py-4">
-        <p>Akazuba Flower Shop Admin Panel</p>
-        <p className="mt-1">Last updated: {new Date().toLocaleString()}</p>
-      </div>
+      {/* Status Messages */}
+      {hasUnsavedChanges && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-yellow-600" />
+            <p className="text-yellow-800 text-sm">
+              You have unsaved changes. Make sure to save your work.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {backendStatus === 'offline' && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <p className="text-red-800 text-sm">
+              Backend is offline. Some features may not work properly.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

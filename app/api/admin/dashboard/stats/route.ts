@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('📊 Dashboard stats API called')
+    console.log('📊 Dashboard stats API called at:', new Date().toISOString())
     // Since this is an admin route, it's already protected by the admin layout
     // We can directly fetch from the backend without additional token validation
     

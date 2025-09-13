@@ -77,7 +77,17 @@ export const WishlistProvider: React.FC<WishlistProviderProps> = ({ children }) 
       setIsLoading(true)
       
       // Check if we have a valid token before making the API call
-      const token = localStorage.getItem('accessToken')
+      let token = localStorage.getItem('accessToken')
+      
+      // If not found in localStorage, try cookies as fallback
+      if (!token) {
+        const cookies = document.cookie.split(';')
+        const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='))
+        if (accessTokenCookie) {
+          token = accessTokenCookie.split('=')[1]
+        }
+      }
+      
       if (!token) {
         setItems([])
         return

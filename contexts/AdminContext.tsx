@@ -176,7 +176,22 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   
   // Helper function to get auth headers
   const getAuthHeaders = useCallback(() => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+    let token = null
+    
+    if (typeof window !== 'undefined') {
+      // First try localStorage
+      token = localStorage.getItem('accessToken')
+      
+      // If not found in localStorage, try cookies as fallback
+      if (!token) {
+        const cookies = document.cookie.split(';')
+        const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='))
+        if (accessTokenCookie) {
+          token = accessTokenCookie.split('=')[1]
+        }
+      }
+    }
+    
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
@@ -514,6 +529,11 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         sku: (updates as any).sku,
         weight: (updates as any).weight
       }
+      
+      console.log('🔄 AdminContext: Converting updates for unified service:', {
+        originalUpdates: updates,
+        convertedUpdates: productUpdates
+      })
 
       const updatedProduct = await unifiedProductService.updateProduct(id, productUpdates)
       
@@ -567,6 +587,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         markChangesSaved() // Mark as saved since it's persisted
         
         // Notify customer context to refresh data
+        console.log('📢 Dispatching admin-product-deleted event for product:', id)
         window.dispatchEvent(new CustomEvent('admin-product-deleted', { 
           detail: { productId: id } 
         }))
@@ -580,7 +601,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
     } catch (error) {
       console.error('❌ Error deleting product:', error)
       // Don't remove from local state if there's an error
-    markChangesUnsaved()
+      markChangesUnsaved()
     }
   }, [markChangesUnsaved, markChangesSaved, refreshProducts, refreshStats])
   
@@ -636,9 +657,10 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   
   // Initialize data on mount
   useEffect(() => {
+    console.log('🔄 AdminContext: Initializing data on mount')
     checkBackendStatus()
     refreshAll()
-  }, [checkBackendStatus, refreshAll])
+  }, []) // Remove dependencies to prevent re-running
   
   // Real-time revenue calculation when orders change
   useEffect(() => {
@@ -648,11 +670,18 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       console.log('📦 Orders count for revenue:', orders.length)
       
       // Update stats with real-time revenue
-      setStats(prev => ({
-        ...prev,
-        revenue: realTimeRevenue,
-        orders: orders.length
-      }))
+      setStats(prev => {
+        // Only update if values actually changed to prevent unnecessary re-renders
+        if (prev.revenue !== realTimeRevenue || prev.orders !== orders.length) {
+          console.log('📊 Stats updated due to revenue/orders change')
+          return {
+            ...prev,
+            revenue: realTimeRevenue,
+            orders: orders.length
+          }
+        }
+        return prev
+      })
     }
   }, [orders]) // This will trigger whenever orders change
   
@@ -681,17 +710,18 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
   }, [refreshOrders, refreshStats])
   
   // Auto-refresh data every 5 minutes (reduced frequency to prevent memory issues)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!hasUnsavedChanges) {
-        // Only refresh orders and stats, not all data
-        refreshOrders()
-        refreshStats()
-      }
-    }, 300000) // 5 minutes instead of 30 seconds
-    
-    return () => clearInterval(interval)
-  }, [refreshOrders, refreshStats, hasUnsavedChanges])
+  // DISABLED: Auto-refresh to prevent constant refreshing
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (!hasUnsavedChanges) {
+  //       // Only refresh orders and stats, not all data
+  //       refreshOrders()
+  //       refreshStats()
+  //     }
+  //   }, 300000) // 5 minutes instead of 30 seconds
+  //   
+  //   return () => clearInterval(interval)
+  // }, [refreshOrders, refreshStats, hasUnsavedChanges])
   
   const value: AdminContextType = {
     // Data
