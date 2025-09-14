@@ -233,11 +233,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             console.log('🍪 Cross-domain cookies synced for:', currentDomain)
           }
         } else if ((isCustomDomain || isVercelDomain) && !domainSpecificSession && token) {
-          // Only clear if we have a token but no domain session (potential cross-domain issue)
-          console.log('🔒 Clearing cross-domain tokens for:', currentDomain)
-          clearAllAuthData()
-          setUser(null)
-          return // Exit early to prevent unauthorized access
+          // Create domain-specific session instead of clearing tokens
+          console.log('🔒 Creating domain-specific session for:', currentDomain)
+          localStorage.setItem(`authSession_${currentDomain}`, 'true')
+          // Don't clear tokens, just create the session
         }
         
         // Check if this is a fresh session (no localStorage flag)
