@@ -43,7 +43,9 @@ const ProfilePage = () => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   if (!isAuthenticated) {
-    router.push('/unified-login')
+    if (typeof window !== 'undefined') {
+      router.push('/unified-login')
+    }
     return null
   }
 

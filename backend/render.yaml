@@ -20,9 +20,9 @@ services:
       - key: PORT
         value: 10000
       - key: CORS_ORIGIN
-        value: https://online-shopping-by-diane.vercel.app
+        value: https://akazubaflorist.com
       - key: FRONTEND_URL
-        value: https://online-shopping-by-diane.vercel.app
+        value: https://akazubaflorist.com
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
       - key: CLOUDINARY_API_KEY

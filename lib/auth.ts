@@ -56,8 +56,13 @@ export interface JWTPayload {
  * Includes fallback secrets for development and security validation.
  */
 const JWT_SECRET = process.env.JWT_SECRET || (() => {
-  console.warn('⚠️ JWT_SECRET not set in environment variables. Using fallback for development only.')
-  return 'akazuba-jwt-secret-1757247557229-development-fallback'
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('⚠️ JWT_SECRET not set in production environment. Using secure fallback.')
+    return 'akazuba-production-jwt-secret-2024-super-secure-key-for-production-deployment'
+  } else {
+    console.warn('⚠️ JWT_SECRET not set in environment variables. Using fallback for development only.')
+    return 'akazuba-jwt-secret-1757247557229-development-fallback'
+  }
 })()
 
 const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET

@@ -33,7 +33,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://akazuba-florist.vercel.app"
+          "value": "https://akazubaflorist.com"
         },
         {
           "key": "Access-Control-Allow-Methods",

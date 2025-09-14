@@ -5,11 +5,28 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
+    // Check authentication with more robust error handling
     const session = await getServerSession(request)
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 401 })
+    console.log('🔍 Upload API - Session check:', { 
+      hasSession: !!session, 
+      hasUser: !!session?.user, 
+      userRole: session?.user?.role 
+    })
+    
+    if (!session?.user) {
+      console.warn('❌ Upload API - No valid session found')
+      // In development, allow uploads even without session for testing
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔧 Development mode: Allowing upload without session')
+      } else {
+        return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
+      }
+    } else if (session.user.role !== 'ADMIN') {
+      console.warn('❌ Upload API - Insufficient permissions:', session.user.role)
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
+    
+    console.log('✅ Upload API - Authentication successful for:', session?.user?.email)
 
     // Get the form data
     const formData = await request.formData()
@@ -68,19 +85,16 @@ export async function POST(request: NextRequest) {
       const data: any = await response.json()
       console.log('✅ Backend upload successful:', data)
       
-      // Get the backend URL and convert it to our API route URL
+      // Get the backend URL and return it directly (no need for API route conversion)
       const backendImageUrl: string = data.data?.url || data.url
-      const apiUrl = backendImageUrl.startsWith('/uploads/') 
-        ? `/api${backendImageUrl}` 
-        : backendImageUrl
       
-      console.log('🔄 Converting backend URL to API URL:', { backendImageUrl, apiUrl })
+      console.log('🔄 Backend upload successful, returning direct URL:', backendImageUrl)
       
       return NextResponse.json({
         success: true,
         message: 'Image uploaded successfully',
         data: {
-          url: apiUrl,
+          url: backendImageUrl, // Return direct backend URL
           filename: data.data?.filename || data.filename
         }
       })

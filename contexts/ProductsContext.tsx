@@ -227,7 +227,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       console.log('🔄 Authentication state changed, reloading products')
       // Add a small delay to prevent rapid re-initialization
       const timeoutId = setTimeout(() => {
-        loadProducts()
+      loadProducts()
       }, 100)
       
       return () => clearTimeout(timeoutId)
@@ -294,8 +294,9 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
       forceRefresh()
     }
 
-    const handleAdminProductDelete = (event?: CustomEvent) => {
-      console.log('🗑️ Admin product deleted, refreshing customer data', event?.detail)
+    const handleAdminProductDelete = (event: Event) => {
+      const customEvent = event as CustomEvent
+      console.log('🗑️ Admin product deleted, refreshing customer data', customEvent?.detail)
       forceRefresh()
     }
 

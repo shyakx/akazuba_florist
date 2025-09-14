@@ -25,9 +25,9 @@ router.options('*', (req, res) => {
   const allowedOrigins = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://online-shopping-by-diane.vercel.app',
-    'https://akazuba-florist.vercel.app',
-    'https://akazubaflorist.com'
+    'https://akazubaflorist.com',
+    'https://www.akazubaflorist.com',
+    'https://akazuba-florist.vercel.app'
   ]
   
   if (origin && allowedOrigins.includes(origin)) {

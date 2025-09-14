@@ -1,52 +1,155 @@
-/**
- * Image URL Utilities
- * 
- * This module provides utilities for handling image URLs throughout the application,
- * ensuring they go through the proper image serving API routes.
- */
+// Image utility functions for robust image handling
+
+export interface ImageValidationResult {
+  isValid: boolean
+  url: string
+  error?: string
+}
 
 /**
- * Converts image URLs to the correct API format for serving
- * 
- * @param url - The image URL to convert
- * @returns The converted URL that goes through our image serving API
- * 
- * @example
- * convertImageUrl('/uploads/image-123.jpg') // Returns '/api/uploads/image-123.jpg'
- * convertImageUrl('/api/uploads/image-123.jpg') // Returns '/api/uploads/image-123.jpg' (unchanged)
- * convertImageUrl('https://example.com/image.jpg') // Returns 'https://example.com/image.jpg' (unchanged)
+ * Validates and normalizes image URLs
  */
-export function convertImageUrl(url: string): string {
-  if (!url) return url
-  
-  // If it's already an API URL, return as is
-  if (url.startsWith('/api/uploads/')) return url
-  
-  // If it's a backend upload URL, convert to API URL
-  if (url.startsWith('/uploads/')) {
-    return `/api${url}`
+export function validateImageUrl(url: string | null | undefined): ImageValidationResult {
+  if (!url || typeof url !== 'string') {
+    return {
+      isValid: false,
+      url: '/images/placeholder-product.jpg',
+      error: 'Invalid or empty URL'
+    }
   }
+
+  const cleanUrl = url.trim()
   
-  // If it's already a full URL or other format, return as is
-  return url
+  // Fix common incorrect URL patterns
+  let normalizedUrl = cleanUrl
+  
+  // Fix typo URLs (common misspellings)
+  normalizedUrl = normalizedUrl.replace(/\/imagees\//g, '/images/')
+  normalizedUrl = normalizedUrl.replace(/\/imaages\//g, '/images/')
+  normalizedUrl = normalizedUrl.replace(/\/imagess\//g, '/images/')
+  normalizedUrl = normalizedUrl.replace(/\/immages\//g, '/images/')
+  normalizedUrl = normalizedUrl.replace(/\/imgaes\//g, '/images/')
+  normalizedUrl = normalizedUrl.replace(/\/imags\//g, '/images/')
+  
+  // Fix double slashes
+  normalizedUrl = normalizedUrl.replace(/\/\/+/g, '/')
+  
+  // Fix API uploads pattern
+  if (normalizedUrl.startsWith('/api/uploads/')) {
+    normalizedUrl = normalizedUrl.replace('/api/uploads/', '/uploads/')
+  }
+
+  // Validate URL format
+  if (normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://')) {
+    return {
+      isValid: true,
+      url: normalizedUrl
+    }
+  }
+
+  if (normalizedUrl.startsWith('/uploads/')) {
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000' 
+      : 'https://akazuba-backend-api.onrender.com'
+    return {
+      isValid: true,
+      url: `${backendUrl}${normalizedUrl}`
+    }
+  }
+
+  if (normalizedUrl.startsWith('/images/')) {
+    return {
+      isValid: true,
+      url: normalizedUrl
+    }
+  }
+
+  // If it's just a filename, assume it's in uploads
+  if (!normalizedUrl.startsWith('/')) {
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:5000' 
+      : 'https://akazuba-backend-api.onrender.com'
+    return {
+      isValid: true,
+      url: `${backendUrl}/uploads/${normalizedUrl}`
+    }
+  }
+
+  return {
+    isValid: false,
+    url: '/images/placeholder-product.jpg',
+    error: 'Unknown URL format'
+  }
 }
 
 /**
- * Converts an array of image URLs to the correct API format
- * 
- * @param urls - Array of image URLs to convert
- * @returns Array of converted URLs
+ * Gets appropriate placeholder based on product type
  */
-export function convertImageUrls(urls: string[]): string[] {
-  return urls.map(convertImageUrl)
+export function getPlaceholderForProductType(productType?: string): string {
+  if (!productType) return '/images/placeholder-product.jpg'
+  
+  const type = productType.toLowerCase()
+  if (type.includes('perfume')) {
+    return '/images/placeholder-perfume.jpg'
+  } else if (type.includes('flower')) {
+    return '/images/placeholder-flower.jpg'
+  } else {
+    return '/images/placeholder-product.jpg'
+  }
 }
 
 /**
- * Checks if a URL is a backend upload URL that needs conversion
- * 
- * @param url - The URL to check
- * @returns True if the URL needs conversion
+ * Validates and processes an array of image URLs
  */
-export function needsImageUrlConversion(url: string): boolean {
-  return Boolean(url && url.startsWith('/uploads/') && !url.startsWith('/api/uploads/'))
+export function processImageArray(images: any[], productType?: string): string[] {
+  if (!Array.isArray(images) || images.length === 0) {
+    return [getPlaceholderForProductType(productType)]
+  }
+
+  const processedImages: string[] = []
+  
+  for (const img of images) {
+    const result = validateImageUrl(img)
+    if (result.isValid) {
+      processedImages.push(result.url)
+    }
+  }
+
+  // If no valid images found, use placeholder
+  if (processedImages.length === 0) {
+    return [getPlaceholderForProductType(productType)]
+  }
+
+  return processedImages
+}
+
+/**
+ * Checks if an image URL is a placeholder
+ */
+export function isPlaceholderImage(url: string): boolean {
+  return url.includes('placeholder-') || url.includes('placeholder.')
+}
+
+/**
+ * Gets fallback image URL for error handling
+ */
+export function getFallbackImage(currentUrl: string, productType?: string): string {
+  // If current URL is already a placeholder, try a different one
+  if (isPlaceholderImage(currentUrl)) {
+    if (currentUrl.includes('placeholder-flower.jpg')) {
+      return '/images/placeholder-product.jpg'
+    } else if (currentUrl.includes('placeholder-perfume.jpg')) {
+      return '/images/placeholder-flower.jpg'
+    } else {
+      return getPlaceholderForProductType(productType)
+    }
+  }
+
+  // If it's a backend URL that failed, try frontend placeholder
+  if (currentUrl.includes('localhost:5000') || currentUrl.includes('akazuba-backend-api.onrender.com')) {
+    return getPlaceholderForProductType(productType)
+  }
+
+  // Default fallback
+  return '/images/placeholder-product.jpg'
 }

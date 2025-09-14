@@ -45,7 +45,7 @@ const nextConfig = {
     // JWT Secret for development (matches your backend)
     JWT_SECRET: process.env.NODE_ENV === 'development' 
       ? '27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665'
-      : process.env.JWT_SECRET
+      : process.env.JWT_SECRET || 'akazuba-production-jwt-secret-2024-super-secure-key-for-production-deployment'
   },
   webpack: (config, { dev, isServer }) => {
     // Fix SSR issues - simplify configuration

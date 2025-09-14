@@ -4,6 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import { ShoppingCart, Heart } from 'lucide-react'
 import { Product } from '@/types'
+import { getFallbackImage } from '@/lib/imageUtils'
 
 /**
  * Product Card Props Interface
@@ -56,11 +57,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
       {/* Image */}
       <div className="relative h-48 bg-gray-100">
         <Image
-          src={product.images[0] || '/images/placeholder-flower.jpg'}
+          src={product.images?.[0] || '/images/placeholder-flower.jpg'}
           alt={product.name}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          onError={(e) => {
+            console.warn('🖼️ Image failed to load for product:', product.name, 'URL:', product.images?.[0])
+            // Use robust fallback system
+            const target = e.target as HTMLImageElement
+            const fallbackUrl = getFallbackImage(target.src, product.type)
+            target.src = fallbackUrl
+            console.log('🔄 Using fallback image:', fallbackUrl)
+          }}
+          onLoad={() => {
+            console.log('✅ Image loaded successfully for product:', product.name)
+          }}
         />
         
         {/* Sale Badge */}

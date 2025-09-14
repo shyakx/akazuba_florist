@@ -6,7 +6,7 @@ A modern, responsive e-commerce website for Akazuba Florist, offering beautiful 
 
 ## 🚀 Live Site
 
-**Frontend URL**: https://online-shopping-by-diane.vercel.app/
+**Frontend URL**: https://akazubaflorist.com/
 **Backend URL**: https://akazuba-backend-api.onrender.com/
 
 ## ✨ Features

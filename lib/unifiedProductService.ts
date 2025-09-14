@@ -1,4 +1,5 @@
 import { Product } from '@/types'
+import { processImageArray, validateImageUrl } from './imageUtils'
 
 // Unified Product Service - Single source of truth for all product operations
 class UnifiedProductService {
@@ -123,11 +124,19 @@ class UnifiedProductService {
     }
 
     const price = typeof backendProduct.price === 'string' ? parseFloat(backendProduct.price) : (backendProduct.price || 0)
-    const images = backendProduct.images && backendProduct.images.length > 0 
-      ? backendProduct.images 
-      : backendProduct.image 
-        ? [backendProduct.image] 
-        : ['/images/placeholder-flower.jpg']
+    // Handle images with robust validation and processing
+    let images: string[] = []
+    
+    if (backendProduct.images && Array.isArray(backendProduct.images) && backendProduct.images.length > 0) {
+      images = processImageArray(backendProduct.images, backendProduct.type)
+    } else if (backendProduct.image && typeof backendProduct.image === 'string' && backendProduct.image.trim() !== '') {
+      const result = validateImageUrl(backendProduct.image)
+      images = [result.url]
+    } else {
+      images = processImageArray([], backendProduct.type)
+    }
+    
+    console.log('🖼️ Processed images for product:', backendProduct.name, 'images:', images)
 
     return {
       id: backendProduct.id || `product-${Date.now()}`,
@@ -149,6 +158,59 @@ class UnifiedProductService {
       tags: backendProduct.tags || [backendProduct.type, backendProduct.color].filter(Boolean),
       categoryIds: backendProduct.category?.id ? [backendProduct.category.id] : []
     }
+  }
+
+  // Convert image URL to proper format - PERMANENT SOLUTION
+  private convertImageUrl(imageUrl: string): string {
+    if (!imageUrl || typeof imageUrl !== 'string') {
+      console.log('🖼️ Invalid image URL, using placeholder:', imageUrl)
+      return '/images/placeholder-flower.jpg'
+    }
+    
+    // Clean the URL first
+    let cleanUrl = imageUrl.trim()
+    
+    // Fix common incorrect URL patterns
+    if (cleanUrl.startsWith('/api/uploads/')) {
+      cleanUrl = cleanUrl.replace('/api/uploads/', '/uploads/')
+      console.log('🖼️ Fixed incorrect /api/uploads/ URL:', { original: imageUrl, fixed: cleanUrl })
+    }
+    
+    // If it's already a full URL, return as is
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      console.log('🖼️ Full URL detected, returning as is:', cleanUrl)
+      return cleanUrl
+    }
+    
+    // If it's a relative path starting with /uploads/, convert to backend URL
+    if (cleanUrl.startsWith('/uploads/')) {
+      const backendUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:5000' 
+        : 'https://akazuba-backend-api.onrender.com'
+      const fullUrl = `${backendUrl}${cleanUrl}`
+      console.log('🖼️ Converting uploads path to backend URL:', { original: imageUrl, converted: fullUrl })
+      return fullUrl
+    }
+    
+    // If it's a relative path starting with /images/, return as is (frontend images)
+    if (cleanUrl.startsWith('/images/')) {
+      console.log('🖼️ Frontend image path, returning as is:', cleanUrl)
+      return cleanUrl
+    }
+    
+    // If it's just a filename, assume it's in uploads
+    if (!cleanUrl.startsWith('/')) {
+      const backendUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:5000' 
+        : 'https://akazuba-backend-api.onrender.com'
+      const fullUrl = `${backendUrl}/uploads/${cleanUrl}`
+      console.log('🖼️ Converting filename to backend URL:', { original: imageUrl, converted: fullUrl })
+      return fullUrl
+    }
+    
+    // Default fallback - use generic placeholder
+    console.log('🖼️ Unknown image URL format, using placeholder:', imageUrl)
+    return '/images/placeholder-product.jpg'
   }
 
   // Get fallback products (same for both admin and customer)
@@ -551,7 +613,7 @@ class UnifiedProductService {
         method: 'PUT',
         updates: backendUpdates
       })
-      
+
       const response = await fetch(`${this.baseURL}/products/${id}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),

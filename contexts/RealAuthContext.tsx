@@ -204,6 +204,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           hasStoredUser: !!storedUser,
           tokenPreview: token ? token.substring(0, 20) + '...' : 'null'
         })
+
+        // Validate token format before proceeding
+        if (token && !token.includes('.')) {
+          console.warn('⚠️ Invalid token format detected, clearing...')
+          clearAllAuthData()
+          setIsInitialized(true)
+          return
+        }
         
         // SECURITY FIX: Prevent cross-domain session leakage
         // Only sync authentication within the same domain family
@@ -450,10 +458,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser(response.data.user)
           console.log('👤 User state set to:', response.data.user)
           
-          // Set user role cookie for middleware
+          // Set user role cookie for middleware with robust error handling
           if (response.data.user.role) {
-            const domain = window.location.hostname
-            document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; domain=${domain}`
+            try {
+              const isProduction = window.location.hostname !== 'localhost'
+              const cookieOptions = isProduction
+                ? `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; secure`
+                : `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax; domain=localhost`
+              
+              document.cookie = cookieOptions
+              console.log('🍪 User role cookie set (regular login):', response.data.user.role)
+              
+              // Verify cookie was set and retry if needed
+              const cookieValue = document.cookie.split(';').find(c => c.trim().startsWith('userRole='))?.split('=')[1]
+              if (!cookieValue) {
+                console.warn('⚠️ Cookie setting failed, retrying without domain...')
+                document.cookie = `userRole=${response.data.user.role}; path=/; max-age=86400; samesite=lax`
+              }
+            } catch (cookieError) {
+              console.error('❌ Failed to set user role cookie:', cookieError)
+              // Don't fail login for cookie issues, just log warning
+            }
           }
         }
         

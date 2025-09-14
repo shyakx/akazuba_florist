@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'
-import { convertImageUrl } from '@/lib/imageUtils'
+import { validateImageUrl } from '@/lib/imageUtils'
 import { unifiedProductService } from '@/lib/unifiedProductService'
 
 // Types
@@ -250,8 +250,8 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
       // Transform unified service products to admin format
       const transformedProducts: Product[] = productsData.map((product) => {
         // Convert image URLs to API format
-        const convertedImages = (product.images || []).map((img: string) => convertImageUrl(img))
-        const convertedImage = convertImageUrl(product.images?.[0] || '')
+        const convertedImages = (product.images || []).map((img: string) => validateImageUrl(img).url)
+        const convertedImage = validateImageUrl(product.images?.[0] || '').url
         
         return {
           id: product.id,
@@ -315,7 +315,7 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
           ...order,
           order_items: (order.order_items || []).map((item: any) => ({
             ...item,
-            productImage: item.productImage ? convertImageUrl(item.productImage) : item.productImage
+            productImage: item.productImage ? validateImageUrl(item.productImage).url : item.productImage
           }))
         }))
         
@@ -398,7 +398,20 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         console.log('📊 Previous stats:', stats)
         console.log('💰 Real-time revenue calculated:', realTimeRevenue)
         console.log('📦 Orders used for calculation:', orders.length)
-        setStats(newStats)
+        // Only update if values have actually changed to prevent unnecessary re-renders
+        setStats(prevStats => {
+          if (prevStats.products !== newStats.products || 
+              prevStats.orders !== newStats.orders || 
+              prevStats.revenue !== newStats.revenue ||
+              prevStats.customers !== newStats.customers ||
+              prevStats.categories !== newStats.categories) {
+            console.log('📊 Stats values changed, updating state')
+            return newStats
+          } else {
+            console.log('📊 Stats values unchanged, keeping current state')
+            return prevStats
+          }
+        })
         console.log('🔄 Stats state updated')
       } else {
         throw new Error(result.message || 'Failed to fetch stats')
@@ -485,11 +498,17 @@ export const AdminProvider = ({ children }: AdminProviderProps) => {
         await refreshProducts()
         
         // Small delay to ensure cache is properly cleared and backend is updated
-        console.log('⏳ Waiting 500ms for backend to process...')
-        await new Promise(resolve => setTimeout(resolve, 500))
+        console.log('⏳ Waiting 1000ms for backend to process...')
+        await new Promise(resolve => setTimeout(resolve, 1000))
         
         // Then refresh stats to get updated count
         console.log('🔄 Step 2: Refreshing stats...')
+        await refreshStats()
+        
+        // Additional refresh after a short delay to ensure stats are updated
+        console.log('⏳ Waiting 500ms for stats to update...')
+        await new Promise(resolve => setTimeout(resolve, 500))
+        console.log('🔄 Step 3: Final stats refresh...')
         await refreshStats()
         
         console.log('✅ Products and stats refreshed successfully')

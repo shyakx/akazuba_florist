@@ -57,6 +57,7 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   // Removed status filter since all products are now active
   const [filterCategory, setFilterCategory] = useState('')
+  const [mounted, setMounted] = useState(false)
 
   // Helper function to safely get category name
   const getCategoryName = (category: string | { id: string; name: string; slug: string }): string => {
@@ -66,6 +67,11 @@ export default function ProductsPage() {
     return category as string
   }
 
+
+  // Set mounted state to prevent hydration issues
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Refresh products when component mounts to ensure fresh data
   useEffect(() => {
@@ -111,6 +117,16 @@ export default function ProductsPage() {
     return matchesSearch && matchesCategory
   })
 
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="loading">
+        <div className="spinner"></div>
+        <p className="mt-4 text-gray-600">Loading...</p>
+      </div>
+    )
+  }
+
   if (isLoading.products) {
     return (
       <div className="loading">
@@ -139,17 +155,17 @@ export default function ProductsPage() {
             <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
               <div className="flex items-center space-x-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.length || 0)}</div>
+                  <div className="text-2xl font-bold">{!mounted || isLoading.products ? '...' : (products?.length || 0)}</div>
                   <div className="text-sm text-blue-100">Total Products</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.length || 0)}</div>
+                  <div className="text-2xl font-bold">{!mounted || isLoading.products ? '...' : (products?.length || 0)}</div>
                   <div className="text-sm text-blue-100">Total</div>
                 </div>
                 <div className="w-px h-12 bg-white/30"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold">{isLoading.products ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</div>
+                  <div className="text-2xl font-bold">{!mounted || isLoading.products ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</div>
                   <div className="text-sm text-blue-100">Total Sales</div>
                 </div>
               </div>
@@ -164,7 +180,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Products</p>
-              <p className="text-2xl font-bold text-gray-900">{isLoading.products ? '...' : (products?.length || 0)}</p>
+              <p className="text-2xl font-bold text-gray-900">{!mounted || isLoading.products ? '...' : (products?.length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <Package className="w-6 h-6 text-blue-600" />
@@ -181,7 +197,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Products</p>
-              <p className="text-2xl font-bold text-green-600">{isLoading.products ? '...' : (products?.length || 0)}</p>
+              <p className="text-2xl font-bold text-green-600">{!mounted || isLoading.products ? '...' : (products?.length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <Star className="w-6 h-6 text-green-600" />
@@ -198,7 +214,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Low Stock</p>
-              <p className="text-2xl font-bold text-yellow-600">{isLoading.products ? '...' : (products?.filter(p => p.stock < 10).length || 0)}</p>
+              <p className="text-2xl font-bold text-yellow-600">{!mounted || isLoading.products ? '...' : (products?.filter(p => p.stock < 10).length || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
               <TrendingDown className="w-6 h-6 text-yellow-600" />
@@ -215,7 +231,7 @@ export default function ProductsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Sales</p>
-              <p className="text-2xl font-bold text-purple-600">{isLoading.products ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</p>
+              <p className="text-2xl font-bold text-purple-600">{!mounted || isLoading.products ? '...' : (products?.reduce((sum, p) => sum + (p.sales || 0), 0) || 0)}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
               <BarChart3 className="w-6 h-6 text-purple-600" />
@@ -302,9 +318,9 @@ export default function ProductsPage() {
           <button 
             onClick={refreshProducts}
             className="btn btn-secondary"
-            disabled={isLoading.products}
+            disabled={!mounted || isLoading.products}
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading.products ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 mr-2 ${(!mounted || isLoading.products) ? 'animate-spin' : ''}`} />
             Refresh ({products.length})
           </button>
         </div>
@@ -456,19 +472,19 @@ export default function ProductsPage() {
       </div>
 
       {/* Empty State */}
-      {!isLoading && (products || []).length === 0 && (
+      {mounted && !isLoading.products && (products || []).length === 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Package className="w-12 h-12 text-gray-400" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 mb-2">No products found</h3>
           <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            {searchTerm || filterStatus !== 'all' 
+            {searchTerm || filterCategory 
               ? 'Try adjusting your search or filter criteria to find what you\'re looking for.'
               : 'Get started by adding your first beautiful flower product to your inventory.'
             }
           </p>
-          {!searchTerm && filterStatus === 'all' && (
+          {!searchTerm && !filterCategory && (
             <Link href="/admin/products/new" className="btn btn-primary bg-blue-600 hover:bg-blue-700 shadow-lg">
               <Plus className="w-5 h-5 mr-2" />
               Add Your First Product

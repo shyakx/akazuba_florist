@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/RealAuthContext'
 import { Eye, EyeOff, Lock, User, Flower2, Shield, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { secureLogger } from '@/lib/secureLogger'
 
 export default function UnifiedLoginPage() {
   const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ export default function UnifiedLoginPage() {
   // Check if we've already redirected in this session
   const [sessionRedirected, setSessionRedirected] = useState(() => {
     if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('loginRedirected') === 'true'
+      return localStorage.getItem('loginRedirected') === 'true'
     }
     return false
   })
@@ -31,16 +32,28 @@ export default function UnifiedLoginPage() {
 
   // Redirect if already authenticated - with more robust logic
   React.useEffect(() => {
+    secureLogger.debug('Redirection check', {
+      isInitialized,
+      authLoading,
+      isAuthenticated,
+      hasUser: !!user,
+      userRole: user?.role,
+      hasRedirected,
+      sessionRedirected
+    })
 
     // Only redirect if we have stable authentication state and haven't redirected in this session                                                                                    
     if (isInitialized && !authLoading && isAuthenticated && user && !hasRedirected && !sessionRedirected) {                                                                           
 
+      secureLogger.system('REDIRECTION CONDITIONS MET - PROCEEDING WITH REDIRECT')
       setHasRedirected(true) // Prevent multiple redirects
       setSessionRedirected(true) // Mark session as redirected
 
-      // Store in sessionStorage to persist across page reloads
+      // Store in localStorage for better persistence across sessions
       if (typeof window !== 'undefined') {
-        sessionStorage.setItem('loginRedirected', 'true')
+        localStorage.setItem('loginRedirected', 'true')
+        localStorage.setItem('lastLoginTime', Date.now().toString())
+        localStorage.setItem('userRole', user.role)
       }
 
       // Determine redirect URL based on user role and login type
@@ -48,31 +61,68 @@ export default function UnifiedLoginPage() {
 
       if (user.role === 'ADMIN') {
         redirectUrl = '/admin'
-        console.log('🔄 Admin user detected, redirecting to:', redirectUrl)
+        secureLogger.system('Admin user detected, redirecting to:', redirectUrl)
       } else {
-        console.log('🔄 Customer user detected, redirecting to:', redirectUrl)
+        secureLogger.system('Customer user detected, redirecting to:', redirectUrl)
       }
 
       
-      // Use router.push for better Next.js navigation
-      setTimeout(() => {
-        console.log('🚀 Executing redirect to:', redirectUrl)
-        console.log('🚀 Current user role:', user.role)
-        console.log('🚀 Current authentication state:', { isAuthenticated, isInitialized, authLoading })
-        router.push(redirectUrl)
-      }, 500) // Increased delay to ensure state is fully updated
+      // Use window.location.replace for more reliable navigation
+      if (typeof window !== 'undefined') {
+        secureLogger.debug('Executing redirect to:', redirectUrl)
+        secureLogger.user('Current user role:', user.role)
+        secureLogger.auth('Current authentication state:', { isAuthenticated, isInitialized, authLoading })
+        
+        // Use replace to prevent back button issues and ensure clean navigation
+        setTimeout(() => {
+          secureLogger.system('Actually redirecting now to:', redirectUrl)
+          window.location.replace(redirectUrl)
+        }, 100) // Minimal delay for state stability
+      }
+    } else {
+      secureLogger.debug('Redirection blocked', {
+        isInitialized,
+        authLoading,
+        isAuthenticated,
+        hasUser: !!user,
+        hasRedirected,
+        sessionRedirected,
+        reason: !isInitialized ? 'not initialized' : 
+                authLoading ? 'still loading' : 
+                !isAuthenticated ? 'not authenticated' : 
+                !user ? 'no user' : 
+                hasRedirected ? 'already redirected' : 
+                sessionRedirected ? 'session redirected' : 'unknown'
+      })
     }
   }, [isInitialized, authLoading, isAuthenticated, user, hasRedirected, sessionRedirected])
 
   // Clear session redirect flag when user is not authenticated
   React.useEffect(() => {
     if (isInitialized && !isAuthenticated && sessionRedirected) {
+      secureLogger.system('Clearing session redirect flag - user not authenticated')
       setSessionRedirected(false)
       if (typeof window !== 'undefined') {
-        sessionStorage.removeItem('loginRedirected')
+        localStorage.removeItem('loginRedirected')
+        localStorage.removeItem('lastLoginTime')
+        localStorage.removeItem('userRole')
       }
     }
   }, [isInitialized, isAuthenticated, sessionRedirected])
+
+  // Emergency redirect - if user is authenticated but stuck on login page for too long
+  React.useEffect(() => {
+    if (isInitialized && !authLoading && isAuthenticated && user) {
+      const emergencyRedirectTimer = setTimeout(() => {
+        secureLogger.system('EMERGENCY REDIRECT - User authenticated but stuck on login page')
+        const redirectUrl = user.role === 'ADMIN' ? '/admin' : '/dashboard'
+        secureLogger.system('Force redirecting to:', redirectUrl)
+        window.location.href = redirectUrl
+      }, 3000) // 3 seconds emergency redirect
+
+      return () => clearTimeout(emergencyRedirectTimer)
+    }
+  }, [isInitialized, authLoading, isAuthenticated, user])
 
   // Show loading state while authentication is initializing
   if (authLoading || !isInitialized || (isAuthenticated && hasRedirected)) {
@@ -296,33 +346,49 @@ export default function UnifiedLoginPage() {
               </Link>
             </div>
             
-            {/* Debug: Manual redirect button for testing */}
-            {isAuthenticated && user?.role === 'ADMIN' && (
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-600 mb-2">Admin detected! Manual redirect:</p>
+            {/* Fallback redirect for authenticated users */}
+            {isAuthenticated && user && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-600 mb-2">You're already logged in as {user.role}!</p>
                 <div className="space-y-2">
                   <button
                     onClick={() => {
-                      console.log('🔧 Manual redirect to admin panel')
-                      router.push('/admin')
+                      const redirectUrl = user.role === 'ADMIN' ? '/admin' : '/dashboard'
+                      secureLogger.system('Manual redirect to:', redirectUrl)
+                      window.location.replace(redirectUrl)
                     }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors mr-2"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors mr-2"
                   >
-                    Go to Admin Panel
+                    Go to {user.role === 'ADMIN' ? 'Admin Panel' : 'Dashboard'}
                   </button>
                   <button
                     onClick={() => {
-                      console.log('🍪 Current cookies:', document.cookie)
-                      console.log('🍪 localStorage accessToken:', localStorage.getItem('accessToken'))
-                      console.log('🍪 localStorage user:', localStorage.getItem('user'))
-                      
-                      // Test setting a simple cookie
-                      document.cookie = 'testCookie=testValue; path=/; max-age=3600'
-                      console.log('🍪 Set test cookie, new cookies:', document.cookie)
+                      secureLogger.system('Clearing redirect flags and retrying...')
+                      setHasRedirected(false)
+                      setSessionRedirected(false)
+                      if (typeof window !== 'undefined') {
+                        localStorage.removeItem('loginRedirected')
+                      }
+                      // Force a re-render to trigger redirection
+                      setTimeout(() => {
+                        const redirectUrl = user.role === 'ADMIN' ? '/admin' : '/dashboard'
+                        window.location.replace(redirectUrl)
+                      }, 100)
                     }}
-                    className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
                   >
-                    Debug Cookies
+                    Reset & Retry
+                  </button>
+                  <button
+                    onClick={() => {
+                      secureLogger.system('Force redirect - bypassing all checks')
+                      const redirectUrl = user.role === 'ADMIN' ? '/admin' : '/dashboard'
+                      // Force redirect immediately
+                      window.location.href = redirectUrl
+                    }}
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                  >
+                    Force Redirect
                   </button>
                 </div>
               </div>

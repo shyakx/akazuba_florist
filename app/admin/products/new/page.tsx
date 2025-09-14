@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAdmin } from '@/contexts/AdminContext'
 import { ArrowLeft, Save, Upload, X } from 'lucide-react'
+import { validateImageUrl } from '@/lib/imageUtils'
 
 interface Category {
   id: string
@@ -165,18 +166,19 @@ export default function NewProductPage() {
           
           if (response.ok) {
             const result = await response.json()
-            const imageUrl = result.data?.url || result.url
-            console.log('✅ Upload successful, returned URL:', imageUrl)
-            return imageUrl
+            const rawImageUrl = result.data?.url || result.url
+            const validatedUrl = validateImageUrl(rawImageUrl)
+            console.log('✅ Upload successful, returned URL:', validatedUrl.url)
+            return validatedUrl.url
           } else {
             console.error('Upload failed:', response.statusText)
             // Fallback to a placeholder image
-            return '/api/uploads/placeholder-product.jpg'
+            return '/uploads/placeholder-product.jpg'
           }
         } catch (error) {
           console.error('Upload error:', error)
           // Fallback to a placeholder image
-          return '/api/uploads/placeholder-product.jpg'
+          return '/uploads/placeholder-product.jpg'
         }
       })
       
@@ -481,7 +483,7 @@ export default function NewProductPage() {
                       <div className="text-sm text-gray-600">
                         Drag and drop images here, or{' '}
                         <label className={`inline-flex items-center space-x-1 px-3 py-1 rounded-md transition-colors ${
-                  uploadingImages 
+                          uploadingImages 
                             ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
                             : 'bg-blue-600 hover:bg-blue-700 cursor-pointer text-white'
                         }`}>
@@ -531,16 +533,18 @@ export default function NewProductPage() {
                   </button>
                 </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {formData.images.map((image, index) => (
+                {formData.images.map((image, index) => {
+                  const validatedImage = validateImageUrl(image)
+                  return (
                   <div key={index} className="relative group">
                     <img
-                      src={image}
+                      src={validatedImage.url}
                       alt={`Preview ${index + 1}`}
                         className="w-full h-32 object-cover rounded-md border border-gray-200 hover:border-blue-300 transition-colors"
                         onError={(e) => {
                           console.log('❌ Image preview failed to load:', image)
                           // Fallback to placeholder if image fails to load
-                          e.currentTarget.src = '/api/uploads/placeholder-product.jpg'
+                          e.currentTarget.src = '/images/placeholder-product.jpg'
                         }}
                         onLoad={() => {
                           console.log('✅ Image preview loaded successfully:', image)
@@ -561,7 +565,8 @@ export default function NewProductPage() {
                         </p>
                       </div>
                   </div>
-                ))}
+                  )
+                })}
                 </div>
               </div>
             )}

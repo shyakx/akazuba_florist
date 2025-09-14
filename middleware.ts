@@ -34,12 +34,15 @@ export function middleware(request: NextRequest) {
     })
   }
 
-  // Check if user is authenticated
+  // Check if user is authenticated with robust validation
   const isAuthenticated = !!accessToken
   const isAdmin = userRole === 'ADMIN'
 
-  // Additional security check - ensure token is not empty string
-  const hasValidToken = accessToken && accessToken.trim() !== ''
+  // Additional security checks - ensure token is valid format
+  const hasValidToken = accessToken && 
+    accessToken.trim() !== '' && 
+    accessToken.includes('.') && // JWT format check
+    accessToken.length > 10 // Minimum length check
 
   // Only log important middleware checks (not every request)
   if (pathname.startsWith('/admin')) {
