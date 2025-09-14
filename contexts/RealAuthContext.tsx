@@ -129,20 +129,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const currentDomain = window.location.hostname
       localStorage.removeItem(`authSession_${currentDomain}`)
       
-      // Clear authentication cookies
+      // Clear authentication cookies for current domain only
       const domain = window.location.hostname
       const cookieNames = ['accessToken', 'userRole']
       cookieNames.forEach(name => {
-        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${domain}`
+        document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`
       })
-      
-      // Clear cookies for parent domain (production)
-      if (domain.includes('akazubaflorist.com')) {
-        const parentDomain = 'akazubaflorist.com'
-        cookieNames.forEach(name => {
-          document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; domain=${parentDomain}`
-        })
-      }
       
       console.log('🧹 All authentication data cleared successfully')
     } catch (error) {
@@ -240,8 +232,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             
             console.log('🍪 Cross-domain cookies synced for:', currentDomain)
           }
-        } else if ((isCustomDomain || isVercelDomain) && !domainSpecificSession) {
-          // SECURITY: Clear any cross-domain tokens if no valid session exists for this domain
+        } else if ((isCustomDomain || isVercelDomain) && !domainSpecificSession && token) {
+          // Only clear if we have a token but no domain session (potential cross-domain issue)
           console.log('🔒 Clearing cross-domain tokens for:', currentDomain)
           clearAllAuthData()
           setUser(null)
@@ -682,12 +674,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const currentDomain = window.location.hostname
       localStorage.removeItem(`authSession_${currentDomain}`)
       
-      // Clear cookies for all possible domains
-      const domains = ['akazubaflorist.com', 'www.akazubaflorist.com', 'akazuba-florist.vercel.app']
-      domains.forEach(domain => {
-        document.cookie = `accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain}`
-        document.cookie = `userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${domain}`
-      })
+      // Clear cookies for current domain only (avoid cross-domain issues)
+      document.cookie = `accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${currentDomain}`
+      document.cookie = `userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${currentDomain}`
+      document.cookie = `accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`
+      document.cookie = `userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`
       console.log('🍪 Cross-domain cookies cleared')
       console.log('🔒 Domain-specific session cleared for:', currentDomain)
       
