@@ -64,21 +64,53 @@ export default function ProductsPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-  // Categories for the dropdown
-  const categories = [
-    { id: 'flowers', name: 'Flowers' },
-    { id: 'perfumes', name: 'Perfumes' },
-    { id: 'wedding', name: 'Wedding Flowers' },
-    { id: 'funerals', name: 'Funeral Flowers' },
-    { id: 'birthday', name: 'Birthday Flowers' },
-    { id: 'valentine', name: 'Valentine Flowers' },
-    { id: 'male', name: 'Men Perfumes' },
-    { id: 'female', name: 'Women Perfumes' }
-  ]
+  // Categories for the dropdown - will be loaded from backend
+  const [categories, setCategories] = useState<Array<{id: string, name: string}>>([])
 
   useEffect(() => {
     fetchProducts()
+    loadCategories()
   }, [])
+
+  const loadCategories = async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      
+      const response = await fetch('/api/admin/categories', {
+        method: 'GET',
+        headers
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success && result.data) {
+          console.log('📂 Loaded categories:', result.data)
+          setCategories(Array.isArray(result.data) ? result.data : result.data.categories || [])
+        }
+      } else {
+        console.error('Failed to load categories:', response.statusText)
+        // Fallback to hardcoded categories if API fails
+        setCategories([
+          { id: 'flowers', name: 'Flowers' },
+          { id: 'perfumes', name: 'Perfumes' }
+        ])
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error)
+      // Fallback to hardcoded categories if API fails
+      setCategories([
+        { id: 'flowers', name: 'Flowers' },
+        { id: 'perfumes', name: 'Perfumes' }
+      ])
+    }
+  }
 
   const fetchProducts = async () => {
     try {
