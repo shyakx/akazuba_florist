@@ -2,86 +2,102 @@
 
 import React, { useState, useEffect } from 'react'
 import { 
-  Settings, 
   Save, 
-  User, 
-  Bell, 
-  Shield, 
-  Database,
+  AlertCircle,
+  CheckCircle,
+  RefreshCw,
+  Store,
   Mail,
+  Phone,
+  MapPin,
   Globe,
-  CreditCard,
-  RefreshCw
+  DollarSign
 } from 'lucide-react'
 
+interface StoreSettings {
+  storeName: string
+  storeEmail: string
+  storePhone: string
+  storeAddress: string
+  storeWebsite: string
+  currency: string
+  taxRate: number
+  deliveryFee: number
+  freeDeliveryThreshold: number
+  businessHours: string
+  aboutUs: string
+}
+
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('general')
-  const [settings, setSettings] = useState({
-    // General Settings
-    businessName: 'Akazuba Florist',
-    businessEmail: 'info.akazubaflorist@gmail.com',
-    businessPhone: '+250 784 586 110',
-    businessAddress: 'Kigali, Rwanda',
+  const [settings, setSettings] = useState<StoreSettings>({
+    storeName: 'Akazuba Florist',
+    storeEmail: 'info@akazuba.com',
+    storePhone: '+250 788 123 456',
+    storeAddress: 'Kigali, Rwanda',
+    storeWebsite: 'https://akazuba.com',
     currency: 'RWF',
-    timezone: 'Africa/Kigali',
-    
-    // Notification Settings
-    emailNotifications: 'true',
-    orderNotifications: 'true',
-    customerNotifications: 'true',
-    marketingEmails: 'false',
-    
-    // Security Settings
-    twoFactorAuth: 'false',
-    sessionTimeout: '30',
-    passwordExpiry: '90',
-    
-    // System Settings
-    autoBackup: 'true',
-    backupFrequency: 'daily',
-    logRetention: '30',
-    maintenanceMode: 'false'
+    taxRate: 18,
+    deliveryFee: 2000,
+    freeDeliveryThreshold: 10000,
+    businessHours: 'Mon-Sat: 8AM-6PM, Sun: 10AM-4PM',
+    aboutUs: 'Your trusted florist for beautiful flowers and perfumes in Rwanda.'
   })
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchSettings()
+  }, [])
 
   const fetchSettings = async () => {
     try {
-      setIsLoading(true)
-      
-      // Get the JWT token using the proper utility function
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      }
+      setLoading(true)
+      setError(null)
+
+      const token = localStorage.getItem('accessToken')
+      const headers: Record<string, string> = {}
       
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
       }
       
       const response = await fetch('/api/admin/settings', { headers })
-      if (!response.ok) throw new Error('Failed to fetch settings')
-      
-      const result = await response.json()
-      if (result.success) {
-        setSettings(result.data)
-      } else {
-        throw new Error('Failed to fetch settings')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.data) {
+          setSettings({ ...settings, ...data.data })
+        }
       }
     } catch (error) {
       console.error('Error fetching settings:', error)
-      // Keep default settings on error
+      setError('Failed to load settings')
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
-  const handleSave = async () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setSettings(prev => ({
+      ...prev,
+      [name]: name === 'taxRate' || name === 'deliveryFee' || name === 'freeDeliveryThreshold' 
+        ? Number(value) 
+        : value
+    }))
+  }
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
     try {
-    setIsSaving(true)
-      
-      // Get the JWT token using the proper utility function
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+      setSaving(true)
+      setError(null)
+      setSuccess(null)
+
+      const token = localStorage.getItem('accessToken')
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       }
@@ -96,308 +112,295 @@ export default function SettingsPage() {
         body: JSON.stringify(settings)
       })
       
-      if (!response.ok) throw new Error('Failed to save settings')
-      
-      const result = await response.json()
-      if (result.success) {
-        alert('Settings saved successfully!')
+      if (response.ok) {
+        setSuccess('Settings saved successfully!')
+        setTimeout(() => setSuccess(null), 3000)
       } else {
         throw new Error('Failed to save settings')
       }
     } catch (error) {
       console.error('Error saving settings:', error)
-      alert('Failed to save settings. Please try again.')
+      setError('Failed to save settings')
     } finally {
-    setIsSaving(false)
+      setSaving(false)
     }
   }
 
-  useEffect(() => {
-    fetchSettings()
-  }, [])
-
-  const tabs = [
-    { id: 'general', name: 'General', icon: Settings },
-    { id: 'notifications', name: 'Notifications', icon: Bell },
-    { id: 'security', name: 'Security', icon: Shield },
-    { id: 'system', name: 'System', icon: Database }
-  ]
-
-  const renderGeneralSettings = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Business Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
-            <input
-              type="text"
-              value={settings.businessName}
-              onChange={(e) => setSettings({...settings, businessName: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Business Email</label>
-            <input
-              type="email"
-              value={settings.businessEmail}
-              onChange={(e) => setSettings({...settings, businessEmail: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Business Phone</label>
-            <input
-              type="tel"
-              value={settings.businessPhone}
-              onChange={(e) => setSettings({...settings, businessPhone: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
-            <input
-              type="text"
-              value={settings.businessAddress}
-              onChange={(e) => setSettings({...settings, businessAddress: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-        </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
-            <select
-              value={settings.currency}
-              onChange={(e) => setSettings({...settings, currency: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="RWF">RWF - Rwandan Franc</option>
-              <option value="USD">USD - US Dollar</option>
-              <option value="EUR">EUR - Euro</option>
-            </select>
-      </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
-            <select
-              value={settings.timezone}
-              onChange={(e) => setSettings({...settings, timezone: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="Africa/Kigali">Africa/Kigali</option>
-              <option value="UTC">UTC</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderNotificationSettings = () => (
-    <div className="space-y-6">
-        <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Email Notifications</h3>
-        <div className="space-y-4">
-          {[
-            { key: 'emailNotifications', label: 'Enable email notifications', description: 'Receive notifications via email' },
-            { key: 'orderNotifications', label: 'Order notifications', description: 'Get notified when new orders are placed' },
-            { key: 'customerNotifications', label: 'Customer notifications', description: 'Get notified when customers register' },
-            { key: 'marketingEmails', label: 'Marketing emails', description: 'Receive marketing and promotional emails' }
-          ].map((item) => (
-            <div key={item.key} className="flex items-center justify-between">
-          <div>
-                <p className="font-medium text-gray-900">{item.label}</p>
-                <p className="text-sm text-gray-600">{item.description}</p>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings[item.key as keyof typeof settings] === 'true'}
-                  onChange={(e) => setSettings({...settings, [item.key]: e.target.checked ? 'true' : 'false'})}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderSecuritySettings = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Security Settings</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900">Two-Factor Authentication</p>
-              <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                type="checkbox"
-                checked={settings.twoFactorAuth === 'true'}
-                onChange={(e) => setSettings({...settings, twoFactorAuth: e.target.checked ? 'true' : 'false'})}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Session Timeout (minutes)</label>
-                <input
-              type="number"
-              value={settings.sessionTimeout}
-              onChange={(e) => setSettings({...settings, sessionTimeout: parseInt(e.target.value)})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password Expiry (days)</label>
-                <input
-              type="number"
-              value={settings.passwordExpiry}
-              onChange={(e) => setSettings({...settings, passwordExpiry: parseInt(e.target.value)})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-      </div>
-            </div>
-  )
-
-  const renderSystemSettings = () => (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">System Settings</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-gray-900">Automatic Backup</p>
-              <p className="text-sm text-gray-600">Automatically backup your data</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                type="checkbox"
-                checked={settings.autoBackup === 'true'}
-                onChange={(e) => setSettings({...settings, autoBackup: e.target.checked ? 'true' : 'false'})}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Backup Frequency</label>
-                <select
-              value={settings.backupFrequency}
-              onChange={(e) => setSettings({...settings, backupFrequency: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-                </select>
-            </div>
-
-            <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Log Retention (days)</label>
-                      <input
-              type="number"
-              value={settings.logRetention}
-              onChange={(e) => setSettings({...settings, logRetention: parseInt(e.target.value)})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-                </div>
-          
-          <div className="flex items-center justify-between">
-                <div>
-              <p className="font-medium text-gray-900">Maintenance Mode</p>
-              <p className="text-sm text-gray-600">Put the system in maintenance mode</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.maintenanceMode === 'true'}
-                onChange={(e) => setSettings({...settings, maintenanceMode: e.target.checked ? 'true' : 'false'})}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="loading">
-        <div className="spinner"></div>
-        <p className="mt-4 text-gray-600">Loading settings...</p>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading settings...</p>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      {/* Quick Actions */}
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Store Settings</h1>
+          <p className="text-gray-600 mt-2">Configure your store settings and preferences</p>
+        </div>
+        <button
+          onClick={fetchSettings}
+          className="flex items-center space-x-2 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Refresh</span>
+        </button>
+      </div>
+
+      {/* Success/Error Messages */}
+      {success && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <p className="text-green-800 text-sm">{success}</p>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-600" />
+            <p className="text-red-800 text-sm">{error}</p>
+      </div>
+    </div>
+      )}
+
+      <form onSubmit={handleSave} className="space-y-6">
+        {/* Store Information */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <Store className="w-6 h-6 text-pink-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Store Information</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+              <label htmlFor="storeName" className="block text-sm font-medium text-gray-700 mb-2">
+                Store Name
+              </label>
+              <input
+                type="text"
+                id="storeName"
+                name="storeName"
+                value={settings.storeName}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                placeholder="Enter store name"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="storeEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                Store Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="email"
+                  id="storeEmail"
+                  name="storeEmail"
+                  value={settings.storeEmail}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  placeholder="Enter store email"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="storePhone" className="block text-sm font-medium text-gray-700 mb-2">
+                Store Phone
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="tel"
+                  id="storePhone"
+                  name="storePhone"
+                  value={settings.storePhone}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  placeholder="Enter store phone"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="storeWebsite" className="block text-sm font-medium text-gray-700 mb-2">
+                Store Website
+              </label>
+              <div className="relative">
+                <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="url"
+                  id="storeWebsite"
+                  name="storeWebsite"
+                  value={settings.storeWebsite}
+                  onChange={handleInputChange}
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  placeholder="Enter store website"
+            />
+          </div>
+        </div>
+      </div>
+
+          <div className="mt-6">
+            <label htmlFor="storeAddress" className="block text-sm font-medium text-gray-700 mb-2">
+              Store Address
+            </label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 text-gray-400 w-4 h-4" />
+              <textarea
+                id="storeAddress"
+                name="storeAddress"
+                value={settings.storeAddress}
+                onChange={handleInputChange}
+                rows={3}
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                placeholder="Enter store address"
+              />
+            </div>
+            </div>
+
+          <div className="mt-6">
+            <label htmlFor="businessHours" className="block text-sm font-medium text-gray-700 mb-2">
+              Business Hours
+            </label>
+                <input
+              type="text"
+              id="businessHours"
+              name="businessHours"
+              value={settings.businessHours}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              placeholder="Enter business hours"
+            />
+          </div>
+
+          <div className="mt-6">
+            <label htmlFor="aboutUs" className="block text-sm font-medium text-gray-700 mb-2">
+              About Us
+            </label>
+            <textarea
+              id="aboutUs"
+              name="aboutUs"
+              value={settings.aboutUs}
+              onChange={handleInputChange}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              placeholder="Enter store description"
+            />
+          </div>
+        </div>
+
+        {/* Financial Settings */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <DollarSign className="w-6 h-6 text-pink-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Financial Settings</h2>
+            </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
+                Currency
+              </label>
+                <select
+                id="currency"
+                name="currency"
+                value={settings.currency}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+              >
+                <option value="RWF">RWF (Rwandan Franc)</option>
+                <option value="USD">USD (US Dollar)</option>
+                <option value="EUR">EUR (Euro)</option>
+                </select>
+            </div>
+
+            <div>
+              <label htmlFor="taxRate" className="block text-sm font-medium text-gray-700 mb-2">
+                Tax Rate (%)
+              </label>
+                      <input
+              type="number"
+                id="taxRate"
+                name="taxRate"
+                value={settings.taxRate}
+                onChange={handleInputChange}
+                min="0"
+                max="100"
+                step="0.1"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                placeholder="0"
+            />
+                </div>
+          
+                <div>
+              <label htmlFor="deliveryFee" className="block text-sm font-medium text-gray-700 mb-2">
+                Delivery Fee ({settings.currency})
+              </label>
+              <input
+                type="number"
+                id="deliveryFee"
+                name="deliveryFee"
+                value={settings.deliveryFee}
+                onChange={handleInputChange}
+                min="0"
+                step="100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="freeDeliveryThreshold" className="block text-sm font-medium text-gray-700 mb-2">
+                Free Delivery Threshold ({settings.currency})
+              </label>
+              <input
+                type="number"
+                id="freeDeliveryThreshold"
+                name="freeDeliveryThreshold"
+                value={settings.freeDeliveryThreshold}
+                onChange={handleInputChange}
+                min="0"
+                step="100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Save Button */}
       <div className="flex items-center justify-end">
         <button 
-          onClick={handleSave} 
-          disabled={isSaving}
-          className="btn btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSaving ? (
-            <>
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              Saving...
+            type="submit"
+            disabled={saving}
+            className="flex items-center space-x-2 px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {saving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Saving...</span>
             </>
           ) : (
             <>
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
+                <Save className="w-4 h-4" />
+                <span>Save Settings</span>
             </>
           )}
           </button>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="card">
-            <nav className="space-y-1">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg transition-colors ${
-                    activeTab === tab.id 
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  <span>{tab.name}</span>
-          </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="lg:col-span-3">
-          <div className="card">
-            {activeTab === 'general' && renderGeneralSettings()}
-            {activeTab === 'notifications' && renderNotificationSettings()}
-            {activeTab === 'security' && renderSecuritySettings()}
-            {activeTab === 'system' && renderSystemSettings()}
-          </div>
-        </div>
-      </div>
+      </form>
     </div>
   )
 }

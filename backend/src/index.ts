@@ -86,11 +86,13 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions)
 
-// Rate limiting
+// Rate limiting - Increased for development
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs (increased from 100)
   message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 })
 
 // Production Security Middleware
@@ -160,7 +162,14 @@ const corsOptions = {
       console.log('🚫 CORS blocked origin:', origin)
       console.log('✅ Allowed origins:', allowedOrigins)
       console.log('🌍 Environment:', process.env.NODE_ENV || 'development')
-      callback(new Error(`Not allowed by CORS - ${isDevelopment ? 'Development' : 'Production'} origins only`))
+      
+      // Temporary fix: Allow akazubaflorist.com domains
+      if (origin && (origin.includes('akazubaflorist.com') || origin.includes('vercel.app'))) {
+        console.log('🔧 Temporary CORS fix: Allowing akazubaflorist.com domain')
+        callback(null, true)
+      } else {
+        callback(new Error(`Not allowed by CORS - ${isDevelopment ? 'Development' : 'Production'} origins only`))
+      }
     }
   },
   credentials: true,

@@ -1,0 +1,620 @@
+[
+  {
+    "name": "Green Flower",
+    "description": "Beautiful green flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 45000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [
+      "/images/flowers/green/1 min video advertisemnet.mp4"
+    ]
+  },
+  {
+    "name": "Mized Colors",
+    "description": "Beautiful mixed flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Orange Flower",
+    "description": "Beautiful orange flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/orange/orange-1.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Pink Flower",
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/pink/full rose flowers with white cover.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Pink Gift Package 1",
+    "description": "Premium pink flower arrangement with special gift packaging. Includes carefully selected flowers beautifully arranged with chocolates and other treats. Perfect for special occasions and thoughtful gifts.",
+    "price": 120000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/pink/heartshapped roses with short moet and chocolates.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Pink Flower 1",
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/pink/home decor flowers in glass yellow and pink colors.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Pink Flower 2",
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/pink/pink and cake and moet bouquet.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Pink Flower 3",
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/pink/pink and while flowers with chocolate package.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Purple Bucket Bucket Arrangement",
+    "description": "Stunning purple flowers arranged in an elegant bucket. This eye-catching arrangement brings natural beauty to any space. Great for home decoration, office spaces, or as a special gift.",
+    "price": 65000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/purple/purple bucket flowers.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Purple Gift Package",
+    "description": "Premium purple flower arrangement with special gift packaging. Includes carefully selected flowers beautifully arranged with chocolates and other treats. Perfect for special occasions and thoughtful gifts.",
+    "price": 120000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/purple/purple flowers with chocolate package.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Purple Bucket Bucket Arrangement 1",
+    "description": "Stunning purple flowers arranged in an elegant bucket. This eye-catching arrangement brings natural beauty to any space. Great for home decoration, office spaces, or as a special gift.",
+    "price": 65000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/purple/purple-bucket.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Red Flower",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Gift Package 1",
+    "description": "Premium red flower arrangement with special gift packaging. Includes carefully selected flowers beautifully arranged with chocolates and other treats. Perfect for special occasions and thoughtful gifts.",
+    "price": 95000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/green and red colors flowers.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 1",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 2",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/mixed colors booket red coat.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 3",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 4",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/red-1.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 5",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/red-2.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 6",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/red-3.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 7",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/red-4.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "Red Flower 8",
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Valentine",
+    "categoryName": "Valentine",
+    "categoryIds": [
+      "valentine"
+    ],
+    "images": [
+      "/images/flowers/red/red-5.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ]
+  },
+  {
+    "name": "White Flower",
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Wedding",
+    "categoryName": "Wedding",
+    "categoryIds": [
+      "wedding"
+    ],
+    "images": [
+      "/images/flowers/white/all yellow flowers with white cover(coat).jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "White Bucket Bucket Arrangement",
+    "description": "Stunning white flowers arranged in an elegant bucket. This eye-catching arrangement brings natural beauty to any space. Great for home decoration, office spaces, or as a special gift.",
+    "price": 65000,
+    "category": "Wedding",
+    "categoryName": "Wedding",
+    "categoryIds": [
+      "wedding"
+    ],
+    "images": [
+      "/images/flowers/white/bucket flower of white blue and balloon .jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Wedding Wedding Bouquet",
+    "description": "Elegant white wedding bouquet designed for your special day. Features premium flowers arranged in a romantic style. Customizable to match your wedding theme and personal preferences.",
+    "price": 156000,
+    "category": "Wedding",
+    "categoryName": "Wedding",
+    "categoryIds": [
+      "wedding"
+    ],
+    "images": [
+      "/images/wedding/wedding while.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "White Flower 1",
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Wedding",
+    "categoryName": "Wedding",
+    "categoryIds": [
+      "wedding"
+    ],
+    "images": [
+      "/images/flowers/white/full white color bouquet.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "White Flower 2",
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Wedding",
+    "categoryName": "Wedding",
+    "categoryIds": [
+      "wedding"
+    ],
+    "images": [
+      "/images/flowers/white/wedding white flower2.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "White Flower 3",
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Wedding",
+    "categoryName": "Wedding",
+    "categoryIds": [
+      "wedding"
+    ],
+    "images": [
+      "/images/flowers/white/white-1.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Yellow Flower",
+    "description": "Beautiful yellow flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Birthday",
+    "categoryName": "Birthday",
+    "categoryIds": [
+      "birthday"
+    ],
+    "images": [
+      "/images/flowers/yellow/yellow-1.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Yellow Flower 1",
+    "description": "Beautiful yellow flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "price": 35000,
+    "category": "Birthday",
+    "categoryName": "Birthday",
+    "categoryIds": [
+      "birthday"
+    ],
+    "images": [
+      "/images/flowers/yellow/yellow-2.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Funeral Funeral Wreath",
+    "description": "Respectful mixed funeral arrangement to honor your loved one. Beautifully crafted with care and compassion by our professional florists. Available in various sizes and styles.",
+    "price": 120000,
+    "category": "Funerals",
+    "categoryName": "Funerals",
+    "categoryIds": [
+      "funerals"
+    ],
+    "images": [
+      "/images/funerals/funeral many.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Funeral Funeral Wreath 1",
+    "description": "Respectful mixed funeral arrangement to honor your loved one. Beautifully crafted with care and compassion by our professional florists. Available in various sizes and styles.",
+    "price": 120000,
+    "category": "Funerals",
+    "categoryName": "Funerals",
+    "categoryIds": [
+      "funerals"
+    ],
+    "images": [
+      "/images/funerals/funeral.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Premium Perfume 1",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-1.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 10",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-10.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 2",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-2.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 3",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-3.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 4",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-4.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 5",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-5.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 6",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-6.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 7",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-7.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 8",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  },
+  {
+    "name": "Premium Perfume 9",
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "price": 125000,
+    "category": "Special Occasions",
+    "categoryName": "Special Occasions",
+    "categoryIds": [
+      "special-occasions"
+    ],
+    "images": [
+      "/images/flowers/mixed/mixed-9.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ]
+  }
+]

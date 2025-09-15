@@ -58,8 +58,8 @@ export async function POST(request: NextRequest) {
     // In production, you would integrate with an email service like:
     // - SendGrid
     // - Nodemailer with SMTP
-    // - AWS SES
     // - Resend
+    // - Other SMTP providers
     
     console.log('Contact form submission:', {
       name,

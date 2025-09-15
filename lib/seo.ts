@@ -184,7 +184,7 @@ export const generateStructuredData = (metadata: SEOMetadata, type: 'product' | 
           name: seoConfig.siteName,
           logo: {
             '@type': 'ImageObject',
-            url: `${baseUrl}/images/logo.png`
+            url: `${baseUrl}/images/flowers/mixed/logo.png`
           }
         }
       }
@@ -195,7 +195,7 @@ export const generateStructuredData = (metadata: SEOMetadata, type: 'product' | 
         '@type': 'Organization',
         name: seoConfig.siteName,
         url: baseUrl,
-        logo: `${baseUrl}/images/logo.png`,
+        logo: `${baseUrl}/images/flowers/mixed/logo.png`,
         description: seoConfig.defaultDescription,
         address: {
           '@type': 'PostalAddress',

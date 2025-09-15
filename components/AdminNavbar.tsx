@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/RealAuthContext'
 import { 
   Home, Package, ShoppingCart, Users, Settings, 
   LogOut, Menu, X, Plus, Eye, Flower, ChevronDown,
-  User, Shield
+  User, Shield, Upload
 } from 'lucide-react'
 
 const AdminNavbar = () => {
@@ -40,7 +40,8 @@ const AdminNavbar = () => {
       hasDropdown: true,
       dropdownItems: [
         { name: 'All Products', href: '/admin/products', icon: Eye },
-        { name: 'Add Product', href: '/admin/products/new', icon: Plus }
+        { name: 'Add Product', href: '/admin/products/new', icon: Plus },
+        { name: 'Import Products', href: '/admin/import', icon: Upload }
       ]
     },
     {

@@ -7,9 +7,11 @@ import { CartProvider } from '@/contexts/CartContext'
 import { AuthProvider } from '@/contexts/RealAuthContext'
 import { WishlistProvider } from '@/contexts/WishlistContext'
 import { ProductsProvider } from '@/contexts/ProductsContext'
+import { ContentProvider } from '@/contexts/ContentContext'
 import Header from '@/components/Header'
 import ConditionalHeader from '@/components/ConditionalHeader'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import ConditionalMain from '@/components/ConditionalMain'
 
 // Force dynamic rendering to avoid SSR issues
 export const dynamic = 'force-dynamic'
@@ -63,17 +65,19 @@ export default function RootLayout({
       <body className={inter.className}>
         <ErrorBoundary>
           <AuthProvider>
-            <ProductsProvider>
-              <CartProvider>
-                <WishlistProvider>
-                  <ConditionalHeader />
-                  <main className="pt-32">
-                    {children}
-                  </main>
-                  <Toaster position="top-right" />
-                </WishlistProvider>
-              </CartProvider>
-            </ProductsProvider>
+            <ContentProvider>
+              <ProductsProvider>
+                <CartProvider>
+                  <WishlistProvider>
+                    <ConditionalHeader />
+                    <ConditionalMain>
+                      {children}
+                    </ConditionalMain>
+                    <Toaster position="top-right" />
+                  </WishlistProvider>
+                </CartProvider>
+              </ProductsProvider>
+            </ContentProvider>
           </AuthProvider>
         </ErrorBoundary>
       </body>

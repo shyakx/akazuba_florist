@@ -7,7 +7,7 @@ This document outlines all the environment variables needed for the Akazuba Flor
 ### Authentication
 ```bash
 # JWT Secret for token signing and verification
-JWT_SECRET=your-super-secret-jwt-key-here
+JWT_SECRET=27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665
 
 # Session configuration
 SESSION_SECRET=your-session-secret-here
@@ -16,7 +16,7 @@ SESSION_SECRET=your-session-secret-here
 ### Database
 ```bash
 # Database connection string
-DATABASE_URL=postgresql://username:password@localhost:5432/akazuba_florist
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a.oregon-postgres.render.com/akazuba_florist
 
 # Database connection pool settings
 DB_POOL_MIN=2
@@ -103,8 +103,8 @@ For development, create a `.env.local` file in the root directory:
 ```bash
 # Development environment variables
 NODE_ENV=development
-JWT_SECRET=dev-secret-key-change-in-production
-DATABASE_URL=postgresql://localhost:5432/akazuba_florist_dev
+JWT_SECRET=27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a.oregon-postgres.render.com/akazuba_florist
 NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -120,8 +120,8 @@ For production deployment (Vercel, Netlify, etc.), set these environment variabl
 ### Vercel
 ```bash
 # Set in Vercel dashboard under Settings > Environment Variables
-JWT_SECRET=your-production-jwt-secret
-DATABASE_URL=your-production-database-url
+JWT_SECRET=27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a.oregon-postgres.render.com/akazuba_florist
 NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -134,8 +134,8 @@ NODE_ENV=production
 ### Netlify
 ```bash
 # Set in Netlify dashboard under Site settings > Environment variables
-JWT_SECRET=your-production-jwt-secret
-DATABASE_URL=your-production-database-url
+JWT_SECRET=27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a.oregon-postgres.render.com/akazuba_florist
 NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587

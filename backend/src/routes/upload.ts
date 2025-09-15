@@ -91,7 +91,7 @@ router.post('/image', requireAdmin, upload.single('image'), (req, res) => {
     }
 
     // For now, we'll return a local path
-    // In production, you'd upload to cloud storage (AWS S3, Cloudinary, etc.)
+    // In production, you'd upload to cloud storage (Cloudinary, etc.)
     const imageUrl = `/uploads/${req.file.filename}`
 
     res.json({

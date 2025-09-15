@@ -27,6 +27,17 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
   const filteredProducts = useMemo(() => {
     let filtered = [...products]
 
+    // Debug: Log product categories for troubleshooting
+    if (products.length > 0 && selectedCategory !== 'all') {
+      console.log('🔍 Filtering products by category:', selectedCategory);
+      console.log('📊 Sample product categories:', products.slice(0, 5).map(p => ({
+        name: p.name,
+        categoryName: p.categoryName,
+        categoryId: p.categoryId,
+        categoryIds: p.categoryIds
+      })));
+    }
+
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase()
@@ -40,15 +51,35 @@ const ProductsGrid: React.FC<ProductsGridProps> = ({
     // Filter by category
     if (selectedCategory !== 'all') {
       if (selectedCategory === 'flowers') {
-        filtered = filtered.filter(product => product.categoryName === 'Flowers')
+        // Filter for flower products - anything that's NOT a perfume
+        filtered = filtered.filter(product => 
+          product.categoryName !== 'Perfumes' && 
+          product.categoryId !== 'perfumes' &&
+          !product.name.toLowerCase().includes('perfume') &&
+          !product.description.toLowerCase().includes('perfume')
+        )
       } else if (selectedCategory === 'perfumes') {
-        filtered = filtered.filter(product => product.categoryName === 'Perfumes')
+        // Filter for perfume products
+        filtered = filtered.filter(product => 
+          product.categoryName === 'Perfumes' || 
+          product.categoryId === 'perfumes' ||
+          product.name.toLowerCase().includes('perfume') ||
+          product.description.toLowerCase().includes('perfume')
+        )
       } else {
         // Filter by specific subcategory
         filtered = filtered.filter(product => 
-          product.categoryIds?.includes(selectedCategory) || false
+          product.categoryIds?.includes(selectedCategory) || 
+          product.categoryName === selectedCategory ||
+          product.categoryId === selectedCategory ||
+          false
         )
       }
+    }
+
+    // Debug: Log filtering results
+    if (selectedCategory !== 'all') {
+      console.log(`✅ Filtered ${filtered.length} products for category: ${selectedCategory}`);
     }
 
     return filtered

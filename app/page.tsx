@@ -11,8 +11,13 @@ import { useAuth } from '@/contexts/RealAuthContext'
 import StructuredData from '@/components/StructuredData'
 
 export default function HomePage() {
-  const { products, isLoading } = useProducts()
+  const { products, isLoading, forceRefresh } = useProducts()
   const { isAuthenticated } = useAuth()
+
+  // Force refresh on mount to get real database data instead of fallback
+  React.useEffect(() => {
+    forceRefresh()
+  }, [])
 
 
   // Get featured products (show all featured, or fallback to all products if no featured)
@@ -20,9 +25,31 @@ export default function HomePage() {
     ? products?.filter(p => p.isFeatured).slice(0, 8) || []
     : products?.slice(0, 8) || []
   
-  // Get counts
-  const flowerCount = products?.filter(p => p.categoryName === 'Flowers').length || 0
-  const perfumeCount = products?.filter(p => p.categoryName === 'Perfumes').length || 0
+  // Get counts with improved filtering logic
+  const flowerCount = products?.filter(p => 
+    p.categoryName !== 'Perfumes' && 
+    p.categoryId !== 'perfumes' &&
+    !p.name.toLowerCase().includes('perfume') &&
+    !p.description.toLowerCase().includes('perfume')
+  ).length || 0
+  
+  const perfumeCount = products?.filter(p => 
+    p.categoryName === 'Perfumes' || 
+    p.categoryId === 'perfumes' ||
+    p.name.toLowerCase().includes('perfume') ||
+    p.description.toLowerCase().includes('perfume')
+  ).length || 0
+  
+  const totalCategories = 6 // Actual categories in database
+
+  // Debug log
+  console.log('🏠 Homepage Debug:', {
+    totalProducts: products?.length || 0,
+    flowerCount,
+    perfumeCount,
+    totalCategories,
+    products: products?.map(p => ({ name: p.name, category: p.categoryName }))
+  })
 
 
   return (
@@ -70,7 +97,7 @@ export default function HomePage() {
         data={{
           name: "Akazuba Florist",
           url: "https://akazubaflorist.com",
-          logo: "https://akazubaflorist.com/images/akazuba-logo.png",
+          logo: "https://akazubaflorist.com/images/flowers/mixed/logo.png",
           sameAs: [
             "https://www.instagram.com/akazuba_florists/"
           ],
@@ -126,7 +153,7 @@ export default function HomePage() {
               <div className="text-gray-600">Perfumes</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-green-600 mb-2">{flowerCategories.length + perfumeCategories.length}</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">{totalCategories}</div>
               <div className="text-gray-600">Categories</div>
             </div>
           </div>

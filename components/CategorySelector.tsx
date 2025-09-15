@@ -167,7 +167,7 @@ const CategorySelector = () => {
           >
             <div className="flex justify-center mb-6">
               <img 
-                src="/images/logo.png" 
+                src="/images/flowers/mixed/logo.png" 
                 alt="Akazuba Florist Logo" 
                 className="w-16 h-16 object-contain"
               />

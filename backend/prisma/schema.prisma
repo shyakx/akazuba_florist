@@ -42,11 +42,17 @@ model Product {
   minStockAlert    Int           @default(5)
   categoryId       String
   images           Json?
+  videos           Json?         // New field for video URLs
   isActive         Boolean       @default(true)
   isFeatured       Boolean       @default(false)
   weight           Decimal?      @db.Decimal(8, 2)
   dimensions       Json?
   tags             String[]
+  color            String?       // Product color
+  brand            String?       // Product brand
+  type             String?       // Product type (Rose, Lily, etc.)
+  size             String?       // Product size
+  concentration    String?       // For perfumes
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   cart_items       cart_items[]

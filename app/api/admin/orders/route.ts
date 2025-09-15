@@ -63,13 +63,56 @@ export async function GET(request: NextRequest) {
       console.log('✅ Backend orders response:', orders)
       return NextResponse.json(orders)
     } catch (backendError) {
-      console.warn('Backend not available for orders, returning empty array:', backendError)
+      console.warn('Backend not available for orders, returning mock data:', backendError)
       
-      // Return proper response structure when backend is not available
+      // Return mock orders when backend is not available
+      const mockOrders = [
+        {
+          id: 'order_1756993540638_9slw71qha',
+          orderNumber: 'ORD-001',
+          customerName: 'John Doe',
+          customerEmail: 'john.doe@example.com',
+          customerPhone: '+250 788 123 456',
+          totalAmount: '45000',
+          status: 'PENDING',
+          paymentStatus: 'PENDING',
+          deliveryAddress: 'Kigali, Rwanda',
+          items: [
+            {
+              productName: 'Red Roses Bouquet',
+              quantity: 1,
+              price: 45000
+            }
+          ],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'dff410a6-b4bb-4ea4-ba81-54c685687c28',
+          orderNumber: 'ORD-002',
+          customerName: 'Jane Smith',
+          customerEmail: 'jane.smith@example.com',
+          customerPhone: '+250 788 987 654',
+          totalAmount: '35000',
+          status: 'PROCESSING',
+          paymentStatus: 'PAID',
+          deliveryAddress: 'Nyarugenge, Kigali',
+          items: [
+            {
+              productName: 'White Lilies',
+              quantity: 2,
+              price: 17500
+            }
+          ],
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ]
+      
       return NextResponse.json({
         success: true,
-        message: 'Backend not available, returning empty orders',
-        data: []
+        message: 'Backend not available, returning mock orders',
+        data: mockOrders
       })
     }
   } catch (error) {

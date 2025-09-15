@@ -53,17 +53,9 @@ export interface JWTPayload {
  * JWT Configuration
  * 
  * Secure configuration for JWT token generation and validation.
- * Includes fallback secrets for development and security validation.
+ * Uses consistent JWT secret across all environments for security.
  */
-const JWT_SECRET = process.env.JWT_SECRET || (() => {
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('⚠️ JWT_SECRET not set in production environment. Using secure fallback.')
-    return 'akazuba-production-jwt-secret-2024-super-secure-key-for-production-deployment'
-  } else {
-    console.warn('⚠️ JWT_SECRET not set in environment variables. Using fallback for development only.')
-    return 'akazuba-jwt-secret-1757247557229-development-fallback'
-  }
-})()
+const JWT_SECRET = process.env.JWT_SECRET || '27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665'
 
 const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h'

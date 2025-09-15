@@ -203,7 +203,7 @@ const Header = () => {
           <Link href="/" className="flex items-center space-x-3">
             <div className="relative">
               <img 
-                src="/images/logo.png" 
+                src="/images/flowers/mixed/logo.png" 
                 alt="Akazuba Florist Logo" 
                 className="w-10 h-10 object-contain"
               />

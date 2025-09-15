@@ -9,7 +9,9 @@ export interface Product {
   salePrice?: number | null
   stockQuantity: number
   images: string[]
+  videos?: string[]  // New field for videos
   categoryName: string
+  categoryId?: string
   size?: string
   concentration?: string
   isActive: boolean

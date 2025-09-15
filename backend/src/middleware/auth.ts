@@ -16,7 +16,10 @@ declare global {
 
 export interface JWTPayload {
   userId: string
+  email: string
   role: string
+  type?: string
+  sessionId?: string
   iat: number
   exp: number
 }
@@ -31,7 +34,14 @@ export const verifyToken = async (req: Request, res: Response, next: NextFunctio
     }
 
     const token = authHeader.substring(7)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
+    const jwtSecret = process.env.JWT_SECRET || '27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665'
+    const decoded = jwt.verify(token, jwtSecret) as JWTPayload
+
+    // Validate token type if present
+    if (decoded.type && decoded.type !== 'access') {
+      res.status(401).json({ success: false, message: 'Invalid token type' })
+      return
+    }
 
     // Check if user still exists and is active
     const user = await prisma.user.findUnique({
@@ -95,7 +105,8 @@ export const optionalAuth = async (req: Request, res: Response, next: NextFuncti
     }
 
     const token = authHeader.substring(7)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayload
+    const jwtSecret = process.env.JWT_SECRET || '27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665'
+    const decoded = jwt.verify(token, jwtSecret) as JWTPayload
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },

@@ -10,7 +10,7 @@ Your build shows warnings about missing JWT_SECRET. This is **essential for prod
 Go to Vercel Dashboard → Your Project → Settings → Environment Variables:
 
 ```bash
-JWT_SECRET=akazuba-production-jwt-secret-2024-super-secure-key-for-production-deployment
+JWT_SECRET=27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665
 NEXT_PUBLIC_API_URL=https://akazuba-backend-api.onrender.com/api/v1
 NODE_ENV=production
 ```
@@ -19,9 +19,9 @@ NODE_ENV=production
 Go to Render Dashboard → Your Service → Environment:
 
 ```bash
-JWT_SECRET=akazuba-production-jwt-secret-2024-super-secure-key-for-production-deployment
-JWT_REFRESH_SECRET=akazuba-production-refresh-secret-2024-super-secure-key-for-production-deployment
-DATABASE_URL=your-postgresql-connection-string
+JWT_SECRET=27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665
+JWT_REFRESH_SECRET=27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a.oregon-postgres.render.com/akazuba_florist
 CORS_ORIGIN=https://akazubaflorist.com
 FRONTEND_URL=https://akazubaflorist.com
 NODE_ENV=production

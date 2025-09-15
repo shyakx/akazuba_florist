@@ -148,7 +148,7 @@ const Footer = () => {
               <div className="text-gray-500 text-xs uppercase tracking-wider mb-3">Developed by</div>
               <div className="flex items-center justify-center space-x-3">
                 <img 
-                  src="/images/cloud-sync-logo.png" 
+                  src="/images/flowers/mixed/cloud-sync-logo.png" 
                   alt="Cloud Sync Logo" 
                   className="h-12 w-auto object-contain filter brightness-110 flex-shrink-0"
                 />

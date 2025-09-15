@@ -40,7 +40,7 @@ export async function GET(
           await fs.writeFile(localPath, Buffer.from(imageBuffer))
           console.log('💾 Cached image locally for future requests')
         } catch (cacheError) {
-          console.log('⚠️ Could not cache image locally:', cacheError.message)
+          console.log('⚠️ Could not cache image locally:', cacheError instanceof Error ? cacheError.message : String(cacheError))
         }
         
         return new NextResponse(imageBuffer, {
@@ -52,7 +52,7 @@ export async function GET(
         })
       }
     } catch (backendError) {
-      console.log('⚠️ Backend image not available, trying local fallback:', backendError.message)
+      console.log('⚠️ Backend image not available, trying local fallback:', backendError instanceof Error ? backendError.message : String(backendError))
     }
     
     // Fallback: Check local public/uploads directory
@@ -90,28 +90,35 @@ export async function GET(
     } catch (localError) {
       console.log('⚠️ Local image not found, using placeholder')
       // If neither backend nor local file exists, return placeholder
-      const placeholderPath = path.join(process.cwd(), 'public', 'images', 'placeholder-product.jpg')
-      const placeholderBuffer = await fs.readFile(placeholderPath)
-      
-      return new NextResponse(placeholderBuffer, {
-        headers: {
-          'Content-Type': 'image/jpeg',
-          'Cache-Control': 'public, max-age=3600',
-        },
-      })
+      try {
+        const placeholderPath = path.join(process.cwd(), 'public', 'images', 'placeholder-flower.jpg')
+        const placeholderBuffer = await fs.readFile(placeholderPath)
+        
+        return new NextResponse(placeholderBuffer, {
+          headers: {
+            'Content-Type': 'image/jpeg',
+            'Cache-Control': 'public, max-age=3600',
+            'X-Image-Source': 'placeholder',
+          },
+        })
+      } catch (placeholderError) {
+        console.error('❌ Placeholder image not found:', placeholderError)
+        return new NextResponse('Image not found', { status: 404 })
+      }
     }
   } catch (error) {
     console.error('Error serving uploaded image:', error)
     
     // Return placeholder on error
     try {
-      const placeholderPath = path.join(process.cwd(), 'public', 'images', 'placeholder-product.jpg')
+      const placeholderPath = path.join(process.cwd(), 'public', 'images', 'placeholder-flower.jpg')
       const placeholderBuffer = await fs.readFile(placeholderPath)
       
       return new NextResponse(placeholderBuffer, {
         headers: {
           'Content-Type': 'image/jpeg',
           'Cache-Control': 'public, max-age=3600',
+          'X-Image-Source': 'error-placeholder',
         },
       })
     } catch {

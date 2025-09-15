@@ -67,30 +67,32 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📝 Product data received:', body)
     
-    // Create product using unified service
-    const newProduct = await unifiedProductService.createProduct(body)
+    // Create product using unified service with token
+    const newProduct = await unifiedProductService.createProductWithToken(body, session.token || '')
     
-    if (newProduct) {
-      console.log('✅ Product created successfully:', newProduct.id)
-      return NextResponse.json({
-        success: true,
-        data: newProduct,
-        message: 'Product created successfully'
-      })
-    } else {
-      console.error('❌ Failed to create product')
-      return NextResponse.json({ 
-        success: false, 
-        message: 'Failed to create product'
-      }, { status: 500 })
+    if (!newProduct) {
+      throw new Error('Failed to create product')
     }
+    
+    console.log('✅ Product created successfully:', newProduct.id)
+    return NextResponse.json({
+      success: true,
+      data: newProduct,
+      message: 'Product created successfully'
+    })
     
   } catch (error) {
     console.error('❌ Error creating product:', error)
+    console.error('❌ Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    })
     return NextResponse.json({ 
       success: false, 
       message: 'Failed to create product',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
+      details: error instanceof Error ? error.stack : undefined
     }, { status: 500 })
   }
 }

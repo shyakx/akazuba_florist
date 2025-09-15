@@ -1,0 +1,1560 @@
+[
+  {
+    "name": "Green Flower",
+    "price": 45000,
+    "description": "Beautiful green flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "green",
+    "type": "Flower",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [
+      "/images/flowers/green/1 min video advertisemnet.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Mixed Bouquet",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 1",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 10",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 2",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 3",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 4",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 5",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 6",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 7",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 8",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mixed 9",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Mized Colors",
+    "price": 35000,
+    "description": "Beautiful mixed flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Mixed Bouquet 1",
+    "price": 88000,
+    "description": "Beautiful mixed bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Orange Flower",
+    "price": 35000,
+    "description": "Beautiful orange flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "orange",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/orange/orange-1.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Full Rose Flowers With White Cover",
+    "price": 45000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Pink Heart Shaped Rose",
+    "price": 85000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Pink Flower",
+    "price": 35000,
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "pink",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/pink/full rose flowers with white cover.jpg",
+      "/images/flowers/pink/heartshapped roses with short moet and chocolates.jpg",
+      "/images/flowers/pink/home decor flowers in glass yellow and pink colors.jpg",
+      "/images/flowers/pink/pink and cake and moet bouquet.jpg",
+      "/images/flowers/pink/pink and while flowers with chocolate package.jpg",
+      "/images/flowers/pink/pink and white bouquet.jpg",
+      "/images/flowers/pink/pink-1.jpg",
+      "/images/flowers/pink/pink-2.jpg",
+      "/images/flowers/pink/pink-3.jpg",
+      "/images/flowers/pink/rose and yelllow boquet.jpg",
+      "/images/flowers/pink/rose bouquet packed with moet and puppet and chocolate.jpg",
+      "/images/flowers/pink/rose packed with chocolate and accompanied with four cousins .jpg",
+      "/images/flowers/pink/rose-whilte with four cousins and chocolate package.jpg",
+      "/images/flowers/pink/rosed heart shaped.jpg",
+      "/images/flowers/pink/roses and white boquetr.jpg",
+      "/images/flowers/pink/roses heart shaped package with nutella.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Pink Gift Package",
+    "price": 103000,
+    "description": "Beautiful pink bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "pink",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Pink Gift Package 1",
+    "price": 120000,
+    "description": "Premium pink flower arrangement with special gift packaging. Includes carefully selected flowers beautifully arranged with chocolates and other treats. Perfect for special occasions and thoughtful gifts.",
+    "category": "flowers",
+    "color": "pink",
+    "type": "Gift Package",
+    "images": [
+      "/images/flowers/pink/full rose flowers with white cover.jpg",
+      "/images/flowers/pink/heartshapped roses with short moet and chocolates.jpg",
+      "/images/flowers/pink/home decor flowers in glass yellow and pink colors.jpg",
+      "/images/flowers/pink/pink and cake and moet bouquet.jpg",
+      "/images/flowers/pink/pink and while flowers with chocolate package.jpg",
+      "/images/flowers/pink/pink and white bouquet.jpg",
+      "/images/flowers/pink/pink-1.jpg",
+      "/images/flowers/pink/pink-2.jpg",
+      "/images/flowers/pink/pink-3.jpg",
+      "/images/flowers/pink/rose and yelllow boquet.jpg",
+      "/images/flowers/pink/rose bouquet packed with moet and puppet and chocolate.jpg",
+      "/images/flowers/pink/rose packed with chocolate and accompanied with four cousins .jpg",
+      "/images/flowers/pink/rose-whilte with four cousins and chocolate package.jpg",
+      "/images/flowers/pink/rosed heart shaped.jpg",
+      "/images/flowers/pink/roses and white boquetr.jpg",
+      "/images/flowers/pink/roses heart shaped package with nutella.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Pink Bouquet",
+    "price": 78000,
+    "description": "Beautiful pink bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "pink",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Pink Flower 1",
+    "price": 35000,
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "pink",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/pink/full rose flowers with white cover.jpg",
+      "/images/flowers/pink/heartshapped roses with short moet and chocolates.jpg",
+      "/images/flowers/pink/home decor flowers in glass yellow and pink colors.jpg",
+      "/images/flowers/pink/pink and cake and moet bouquet.jpg",
+      "/images/flowers/pink/pink and while flowers with chocolate package.jpg",
+      "/images/flowers/pink/pink and white bouquet.jpg",
+      "/images/flowers/pink/pink-1.jpg",
+      "/images/flowers/pink/pink-2.jpg",
+      "/images/flowers/pink/pink-3.jpg",
+      "/images/flowers/pink/rose and yelllow boquet.jpg",
+      "/images/flowers/pink/rose bouquet packed with moet and puppet and chocolate.jpg",
+      "/images/flowers/pink/rose packed with chocolate and accompanied with four cousins .jpg",
+      "/images/flowers/pink/rose-whilte with four cousins and chocolate package.jpg",
+      "/images/flowers/pink/rosed heart shaped.jpg",
+      "/images/flowers/pink/roses and white boquetr.jpg",
+      "/images/flowers/pink/roses heart shaped package with nutella.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Pink Flower 2",
+    "price": 35000,
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "pink",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/pink/full rose flowers with white cover.jpg",
+      "/images/flowers/pink/heartshapped roses with short moet and chocolates.jpg",
+      "/images/flowers/pink/home decor flowers in glass yellow and pink colors.jpg",
+      "/images/flowers/pink/pink and cake and moet bouquet.jpg",
+      "/images/flowers/pink/pink and while flowers with chocolate package.jpg",
+      "/images/flowers/pink/pink and white bouquet.jpg",
+      "/images/flowers/pink/pink-1.jpg",
+      "/images/flowers/pink/pink-2.jpg",
+      "/images/flowers/pink/pink-3.jpg",
+      "/images/flowers/pink/rose and yelllow boquet.jpg",
+      "/images/flowers/pink/rose bouquet packed with moet and puppet and chocolate.jpg",
+      "/images/flowers/pink/rose packed with chocolate and accompanied with four cousins .jpg",
+      "/images/flowers/pink/rose-whilte with four cousins and chocolate package.jpg",
+      "/images/flowers/pink/rosed heart shaped.jpg",
+      "/images/flowers/pink/roses and white boquetr.jpg",
+      "/images/flowers/pink/roses heart shaped package with nutella.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Pink Flower 3",
+    "price": 35000,
+    "description": "Beautiful pink flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "pink",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/pink/full rose flowers with white cover.jpg",
+      "/images/flowers/pink/heartshapped roses with short moet and chocolates.jpg",
+      "/images/flowers/pink/home decor flowers in glass yellow and pink colors.jpg",
+      "/images/flowers/pink/pink and cake and moet bouquet.jpg",
+      "/images/flowers/pink/pink and while flowers with chocolate package.jpg",
+      "/images/flowers/pink/pink and white bouquet.jpg",
+      "/images/flowers/pink/pink-1.jpg",
+      "/images/flowers/pink/pink-2.jpg",
+      "/images/flowers/pink/pink-3.jpg",
+      "/images/flowers/pink/rose and yelllow boquet.jpg",
+      "/images/flowers/pink/rose bouquet packed with moet and puppet and chocolate.jpg",
+      "/images/flowers/pink/rose packed with chocolate and accompanied with four cousins .jpg",
+      "/images/flowers/pink/rose-whilte with four cousins and chocolate package.jpg",
+      "/images/flowers/pink/rosed heart shaped.jpg",
+      "/images/flowers/pink/roses and white boquetr.jpg",
+      "/images/flowers/pink/roses heart shaped package with nutella.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Rose And Yelllow Boquet",
+    "price": 45000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Pink Gift Package 2",
+    "price": 70000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Pink Gift Package 3",
+    "price": 70000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Pink Gift Package 4",
+    "price": 70000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Pink Heart Shaped Rose 1",
+    "price": 60000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Roses And White Boquetr",
+    "price": 45000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Pink Heart Shaped Rose 2",
+    "price": 85000,
+    "description": "Exquisite pink roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "pink",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "Purple Bucket Bucket Arrangement",
+    "price": 65000,
+    "description": "Stunning purple flowers arranged in an elegant bucket. This eye-catching arrangement brings natural beauty to any space. Great for home decoration, office spaces, or as a special gift.",
+    "category": "flowers",
+    "color": "purple",
+    "type": "Bucket Arrangement",
+    "images": [
+      "/images/flowers/purple/purple bucket flowers.jpg",
+      "/images/flowers/purple/purple flowers with chocolate package.jpg",
+      "/images/flowers/purple/purple-bucket.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Purple Gift Package",
+    "price": 120000,
+    "description": "Premium purple flower arrangement with special gift packaging. Includes carefully selected flowers beautifully arranged with chocolates and other treats. Perfect for special occasions and thoughtful gifts.",
+    "category": "flowers",
+    "color": "purple",
+    "type": "Gift Package",
+    "images": [
+      "/images/flowers/purple/purple bucket flowers.jpg",
+      "/images/flowers/purple/purple flowers with chocolate package.jpg",
+      "/images/flowers/purple/purple-bucket.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Purple Bucket Bucket Arrangement 1",
+    "price": 65000,
+    "description": "Stunning purple flowers arranged in an elegant bucket. This eye-catching arrangement brings natural beauty to any space. Great for home decoration, office spaces, or as a special gift.",
+    "category": "flowers",
+    "color": "purple",
+    "type": "Bucket Arrangement",
+    "images": [
+      "/images/flowers/purple/purple bucket flowers.jpg",
+      "/images/flowers/purple/purple flowers with chocolate package.jpg",
+      "/images/flowers/purple/purple-bucket.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Gift Package",
+    "price": 78000,
+    "description": "Beautiful red bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "red",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Red Flower",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Heart Shaped Bouquet",
+    "price": 93000,
+    "description": "Beautiful red bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "red",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Red Bouquet",
+    "price": 78000,
+    "description": "Beautiful red bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "red",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Red Gift Package 1",
+    "price": 95000,
+    "description": "Premium red flower arrangement with special gift packaging. Includes carefully selected flowers beautifully arranged with chocolates and other treats. Perfect for special occasions and thoughtful gifts.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Gift Package",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 1",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 2",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 3",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 4",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 5",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 6",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 7",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Red Flower 8",
+    "price": 35000,
+    "description": "Beautiful red flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/red/basket package of mixed pink white yellow and red flowers.jpg",
+      "/images/flowers/red/green and red colors flowers.jpg",
+      "/images/flowers/red/heart shaped red white flowers bouquet .jpg",
+      "/images/flowers/red/mixed colors booket red coat.jpg",
+      "/images/flowers/red/red pink and jp chenet AND CHOXOLATE PACKAGE.jpg",
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg",
+      "/images/flowers/red/red-3.jpg",
+      "/images/flowers/red/red-4.jpg",
+      "/images/flowers/red/red-5.jpg",
+      "/images/flowers/red/red-6.jpg",
+      "/images/flowers/red/red-7.jpg",
+      "/images/flowers/red/red-8.jpg"
+    ],
+    "videos": [
+      "/images/flowers/red/roses red video.mp4"
+    ],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Roses Red Video",
+    "price": 55000,
+    "description": "Exquisite red roses hand-selected for their perfect bloom and vibrant color. Each rose is carefully arranged by our expert florists to create a stunning display. Perfect for romantic occasions, anniversaries, or expressing your love.",
+    "category": "valentine",
+    "color": "red",
+    "type": "Rose",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "valentine",
+    "categoryIds": [
+      "valentine"
+    ]
+  },
+  {
+    "name": "White Flower",
+    "price": 35000,
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "white",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/white/all yellow flowers with white cover(coat).jpg",
+      "/images/flowers/white/bucket flower of white blue and balloon .jpg",
+      "/images/flowers/white/full white color bouquet.jpg",
+      "/images/flowers/white/wedding white flower2.jpg",
+      "/images/flowers/white/white-1.jpg",
+      "/images/flowers/white/white-2.jpg",
+      "/images/flowers/white/white-3.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "White Bucket Bucket Arrangement",
+    "price": 65000,
+    "description": "Stunning white flowers arranged in an elegant bucket. This eye-catching arrangement brings natural beauty to any space. Great for home decoration, office spaces, or as a special gift.",
+    "category": "flowers",
+    "color": "white",
+    "type": "Bucket Arrangement",
+    "images": [
+      "/images/flowers/white/all yellow flowers with white cover(coat).jpg",
+      "/images/flowers/white/bucket flower of white blue and balloon .jpg",
+      "/images/flowers/white/full white color bouquet.jpg",
+      "/images/flowers/white/wedding white flower2.jpg",
+      "/images/flowers/white/white-1.jpg",
+      "/images/flowers/white/white-2.jpg",
+      "/images/flowers/white/white-3.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "White Bouquet",
+    "price": 78000,
+    "description": "Beautiful white bouquet featuring a carefully curated selection of premium flowers. Hand-arranged by our professional florists to create a harmonious blend of colors and textures. Ideal for celebrations, gifts, or brightening any space.",
+    "category": "birthday",
+    "color": "white",
+    "type": "Bouquet",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "birthday",
+    "categoryIds": [
+      "birthday"
+    ]
+  },
+  {
+    "name": "Wedding Wedding Bouquet",
+    "price": 156000,
+    "description": "Elegant white wedding bouquet designed for your special day. Features premium flowers arranged in a romantic style. Customizable to match your wedding theme and personal preferences.",
+    "category": "wedding",
+    "color": "white",
+    "type": "Wedding Bouquet",
+    "images": [
+      "/images/wedding/wedding while.jpg"
+    ],
+    "videos": [],
+    "categoryName": "wedding",
+    "categoryIds": [
+      "wedding"
+    ]
+  },
+  {
+    "name": "White Flower 1",
+    "price": 35000,
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "white",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/white/all yellow flowers with white cover(coat).jpg",
+      "/images/flowers/white/bucket flower of white blue and balloon .jpg",
+      "/images/flowers/white/full white color bouquet.jpg",
+      "/images/flowers/white/wedding white flower2.jpg",
+      "/images/flowers/white/white-1.jpg",
+      "/images/flowers/white/white-2.jpg",
+      "/images/flowers/white/white-3.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "White Flower 2",
+    "price": 35000,
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "white",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/white/all yellow flowers with white cover(coat).jpg",
+      "/images/flowers/white/bucket flower of white blue and balloon .jpg",
+      "/images/flowers/white/full white color bouquet.jpg",
+      "/images/flowers/white/wedding white flower2.jpg",
+      "/images/flowers/white/white-1.jpg",
+      "/images/flowers/white/white-2.jpg",
+      "/images/flowers/white/white-3.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "White Flower 3",
+    "price": 35000,
+    "description": "Beautiful white flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "white",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/white/all yellow flowers with white cover(coat).jpg",
+      "/images/flowers/white/bucket flower of white blue and balloon .jpg",
+      "/images/flowers/white/full white color bouquet.jpg",
+      "/images/flowers/white/wedding white flower2.jpg",
+      "/images/flowers/white/white-1.jpg",
+      "/images/flowers/white/white-2.jpg",
+      "/images/flowers/white/white-3.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Yellow Flower",
+    "price": 35000,
+    "description": "Beautiful yellow flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "yellow",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/yellow/yellow-1.jpg",
+      "/images/flowers/yellow/yellow-2.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Yellow Flower 1",
+    "price": 35000,
+    "description": "Beautiful yellow flowers from Akazuba Florist. Hand-selected for their vibrant color and perfect bloom. Each flower is carefully chosen to ensure the highest quality and freshness.",
+    "category": "flowers",
+    "color": "yellow",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/yellow/yellow-1.jpg",
+      "/images/flowers/yellow/yellow-2.jpg"
+    ],
+    "videos": [],
+    "categoryName": "flowers",
+    "categoryIds": [
+      "flowers"
+    ]
+  },
+  {
+    "name": "Funeral Funeral Wreath",
+    "price": 120000,
+    "description": "Respectful mixed funeral arrangement to honor your loved one. Beautifully crafted with care and compassion by our professional florists. Available in various sizes and styles.",
+    "category": "funerals",
+    "color": "mixed",
+    "type": "Funeral Wreath",
+    "images": [
+      "/images/funerals/funeral many.jpg",
+      "/images/funerals/funeral.jpg"
+    ],
+    "videos": [],
+    "categoryName": "funerals",
+    "categoryIds": [
+      "funerals"
+    ]
+  },
+  {
+    "name": "Funeral Funeral Wreath 1",
+    "price": 120000,
+    "description": "Respectful mixed funeral arrangement to honor your loved one. Beautifully crafted with care and compassion by our professional florists. Available in various sizes and styles.",
+    "category": "funerals",
+    "color": "mixed",
+    "type": "Funeral Wreath",
+    "images": [
+      "/images/funerals/funeral many.jpg",
+      "/images/funerals/funeral.jpg"
+    ],
+    "videos": [],
+    "categoryName": "funerals",
+    "categoryIds": [
+      "funerals"
+    ]
+  },
+  {
+    "name": "A Beautful Puppet",
+    "price": 150000,
+    "description": "Premium fragrance gift package from our exclusive collection. Includes luxurious perfume with elegant packaging, perfect for special occasions and making a lasting impression.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Gift Package",
+    "images": [
+      "/images/placeholder-flower.jpg"
+    ],
+    "videos": [],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 1",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 10",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 2",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 3",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 4",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 5",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 6",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 7",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 8",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Premium Perfume 9",
+    "price": 125000,
+    "description": "Premium fragrance inspired by nature's beauty. Long-lasting scent with exquisite floral notes that create an unforgettable impression. Perfect for those who appreciate the finer things in life.",
+    "category": "special-occasions",
+    "color": "mixed",
+    "type": "Flower",
+    "images": [
+      "/images/flowers/mixed/mixed colors bouquet.jpg",
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-10.jpg",
+      "/images/flowers/mixed/mixed-2.jpg",
+      "/images/flowers/mixed/mixed-3.jpg",
+      "/images/flowers/mixed/mixed-4.jpg",
+      "/images/flowers/mixed/mixed-5.jpg",
+      "/images/flowers/mixed/mixed-6.jpg",
+      "/images/flowers/mixed/mixed-7.jpg",
+      "/images/flowers/mixed/mixed-8.jpg",
+      "/images/flowers/mixed/mixed-9.jpg",
+      "/images/flowers/mixed/mized colors.jpg",
+      "/images/flowers/mixed/placeholder-flower.jpg",
+      "/images/flowers/mixed/placeholder-product.jpg"
+    ],
+    "videos": [
+      "/images/flowers/mixed/video of bouquet .mp4"
+    ],
+    "categoryName": "special-occasions",
+    "categoryIds": [
+      "special-occasions"
+    ]
+  },
+  {
+    "name": "Wedding Wedding Bouquet 1",
+    "price": 180000,
+    "description": "Elegant mixed wedding bouquet designed for your special day. Features premium flowers arranged in a romantic style. Customizable to match your wedding theme and personal preferences.",
+    "category": "wedding",
+    "color": "mixed",
+    "type": "Wedding Bouquet",
+    "images": [
+      "/images/wedding/wedding while.jpg"
+    ],
+    "videos": [],
+    "categoryName": "wedding",
+    "categoryIds": [
+      "wedding"
+    ]
+  }
+]

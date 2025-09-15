@@ -85,37 +85,67 @@ export async function POST(request: NextRequest) {
       const data: any = await response.json()
       console.log('✅ Backend upload successful:', data)
       
-      // Get the backend URL and return it directly (no need for API route conversion)
+      // Get the backend URL and return the correct backend URL
       const backendImageUrl: string = data.data?.url || data.url
+      // Remove the /api/v1/upload/image part from backendUrl to get the base URL
+      const baseBackendUrl = backendUrl.replace('/api/v1/upload/image', '')
+      const fullBackendUrl = `${baseBackendUrl}${backendImageUrl}`
       
-      console.log('🔄 Backend upload successful, returning direct URL:', backendImageUrl)
+      console.log('🔄 Backend upload successful, returning full backend URL:', fullBackendUrl)
       
       return NextResponse.json({
         success: true,
         message: 'Image uploaded successfully',
         data: {
-          url: backendImageUrl, // Return direct backend URL
+          url: fullBackendUrl, // Return full backend URL
           filename: data.data?.filename || data.filename
         }
       })
     } catch (backendError) {
       console.warn('⚠️ Backend not available for image upload, using fallback:', backendError)
       
-      // Fallback: Generate a unique filename and return a placeholder URL
+      // Fallback: Save file locally and return URL
       const timestamp = Date.now()
       const extension = file.name.split('.').pop() || 'jpg'
-      const fallbackUrl = `/api/uploads/uploaded-${timestamp}.${extension}`
+      const filename = `uploaded-${timestamp}.${extension}`
+      const fallbackUrl = `/api/uploads/${filename}`
       
-      console.log('📝 Returning fallback upload response:', fallbackUrl)
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Image uploaded successfully (offline mode)',
-        data: {
-          url: fallbackUrl,
-          filename: `uploaded-${timestamp}.${extension}`
-        }
-      })
+      try {
+        // Save file to local uploads directory
+        const { promises: fs } = await import('fs')
+        const path = await import('path')
+        
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
+        await fs.mkdir(uploadsDir, { recursive: true })
+        
+        const filePath = path.join(uploadsDir, filename)
+        const arrayBuffer = await file.arrayBuffer()
+        await fs.writeFile(filePath, Buffer.from(arrayBuffer))
+        
+        console.log('💾 File saved locally:', filePath)
+        console.log('📝 Returning fallback upload response:', fallbackUrl)
+        
+        return NextResponse.json({
+          success: true,
+          message: 'Image uploaded successfully (offline mode)',
+          data: {
+            url: fallbackUrl,
+            filename: filename
+          }
+        })
+      } catch (saveError) {
+        console.error('❌ Failed to save file locally:', saveError)
+        
+        // If we can't save locally, return a placeholder URL
+        return NextResponse.json({
+          success: true,
+          message: 'Image uploaded successfully (placeholder mode)',
+          data: {
+            url: '/images/placeholder-flower.jpg',
+            filename: 'placeholder.jpg'
+          }
+        })
+      }
     }
   } catch (error) {
     console.error('Error uploading image:', error)

@@ -18,7 +18,7 @@ const STATIC_CACHE_URLS = [
   '/',
   '/offline',
   '/manifest.json',
-  '/images/logo.png',
+  '/images/flowers/mixed/logo.png',
   '/images/hero-bg.jpg',
   '/images/placeholder-product.jpg'
 ]
@@ -140,7 +140,7 @@ self.addEventListener('push', (event) => {
   
   const options = {
     body: event.data ? event.data.text() : 'New notification from Akazuba Florist',
-    icon: '/images/logo.png',
+    icon: '/images/flowers/mixed/logo.png',
     badge: '/images/badge.png',
     vibrate: [100, 50, 100],
     data: {

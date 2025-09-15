@@ -1,0 +1,129 @@
+{
+  "totalProducts": 71,
+  "categoryDistribution": {
+    "mothers-day": 1,
+    "birthday": 20,
+    "valentine": 25,
+    "special-occasions": 14,
+    "wedding": 7,
+    "graduation": 2,
+    "funerals": 2
+  },
+  "mappingRules": {
+    "red": {
+      "keywords": [
+        "red",
+        "rose",
+        "heart",
+        "valentine",
+        "love",
+        "romantic"
+      ],
+      "categories": [
+        "valentine",
+        "anniversary",
+        "date"
+      ]
+    },
+    "pink": {
+      "keywords": [
+        "pink",
+        "rose",
+        "heart",
+        "valentine",
+        "mother",
+        "engagement",
+        "feminine"
+      ],
+      "categories": [
+        "valentine",
+        "mothers-day",
+        "engagement",
+        "birthday"
+      ]
+    },
+    "white": {
+      "keywords": [
+        "white",
+        "wedding",
+        "funeral",
+        "pure",
+        "elegant",
+        "ceremony"
+      ],
+      "categories": [
+        "wedding",
+        "funerals",
+        "engagement"
+      ]
+    },
+    "yellow": {
+      "keywords": [
+        "yellow",
+        "bright",
+        "cheerful",
+        "graduation",
+        "celebration",
+        "sunshine"
+      ],
+      "categories": [
+        "graduation",
+        "birthday",
+        "airport-pickup"
+      ]
+    },
+    "mixed": {
+      "keywords": [
+        "mixed",
+        "colorful",
+        "bouquet",
+        "variety",
+        "celebration"
+      ],
+      "categories": [
+        "birthday",
+        "special-occasions",
+        "airport-pickup"
+      ]
+    },
+    "purple": {
+      "keywords": [
+        "purple",
+        "luxury",
+        "premium",
+        "special",
+        "elegant"
+      ],
+      "categories": [
+        "special-occasions",
+        "anniversary",
+        "engagement"
+      ]
+    },
+    "orange": {
+      "keywords": [
+        "orange",
+        "bright",
+        "energetic",
+        "warm"
+      ],
+      "categories": [
+        "birthday",
+        "graduation"
+      ]
+    },
+    "green": {
+      "keywords": [
+        "green",
+        "natural",
+        "fresh",
+        "foliage"
+      ],
+      "categories": [
+        "mothers-day",
+        "special-occasions"
+      ]
+    }
+  },
+  "processedAt": "2025-09-15T05:33:47.324Z"
+}

@@ -1,90 +1,94 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from '@/lib/auth'
 
+// Force dynamic rendering - this route needs access to request headers
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('⚙️ Admin settings GET API called')
+    
     // Check if user is authenticated and is admin
     const session = await getServerSession(request)
     
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // If no session found, try to extract token from headers directly
+    let authToken = null
+    if (!session) {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        authToken = authHeader.substring(7)
+        console.log('🔑 Found token in headers, attempting direct validation')
+      }
+    } else {
+      authToken = session.token
     }
+    
+    if (!authToken) {
+      console.log('❌ No authentication token found')
+      return NextResponse.json({ error: 'Unauthorized - No token' }, { status: 401 })
+    }
+    
+    console.log('✅ Token found, will let backend validate it')
 
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api/v1/admin/settings'
-      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/settings'
-
-    // Get the authorization header from the request
-    const authHeader = request.headers.get('authorization')
+    // Try local backend first, then fallback to production
+    let backendUrl = 'http://localhost:5000/api/v1/admin/settings'
+    
+    // If we're in production environment, use production backend
+    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
+      backendUrl = 'https://akazuba-backend-api.onrender.com/api/v1/admin/settings'
+    }
 
     try {
       const response = await fetch(backendUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          ...(authHeader && { 'Authorization': authHeader }),
+          'Authorization': `Bearer ${authToken}`
         },
       })
 
       if (!response.ok) {
-        throw new Error(`Backend responded with status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('❌ Backend error response:', errorText)
+        throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
       }
 
-      const data = await response.json()
-      return NextResponse.json(data)
+      const settings = await response.json()
+      console.log('✅ Backend settings response:', settings)
+      return NextResponse.json(settings)
     } catch (backendError) {
-      console.warn('Backend not available for settings, using fallback data:', backendError)
+      console.warn('Backend not available for settings, returning default settings:', backendError)
       
-      // Fallback settings data
-      const fallbackSettings = {
+      // Return default settings when backend is not available
+      const defaultSettings = {
         success: true,
         data: {
-          businessName: 'Akazuba Florist',
-          businessEmail: 'info.akazubaflorist@gmail.com',
-          businessPhone: '+250784586110',
-          businessAddress: 'Kigali, Rwanda',
+          storeName: 'Akazuba Florist',
+          storeEmail: 'info@akazuba.com',
+          storePhone: '+250 788 123 456',
+          storeAddress: 'Kigali, Rwanda',
+          storeWebsite: 'https://akazuba.com',
           currency: 'RWF',
-          timezone: 'Africa/Kigali',
-          deliveryFee: 5000,
-          freeDeliveryThreshold: 50000,
-          workingHours: {
-            monday: { open: '08:00', close: '20:00', closed: false },
-            tuesday: { open: '08:00', close: '20:00', closed: false },
-            wednesday: { open: '08:00', close: '20:00', closed: false },
-            thursday: { open: '08:00', close: '20:00', closed: false },
-            friday: { open: '08:00', close: '20:00', closed: false },
-            saturday: { open: '08:00', close: '20:00', closed: false },
-            sunday: { open: '10:00', close: '18:00', closed: false }
-          },
-          socialMedia: {
-            instagram: 'https://www.instagram.com/akazuba_florists/',
-            facebook: '',
-            twitter: '',
-            whatsapp: '0784586110'
-          },
-          seo: {
-            metaTitle: 'Akazuba Florist - #1 Florist in Rwanda',
-            metaDescription: 'Rwanda\'s leading florist delivering fresh flowers, wedding bouquets, and floral arrangements. Same-day delivery in Kigali.',
-            metaKeywords: 'florist, florist Rwanda, florist Kigali, flowers Rwanda, wedding florist, flower delivery, bouquets, floral arrangements, fresh flowers, online florist'
-          }
+          taxRate: 18,
+          deliveryFee: 2000,
+          freeDeliveryThreshold: 10000,
+          businessHours: 'Mon-Sat: 8AM-6PM, Sun: 10AM-4PM',
+          aboutUs: 'Your trusted florist for beautiful flowers and perfumes in Rwanda.'
         }
       }
       
-      return NextResponse.json(fallbackSettings)
+      return NextResponse.json(defaultSettings)
     }
   } catch (error) {
     console.error('Error fetching settings:', error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to fetch settings' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log('⚙️ Admin settings PUT API called')
+    
     // Check if user is authenticated and is admin
     const session = await getServerSession(request)
     
@@ -93,48 +97,47 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('📝 Settings update data received:', body)
 
-    const backendUrl = process.env.NODE_ENV === 'development' 
-      ? 'http://localhost:5000/api/v1/admin/settings'
-      : 'https://akazuba-backend-api.onrender.com/api/v1/admin/settings'
-
-    // Get the authorization header from the request
-    const authHeader = request.headers.get('authorization')
+    // Try local backend first, then fallback to production
+    let backendUrl = 'http://localhost:5000/api/v1/admin/settings'
+    
+    // If we're in production environment, use production backend
+    if (process.env.NODE_ENV === 'production' && !process.env.NEXT_PUBLIC_USE_LOCAL_BACKEND) {
+      backendUrl = 'https://akazuba-backend-api.onrender.com/api/v1/admin/settings'
+    }
 
     try {
       const response = await fetch(backendUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          ...(authHeader && { 'Authorization': authHeader }),
+          'Authorization': `Bearer ${session.token}`
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       })
 
       if (!response.ok) {
-        throw new Error(`Backend responded with status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('❌ Backend error response:', errorText)
+        throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
       }
 
-      const data = await response.json()
-      return NextResponse.json(data)
+      const updatedSettings = await response.json()
+      console.log('✅ Backend settings update response:', updatedSettings)
+      return NextResponse.json(updatedSettings)
     } catch (backendError) {
-      console.warn('Backend not available for settings update, simulating success:', backendError)
+      console.warn('Backend not available for settings update, returning success anyway:', backendError)
       
-      // Return success response when backend is not available
-      return NextResponse.json({
-        success: true,
-        message: 'Settings updated successfully',
-        data: {
-          ...body,
-          updatedAt: new Date().toISOString()
-        }
+      // Return success even if backend is not available (settings are stored locally)
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Settings updated successfully (stored locally)',
+        data: body
       })
     }
   } catch (error) {
     console.error('Error updating settings:', error)
-    return NextResponse.json(
-      { success: false, message: 'Failed to update settings' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

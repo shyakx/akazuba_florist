@@ -77,7 +77,7 @@ OWNER_EMAIL=info.akazubaflorist@gmail.com
 OWNER_PHONE=0784586110
 
 # Database (if using)
-DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a/akazuba_florist
+DATABASE_URL=postgresql://akazuba_user:WVkNIzcYTDXNAmOn893o1byvf7j6wDxN@dpg-d2o0b8ripnbc73d1n3pg-a.oregon-postgres.render.com/akazuba_florist
 ```
 
 ### Payment Setup

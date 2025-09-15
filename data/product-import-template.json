@@ -1,0 +1,142 @@
+[
+  {
+    "name": "Red Rose",
+    "price": 45500,
+    "description": "Beautiful red rose perfect for any occasion. Freshly cut and carefully arranged by our expert florists. Each rose is hand-selected for its vibrant color and perfect bloom.",
+    "category": "flowers",
+    "color": "red",
+    "type": "Rose",
+    "images": [
+      "/images/flowers/red/red-1.jpg",
+      "/images/flowers/red/red-2.jpg"
+    ],
+    "videos": [
+      "/videos/red-rose-demo.mp4"
+    ]
+  },
+  {
+    "name": "White Lily",
+    "price": 39000,
+    "description": "Elegant white lily for special moments. Symbol of purity and beauty, perfect for weddings, anniversaries, or memorial services. Long-lasting blooms with intoxicating fragrance.",
+    "category": "flowers",
+    "color": "white",
+    "type": "Lily",
+    "images": [
+      "/images/flowers/white/white-1.jpg"
+    ],
+    "videos": [
+      "/videos/white-lily-demo.mp4"
+    ]
+  },
+  {
+    "name": "Pink Peony",
+    "price": 52000,
+    "description": "Gorgeous pink peony for celebrations. Large, lush blooms that make a stunning statement. Perfect for birthdays, graduations, or any special celebration.",
+    "category": "flowers",
+    "color": "pink",
+    "type": "Peony",
+    "images": [
+      "/images/flowers/pink/pink-1.jpg",
+      "/images/flowers/pink/pink-2.jpg"
+    ],
+    "videos": [
+      "/videos/pink-peony-demo.mp4"
+    ]
+  },
+  {
+    "name": "Yellow Sunflower",
+    "price": 26000,
+    "description": "Bright and cheerful yellow sunflower. Brings sunshine to any room with its large, vibrant blooms. Perfect for lifting spirits and brightening days.",
+    "category": "flowers",
+    "color": "yellow",
+    "type": "Sunflower",
+    "images": [
+      "/images/flowers/yellow/yellow-1.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Mixed Bouquet",
+    "price": 78000,
+    "description": "Beautiful mixed bouquet featuring a variety of seasonal flowers. Hand-arranged by our expert florists to create a stunning display of colors and textures.",
+    "category": "flowers",
+    "color": "mixed",
+    "type": "Bouquet",
+    "images": [
+      "/images/flowers/mixed/mixed-1.jpg",
+      "/images/flowers/mixed/mixed-2.jpg"
+    ],
+    "videos": [
+      "/videos/mixed-bouquet-demo.mp4"
+    ]
+  },
+  {
+    "name": "Luxury Perfume",
+    "price": 125000,
+    "description": "Premium fragrance for special occasions. Long-lasting scent with notes of jasmine, rose, and sandalwood. Perfect for evening wear and special events.",
+    "category": "perfumes",
+    "color": "n/a",
+    "type": "Perfume",
+    "images": [
+      "/images/perfumes/luxury-perfume.jpg"
+    ],
+    "videos": [
+      "/videos/perfume-demo.mp4"
+    ]
+  },
+  {
+    "name": "Wedding Bouquet",
+    "price": 156000,
+    "description": "Elegant wedding bouquet designed for your special day. Features premium flowers arranged in a romantic style. Customizable colors and flowers to match your theme.",
+    "category": "wedding",
+    "color": "white",
+    "type": "Wedding Bouquet",
+    "images": [
+      "/images/wedding/wedding-bouquet-1.jpg",
+      "/images/wedding/wedding-bouquet-2.jpg"
+    ],
+    "videos": [
+      "/videos/wedding-bouquet-demo.mp4"
+    ]
+  },
+  {
+    "name": "Funeral Wreath",
+    "price": 95000,
+    "description": "Respectful funeral wreath to honor your loved one. Beautifully arranged with white and pastel flowers. Available in various sizes and styles.",
+    "category": "funerals",
+    "color": "white",
+    "type": "Funeral Wreath",
+    "images": [
+      "/images/funerals/funeral-wreath.jpg"
+    ],
+    "videos": []
+  },
+  {
+    "name": "Birthday Arrangement",
+    "price": 65000,
+    "description": "Colorful birthday arrangement to celebrate another year of life. Bright, cheerful flowers arranged in a festive style. Perfect for any age celebration.",
+    "category": "birthday",
+    "color": "mixed",
+    "type": "Birthday Arrangement",
+    "images": [
+      "/images/birthday/birthday-arrangement.jpg"
+    ],
+    "videos": [
+      "/videos/birthday-demo.mp4"
+    ]
+  },
+  {
+    "name": "Valentine Rose Box",
+    "price": 89000,
+    "description": "Romantic red roses arranged in a beautiful gift box. Perfect for Valentine's Day or any romantic occasion. Includes decorative ribbon and card.",
+    "category": "valentine",
+    "color": "red",
+    "type": "Valentine Box",
+    "images": [
+      "/images/valentine/rose-box.jpg"
+    ],
+    "videos": [
+      "/videos/valentine-demo.mp4"
+    ]
+  }
+]

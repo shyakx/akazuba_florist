@@ -138,6 +138,13 @@ class UnifiedProductService {
     
     console.log('🖼️ Processed images for product:', backendProduct.name, 'images:', images)
 
+    // Handle videos with robust validation
+    let videos: string[] = []
+    if (backendProduct.videos && Array.isArray(backendProduct.videos) && backendProduct.videos.length > 0) {
+      videos = backendProduct.videos.filter((video: string) => video && typeof video === 'string' && video.trim() !== '')
+    }
+    console.log('🎥 Processed videos for product:', backendProduct.name, 'videos:', videos)
+
     return {
       id: backendProduct.id || `product-${Date.now()}`,
       name: backendProduct.name || 'Unnamed Product',
@@ -149,6 +156,7 @@ class UnifiedProductService {
       salePrice: backendProduct.salePrice || null,
       stockQuantity: backendProduct.stockQuantity || backendProduct.stock || 0,
       images: images,
+      videos: videos,
       categoryName: backendProduct.category?.name || backendProduct.category || 'Unknown',
       size: backendProduct.size || 'Standard',
       isActive: backendProduct.isActive !== false,
@@ -434,6 +442,9 @@ class UnifiedProductService {
       return cachedData
     }
 
+    // Use admin endpoint for admin context to get all products (active + inactive)
+    const endpoint = adminContext ? `${this.baseURL}/admin/products` : `${this.baseURL}/products`
+    
     try {
       // Rate limiting to prevent 429 errors
       const now = Date.now()
@@ -445,8 +456,6 @@ class UnifiedProductService {
       }
       this.lastRequestTime = Date.now()
 
-      // Use admin endpoint for admin context to get all products (active + inactive)
-      const endpoint = adminContext ? `${this.baseURL}/admin/products` : `${this.baseURL}/products`
       console.log('🔄 Fetching products from backend:', endpoint)
       
       const response = await fetch(endpoint, {
@@ -481,11 +490,13 @@ class UnifiedProductService {
       return products
 
     } catch (error) {
-      console.warn('⚠️ Backend not available, using fallback products:', error)
+      console.error('❌ Backend API failed:', error)
+      console.log('🔍 API URL attempted:', endpoint)
+      console.log('🔍 Error details:', error instanceof Error ? error.message : String(error))
       
-      const fallbackProducts = this.getFallbackProducts()
-      this.setCache(cacheKey, fallbackProducts)
-      return fallbackProducts
+      // Return empty array instead of fallback products to debug the issue
+      console.log('🚫 Returning empty array instead of fallback products for debugging')
+      return []
     }
   }
 
@@ -493,6 +504,125 @@ class UnifiedProductService {
   async getProductById(id: string): Promise<Product | null> {
     const products = await this.getAllProducts()
     return products.find(product => product.id === id) || null
+  }
+
+  // Create product with explicit token (Server-side)
+  async createProductWithToken(productData: Omit<Product, 'id'>, token: string): Promise<Product | null> {
+    try {
+      console.log('➕ Creating product via admin API')
+      console.log('📝 Product data received:', productData)
+      console.log('🔑 Token provided:', token ? `${token.substring(0, 20)}...` : 'No token')
+      
+      // Get actual category IDs from backend
+      console.log('🔄 Fetching categories with token...')
+      const categories = await this.getCategoriesWithToken(token)
+      console.log('📂 Available categories:', categories)
+      
+      if (!categories || categories.length === 0) {
+        console.warn('⚠️ No categories found, using fallback categories')
+      }
+      
+      // Find the correct category ID
+      let categoryId = null
+      
+      // Check if categoryId is a valid UUID (actual category ID)
+      const isValidCategoryId = productData.categoryId && 
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productData.categoryId)
+      
+      if (isValidCategoryId) {
+        // Use the provided category ID if it's a valid UUID
+        categoryId = productData.categoryId
+      } else if (productData.categoryId || productData.categoryName) {
+        // Map category name/slug to ID
+        const categoryInput = productData.categoryId || productData.categoryName
+        const inputLower = categoryInput?.toLowerCase()
+        
+        if (inputLower === 'flowers' || inputLower === 'flower') {
+          const flowersCategory = categories.find(cat => 
+            cat.name?.toLowerCase().includes('flower')
+          )
+          categoryId = flowersCategory?.id || categories[0]?.id
+        } else if (inputLower === 'perfumes' || inputLower === 'perfume') {
+          const perfumesCategory = categories.find(cat => 
+            cat.name?.toLowerCase().includes('perfume')
+          )
+          categoryId = perfumesCategory?.id || categories[0]?.id
+        } else {
+          // Default to first available category
+          categoryId = categories[0]?.id
+        }
+      } else {
+        // Default to first available category
+        categoryId = categories[0]?.id
+      }
+      
+      console.log('🎯 Selected category ID:', categoryId)
+      
+      const backendData = {
+        name: productData.name,
+        description: productData.description,
+        price: productData.price,
+        stockQuantity: productData.stockQuantity,
+        isActive: productData.isActive,
+        images: productData.images,
+        categoryId: categoryId,
+        tags: productData.tags,
+        sku: productData.sku,
+        weight: productData.weight
+      }
+
+      console.log('📤 Sending to backend:', backendData)
+
+      const response = await fetch(`${this.baseURL}/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(backendData)
+      })
+
+      console.log('📥 Backend response status:', response.status)
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Backend error response:', errorText)
+        throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      console.log('📥 Backend response data:', data)
+      
+      if (data.success && data.data) {
+        console.log('✅ Product created successfully in backend')
+        // Invalidate all product caches after creating product
+        this.invalidateAllProductCaches()
+        const convertedProduct = this.convertBackendProduct(data.data)
+        console.log('🔄 Converted product:', convertedProduct)
+        return convertedProduct
+      }
+      
+      console.error('❌ Backend response indicates failure:', data)
+      return null
+    } catch (error) {
+      console.error('❌ Error creating product:', error)
+      
+      // Don't return fallback product for validation errors - let the error bubble up
+      if (error instanceof Error && error.message.includes('400')) {
+        throw error // Re-throw validation errors
+      }
+      
+      console.warn('⚠️ Backend not available for product creation:', error)
+      
+      // Only return fallback product for network/connection issues
+      const fallbackProduct: Product = {
+        id: Date.now().toString(),
+        ...productData
+      }
+      
+      console.log('📝 Returning fallback product:', fallbackProduct)
+      return fallbackProduct
+    }
   }
 
   // Create product (Admin only)
@@ -508,18 +638,28 @@ class UnifiedProductService {
       
       // Find the correct category ID
       let categoryId = null
-      if (productData.categoryName === 'Flowers' || productData.categoryName === 'flowers') {
-        const flowersCategory = categories.find(cat => 
-          cat.name?.toLowerCase().includes('flower') || 
-          cat.name?.toLowerCase().includes('flower')
-        )
-        categoryId = flowersCategory?.id || categories[0]?.id
-      } else if (productData.categoryName === 'Perfumes' || productData.categoryName === 'perfumes') {
-        const perfumesCategory = categories.find(cat => 
-          cat.name?.toLowerCase().includes('perfume') || 
-          cat.name?.toLowerCase().includes('perfume')
-        )
-        categoryId = perfumesCategory?.id || categories[0]?.id
+      
+      // If categoryId is provided directly, use it
+      if (productData.categoryId) {
+        categoryId = productData.categoryId
+      } else if (productData.categoryName) {
+        // If categoryName is provided, find the matching category
+        if (productData.categoryName === 'Flowers' || productData.categoryName === 'flowers') {
+          const flowersCategory = categories.find(cat => 
+            cat.name?.toLowerCase().includes('flower') || 
+            cat.name?.toLowerCase().includes('flower')
+          )
+          categoryId = flowersCategory?.id || categories[0]?.id
+        } else if (productData.categoryName === 'Perfumes' || productData.categoryName === 'perfumes') {
+          const perfumesCategory = categories.find(cat => 
+            cat.name?.toLowerCase().includes('perfume') || 
+            cat.name?.toLowerCase().includes('perfume')
+          )
+          categoryId = perfumesCategory?.id || categories[0]?.id
+        } else {
+          // Default to first available category
+          categoryId = categories[0]?.id
+        }
       } else {
         // Default to first available category
         categoryId = categories[0]?.id
@@ -682,6 +822,51 @@ class UnifiedProductService {
     }
   }
 
+  /**
+   * Delete product with explicit token (for server-side API routes)
+   * @param id - Product ID to delete
+   * @param token - Authentication token
+   * @returns Promise resolving to true if successful, false otherwise
+   */
+  async deleteProductWithToken(id: string, token: string): Promise<boolean> {
+    try {
+      console.log('🗑️ Deleting product from backend with token:', id)
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+      
+      // Call backend API directly
+      const response = await fetch(`${this.baseURL}/products/${id}`, {
+        method: 'DELETE',
+        headers
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Backend delete error:', response.status, errorText)
+        throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+      
+      if (data.success) {
+        // Invalidate all product caches after deleting product
+        this.invalidateAllProductCaches()
+        console.log('✅ Product deleted successfully from backend')
+        return true
+      }
+      
+      console.warn('⚠️ Backend deletion returned success: false')
+      return false
+    } catch (error) {
+      console.error('❌ Failed to delete product from backend:', error)
+      // Don't delete from local state if backend call fails
+      return false
+    }
+  }
+
   // Force refresh - clears cache and refetches
   async forceRefresh(): Promise<Product[]> {
     console.log('🔄 Force refreshing products...')
@@ -700,6 +885,31 @@ class UnifiedProductService {
   }
 
   // Get categories
+  // Get categories with explicit token (Server-side)
+  private async getCategoriesWithToken(token: string): Promise<any[]> {
+    try {
+      const response = await fetch(`${this.baseURL}/categories`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      const data = await response.json()
+      
+      if (data.success && data.data) {
+        console.log('📂 Categories from backend:', data.data)
+        return data.data
+      }
+      return []
+    } catch (error) {
+      console.warn('⚠️ Backend not available for categories:', error)
+      return [
+        { id: 'flowers-category', name: 'Flowers', slug: 'flowers' },
+        { id: 'perfumes-category', name: 'Perfumes', slug: 'perfumes' }
+      ]
+    }
+  }
+
   async getCategories(): Promise<any[]> {
     try {
       const response = await fetch(`${this.baseURL}/categories`, {

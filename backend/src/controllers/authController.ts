@@ -10,9 +10,9 @@ import { emailService } from '../utils/emailService'
 const prisma = new PrismaClient()
 
 // JWT Configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'akazuba-jwt-secret-2024-development-super-secure-key-for-production'
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d'
-const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '30d'
+const JWT_SECRET = process.env.JWT_SECRET || '27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665'
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h'
+const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
 
 // Ensure JWT_SECRET is defined
 if (!JWT_SECRET) {
@@ -26,15 +26,15 @@ console.log('  - JWT_EXPIRES_IN:', JWT_EXPIRES_IN)
 console.log('  - REFRESH_TOKEN_EXPIRES_IN:', REFRESH_TOKEN_EXPIRES_IN)
 
 // Generate JWT tokens
-const generateTokens = (userId: string, role: string) => {
+const generateTokens = (userId: string, email: string, role: string) => {
   const accessToken = jwt.sign(
-    { userId, role },
+    { userId, email, role, type: 'access' },
     JWT_SECRET as Secret,
     { expiresIn: JWT_EXPIRES_IN } as SignOptions
   )
 
   const refreshToken = jwt.sign(
-    { userId, role, type: 'refresh' },
+    { userId, email, role, type: 'refresh' },
     JWT_SECRET as Secret,
     { expiresIn: REFRESH_TOKEN_EXPIRES_IN } as SignOptions
   )
@@ -125,7 +125,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     })
 
     // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user.id, user.role)
+    const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role)
 
     // Store refresh token
     await prisma.refresh_tokens.create({
@@ -206,7 +206,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user.id, user.role)
+    const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role)
 
     // Store refresh token
     await prisma.refresh_tokens.create({
@@ -297,7 +297,7 @@ export const adminLogin = async (req: Request, res: Response): Promise<void> => 
     }
 
     // Generate tokens
-    const { accessToken, refreshToken } = generateTokens(user.id, user.role)
+    const { accessToken, refreshToken } = generateTokens(user.id, user.email, user.role)
 
     // Store refresh token
     await prisma.refresh_tokens.create({
@@ -419,6 +419,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     // Generate new tokens
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens( 
       storedToken.users.id,
+      storedToken.users.email,
       storedToken.users.role
     )
 

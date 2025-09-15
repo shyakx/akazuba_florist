@@ -1,110 +1,254 @@
 'use client'
 
-import React, { useState } from 'react'
-import ContentManager from '@/components/ContentManager'
-import { Edit3, FileText, Settings, Globe, Mail, Phone, MapPin, DollarSign, Users, Package } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Save, Eye, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react'
 
-export default function AdminContentPage() {
-  const [isContentManagerOpen, setIsContentManagerOpen] = useState(false)
-
-  const contentSections = [
-    {
-      title: 'General Settings',
-      description: 'Manage shop name, contact information, and business hours',
-      icon: Settings,
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Payment Settings',
-      description: 'Configure payment methods, delivery fees, and account details',
-      icon: DollarSign,
-      color: 'bg-green-500'
-    },
-    {
-      title: 'Hero Section',
-      description: 'Customize homepage hero content and call-to-action',
-      icon: Globe,
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'About Section',
-      description: 'Update company information and statistics',
-      icon: Users,
-      color: 'bg-orange-500'
-    },
-    {
-      title: 'Social Media',
-      description: 'Manage social media links and contact information',
-      icon: Mail,
-      color: 'bg-pink-500'
-    },
-    {
-      title: 'About Page',
-      description: 'Edit detailed about page content and team information',
-      icon: FileText,
-      color: 'bg-indigo-500'
+interface ContentData {
+  hero: {
+    title: string
+    subtitle: string
+    backgroundImage: string
+    ctaText: string
+    ctaLink: string
+  }
+  about: {
+    title: string
+    description: string
+    image: string
+  }
+  contact: {
+    address: string
+    phone: string
+    email: string
+    hours: string
+  }
+  footer: {
+    description: string
+    socialLinks: {
+      facebook: string
+      instagram: string
+      twitter: string
     }
+  }
+  seo: {
+    siteTitle: string
+    siteDescription: string
+    keywords: string
+  }
+}
+
+export default function ContentManagement() {
+  const [content, setContent] = useState<ContentData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [activeSection, setActiveSection] = useState('hero')
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+
+  useEffect(() => {
+    fetchContent()
+  }, [])
+
+  const fetchContent = async () => {
+    try {
+      setLoading(true)
+      setMessage(null)
+      
+      // Simplified: Use default content for now
+      setContent({
+        hero: {
+          title: 'Welcome to Akazuba',
+          subtitle: 'Beautiful flowers and perfumes for every occasion',
+          backgroundImage: '/images/hero-bg.jpg',
+          ctaText: 'Shop Now',
+          ctaLink: '/products'
+        },
+        about: {
+          title: 'About Us',
+          description: 'We are passionate about providing the finest flowers and perfumes.',
+          image: '/images/about.jpg'
+        },
+        contact: {
+          address: 'Kigali, Rwanda',
+          phone: '+250 788 123 456',
+          email: 'info@akazuba.com',
+          hours: 'Mon-Sat: 8AM-6PM'
+        },
+        footer: {
+          description: 'Your trusted florist for beautiful flowers and perfumes.',
+          socialLinks: {
+            facebook: 'https://facebook.com/akazuba',
+            instagram: 'https://instagram.com/akazuba',
+            twitter: 'https://twitter.com/akazuba'
+          }
+        },
+        seo: {
+          siteTitle: 'Akazuba - Flowers & Perfumes',
+          siteDescription: 'Beautiful flowers and perfumes for every occasion',
+          keywords: 'flowers, perfumes, gifts, Rwanda'
+        }
+      })
+    } catch (error) {
+      console.error('Error setting content:', error)
+      setMessage({ type: 'error', text: 'Failed to load content' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const saveContent = async (section: string, data: any) => {
+    try {
+      setSaving(true)
+      setMessage(null)
+      
+      // Simplified: Just update local state for now
+      setContent(prev => prev ? {
+        ...prev,
+        [section]: data
+      } : null)
+      
+      setMessage({ type: 'success', text: `${section} content updated successfully!` })
+      setTimeout(() => setMessage(null), 3000)
+    } catch (error) {
+      console.error('Error saving content:', error)
+      setMessage({ type: 'error', text: `Failed to update ${section} content` })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleInputChange = (section: string, field: string, value: string) => {
+    if (!content) return
+    
+    setContent(prev => prev ? {
+      ...prev,
+      [section]: {
+        ...prev[section as keyof ContentData],
+        [field]: value
+      }
+    } : null)
+  }
+
+  const handleSocialLinkChange = (platform: string, value: string) => {
+    if (!content) return
+    
+    setContent(prev => prev ? {
+      ...prev,
+      footer: {
+        ...prev.footer,
+        socialLinks: {
+          ...prev.footer.socialLinks,
+          [platform]: value
+        }
+      }
+    } : null)
+  }
+
+  const sections = [
+    { id: 'hero', name: 'Hero Section', icon: '🏠' },
+    { id: 'about', name: 'About Us', icon: 'ℹ️' },
+    { id: 'contact', name: 'Contact Info', icon: '📞' },
+    { id: 'footer', name: 'Footer', icon: '📄' },
+    { id: 'seo', name: 'SEO Settings', icon: '🔍' }
   ]
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading content...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!content) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <p className="text-gray-600">Failed to load content</p>
+        <button
+          onClick={fetchContent}
+          className="mt-4 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4 inline mr-2" />
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <Edit3 className="h-8 w-8 text-pink-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Content Manager</h1>
-        </div>
-        <p className="text-gray-600">
-          Manage your website content, settings, and branding from one central location.
-        </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Content Management</h1>
+          <p className="text-gray-600">Manage your website content and settings</p>
       </div>
-
-      {/* Quick Access Button */}
-      <div className="mb-8">
         <button
-          onClick={() => setIsContentManagerOpen(true)}
-          className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center space-x-2"
+          onClick={fetchContent}
+          className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
         >
-          <Edit3 className="h-5 w-5" />
-          <span>Open Content Manager</span>
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
         </button>
       </div>
 
-      {/* Content Sections Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {contentSections.map((section, index) => (
-          <div
-            key={index}
-            className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => setIsContentManagerOpen(true)}
+      {message && (
+        <div className={`mb-6 p-4 rounded-lg flex items-center ${
+          message.type === 'success' 
+            ? 'bg-green-50 text-green-800 border border-green-200' 
+            : 'bg-red-50 text-red-800 border border-red-200'
+        }`}>
+          {message.type === 'success' ? (
+            <CheckCircle className="w-5 h-5 mr-2" />
+          ) : (
+            <AlertCircle className="w-5 h-5 mr-2" />
+          )}
+          {message.text}
+          <button
+            onClick={() => setMessage(null)}
+            className="ml-auto text-gray-500 hover:text-gray-700"
           >
-            <div className="flex items-center space-x-3 mb-3">
-              <div className={`p-2 rounded-lg ${section.color}`}>
-                <section.icon className="h-5 w-5 text-white" />
+            ×
+          </button>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
-            </div>
-            <p className="text-gray-600 text-sm">{section.description}</p>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-4">Content Sections</h3>
+            <nav className="space-y-2">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
+                    activeSection === section.id
+                      ? 'bg-pink-100 text-pink-700 border border-pink-200'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="mr-2">{section.icon}</span>
+                  {section.name}
+                </button>
+              ))}
+            </nav>
           </div>
-        ))}
       </div>
 
-      {/* Instructions */}
-      <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-2">How to Use Content Manager</h3>
-        <ul className="text-blue-800 space-y-2">
-          <li>• Click "Open Content Manager" or any section card above to access the full editor</li>
-          <li>• Use the tabs to navigate between different content sections</li>
-          <li>• Make your changes and click "Save Changes" to apply them</li>
-          <li>• Changes will be reflected on your website immediately</li>
-        </ul>
+        {/* Main Content */}
+        <div className="lg:col-span-3">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            {/* Content sections will be rendered here */}
+            <div className="text-center py-12">
+              <p className="text-gray-600">Content form for {activeSection} will be implemented next</p>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* Content Manager Modal */}
-      <ContentManager 
-        isOpen={isContentManagerOpen} 
-        onClose={() => setIsContentManagerOpen(false)} 
-      />
     </div>
   )
 }

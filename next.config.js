@@ -10,7 +10,7 @@ const nextConfig = {
   trailingSlash: true,
   generateEtags: false,
   images: {
-    domains: ['images.unsplash.com', 'images.pexels.com', 'akazuba-production-assets.s3.us-east-1.amazonaws.com'],
+    domains: ['images.unsplash.com', 'images.pexels.com'],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     unoptimized: true, // Allow static images to be served directly
@@ -41,10 +41,8 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'development' 
       ? 'http://localhost:5000/api/v1' 
       : 'https://akazuba-backend-api.onrender.com/api/v1',
-    // JWT Secret for development (matches your backend)
-    JWT_SECRET: process.env.NODE_ENV === 'development' 
-      ? '27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665'
-      : process.env.JWT_SECRET || 'akazuba-production-jwt-secret-2024-super-secure-key-for-production-deployment'
+    // JWT Secret for development and production (matches your backend)
+    JWT_SECRET: process.env.JWT_SECRET || '27f74d4094e2f4d8676cdabb12a17548181fa19903624a53f640ce08d5f50665'
   },
   webpack: (config, { dev, isServer }) => {
     // Fix SSR issues - simplify configuration

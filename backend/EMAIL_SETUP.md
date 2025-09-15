@@ -155,7 +155,7 @@ DEBUG_EMAIL="true"
 
 For production deployment:
 
-1. **Use a dedicated email service** like SendGrid, Mailgun, or AWS SES
+1. **Use a dedicated email service** like SendGrid, Mailgun, or other SMTP providers
 2. **Set up proper DNS records** (SPF, DKIM, DMARC)
 3. **Monitor email delivery** and bounce rates
 4. **Implement rate limiting** to prevent abuse
