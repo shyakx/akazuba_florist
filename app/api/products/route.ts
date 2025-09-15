@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic'
  * - Pagination support
  * - Environment-aware URL handling
  * - Comprehensive error handling
+ * - Fixed syntax error in previous version
  */
 export async function GET(request: NextRequest) {
   try {
