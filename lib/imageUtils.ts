@@ -49,6 +49,15 @@ export function validateImageUrl(url: string | null | undefined): ImageValidatio
     }
   }
 
+  // Check if it's already a complete backend URL (prevent double-processing)
+  if (normalizedUrl.includes('akazuba-backend-api.onrender.com') || normalizedUrl.includes('localhost:5000')) {
+    console.log('✅ Backend URL detected, returning as-is:', normalizedUrl)
+    return {
+      isValid: true,
+      url: normalizedUrl
+    }
+  }
+
   // Handle relative upload paths
   if (normalizedUrl.startsWith('/uploads/')) {
     const backendUrl = process.env.NODE_ENV === 'development' 
