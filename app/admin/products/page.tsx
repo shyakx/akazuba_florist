@@ -209,62 +209,9 @@ export default function ProductsPage() {
     }
   }
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
+  // handleImageUpload removed - using placeholder images instead
 
-    // Validate files
-    const validFiles = Array.from(files).filter(file => {
-      if (!file.type.startsWith('image/')) {
-        alert(`File "${file.name}" is not an image. Please select only image files.`)
-        return false
-      }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert(`File "${file.name}" is too large. Please select images smaller than 5MB.`)
-        return false
-      }
-      return true
-    })
-
-    if (validFiles.length === 0) return
-
-    // Create local preview URLs immediately
-    const newImageUrls: string[] = []
-    
-    validFiles.forEach(file => {
-      const localUrl = URL.createObjectURL(file)
-      newImageUrls.push(localUrl)
-    })
-
-    // Add to product images
-    setNewProduct(prev => ({
-      ...prev,
-      images: [...prev.images, ...newImageUrls]
-    }))
-
-    setMessage({ type: 'success', text: `Added ${validFiles.length} image(s) for preview!` })
-    setTimeout(() => setMessage(null), 3000)
-
-    // Clear the file input
-    e.target.value = ''
-  }
-
-  const removeImage = (index: number) => {
-    setNewProduct(prev => {
-      const newImages = [...prev.images]
-      const removedImage = newImages[index]
-      
-      // Clean up object URL to prevent memory leaks
-      if (removedImage && removedImage.startsWith('blob:')) {
-        URL.revokeObjectURL(removedImage)
-      }
-      
-      return {
-        ...prev,
-        images: newImages.filter((_, i) => i !== index)
-      }
-    })
-  }
+  // removeImage removed - using placeholder images instead
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -285,24 +232,22 @@ export default function ProductsPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-          // SIMPLIFIED: Use placeholder images for now to avoid upload issues
+          // SIMPLIFIED: Always use placeholder images to avoid upload issues
           let uploadedImageUrls: string[] = []
           
-          if (newProduct.images.length > 0) {
-            console.log('📤 Using simplified image handling...')
-            
-            // For now, use placeholder images based on category
-            const isPerfume = newProduct.categoryId === 'perfumes' || 
-                            newProduct.categoryId?.includes('perfume') ||
-                            newProduct.name.toLowerCase().includes('perfume')
-            
-            if (isPerfume) {
-              uploadedImageUrls.push('/images/placeholder-perfume.jpg')
-              console.log('✅ Using perfume placeholder image')
-            } else {
-              uploadedImageUrls.push('/images/placeholder-flower.jpg')
-              console.log('✅ Using flower placeholder image')
-            }
+          console.log('📤 Using simplified image handling...')
+          
+          // Always add a placeholder image based on category
+          const isPerfume = newProduct.categoryId === 'perfumes' || 
+                          newProduct.categoryId?.includes('perfume') ||
+                          newProduct.name.toLowerCase().includes('perfume')
+          
+          if (isPerfume) {
+            uploadedImageUrls.push('/images/placeholder-perfume.jpg')
+            console.log('✅ Using perfume placeholder image')
+          } else {
+            uploadedImageUrls.push('/images/placeholder-flower.jpg')
+            console.log('✅ Using flower placeholder image')
           }
           
           console.log('📤 Final image URLs (simplified):', uploadedImageUrls)
@@ -746,74 +691,18 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              {/* Images */}
+              {/* Images - Simplified */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Images
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-400 hover:bg-gray-50 transition-colors">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">Click to upload images</p>
-                  <p className="text-xs text-gray-500 mb-2">
-                    Supports: JPG, PNG, GIF (Max 5MB each)
+                  <p className="text-sm text-gray-600 mb-2">Placeholder images will be used</p>
+                  <p className="text-xs text-gray-500">
+                    Appropriate placeholder images will be automatically assigned based on the product category
                   </p>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label
-                    htmlFor="image-upload"
-                    className="inline-flex items-center space-x-1 px-3 py-1 rounded-md bg-pink-600 hover:bg-pink-700 cursor-pointer text-white transition-colors"
-                  >
-                    <Upload className="w-3 h-3" />
-                    <span>Choose Files</span>
-                  </label>
                 </div>
-                
-                {errors.images && (
-                  <p className="mt-2 text-sm text-red-600">{errors.images}</p>
-                )}
-                
-                {newProduct.images.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-600 mb-2">Uploaded Images ({newProduct.images.length})</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {newProduct.images.map((image, index) => (
-                        <div key={index} className="relative group">
-                          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                            <img
-                              src={image}
-                              alt={`Preview ${index + 1}`}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.src = '/images/placeholder-flower.jpg'
-                                e.currentTarget.alt = 'Failed to load image'
-                              }}
-                              onLoad={() => {
-                                console.log(`✅ Image ${index + 1} loaded successfully:`, image)
-                              }}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Remove image"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                          <div className="absolute bottom-1 left-1 right-1 bg-black bg-opacity-50 text-white text-xs p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                            Image {index + 1}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Actions */}
