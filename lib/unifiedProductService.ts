@@ -733,7 +733,7 @@ class UnifiedProductService {
   }
 
   // Update product (Admin only)
-  async updateProduct(id: string, updates: Partial<Product>): Promise<Product | null> {
+  async updateProduct(id: string, updates: Partial<Product>, headers?: Record<string, string>): Promise<Product | null> {
     try {
       console.log('🔄 Updating product in backend:', id, updates)
       
@@ -757,12 +757,18 @@ class UnifiedProductService {
 
       const response = await fetch(`${this.baseURL}/products/${id}`, {
         method: 'PUT',
-        headers: this.getAuthHeaders(),
+        headers: headers || this.getAuthHeaders(),
         body: JSON.stringify(backendUpdates)
       })
 
       if (!response.ok) {
-        throw new Error(`Backend responded with status: ${response.status}`)
+        const errorText = await response.text()
+        console.error('❌ Backend update error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText: errorText
+        })
+        throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
       }
 
       const data = await response.json()

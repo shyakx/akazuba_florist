@@ -74,18 +74,34 @@ export async function PUT(
   try {
     console.log('📦 Admin update product API called for ID:', params.id)
     
-    // Check if user is authenticated and is admin
+    // Check if user is authenticated and is admin (same logic as GET)
     const session = await getServerSession(request)
     
-    if (!session?.user || session.user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // If no session found, try to extract token from headers directly
+    let authToken = null
+    if (!session) {
+      const authHeader = request.headers.get('authorization')
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        authToken = authHeader.substring(7)
+        console.log('🔑 Found token in headers for PUT, attempting direct validation')
+      }
+    } else {
+      authToken = session.token
     }
+    
+    if (!authToken) {
+      console.log('❌ No authentication token found for PUT')
+      return NextResponse.json({ error: 'Unauthorized - No token' }, { status: 401 })
+    }
+    
+    console.log('✅ Token found for PUT, will let backend validate it')
 
     const body = await request.json()
     console.log('📝 Product update data received:', body)
     
-    // Update product using unified service
-    const updatedProduct = await unifiedProductService.updateProduct(params.id, body)
+    // Update product using unified service with auth headers
+    const headers = { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' }
+    const updatedProduct = await unifiedProductService.updateProduct(params.id, body, headers)
     
     if (!updatedProduct) {
       throw new Error('Failed to update product')
