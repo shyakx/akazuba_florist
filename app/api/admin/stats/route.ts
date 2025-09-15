@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     const stats = {
       success: true,
       data: {
-        categories: 2, // We have flowers and perfumes
+        categories: 7, // We have 7 categories including flowers, perfumes, and others
         products: products.length,
         orders: orders.length,
         revenue: revenue,

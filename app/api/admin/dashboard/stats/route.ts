@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         // Transform backend data to match frontend expectations
         const transformedData = {
           success: true,
-          categories: 2, // We know we have 2 categories from our previous tests
+          categories: 7, // We now have 7 categories including Perfumes
           products: actualProducts.length, // Use real product count
           orders: actualOrders.length || data.data.totalOrders || 0, // Use actual order count
           revenue: calculatedRevenue || data.data.totalRevenue || 0, // Use calculated revenue

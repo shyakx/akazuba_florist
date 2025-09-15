@@ -40,7 +40,7 @@ export default function HomePage() {
     p.description.toLowerCase().includes('perfume')
   ).length || 0
   
-  const totalCategories = 6 // Actual categories in database
+  const totalCategories = 7 // Actual categories in database (including new Perfumes category)
 
   // Debug log
   console.log('🏠 Homepage Debug:', {
