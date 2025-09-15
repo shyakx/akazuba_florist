@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAdmin } from '@/contexts/AdminContext'
 import { ArrowLeft, Save, Upload, X } from 'lucide-react'
-import { validateImageUrl } from '@/lib/imageUtils'
 
 interface Category {
   id: string
@@ -140,68 +140,58 @@ export default function NewProductPage() {
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (files) {
-      setUploadingImages(true)
-      const uploadPromises = Array.from(files).map(async (file) => {
-        // Create FormData for file upload
-        const formData = new FormData()
-        formData.append('image', file)
-        
-        try {
-          // Upload to backend
-          const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-          const headers: Record<string, string> = {}
-          
-          if (token) {
-            headers['Authorization'] = `Bearer ${token}`
-          }
-          
-          const response = await fetch('/api/upload', {
-            method: 'POST',
-            headers,
-            body: formData
-          })
-          
-          if (response.ok) {
-            const result = await response.json()
-            const rawImageUrl = result.data?.url || result.url
-            const validatedUrl = validateImageUrl(rawImageUrl)
-            console.log('✅ Upload successful, returned URL:', validatedUrl.url)
-            return validatedUrl.url
-          } else {
-            console.error('Upload failed:', response.statusText)
-            // Fallback to a placeholder image
-            return '/uploads/placeholder-product.jpg'
-          }
-        } catch (error) {
-          console.error('Upload error:', error)
-          // Fallback to a placeholder image
-          return '/uploads/placeholder-product.jpg'
-        }
-      })
-      
-      try {
-        const uploadedUrls = await Promise.all(uploadPromises)
+    if (!files || files.length === 0) return
+
+    // Validate files
+    const validFiles = Array.from(files).filter(file => {
+      if (!file.type.startsWith('image/')) {
+        alert(`File "${file.name}" is not an image. Please select only image files.`)
+        return false
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert(`File "${file.name}" is too large. Please select images smaller than 5MB.`)
+        return false
+      }
+      return true
+    })
+
+    if (validFiles.length === 0) return
+
+    // Create local preview URLs immediately
+    const newImageUrls: string[] = []
+    
+    validFiles.forEach(file => {
+      const localUrl = URL.createObjectURL(file)
+      newImageUrls.push(localUrl)
+    })
+
+    // Add to product images
       setFormData(prev => ({
         ...prev,
-          images: [...prev.images, ...uploadedUrls]
-        }))
-      } catch (error) {
-        console.error('Error uploading images:', error)
-        alert('Failed to upload some images. Please try again.')
-      } finally {
-        setUploadingImages(false)
-      }
-    }
+      images: [...prev.images, ...newImageUrls]
+    }))
+
+    // Clear the file input
+    e.target.value = ''
   }
 
   const removeImage = (index: number) => {
-    setFormData(prev => ({
+    setFormData(prev => {
+      const newImages = [...prev.images]
+      const removedImage = newImages[index]
+      
+      // Clean up object URL to prevent memory leaks
+      if (removedImage && removedImage.startsWith('blob:')) {
+        URL.revokeObjectURL(removedImage)
+      }
+      
+      return {
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }))
+        images: newImages.filter((_, i) => i !== index)
+      }
+    })
   }
 
   const validateForm = () => {
@@ -241,45 +231,54 @@ export default function NewProductPage() {
     setLoading(true)
     
     try {
-      // Get the JWT token using the proper utility function
+      // Get the JWT token
       const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
+      
+      // Use placeholder images for now (reliable method)
+      const imageUrls: string[] = []
+      
+      if (formData.images.length > 0) {
+        // For now, use placeholder images based on category
+        const isPerfume = formData.category === 'perfumes' || formData.category.includes('perfume')
+        imageUrls.push(isPerfume ? '/images/placeholder-perfume.jpg' : '/images/placeholder-flower.jpg')
+      } else {
+        // Use placeholder based on category
+        const isPerfume = formData.category === 'perfumes' || formData.category.includes('perfume')
+        imageUrls.push(isPerfume ? '/images/placeholder-perfume.jpg' : '/images/placeholder-flower.jpg')
       }
       
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
+      // Create product using the import method (more reliable)
+      const importProduct = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        category: formData.category,
+        color: '',
+        type: '',
+        images: imageUrls,
+        videos: []
       }
       
-      const productData = {
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          categoryId: formData.category,
-          stockQuantity: parseInt(formData.stock),
-          isActive: formData.status === 'active',
-          images: formData.images
-      }
+      console.log('🔄 Creating product using import method:', importProduct)
       
-      console.log('🔄 Creating product with data:', productData)
-          
-      // Use the unified service via AdminContext
-          const newProduct = {
-        id: Date.now().toString(), // Temporary ID
-            name: formData.name,
-            description: formData.description,
-            price: parseFloat(formData.price),
-            category: formData.category,
-            stock: parseInt(formData.stock),
-            status: formData.status as 'active',
-            images: formData.images,
-            createdAt: new Date().toISOString()
-          }
-          
-      await addProduct(newProduct)
-          
-          alert('Product created successfully!')
-          router.push('/admin/products')
+      // Use the import API which is more reliable
+      const response = await fetch('/api/admin/products/import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ products: [importProduct] })
+      })
+      
+      const result = await response.json()
+      
+      if (result.success && result.data.success > 0) {
+        alert('Product created successfully!')
+        router.push('/admin/products')
+      } else {
+        throw new Error(result.message || 'Failed to create product')
+      }
     } catch (error) {
       console.error('Error creating product:', error)
       alert(`Failed to create product: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -452,6 +451,12 @@ export default function NewProductPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Upload Images
               </label>
+              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <strong>Note:</strong> Images will be previewed locally. For now, products will use placeholder images. 
+                  Use the <Link href="/admin/import" className="underline font-medium">Import feature</Link> for products with custom images.
+                </p>
+              </div>
               
               {/* Drag and Drop Area */}
               <div 
@@ -533,12 +538,10 @@ export default function NewProductPage() {
                   </button>
                 </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {formData.images.map((image, index) => {
-                  const validatedImage = validateImageUrl(image)
-                  return (
+                {formData.images.map((image, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={validatedImage.url}
+                      src={image}
                       alt={`Preview ${index + 1}`}
                         className="w-full h-32 object-cover rounded-md border border-gray-200 hover:border-blue-300 transition-colors"
                         onError={(e) => {
@@ -565,8 +568,7 @@ export default function NewProductPage() {
                         </p>
                       </div>
                   </div>
-                  )
-                })}
+                ))}
                 </div>
               </div>
             )}

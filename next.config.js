@@ -10,7 +10,12 @@ const nextConfig = {
   trailingSlash: true,
   generateEtags: false,
   images: {
-    domains: ['images.unsplash.com', 'images.pexels.com'],
+    domains: [
+      'images.unsplash.com', 
+      'images.pexels.com',
+      'akazuba-backend-api.onrender.com',
+      'localhost:5000'
+    ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     unoptimized: true, // Allow static images to be served directly

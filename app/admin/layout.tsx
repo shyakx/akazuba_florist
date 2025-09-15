@@ -17,6 +17,7 @@ import {
   FileText
 } from 'lucide-react'
 import { useAuth } from '@/contexts/RealAuthContext'
+import { AdminProvider } from '@/contexts/AdminContext'
 import './admin-styles.css'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -200,7 +201,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Content */}
         <div className="p-6">
-          {children}
+          <AdminProvider>
+            {children}
+          </AdminProvider>
         </div>
       </main>
 

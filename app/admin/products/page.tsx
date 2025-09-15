@@ -458,7 +458,7 @@ export default function ProductsPage() {
     }
   }
 
-  const filteredProducts = products.filter(product =>
+  const filteredProducts = (products || []).filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
@@ -547,7 +547,7 @@ export default function ProductsPage() {
 
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((product) => (
+        {(filteredProducts || []).map((product) => (
           <div key={product.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* Product Image */}
             <div className="relative h-48 bg-gray-100">
@@ -611,7 +611,7 @@ export default function ProductsPage() {
         ))}
       </div>
 
-      {filteredProducts.length === 0 && (
+      {(filteredProducts || []).length === 0 && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
           <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>

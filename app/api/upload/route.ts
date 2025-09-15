@@ -87,9 +87,22 @@ export async function POST(request: NextRequest) {
       
       // Get the backend URL and return the correct backend URL
       const backendImageUrl: string = data.data?.url || data.url
-      // Remove the /api/v1/upload/image part from backendUrl to get the base URL
-      const baseBackendUrl = backendUrl.replace('/api/v1/upload/image', '')
-      const fullBackendUrl = `${baseBackendUrl}${backendImageUrl}`
+      console.log('🔍 Backend returned URL:', backendImageUrl)
+      console.log('🔍 Backend URL starts with http:', backendImageUrl.startsWith('http'))
+      
+      // Check if the backend URL is already a complete URL
+      let fullBackendUrl: string
+      if (backendImageUrl.startsWith('http')) {
+        // Backend already returned a complete URL
+        fullBackendUrl = backendImageUrl
+        console.log('🔍 Using backend URL as-is:', fullBackendUrl)
+      } else {
+        // Backend returned a relative path, construct the full URL
+        const baseBackendUrl = backendUrl.replace('/api/v1/upload/image', '')
+        fullBackendUrl = `${baseBackendUrl}${backendImageUrl}`
+        console.log('🔍 Constructed URL from base:', baseBackendUrl, 'and path:', backendImageUrl)
+        console.log('🔍 Final constructed URL:', fullBackendUrl)
+      }
       
       console.log('🔄 Backend upload successful, returning full backend URL:', fullBackendUrl)
       
