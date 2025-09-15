@@ -141,7 +141,7 @@ export default function ProductsPage() {
 
   // Check if form is valid without setting errors (for button state)
   const isFormValid = () => {
-    const isValid = newProduct.name.trim() &&
+    return newProduct.name.trim() &&
            newProduct.name.trim().length >= 3 &&
            newProduct.description.trim() &&
            newProduct.description.trim().length >= 10 &&
@@ -155,23 +155,6 @@ export default function ProductsPage() {
            newProduct.images.length > 0 &&
            (!newProduct.sku || newProduct.sku.trim().length >= 3) &&
            (!newProduct.weight || Number(newProduct.weight) > 0)
-    
-    // Debug logging
-    console.log('🔍 Form validation check:', {
-      name: newProduct.name.trim(),
-      nameLength: newProduct.name.trim().length,
-      description: newProduct.description.trim(),
-      descriptionLength: newProduct.description.trim().length,
-      price: newProduct.price,
-      priceNumber: Number(newProduct.price),
-      stockQuantity: newProduct.stockQuantity,
-      stockNumber: Number(newProduct.stockQuantity),
-      categoryId: newProduct.categoryId,
-      imagesLength: newProduct.images.length,
-      isValid
-    })
-    
-    return isValid
   }
 
   const validateForm = () => {
