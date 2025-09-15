@@ -308,21 +308,25 @@ export default function ProductsPage() {
       
       console.log('📤 Final uploaded image URLs:', uploadedImageUrls)
 
+      const productData = {
+        name: newProduct.name.trim(),
+        description: newProduct.description.trim(),
+        price: Number(newProduct.price),
+        categoryId: newProduct.categoryId,
+        stockQuantity: Number(newProduct.stockQuantity) || 0,
+        isActive: true,
+        images: uploadedImageUrls,
+        sku: newProduct.sku.trim() || undefined,
+        weight: newProduct.weight ? Number(newProduct.weight) : undefined,
+        tags: newProduct.tags
+      }
+      
+      console.log('📤 Sending product data to API:', productData)
+
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers,
-        body: JSON.stringify({
-          name: newProduct.name.trim(),
-          description: newProduct.description.trim(),
-          price: Number(newProduct.price),
-          categoryId: newProduct.categoryId,
-          stockQuantity: Number(newProduct.stockQuantity) || 0,
-          isActive: true,
-          images: uploadedImageUrls,
-          sku: newProduct.sku.trim() || undefined,
-          weight: newProduct.weight ? Number(newProduct.weight) : undefined,
-          tags: newProduct.tags
-        })
+        body: JSON.stringify(productData)
       })
 
       if (response.ok) {
