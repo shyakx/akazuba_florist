@@ -239,10 +239,56 @@ export default function ProductsPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-      // For now, use placeholder images to simplify the process
-      const uploadedImageUrls = newProduct.images.length > 0 
-        ? ['/images/placeholder-flower.jpg'] 
-        : []
+      // Upload images if any are present
+      let uploadedImageUrls: string[] = []
+      
+      if (newProduct.images.length > 0) {
+        console.log('📤 Starting image upload process...')
+        
+        // Convert blob URLs to files and upload them
+        for (const imageUrl of newProduct.images) {
+          if (imageUrl.startsWith('blob:')) {
+            try {
+              // Convert blob URL to file
+              const response = await fetch(imageUrl)
+              const blob = await response.blob()
+              const file = new File([blob], 'image.jpg', { type: blob.type })
+              
+              // Upload to server
+              const formData = new FormData()
+              formData.append('image', file)
+              
+              const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                body: formData
+              })
+              
+              if (uploadResponse.ok) {
+                const uploadResult = await uploadResponse.json()
+                const uploadedUrl = uploadResult.data?.url || uploadResult.url
+                if (uploadedUrl) {
+                  uploadedImageUrls.push(uploadedUrl)
+                  console.log('✅ Image uploaded successfully:', uploadedUrl)
+                }
+              } else {
+                console.error('❌ Image upload failed:', uploadResponse.statusText)
+                // Use placeholder as fallback
+                uploadedImageUrls.push('/images/placeholder-flower.jpg')
+              }
+            } catch (error) {
+              console.error('❌ Error processing image:', error)
+              // Use placeholder as fallback
+              uploadedImageUrls.push('/images/placeholder-flower.jpg')
+            }
+          } else {
+            // Already a server URL, use as-is
+            uploadedImageUrls.push(imageUrl)
+          }
+        }
+      }
+      
+      console.log('📤 Final uploaded image URLs:', uploadedImageUrls)
 
       const response = await fetch('/api/admin/products', {
         method: 'POST',
