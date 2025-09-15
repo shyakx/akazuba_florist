@@ -19,6 +19,7 @@ export function validateImageUrl(url: string | null | undefined): ImageValidatio
   }
 
   const cleanUrl = url.trim()
+  console.log('🔍 Validating image URL:', cleanUrl)
   
   // Fix common incorrect URL patterns
   let normalizedUrl = cleanUrl
@@ -39,14 +40,16 @@ export function validateImageUrl(url: string | null | undefined): ImageValidatio
     normalizedUrl = normalizedUrl.replace('/api/uploads/', '/uploads/')
   }
 
-  // Validate URL format
+  // Validate URL format - check for full URLs first
   if (normalizedUrl.startsWith('http://') || normalizedUrl.startsWith('https://')) {
+    console.log('✅ Full URL detected, returning as-is:', normalizedUrl)
     return {
       isValid: true,
       url: normalizedUrl
     }
   }
 
+  // Handle relative upload paths
   if (normalizedUrl.startsWith('/uploads/')) {
     const backendUrl = process.env.NODE_ENV === 'development' 
       ? 'http://localhost:5000' 
@@ -69,6 +72,7 @@ export function validateImageUrl(url: string | null | undefined): ImageValidatio
     const backendUrl = process.env.NODE_ENV === 'development' 
       ? 'http://localhost:5000' 
       : 'https://akazuba-backend-api.onrender.com'
+    console.log('📁 Filename detected, constructing URL:', `${backendUrl}/uploads/${normalizedUrl}`)
     return {
       isValid: true,
       url: `${backendUrl}/uploads/${normalizedUrl}`
