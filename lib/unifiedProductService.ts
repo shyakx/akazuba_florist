@@ -158,6 +158,7 @@ class UnifiedProductService {
       images: images,
       videos: videos,
       categoryName: backendProduct.category?.name || backendProduct.category || 'Unknown',
+      categoryId: backendProduct.category?.id || backendProduct.categoryId || null,
       size: backendProduct.size || 'Standard',
       isActive: backendProduct.isActive !== false,
       isFeatured: backendProduct.featured || backendProduct.isFeatured || false,

@@ -70,6 +70,8 @@ export default function EditProductPage() {
       const response = await fetch(`/api/admin/products/${productId}`, { headers })
         if (response.ok) {
         const data = await response.json()
+        console.log('🔍 Fetched product data:', data)
+        console.log('🔍 Product data to set:', data.data || data)
         setProduct(data.data || data)
       } else {
         throw new Error('Failed to fetch product')

@@ -44,6 +44,13 @@ export async function GET(
     }
     
     console.log('📦 Returning product from backend:', product.id)
+    console.log('📦 Product data fields:', {
+      id: product.id,
+      name: product.name,
+      categoryId: product.categoryId,
+      categoryName: product.categoryName,
+      allFields: Object.keys(product)
+    })
     
     return NextResponse.json({
       success: true,
