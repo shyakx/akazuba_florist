@@ -473,8 +473,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     const product = await prisma.product.update({
       where: { id },
       data: updateData,
-      include: { category: true
-      }
+      include: { category: true }
     })
 
     res.json({

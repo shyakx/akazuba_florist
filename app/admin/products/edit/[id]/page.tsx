@@ -115,6 +115,12 @@ export default function EditProductPage() {
     if (!product) return
     
     const { name, value } = e.target
+    
+    // Prevent changes to categoryId (read-only field)
+    if (name === 'categoryId') {
+      return
+    }
+    
     setProduct(prev => prev ? {
       ...prev,
       [name]: name === 'price' || name === 'stockQuantity' 
@@ -211,7 +217,6 @@ export default function EditProductPage() {
           name: product.name,
           description: product.description,
           price: product.price,
-          categoryId: product.categoryId,
           stockQuantity: product.stockQuantity,
           isActive: product.isActive,
           images: product.images
@@ -308,21 +313,11 @@ export default function EditProductPage() {
               <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-2">
                   Category *
                 </label>
-                <select
-                id="categoryId"
-                name="categoryId"
-                value={product.categoryId}
-                  onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 ${
-                  errors.categoryId ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">Select a category</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                  ))}
-                </select>
-              {errors.categoryId && <p className="mt-1 text-sm text-red-600">{errors.categoryId}</p>}
+                <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 flex items-center">
+                  <span>{categories.find(cat => cat.id === product.categoryId)?.name || 'Unknown Category'}</span>
+                  <span className="ml-2 text-xs text-gray-400">(Read Only)</span>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">Category cannot be changed after product creation</p>
               </div>
             </div>
 
