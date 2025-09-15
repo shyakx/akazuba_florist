@@ -107,6 +107,24 @@ export default function ProductsPage() {
     }
   }
 
+  // Check if form is valid without setting errors (for button state)
+  const isFormValid = () => {
+    return newProduct.name.trim() &&
+           newProduct.name.trim().length >= 3 &&
+           newProduct.description.trim() &&
+           newProduct.description.trim().length >= 10 &&
+           newProduct.price &&
+           Number(newProduct.price) > 0 &&
+           Number(newProduct.price) <= 1000000 &&
+           newProduct.stockQuantity &&
+           Number(newProduct.stockQuantity) >= 0 &&
+           Number(newProduct.stockQuantity) <= 10000 &&
+           newProduct.categoryId &&
+           newProduct.images.length > 0 &&
+           (!newProduct.sku || newProduct.sku.trim().length >= 3) &&
+           (!newProduct.weight || Number(newProduct.weight) > 0)
+  }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
     
@@ -817,7 +835,7 @@ export default function ProductsPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || !isFormValid()}
                   className="flex items-center space-x-2 px-6 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {saving ? (
