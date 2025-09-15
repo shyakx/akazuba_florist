@@ -83,7 +83,18 @@ export default function EditProductPage() {
   }
 
   const validateForm = () => {
-    if (!product) return false
+    if (!product) {
+      console.error('❌ No product in validation')
+      return false
+    }
+    
+    console.log('🔍 Validating product:', { 
+      name: product.name, 
+      description: product.description, 
+      price: product.price, 
+      stockQuantity: product.stockQuantity,
+      categoryId: product.categoryId 
+    })
     
     const newErrors: Record<string, string> = {}
     
@@ -107,6 +118,7 @@ export default function EditProductPage() {
       newErrors.categoryId = 'Category is required'
     }
     
+    console.log('🔍 Validation errors:', newErrors)
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -194,11 +206,23 @@ export default function EditProductPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!product || !validateForm()) {
+    console.log('🔍 Form submission started:', { product, productId })
+    
+    if (!product) {
+      console.error('❌ No product data found')
+      return
+    }
+    
+    const isValid = validateForm()
+    console.log('🔍 Form validation result:', { isValid, errors })
+    
+    if (!isValid) {
+      console.error('❌ Form validation failed:', errors)
       return
     }
 
     setSaving(true)
+    console.log('🔄 Starting save process...')
     
     try {
       const token = localStorage.getItem('accessToken')
@@ -465,6 +489,7 @@ export default function EditProductPage() {
             <button
               type="submit"
             disabled={saving}
+            onClick={() => console.log('🔘 Save button clicked!')}
             className="flex items-center space-x-2 px-6 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
             {saving ? (
