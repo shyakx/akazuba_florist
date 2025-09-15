@@ -518,6 +518,10 @@ class UnifiedProductService {
       console.log('🔄 Fetching categories with token...')
       const categories = await this.getCategoriesWithToken(token)
       console.log('📂 Available categories:', categories)
+      console.log('📂 Categories count:', categories.length)
+      if (categories.length > 0) {
+        console.log('📂 First category:', categories[0])
+      }
       
       if (!categories || categories.length === 0) {
         console.warn('⚠️ No categories found, using fallback categories')
@@ -573,6 +577,11 @@ class UnifiedProductService {
       }
 
       console.log('📤 Sending to backend:', backendData)
+      console.log('📤 Backend URL:', `${this.baseURL}/products`)
+      console.log('📤 Request headers:', {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token.substring(0, 20)}...`
+      })
 
       const response = await fetch(`${this.baseURL}/products`, {
         method: 'POST',
@@ -584,10 +593,13 @@ class UnifiedProductService {
       })
 
       console.log('📥 Backend response status:', response.status)
+      console.log('📥 Backend response headers:', Object.fromEntries(response.headers.entries()))
 
       if (!response.ok) {
         const errorText = await response.text()
         console.error('❌ Backend error response:', errorText)
+        console.error('❌ Backend error status:', response.status)
+        console.error('❌ Backend error statusText:', response.statusText)
         throw new Error(`Backend responded with status: ${response.status} - ${errorText}`)
       }
 
