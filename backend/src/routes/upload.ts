@@ -90,9 +90,11 @@ router.post('/image', requireAdmin, upload.single('image'), (req, res) => {
       })
     }
 
-    // For now, we'll return a local path
-    // In production, you'd upload to cloud storage (Cloudinary, etc.)
-    const imageUrl = `/uploads/${req.file.filename}`
+    // Return full URL for the uploaded image
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://akazuba-backend-api.onrender.com'
+      : 'http://localhost:5000'
+    const imageUrl = `${baseUrl}/uploads/${req.file.filename}`
 
     res.json({
       success: true,

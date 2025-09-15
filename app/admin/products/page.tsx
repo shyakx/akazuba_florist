@@ -151,8 +151,10 @@ export default function ProductsPage() {
            newProduct.stockQuantity &&
            Number(newProduct.stockQuantity) >= 0 &&
            Number(newProduct.stockQuantity) <= 10000 &&
-           newProduct.categoryId
-           // Removed image requirement since we use placeholders
+           newProduct.categoryId &&
+           newProduct.images.length > 0 &&
+           (!newProduct.sku || newProduct.sku.trim().length >= 3) &&
+           (!newProduct.weight || Number(newProduct.weight) > 0)
   }
 
   const validateForm = () => {
@@ -186,7 +188,9 @@ export default function ProductsPage() {
       newErrors.categoryId = 'Category is required'
     }
     
-    // Images are now optional - we use placeholder images
+    if (newProduct.images.length === 0) {
+      newErrors.images = 'At least one image is required'
+    }
     
     if (newProduct.sku && newProduct.sku.trim().length < 3) {
       newErrors.sku = 'SKU must be at least 3 characters if provided'
@@ -209,9 +213,62 @@ export default function ProductsPage() {
     }
   }
 
-  // handleImageUpload removed - using placeholder images instead
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
 
-  // removeImage removed - using placeholder images instead
+    // Validate files
+    const validFiles = Array.from(files).filter(file => {
+      if (!file.type.startsWith('image/')) {
+        alert(`File "${file.name}" is not an image. Please select only image files.`)
+        return false
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        alert(`File "${file.name}" is too large. Please select images smaller than 5MB.`)
+        return false
+      }
+      return true
+    })
+
+    if (validFiles.length === 0) return
+
+    // Create local preview URLs immediately
+    const newImageUrls: string[] = []
+    
+    validFiles.forEach(file => {
+      const localUrl = URL.createObjectURL(file)
+      newImageUrls.push(localUrl)
+    })
+
+    // Add to product images
+    setNewProduct(prev => ({
+      ...prev,
+      images: [...prev.images, ...newImageUrls]
+    }))
+
+    setMessage({ type: 'success', text: `Added ${validFiles.length} image(s) for preview!` })
+    setTimeout(() => setMessage(null), 3000)
+
+    // Clear the file input
+    e.target.value = ''
+  }
+
+  const removeImage = (index: number) => {
+    setNewProduct(prev => {
+      const newImages = [...prev.images]
+      const removedImage = newImages[index]
+      
+      // Clean up object URL to prevent memory leaks
+      if (removedImage && removedImage.startsWith('blob:')) {
+        URL.revokeObjectURL(removedImage)
+      }
+      
+      return {
+        ...prev,
+        images: newImages.filter((_, i) => i !== index)
+      }
+    })
+  }
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -232,25 +289,72 @@ export default function ProductsPage() {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-          // SIMPLIFIED: Always use placeholder images to avoid upload issues
+          // Upload images if any are present
           let uploadedImageUrls: string[] = []
           
-          console.log('📤 Using simplified image handling...')
-          
-          // Always add a placeholder image based on category
-          const isPerfume = newProduct.categoryId === 'perfumes' || 
-                          newProduct.categoryId?.includes('perfume') ||
-                          newProduct.name.toLowerCase().includes('perfume')
-          
-          if (isPerfume) {
-            uploadedImageUrls.push('/images/placeholder-perfume.jpg')
-            console.log('✅ Using perfume placeholder image')
+          if (newProduct.images.length > 0) {
+            console.log('📤 Starting image upload process...')
+            
+            // Convert blob URLs to files and upload them
+            for (const imageUrl of newProduct.images) {
+              if (imageUrl.startsWith('blob:')) {
+                try {
+                  // Convert blob URL to file
+                  const response = await fetch(imageUrl)
+                  const blob = await response.blob()
+                  const file = new File([blob], 'image.jpg', { type: blob.type })
+                  
+                  // Upload to server
+                  const formData = new FormData()
+                  formData.append('image', file)
+                  
+                  const uploadResponse = await fetch('/api/upload', {
+                    method: 'POST',
+                    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                    body: formData
+                  })
+                  
+                  if (uploadResponse.ok) {
+                    const uploadResult = await uploadResponse.json()
+                    const uploadedUrl = uploadResult.data?.url || uploadResult.url
+                    if (uploadedUrl) {
+                      // Ensure the URL is properly formatted
+                      const finalUrl = uploadedUrl.startsWith('http') 
+                        ? uploadedUrl 
+                        : `https://akazuba-backend-api.onrender.com${uploadedUrl}`
+                      uploadedImageUrls.push(finalUrl)
+                      console.log('✅ Image uploaded successfully:', finalUrl)
+                    }
+                  } else {
+                    console.error('❌ Image upload failed:', uploadResponse.statusText)
+                    // Use placeholder as fallback
+                    const isPerfume = newProduct.categoryId === 'perfumes' || 
+                                    newProduct.categoryId?.includes('perfume') ||
+                                    newProduct.name.toLowerCase().includes('perfume')
+                    uploadedImageUrls.push(isPerfume ? '/images/placeholder-perfume.jpg' : '/images/placeholder-flower.jpg')
+                  }
+                } catch (error) {
+                  console.error('❌ Error processing image:', error)
+                  // Use placeholder as fallback
+                  const isPerfume = newProduct.categoryId === 'perfumes' || 
+                                  newProduct.categoryId?.includes('perfume') ||
+                                  newProduct.name.toLowerCase().includes('perfume')
+                  uploadedImageUrls.push(isPerfume ? '/images/placeholder-perfume.jpg' : '/images/placeholder-flower.jpg')
+                }
+              } else {
+                // Already a server URL, use as-is
+                uploadedImageUrls.push(imageUrl)
+              }
+            }
           } else {
-            uploadedImageUrls.push('/images/placeholder-flower.jpg')
-            console.log('✅ Using flower placeholder image')
+            // No images uploaded, use placeholder based on category
+            const isPerfume = newProduct.categoryId === 'perfumes' || 
+                            newProduct.categoryId?.includes('perfume') ||
+                            newProduct.name.toLowerCase().includes('perfume')
+            uploadedImageUrls.push(isPerfume ? '/images/placeholder-perfume.jpg' : '/images/placeholder-flower.jpg')
           }
           
-          console.log('📤 Final image URLs (simplified):', uploadedImageUrls)
+          console.log('📤 Final uploaded image URLs:', uploadedImageUrls)
 
       const productData = {
         name: newProduct.name.trim(),
@@ -691,18 +795,74 @@ export default function ProductsPage() {
                 </div>
               </div>
 
-              {/* Images - Simplified */}
+              {/* Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Product Images
                 </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-400 hover:bg-gray-50 transition-colors">
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">Placeholder images will be used</p>
-                  <p className="text-xs text-gray-500">
-                    Appropriate placeholder images will be automatically assigned based on the product category
+                  <p className="text-sm text-gray-600 mb-2">Click to upload images</p>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Supports: JPG, PNG, GIF (Max 5MB each)
                   </p>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label
+                    htmlFor="image-upload"
+                    className="inline-flex items-center space-x-1 px-3 py-1 rounded-md bg-pink-600 hover:bg-pink-700 cursor-pointer text-white transition-colors"
+                  >
+                    <Upload className="w-3 h-3" />
+                    <span>Choose Files</span>
+                  </label>
                 </div>
+                
+                {errors.images && (
+                  <p className="mt-2 text-sm text-red-600">{errors.images}</p>
+                )}
+                
+                {newProduct.images.length > 0 && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600 mb-2">Uploaded Images ({newProduct.images.length})</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {newProduct.images.map((image, index) => (
+                        <div key={index} className="relative group">
+                          <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                            <img
+                              src={image}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = '/images/placeholder-flower.jpg'
+                                e.currentTarget.alt = 'Failed to load image'
+                              }}
+                              onLoad={() => {
+                                console.log(`✅ Image ${index + 1} loaded successfully:`, image)
+                              }}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Remove image"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <div className="absolute bottom-1 left-1 right-1 bg-black bg-opacity-50 text-white text-xs p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                            Image {index + 1}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
