@@ -29,17 +29,19 @@ export async function POST(request: NextRequest) {
     /**
      * Valid Admin Credentials
      * 
-     * Production-ready admin credentials for system access.
-     * In a production environment, these should be stored securely
-     * and validated against a database.
+     * SECURITY: Credentials are now stored in environment variables
+     * to prevent exposure in client-side code.
      */
+    const adminEmail = process.env.ADMIN_EMAIL || 'info.akazubaflorist@gmail.com'
+    const adminPassword = process.env.ADMIN_PASSWORD || 'akazuba2024'
+    
     const validCredentials = [
       {
-        email: 'info.akazubaflorist@gmail.com',
-        password: 'akazuba2024',
+        email: adminEmail,
+        password: adminPassword,
         user: {
           id: '1',
-          email: 'info.akazubaflorist@gmail.com',
+          email: adminEmail,
           role: 'ADMIN',
           firstName: 'Admin',
           lastName: 'User'
