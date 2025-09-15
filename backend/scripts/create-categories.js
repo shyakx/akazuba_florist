@@ -55,9 +55,14 @@ async function createCategories() {
         description: 'Sympathy flowers and funeral arrangements'
       },
       {
+        name: 'Perfumes',
+        slug: 'perfumes',
+        description: 'Fine perfumes and fragrances for men and women'
+      },
+      {
         name: 'Special Occasions',
         slug: 'special-occasions',
-        description: 'Perfumes and special occasion gifts'
+        description: 'Special occasion gifts and arrangements'
       }
     ];
     
