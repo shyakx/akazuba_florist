@@ -45,7 +45,9 @@ const nextConfig = {
     // Override API URL for development - matches your backend configuration
     NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'development' 
       ? 'http://localhost:5000/api/v1' 
-      : 'https://akazuba-backend-api.onrender.com/api/v1'
+      : 'https://akazuba-backend-api.onrender.com/api/v1',
+    // Force HTTPS in production
+    NEXT_PUBLIC_FORCE_HTTPS: process.env.NODE_ENV === 'production' ? 'true' : 'false'
     // JWT_SECRET removed from client-side env - should only be server-side
   },
   webpack: (config, { dev, isServer }) => {

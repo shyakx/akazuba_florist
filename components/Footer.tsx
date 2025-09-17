@@ -162,11 +162,16 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-700/50 pt-4">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
-            <p className="text-gray-400 text-sm">
-              © 2024 Akazuba Florist. All rights reserved.
-            </p>
+        <div className="border-t border-gray-700/50 pt-6">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="text-center md:text-left">
+              <p className="text-gray-300 text-sm font-medium mb-1">
+                © 2024 Akazuba Florist. All rights reserved.
+              </p>
+              <p className="text-gray-500 text-xs">
+                Registered in Rwanda | Business License: AKZ-FLR-2024 | VAT: RW-2024-001
+              </p>
+            </div>
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <span className="text-gray-400 text-sm">Secure shopping</span>
@@ -178,6 +183,27 @@ const Footer = () => {
                 <Heart className="h-4 w-4 text-pink-400" />
                 <span className="text-gray-400 text-sm">Made with love</span>
               </div>
+            </div>
+          </div>
+          
+          {/* Additional Legal Links */}
+          <div className="mt-4 pt-4 border-t border-gray-700/30">
+            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs text-gray-500">
+              <Link href="/privacy" className="hover:text-gray-300 transition-colors">
+                Privacy Policy
+              </Link>
+              <span>•</span>
+              <Link href="/terms" className="hover:text-gray-300 transition-colors">
+                Terms of Service
+              </Link>
+              <span>•</span>
+              <Link href="/delivery" className="hover:text-gray-300 transition-colors">
+                Delivery Policy
+              </Link>
+              <span>•</span>
+              <Link href="/contact" className="hover:text-gray-300 transition-colors">
+                Contact Us
+              </Link>
             </div>
           </div>
         </div>

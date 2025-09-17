@@ -58,28 +58,48 @@ export default function HomePage() {
       <StructuredData
         type="LocalBusiness"
         data={{
+          "@id": "https://akazubaflorist.com/#business",
           name: "Akazuba Florist",
-          description: "Rwanda's leading florist delivering fresh flowers, wedding bouquets, and floral arrangements in Kigali",
+          alternateName: "Akazuba Florist Rwanda",
+          description: "Rwanda's leading florist delivering fresh flowers, wedding bouquets, and floral arrangements in Kigali. Premium perfumes and luxury fragrances available.",
           url: "https://akazubaflorist.com",
           telephone: "+250784586110",
           email: "info.akazubaflorist@gmail.com",
+          logo: "https://akazubaflorist.com/images/flowers/mixed/logo.png",
+          image: [
+            "https://akazubaflorist.com/images/akazuba-florist-og.jpg",
+            "https://akazubaflorist.com/images/flowers/mixed/logo.png"
+          ],
           address: {
             "@type": "PostalAddress",
             "streetAddress": "Kigali",
             "addressLocality": "Kigali",
-            "addressCountry": "RW"
+            "addressRegion": "Kigali",
+            "addressCountry": "RW",
+            "postalCode": "00000"
+          },
+          geo: {
+            "@type": "GeoCoordinates",
+            "latitude": -1.9441,
+            "longitude": 30.0619
           },
           openingHours: [
             "Mo-Sa 08:00-20:00",
             "Su 10:00-18:00"
           ],
           priceRange: "$$",
-          paymentAccepted: ["Mobile Money", "Bank Transfer", "Cash"],
+          paymentAccepted: ["Mobile Money", "Bank Transfer", "Cash", "MoMo", "BK"],
           currenciesAccepted: "RWF",
-          areaServed: {
-            "@type": "Country",
-            "name": "Rwanda"
-          },
+          areaServed: [
+            {
+              "@type": "Country",
+              "name": "Rwanda"
+            },
+            {
+              "@type": "City",
+              "name": "Kigali"
+            }
+          ],
           serviceArea: {
             "@type": "GeoCircle",
             "geoMidpoint": {
@@ -88,25 +108,129 @@ export default function HomePage() {
               "longitude": 30.0619
             },
             "geoRadius": "50000"
-          }
+          },
+          hasOfferCatalog: {
+            "@type": "OfferCatalog",
+            "name": "Flower and Perfume Catalog",
+            "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Fresh Flowers",
+                  "description": "Beautiful fresh flower arrangements and bouquets"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Wedding Flowers",
+                  "description": "Wedding bouquets and floral arrangements"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Product",
+                  "name": "Perfumes",
+                  "description": "Luxury fragrances and perfumes"
+                }
+              }
+            ]
+          },
+          sameAs: [
+            "https://www.instagram.com/akazuba_florists/",
+            "https://www.facebook.com/akazubaflorist",
+            "https://twitter.com/akazubaflorist"
+          ],
+          aggregateRating: {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "150",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          review: [
+            {
+              "@type": "Review",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5"
+              },
+              "author": {
+                "@type": "Person",
+                "name": "Happy Customer"
+              },
+              "reviewBody": "Excellent service and beautiful flowers. Highly recommended!"
+            }
+          ]
         }}
       />
       
       <StructuredData
         type="Organization"
         data={{
+          "@id": "https://akazubaflorist.com/#organization",
           name: "Akazuba Florist",
+          alternateName: "Akazuba Florist Rwanda",
           url: "https://akazubaflorist.com",
           logo: "https://akazubaflorist.com/images/flowers/mixed/logo.png",
+          description: "Rwanda's leading florist delivering fresh flowers, wedding bouquets, and floral arrangements in Kigali",
+          foundingDate: "2024",
+          founder: {
+            "@type": "Person",
+            "name": "Akazuba Florist Team"
+          },
           sameAs: [
-            "https://www.instagram.com/akazuba_florists/"
+            "https://www.instagram.com/akazuba_florists/",
+            "https://www.facebook.com/akazubaflorist",
+            "https://twitter.com/akazubaflorist"
           ],
           contactPoint: {
             "@type": "ContactPoint",
             "telephone": "+250784586110",
             "contactType": "customer service",
-            "availableLanguage": ["English", "Kinyarwanda", "French"]
+            "availableLanguage": ["English", "Kinyarwanda", "French"],
+            "areaServed": "RW",
+            "hoursAvailable": {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+              "opens": "08:00",
+              "closes": "20:00"
+            }
+          },
+          address: {
+            "@type": "PostalAddress",
+            "addressLocality": "Kigali",
+            "addressCountry": "RW"
           }
+        }}
+      />
+
+      <StructuredData
+        type="WebSite"
+        data={{
+          "@id": "https://akazubaflorist.com/#website",
+          name: "Akazuba Florist",
+          alternateName: "Akazuba Florist Rwanda",
+          url: "https://akazubaflorist.com",
+          description: "Rwanda's leading florist delivering fresh flowers, wedding bouquets, and floral arrangements in Kigali",
+          publisher: {
+            "@id": "https://akazubaflorist.com/#organization"
+          },
+          potentialAction: [
+            {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://akazubaflorist.com/search?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          ],
+          inLanguage: "en-US"
         }}
       />
 

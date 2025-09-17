@@ -21,6 +21,18 @@ const authRoutes = [
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
+  // HTTPS Enforcement - redirect HTTP to HTTPS in production
+  if (process.env.NODE_ENV === 'production') {
+    const proto = request.headers.get('x-forwarded-proto') || request.headers.get('x-forwarded-protocol')
+    const host = request.headers.get('host')
+    
+    if (proto === 'http' && host) {
+      const httpsUrl = new URL(request.url)
+      httpsUrl.protocol = 'https:'
+      return NextResponse.redirect(httpsUrl, 301)
+    }
+  }
+  
   // Get tokens from cookies
   const accessToken = request.cookies.get('accessToken')?.value
   const userRole = request.cookies.get('userRole')?.value
