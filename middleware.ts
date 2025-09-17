@@ -25,10 +25,13 @@ export function middleware(request: NextRequest) {
   if (process.env.NODE_ENV === 'production') {
     const proto = request.headers.get('x-forwarded-proto') || request.headers.get('x-forwarded-protocol')
     const host = request.headers.get('host')
+    const url = request.url
     
-    if (proto === 'http' && host) {
+    // Force HTTPS for all requests
+    if (url.startsWith('http://') || proto === 'http') {
       const httpsUrl = new URL(request.url)
       httpsUrl.protocol = 'https:'
+      console.log('🔒 Redirecting HTTP to HTTPS:', url, '->', httpsUrl.toString())
       return NextResponse.redirect(httpsUrl, 301)
     }
   }

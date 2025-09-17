@@ -13,15 +13,15 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-1">
             <div className="flex items-center mb-4">
-              <div className="w-10 h-10 bg-pink-500 rounded-lg flex items-center justify-center">
-                <Flower className="h-5 w-5 text-white" />
+              <div className="w-12 h-12 bg-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Flower className="h-6 w-6 text-white" />
               </div>
-              <span className="ml-3 text-xl font-bold">Akazuba Florist</span>
+              <span className="ml-3 text-xl font-bold text-white">Akazuba Florist</span>
             </div>
-            <p className="text-gray-300 text-sm mb-4">
+            <p className="text-gray-300 text-sm mb-6 leading-relaxed">
               Premium flowers and perfumes delivered fresh to your door.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               {[
                 { icon: Facebook, href: "#", label: "Facebook" },
                 { icon: Instagram, href: "https://www.instagram.com/akazuba_florists/", label: "Instagram" },
@@ -30,7 +30,7 @@ const Footer = () => {
                 <a
                   key={index}
                   href={social.href}
-                  className="text-gray-400 hover:text-pink-400 transition-colors duration-300 p-2 rounded-lg hover:bg-gray-800/50"
+                  className="text-gray-400 hover:text-pink-400 transition-colors duration-300 p-2 rounded-lg hover:bg-gray-800/50 flex items-center justify-center"
                   title={social.label}
                 >
                   <social.icon className="h-5 w-5" />
@@ -66,10 +66,10 @@ const Footer = () => {
 
           {/* Contact Information */}
           <div>
-            <h3 className="text-base font-semibold mb-3 text-white">
+            <h3 className="text-base font-semibold mb-4 text-white">
               Connect With Us
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {[
                 {
                   icon: Mail,
@@ -94,16 +94,16 @@ const Footer = () => {
               ].map((contact, index) => (
                 <div
                   key={index}
-                  className="flex items-center space-x-3"
+                  className="flex items-start space-x-3"
                 >
-                  <div className="w-6 h-6 bg-pink-500/10 rounded-lg flex items-center justify-center backdrop-blur-sm flex-shrink-0">
-                    <contact.icon className="h-3 w-3 text-pink-400" />
+                  <div className="w-6 h-6 bg-pink-500/20 rounded-lg flex items-center justify-center backdrop-blur-sm flex-shrink-0 mt-0.5">
+                    <contact.icon className="h-3.5 w-3.5 text-pink-400" />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     {contact.href ? (
                       <a
                         href={contact.href}
-                        className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium block"
+                        className="text-gray-300 hover:text-white transition-colors duration-300 text-sm font-medium block break-words"
                       >
                         {contact.text}
                       </a>

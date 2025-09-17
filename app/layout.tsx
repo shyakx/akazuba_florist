@@ -26,6 +26,18 @@ export const metadata: Metadata = {
   creator: 'Akazuba Florist',
   publisher: 'Akazuba Florist',
   robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+  icons: {
+    icon: [
+      { url: '/images/flowers/mixed/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/images/flowers/mixed/logo.png', sizes: '16x16', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/images/flowers/mixed/logo.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'mask-icon', url: '/images/flowers/mixed/logo.png', color: '#ec4899' },
+    ],
+  },
   openGraph: {
     title: 'Akazuba Florist - #1 Florist in Rwanda | Premium Flowers & Bouquets',
     description: 'Rwanda\'s leading florist delivering fresh flowers, wedding bouquets, and floral arrangements. Same-day delivery in Kigali.',
@@ -90,6 +102,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/images/flowers/mixed/logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/images/flowers/mixed/logo.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <meta name="theme-color" content="#ec4899" />
+        <meta name="msapplication-TileColor" content="#ec4899" />
+        <meta name="msapplication-TileImage" content="/images/flowers/mixed/logo.png" />
+      </head>
       <body className={inter.className}>
         <ErrorBoundary>
           <AuthProvider>

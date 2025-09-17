@@ -70,6 +70,7 @@ export default function HomePage() {
             "https://akazubaflorist.com/images/akazuba-florist-og.jpg",
             "https://akazubaflorist.com/images/flowers/mixed/logo.png"
           ],
+          favicon: "https://akazubaflorist.com/favicon.ico",
           address: {
             "@type": "PostalAddress",
             "streetAddress": "Kigali",
