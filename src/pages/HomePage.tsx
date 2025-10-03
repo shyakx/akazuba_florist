@@ -43,7 +43,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative bg-gradient-to-br from-orange-400 via-orange-500 to-red-500 text-white py-20 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 text-white py-20 px-4 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-20 w-40 h-40 bg-white rounded-full blur-3xl"></div>
@@ -60,12 +60,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
               {content.hero_title || 'Welcome to AKAZUBA FLORIST'}
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-orange-50">
+            <p className="text-xl md:text-2xl mb-8 text-green-50">
               {content.hero_subtitle || 'Discover premium flowers and perfumes delivered to your door in Rwanda'}
             </p>
             <button
               onClick={() => onNavigate('products')}
-              className="inline-flex items-center space-x-2 bg-white text-orange-500 px-8 py-4 rounded-full font-semibold text-lg hover:bg-orange-50 transition shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="inline-flex items-center space-x-2 bg-white text-green-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-green-50 transition shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <span>Shop Now</span>
               <ArrowRight className="w-5 h-5" />
@@ -109,12 +109,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      <section className="py-16 px-4 bg-gradient-to-br from-orange-50 to-white">
+      <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-6">
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Flower2 className="w-8 h-8 text-orange-500" />
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Flower2 className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Premium Quality</h3>
               <p className="text-gray-600">
@@ -123,8 +123,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </div>
 
             <div className="text-center p-6">
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -135,8 +135,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </div>
 
             <div className="text-center p-6">
-              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-orange-500" />
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Customer Care</h3>
               <p className="text-gray-600">

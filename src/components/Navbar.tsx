@@ -26,7 +26,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
           <div className="flex items-center space-x-8">
             <button
               onClick={() => onNavigate('home')}
-              className="flex items-center space-x-2 text-2xl font-bold text-orange-500 hover:text-orange-600 transition"
+              className="flex items-center space-x-2 text-2xl font-bold text-green-600 hover:text-green-700 transition"
             >
               <img 
                 src="/images/logo/akazuba-logo.png" 
@@ -46,7 +46,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 onClick={() => onNavigate('home')}
                 className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
                   currentPage === 'home'
-                    ? 'bg-orange-50 text-orange-600'
+                    ? 'bg-green-50 text-green-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -58,7 +58,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 onClick={() => onNavigate('products')}
                 className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
                   currentPage === 'products'
-                    ? 'bg-orange-50 text-orange-600'
+                    ? 'bg-green-50 text-green-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -70,7 +70,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 onClick={() => onNavigate('about')}
                 className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
                   currentPage === 'about'
-                    ? 'bg-orange-50 text-orange-600'
+                    ? 'bg-green-50 text-green-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -82,7 +82,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 onClick={() => onNavigate('contact')}
                 className={`flex items-center space-x-1 px-3 py-2 rounded-lg transition ${
                   currentPage === 'contact'
-                    ? 'bg-orange-50 text-orange-600'
+                    ? 'bg-green-50 text-green-600'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -108,7 +108,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 >
                   <ShoppingCart className="w-6 h-6" />
                   {cartItemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                       {cartItemCount}
                     </span>
                   )}
@@ -150,7 +150,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 </button>
                 <button
                   onClick={() => onNavigate('signup')}
-                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-medium"
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
                 >
                   Sign Up
                 </button>

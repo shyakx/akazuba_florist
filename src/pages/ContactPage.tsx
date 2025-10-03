@@ -26,10 +26,10 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-gradient-to-br from-orange-500 to-red-500 text-white py-20 px-4">
+      <section className="bg-gradient-to-br from-green-500 to-red-500 text-white py-20 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl font-bold mb-6">Contact Us</h1>
-          <p className="text-xl text-orange-50">
+          <p className="text-xl text-green-50">
             Get in touch with AKAZUBA FLORIST
           </p>
         </div>
@@ -43,8 +43,8 @@ export default function ContactPage() {
               
               <div className="space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="bg-orange-100 p-3 rounded-full">
-                    <Mail className="w-6 h-6 text-orange-500" />
+                  <div className="bg-green-100 p-3 rounded-full">
+                    <Mail className="w-6 h-6 text-green-500" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Email</h3>
@@ -53,8 +53,8 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="bg-orange-100 p-3 rounded-full">
-                    <Phone className="w-6 h-6 text-orange-500" />
+                  <div className="bg-green-100 p-3 rounded-full">
+                    <Phone className="w-6 h-6 text-green-500" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Phone</h3>
@@ -63,8 +63,8 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="bg-orange-100 p-3 rounded-full">
-                    <MapPin className="w-6 h-6 text-orange-500" />
+                  <div className="bg-green-100 p-3 rounded-full">
+                    <MapPin className="w-6 h-6 text-green-500" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Location</h3>
@@ -73,8 +73,8 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start space-x-4">
-                  <div className="bg-orange-100 p-3 rounded-full">
-                    <Clock className="w-6 h-6 text-orange-500" />
+                  <div className="bg-green-100 p-3 rounded-full">
+                    <Clock className="w-6 h-6 text-green-500" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Business Hours</h3>
@@ -98,7 +98,7 @@ export default function ContactPage() {
                     type="text"
                     id="name"
                     name="name"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Your full name"
                   />
                 </div>
@@ -111,7 +111,7 @@ export default function ContactPage() {
                     type="email"
                     id="email"
                     name="email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -124,7 +124,7 @@ export default function ContactPage() {
                     type="tel"
                     id="phone"
                     name="phone"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="+250 784 586 110"
                   />
                 </div>
@@ -137,7 +137,7 @@ export default function ContactPage() {
                     type="text"
                     id="subject"
                     name="subject"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="What's this about?"
                   />
                 </div>
@@ -150,14 +150,14 @@ export default function ContactPage() {
                     id="message"
                     name="message"
                     rows={5}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Tell us how we can help you..."
                   ></textarea>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-orange-500 text-white py-4 rounded-lg font-semibold hover:bg-orange-600 transition text-lg"
+                  className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition text-lg"
                 >
                   Send Message
                 </button>
@@ -167,7 +167,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="py-16 px-4 bg-gradient-to-br from-orange-50 to-white">
+      <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-white">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-8">Delivery Areas</h2>
           <div className="grid md:grid-cols-2 gap-8">

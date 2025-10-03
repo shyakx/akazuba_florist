@@ -22,7 +22,7 @@ export default function Footer({ onNavigate }: FooterProps) {
                   e.currentTarget.nextElementSibling.style.display = 'block';
                 }}
               />
-              <div className="bg-orange-500 p-1.5 rounded-full" style={{ display: 'none' }}>
+              <div className="bg-green-600 p-1.5 rounded-full" style={{ display: 'none' }}>
                 <Heart className="w-4 h-4 text-white" />
               </div>
               <h3 className="text-xl font-bold">AKAZUBA FLORIST</h3>
@@ -32,13 +32,13 @@ export default function Footer({ onNavigate }: FooterProps) {
               Same-day delivery in Kigali.
             </p>
             <div className="flex space-x-3">
-              <a href="#" className="text-gray-400 hover:text-orange-500 transition">
+              <a href="#" className="text-gray-400 hover:text-green-500 transition">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-orange-500 transition">
+              <a href="#" className="text-gray-400 hover:text-green-500 transition">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-orange-500 transition">
+              <a href="#" className="text-gray-400 hover:text-green-500 transition">
                 <Twitter className="w-5 h-5" />
               </a>
             </div>
@@ -51,7 +51,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               <li>
                 <button
                   onClick={() => onNavigate('home')}
-                  className="text-gray-300 hover:text-orange-500 transition text-sm"
+                  className="text-gray-300 hover:text-green-500 transition text-sm"
                 >
                   Home
                 </button>
@@ -59,7 +59,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               <li>
                 <button
                   onClick={() => onNavigate('products')}
-                  className="text-gray-300 hover:text-orange-500 transition text-sm"
+                  className="text-gray-300 hover:text-green-500 transition text-sm"
                 >
                   Products
                 </button>
@@ -67,7 +67,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               <li>
                 <button
                   onClick={() => onNavigate('about')}
-                  className="text-gray-300 hover:text-orange-500 transition text-sm"
+                  className="text-gray-300 hover:text-green-500 transition text-sm"
                 >
                   About Us
                 </button>
@@ -75,7 +75,7 @@ export default function Footer({ onNavigate }: FooterProps) {
               <li>
                 <button
                   onClick={() => onNavigate('contact')}
-                  className="text-gray-300 hover:text-orange-500 transition text-sm"
+                  className="text-gray-300 hover:text-green-500 transition text-sm"
                 >
                   Contact
                 </button>
@@ -88,19 +88,19 @@ export default function Footer({ onNavigate }: FooterProps) {
             <h4 className="text-base font-semibold mb-3">Contact Info</h4>
             <div className="space-y-2">
               <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 text-orange-500" />
+                <Mail className="w-4 h-4 text-green-500" />
                 <span className="text-gray-300 text-sm">info.akazubaflorist@gmail.com</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4 text-orange-500" />
+                <Phone className="w-4 h-4 text-green-500" />
                 <span className="text-gray-300 text-sm">+250 784 586 110</span>
               </div>
               <div className="flex items-center space-x-2">
-                <MapPin className="w-4 h-4 text-orange-500" />
+                <MapPin className="w-4 h-4 text-green-500" />
                 <span className="text-gray-300 text-sm">Kigali, Rwanda</span>
               </div>
               <div className="flex items-center space-x-2">
-                <Clock className="w-4 h-4 text-orange-500" />
+                <Clock className="w-4 h-4 text-green-500" />
                 <div className="text-gray-300 text-sm">
                   <div>Mon-Fri: 8AM-6PM</div>
                   <div>Sat: 9AM-4PM, Sun: Closed</div>
@@ -116,22 +116,22 @@ export default function Footer({ onNavigate }: FooterProps) {
             {/* Delivery Info */}
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center">
-                <div className="bg-orange-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
-                  <Truck className="w-3 h-3 text-orange-500" />
+                <div className="bg-green-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
+                  <Truck className="w-3 h-3 text-green-500" />
                 </div>
                 <h5 className="font-medium text-sm mb-1">Free Delivery</h5>
                 <p className="text-gray-300 text-xs">RWF 100,000+</p>
               </div>
               <div className="text-center">
-                <div className="bg-orange-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
-                  <Clock className="w-3 h-3 text-orange-500" />
+                <div className="bg-green-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
+                  <Clock className="w-3 h-3 text-green-500" />
                 </div>
                 <h5 className="font-medium text-sm mb-1">Same Day</h5>
                 <p className="text-gray-300 text-xs">Before 2PM</p>
               </div>
               <div className="text-center">
-                <div className="bg-orange-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
-                  <Heart className="w-3 h-3 text-orange-500" />
+                <div className="bg-green-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
+                  <Heart className="w-3 h-3 text-green-500" />
                 </div>
                 <h5 className="font-medium text-sm mb-1">Premium</h5>
                 <p className="text-gray-300 text-xs">Quality</p>

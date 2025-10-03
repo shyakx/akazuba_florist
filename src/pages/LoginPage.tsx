@@ -56,10 +56,10 @@ export default function LoginPage({ onSwitchToSignup, onClose, onNavigate }: Log
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="flex items-center justify-center mb-6">
-          <div className="bg-orange-500 p-3 rounded-full">
+          <div className="bg-green-600 p-3 rounded-full">
             <LogIn className="w-8 h-8 text-white" />
           </div>
         </div>
@@ -88,7 +88,7 @@ export default function LoginPage({ onSwitchToSignup, onClose, onNavigate }: Log
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                 placeholder="you@example.com"
                 required
               />
@@ -108,7 +108,7 @@ export default function LoginPage({ onSwitchToSignup, onClose, onNavigate }: Log
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
                 placeholder="••••••••"
                 required
               />
@@ -129,7 +129,7 @@ export default function LoginPage({ onSwitchToSignup, onClose, onNavigate }: Log
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing In...' : 'Sign In'}
           </button>
@@ -140,7 +140,7 @@ export default function LoginPage({ onSwitchToSignup, onClose, onNavigate }: Log
             Don't have an account?{' '}
             <button
               onClick={onSwitchToSignup}
-              className="text-orange-500 font-semibold hover:text-orange-600 transition"
+              className="text-green-600 font-semibold hover:text-green-700 transition"
             >
               Sign Up
             </button>
