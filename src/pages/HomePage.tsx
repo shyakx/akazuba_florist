@@ -43,7 +43,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 text-white py-20 px-4 overflow-hidden" style={{background: 'linear-gradient(135deg, #10b981, #059669, #047857)'}}>
+      <section className="relative text-white py-20 px-4 overflow-hidden" style={{background: 'linear-gradient(135deg, #10b981, #059669, #047857)', backgroundColor: '#059669'}}>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-20 w-40 h-40 bg-white rounded-full blur-3xl"></div>
@@ -65,8 +65,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </p>
             <button
               onClick={() => onNavigate('products')}
-              className="inline-flex items-center space-x-2 bg-white text-green-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-green-50 transition shadow-lg hover:shadow-xl transform hover:scale-105"
-              style={{color: '#059669', backgroundColor: 'white'}}
+              className="inline-flex items-center space-x-2 px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl transform hover:scale-105"
+              style={{color: '#059669', backgroundColor: 'white', border: '2px solid #059669'}}
             >
               <span>Shop Now</span>
               <ArrowRight className="w-5 h-5" />
