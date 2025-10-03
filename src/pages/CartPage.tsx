@@ -79,7 +79,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
           <p className="text-gray-600 mb-6">Start shopping to add items to your cart</p>
           <button
             onClick={() => onNavigate('products')}
-            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
+            className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium"
           >
             Browse Products
           </button>
@@ -111,7 +111,7 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                       {item.products.name}
                     </h3>
                     <p className="text-gray-600 text-sm mb-3">{item.products.description}</p>
-                    <p className="text-xl font-bold text-green-500">
+                    <p className="text-xl font-bold text-primary-500">
                       RWF {item.products.price.toLocaleString()}
                     </p>
                   </div>
@@ -163,13 +163,13 @@ export default function CartPage({ onNavigate }: CartPageProps) {
                 </div>
                 <div className="border-t pt-3 flex justify-between text-xl font-bold text-gray-800">
                   <span>Total</span>
-                  <span className="text-green-500">RWF {calculateTotal().toLocaleString()}</span>
+                  <span className="text-primary-500">RWF {calculateTotal().toLocaleString()}</span>
                 </div>
               </div>
 
               <button 
                 onClick={() => onNavigate('checkout')}
-                className="w-full bg-green-500 text-white py-4 rounded-lg font-semibold hover:bg-green-600 transition text-lg"
+                className="w-full bg-primary-500 text-white py-4 rounded-lg font-semibold hover:bg-primary-600 transition text-lg"
               >
                 Proceed to Checkout
               </button>

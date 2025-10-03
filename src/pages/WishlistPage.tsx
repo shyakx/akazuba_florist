@@ -100,7 +100,7 @@ export default function WishlistPage({ onNavigate }: WishlistPageProps) {
           <p className="text-gray-600 mb-6">Start adding products to your wishlist</p>
           <button
             onClick={() => onNavigate('products')}
-            className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
+            className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium"
           >
             Browse Products
           </button>
@@ -143,7 +143,7 @@ export default function WishlistPage({ onNavigate }: WishlistPageProps) {
                 </h3>
                 <p className="text-gray-600 text-sm mb-3 line-clamp-2">{item.products.description}</p>
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl font-bold text-green-500">
+                  <span className="text-2xl font-bold text-primary-500">
                     RWF {item.products.price.toLocaleString()}
                   </span>
                 </div>
@@ -151,7 +151,7 @@ export default function WishlistPage({ onNavigate }: WishlistPageProps) {
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleAddToCart(item.products.id)}
-                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition"
+                    className="flex-1 flex items-center justify-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition"
                   >
                     <ShoppingCart className="w-4 h-4" />
                     <span>Add to Cart</span>
@@ -166,7 +166,7 @@ export default function WishlistPage({ onNavigate }: WishlistPageProps) {
                 </div>
 
                 {item.products.stock_quantity < 10 && item.products.stock_quantity > 0 && (
-                  <p className="text-xs text-green-600 mt-2">
+                  <p className="text-xs text-primary-600 mt-2">
                     Only {item.products.stock_quantity} left in stock
                   </p>
                 )}

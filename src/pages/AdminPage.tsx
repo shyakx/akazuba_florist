@@ -364,7 +364,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               onClick={() => setActiveTab('dashboard')}
               className={`px-6 py-4 font-semibold transition ${
                 activeTab === 'dashboard'
-                  ? 'text-green-500 border-b-2 border-green-500'
+                  ? 'text-primary-500 border-b-2 border-primary-500'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -374,7 +374,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               onClick={() => setActiveTab('products')}
               className={`px-6 py-4 font-semibold transition ${
                 activeTab === 'products'
-                  ? 'text-green-500 border-b-2 border-green-500'
+                  ? 'text-primary-500 border-b-2 border-primary-500'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -384,7 +384,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               onClick={() => setActiveTab('orders')}
               className={`px-6 py-4 font-semibold transition ${
                 activeTab === 'orders'
-                  ? 'text-green-500 border-b-2 border-green-500'
+                  ? 'text-primary-500 border-b-2 border-primary-500'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -394,7 +394,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               onClick={() => setActiveTab('customers')}
               className={`px-6 py-4 font-semibold transition ${
                 activeTab === 'customers'
-                  ? 'text-green-500 border-b-2 border-green-500'
+                  ? 'text-primary-500 border-b-2 border-primary-500'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -404,7 +404,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               onClick={() => setActiveTab('content')}
               className={`px-6 py-4 font-semibold transition ${
                 activeTab === 'content'
-                  ? 'text-green-500 border-b-2 border-green-500'
+                  ? 'text-primary-500 border-b-2 border-primary-500'
                   : 'text-gray-600 hover:text-gray-800'
               }`}
             >
@@ -423,13 +423,13 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                     <p className="text-sm font-medium text-gray-600">Total Products</p>
                     <p className="text-3xl font-bold text-gray-900">{analytics.totalProducts}</p>
                     {analytics.lowStockProducts > 0 && (
-                      <p className="text-xs text-green-600 mt-1">
+                      <p className="text-xs text-primary-600 mt-1">
                         {analytics.lowStockProducts} low stock
                       </p>
                     )}
                   </div>
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <Package className="w-6 h-6 text-green-500" />
+                  <div className="bg-primary-100 p-3 rounded-full">
+                    <Package className="w-6 h-6 text-primary-500" />
                   </div>
                 </div>
               </div>
@@ -454,12 +454,12 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                     <p className="text-3xl font-bold text-gray-900">RWF {analytics.totalRevenue.toLocaleString()}</p>
-                    <p className="text-xs text-green-600 mt-1">
+                    <p className="text-xs text-primary-600 mt-1">
                       This month: RWF {analytics.monthlyRevenue.toLocaleString()}
                     </p>
                   </div>
-                  <div className="bg-green-100 p-3 rounded-full">
-                    <DollarSign className="w-6 h-6 text-green-500" />
+                  <div className="bg-primary-100 p-3 rounded-full">
+                    <DollarSign className="w-6 h-6 text-primary-500" />
                   </div>
                 </div>
               </div>
@@ -506,8 +506,8 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
 
               <div className="bg-white rounded-xl shadow-sm p-4">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-green-100 p-2 rounded-lg">
-                    <Activity className="w-5 h-5 text-green-600" />
+                  <div className="bg-primary-100 p-2 rounded-lg">
+                    <Activity className="w-5 h-5 text-primary-600" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600">Processing</p>
@@ -530,8 +530,8 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
 
               <div className="bg-white rounded-xl shadow-sm p-4">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-green-100 p-2 rounded-lg">
-                    <Star className="w-5 h-5 text-green-600" />
+                  <div className="bg-primary-100 p-2 rounded-lg">
+                    <Star className="w-5 h-5 text-primary-600" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600">Delivered</p>
@@ -556,9 +556,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                           order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                          order.status === 'processing' ? 'bg-green-100 text-green-800' :
+                          order.status === 'processing' ? 'bg-primary-100 text-primary-800' :
                           order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                          order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                          order.status === 'delivered' ? 'bg-primary-100 text-primary-800' :
                           'bg-red-100 text-red-800'
                         }`}>
                           {order.status}
@@ -581,7 +581,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       <div className="text-right">
                         <p className="font-semibold text-gray-800">RWF {product.price.toLocaleString()}</p>
                         <span className={`px-2 py-1 text-xs rounded-full ${
-                          product.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          product.is_active ? 'bg-primary-100 text-primary-800' : 'bg-red-100 text-red-800'
                         }`}>
                           {product.is_active ? 'Active' : 'Inactive'}
                         </span>
@@ -606,13 +606,13 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                     placeholder="Search orders..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
                 <select
                   value={orderFilter}
                   onChange={(e) => setOrderFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="all">All Orders</option>
                   <option value="pending">Pending</option>
@@ -654,7 +654,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            order.payment_method === 'momo' ? 'bg-green-100 text-green-800' :
+                            order.payment_method === 'momo' ? 'bg-primary-100 text-primary-800' :
                             order.payment_method === 'bk' ? 'bg-blue-100 text-blue-800' :
                             'bg-gray-100 text-gray-800'
                           }`}>
@@ -671,9 +671,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                             className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                               order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                              order.status === 'processing' ? 'bg-green-100 text-green-800' :
+                              order.status === 'processing' ? 'bg-primary-100 text-primary-800' :
                               order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                              order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                              order.status === 'delivered' ? 'bg-primary-100 text-primary-800' :
                               'bg-red-100 text-red-800'
                             }`}
                           >
@@ -738,8 +738,8 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10">
-                                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                                  <Users className="h-5 w-5 text-green-600" />
+                                <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
+                                  <Users className="h-5 w-5 text-primary-600" />
                                 </div>
                               </div>
                               <div className="ml-4">
@@ -799,7 +799,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                   });
                   setShowProductForm(true);
                 }}
-                className="flex items-center space-x-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
+                className="flex items-center space-x-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium"
               >
                 <Plus className="w-5 h-5" />
                 <span>Add New Product</span>
@@ -811,7 +811,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                     type="checkbox"
                     checked={showDeletedProducts}
                     onChange={(e) => setShowDeletedProducts(e.target.checked)}
-                    className="rounded border-gray-300 text-green-500 focus:ring-green-500"
+                    className="rounded border-gray-300 text-primary-500 focus:ring-primary-500"
                   />
                   <span className="text-sm text-gray-600">Show deleted products</span>
                 </label>
@@ -846,7 +846,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, name: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
 
@@ -857,7 +857,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, category_id: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     >
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
@@ -876,7 +876,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
 
@@ -893,7 +893,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                           stock_quantity: parseInt(e.target.value),
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
 
@@ -907,7 +907,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                         setEditingProduct({ ...editingProduct, description: e.target.value })
                       }
                       rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
 
@@ -921,7 +921,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, image_url: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                   </div>
 
@@ -933,7 +933,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                         onChange={(e) =>
                           setEditingProduct({ ...editingProduct, is_active: e.target.checked })
                         }
-                        className="w-4 h-4 text-green-500 rounded focus:ring-green-500"
+                        className="w-4 h-4 text-primary-500 rounded focus:ring-primary-500"
                       />
                       <span className="text-sm font-medium text-gray-700">Active Product</span>
                     </label>
@@ -943,7 +943,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                 <div className="flex space-x-3 mt-6">
                   <button
                     onClick={handleSaveProduct}
-                    className="flex items-center space-x-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
+                    className="flex items-center space-x-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium"
                   >
                     <Save className="w-5 h-5" />
                     <span>Save Product</span>
@@ -1017,7 +1017,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                           <span
                             className={`px-3 py-1 rounded-full text-xs font-medium ${
                               product.is_active
-                                ? 'bg-green-100 text-green-700'
+                                ? 'bg-primary-100 text-primary-700'
                                 : 'bg-gray-100 text-gray-700'
                             }`}
                           >
@@ -1047,7 +1047,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                             ) : (
                               <button
                                 onClick={() => handleRestoreProduct(product.id)}
-                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                                className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition"
                                 title="Restore Product"
                               >
                                 <Save className="w-4 h-4" />
@@ -1079,7 +1079,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                     </div>
                     <button
                       onClick={() => handleUpdateContent(item.page, item.section)}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-sm font-medium"
+                      className="flex items-center space-x-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition text-sm font-medium"
                     >
                       <Save className="w-4 h-4" />
                       <span>Save</span>
@@ -1094,7 +1094,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       })
                     }
                     rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   />
                 </div>
               ))}
@@ -1131,9 +1131,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                         selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                         selectedOrder.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                        selectedOrder.status === 'processing' ? 'bg-green-100 text-green-800' :
+                        selectedOrder.status === 'processing' ? 'bg-primary-100 text-primary-800' :
                         selectedOrder.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                        selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                        selectedOrder.status === 'delivered' ? 'bg-primary-100 text-primary-800' :
                         'bg-red-100 text-red-800'
                       }`}>
                         {selectedOrder.status}
@@ -1227,7 +1227,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                     updateOrderStatus(selectedOrder.id, e.target.value);
                     setSelectedOrder({...selectedOrder, status: e.target.value as Order['status']});
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="pending">Pending</option>
                   <option value="confirmed">Confirmed</option>
@@ -1325,9 +1325,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                               order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                              order.status === 'processing' ? 'bg-green-100 text-green-800' :
+                              order.status === 'processing' ? 'bg-primary-100 text-primary-800' :
                               order.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                              order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                              order.status === 'delivered' ? 'bg-primary-100 text-primary-800' :
                               'bg-red-100 text-red-800'
                             }`}>
                               {order.status}

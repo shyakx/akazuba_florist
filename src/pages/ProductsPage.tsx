@@ -163,7 +163,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
             onClick={() => setSelectedCategory('all')}
             className={`px-6 py-2 rounded-full font-medium transition ${
               selectedCategory === 'all'
-                ? 'bg-green-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -175,7 +175,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
               onClick={() => setSelectedCategory(category.id)}
               className={`px-6 py-2 rounded-full font-medium transition ${
                 selectedCategory === category.id
-                  ? 'bg-green-600 text-white'
+                  ? 'bg-primary-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -221,15 +221,15 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
                   </div>
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-green-600">
+                    <span className="text-2xl font-bold text-primary-600">
                       RWF {product.price.toLocaleString()}
                     </span>
                     <button
                       onClick={() => handleAddToCart(product.id)}
                       className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
                         addedToCart[product.id]
-                          ? 'bg-green-500 text-white'
-                          : 'bg-green-600 text-white hover:bg-green-700'
+                          ? 'bg-primary-500 text-white'
+                          : 'bg-primary-600 text-white hover:bg-primary-700'
                       }`}
                     >
                       {addedToCart[product.id] ? (
@@ -246,7 +246,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
                     </button>
                   </div>
                   {product.stock_quantity < 10 && product.stock_quantity > 0 && (
-                    <p className="text-xs text-green-600 mt-2">
+                    <p className="text-xs text-primary-600 mt-2">
                       Only {product.stock_quantity} left in stock
                     </p>
                   )}

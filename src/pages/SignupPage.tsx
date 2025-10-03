@@ -64,10 +64,10 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
         <div className="flex items-center justify-center mb-6">
-          <div className="bg-green-600 p-3 rounded-full">
+          <div className="bg-primary-600 p-3 rounded-full">
             <UserPlus className="w-8 h-8 text-white" />
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
         )}
 
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4 flex items-center">
+          <div className="bg-primary-50 border border-primary-200 text-primary-700 px-4 py-3 rounded-lg mb-4 flex items-center">
             <div className="w-5 h-5 mr-2">✅</div>
             Account created successfully! Redirecting...
           </div>
@@ -103,7 +103,7 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
                 placeholder="John Doe"
                 required
               />
@@ -123,7 +123,7 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
                 placeholder="you@example.com"
                 required
               />
@@ -143,7 +143,7 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -176,7 +176,7 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
                 type={showConfirmPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+                className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -198,7 +198,7 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
@@ -209,7 +209,7 @@ export default function SignupPage({ onSwitchToLogin, onClose }: SignupPageProps
             Already have an account?{' '}
             <button
               onClick={onSwitchToLogin}
-              className="text-green-600 font-semibold hover:text-green-700 transition"
+              className="text-primary-600 font-semibold hover:text-primary-700 transition"
             >
               Sign In
             </button>

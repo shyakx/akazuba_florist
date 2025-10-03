@@ -141,7 +141,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
           <p className="text-gray-600 mb-6">Add some products to proceed to checkout</p>
           <button
             onClick={() => onNavigate('products')}
-            className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+            className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-medium"
           >
             Browse Products
           </button>
@@ -154,8 +154,8 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
-          <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-green-500" />
+          <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="w-8 h-8 text-primary-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Order Placed Successfully!</h2>
           <p className="text-gray-600 mb-6">
@@ -164,7 +164,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
           <div className="space-y-3">
             <button
               onClick={() => onNavigate('products')}
-              className="w-full px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
+              className="w-full px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium"
             >
               Continue Shopping
             </button>
@@ -210,7 +210,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                     type="text"
                     value={customerInfo.fullName}
                     onChange={(e) => setCustomerInfo({...customerInfo, fullName: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="Your full name"
                     required
                   />
@@ -224,7 +224,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                     type="email"
                     value={customerInfo.email}
                     onChange={(e) => setCustomerInfo({...customerInfo, email: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="your.email@example.com"
                     required
                   />
@@ -238,7 +238,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                     type="tel"
                     value={customerInfo.phone}
                     onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder="+250 784 586 110"
                     required
                   />
@@ -251,7 +251,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                   <select
                     value={customerInfo.city}
                     onChange={(e) => setCustomerInfo({...customerInfo, city: e.target.value})}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   >
                     <option value="Kigali">Kigali</option>
                     <option value="Butare">Butare</option>
@@ -269,7 +269,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <textarea
                   value={customerInfo.address}
                   onChange={(e) => setCustomerInfo({...customerInfo, address: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   rows={3}
                   placeholder="Enter your complete delivery address"
                   required
@@ -283,7 +283,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <textarea
                   value={customerInfo.notes}
                   onChange={(e) => setCustomerInfo({...customerInfo, notes: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                   rows={2}
                   placeholder="Any special delivery instructions or notes"
                 />
@@ -298,13 +298,13 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <div
                   className={`border-2 rounded-lg p-4 cursor-pointer transition ${
                     paymentMethod === 'momo'
-                      ? 'border-green-500 bg-green-50'
+                      ? 'border-primary-500 bg-primary-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                   onClick={() => setPaymentMethod('momo')}
                 >
                   <div className="flex items-center space-x-3">
-                    <Smartphone className="w-6 h-6 text-green-600" />
+                    <Smartphone className="w-6 h-6 text-primary-600" />
                     <div>
                       <h3 className="font-semibold text-gray-800">MTN Mobile Money</h3>
                       <p className="text-sm text-gray-600">Pay with your MTN MoMo account</p>
@@ -315,13 +315,13 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <div
                   className={`border-2 rounded-lg p-4 cursor-pointer transition ${
                     paymentMethod === 'bk'
-                      ? 'border-green-500 bg-green-50'
+                      ? 'border-primary-500 bg-primary-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                   onClick={() => setPaymentMethod('bk')}
                 >
                   <div className="flex items-center space-x-3">
-                    <Building className="w-6 h-6 text-green-600" />
+                    <Building className="w-6 h-6 text-primary-600" />
                     <div>
                       <h3 className="font-semibold text-gray-800">Bank of Kigali Transfer</h3>
                       <p className="text-sm text-gray-600">Bank transfer to our BK account</p>
@@ -332,13 +332,13 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <div
                   className={`border-2 rounded-lg p-4 cursor-pointer transition ${
                     paymentMethod === 'cash'
-                      ? 'border-green-500 bg-green-50'
+                      ? 'border-primary-500 bg-primary-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                   onClick={() => setPaymentMethod('cash')}
                 >
                   <div className="flex items-center space-x-3">
-                    <DollarSign className="w-6 h-6 text-green-600" />
+                    <DollarSign className="w-6 h-6 text-primary-600" />
                     <div>
                       <h3 className="font-semibold text-gray-800">Cash on Delivery</h3>
                       <p className="text-sm text-gray-600">Pay when your order is delivered</p>
@@ -348,7 +348,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
               </div>
 
               {(paymentMethod === 'momo' || paymentMethod === 'bk') && (
-                <div className="mt-6 p-4 bg-green-50 rounded-lg">
+                <div className="mt-6 p-4 bg-primary-50 rounded-lg">
                   <h4 className="font-semibold text-gray-800 mb-2">Payment Instructions</h4>
                   {paymentMethod === 'momo' ? (
                     <div className="text-sm text-gray-600 space-y-2">
@@ -373,10 +373,10 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                       type="file"
                       accept="image/*"
                       onChange={handlePaymentProofChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     />
                     {paymentProof && (
-                      <p className="text-sm text-green-600 mt-2">
+                      <p className="text-sm text-primary-600 mt-2">
                         ✓ {paymentProof.name} selected
                       </p>
                     )}
@@ -418,14 +418,14 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 </div>
                 <div className="border-t pt-3 flex justify-between text-xl font-bold text-gray-800">
                   <span>Total</span>
-                  <span className="text-green-600">RWF {calculateFinalTotal().toLocaleString()}</span>
+                  <span className="text-primary-600">RWF {calculateFinalTotal().toLocaleString()}</span>
                 </div>
               </div>
 
               <button
                 onClick={handlePlaceOrder}
                 disabled={!customerInfo.fullName || !customerInfo.email || !customerInfo.phone || !customerInfo.address}
-                className="w-full mt-6 bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="w-full mt-6 bg-primary-600 text-white py-4 rounded-lg font-semibold hover:bg-primary-700 transition text-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Place Order
               </button>
