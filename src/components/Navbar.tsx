@@ -35,7 +35,10 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 onError={(e) => {
                   // Fallback to text if logo not found
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling.style.display = 'inline';
+                  const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (nextElement) {
+                    nextElement.style.display = 'inline';
+                  }
                 }}
               />
               <span style={{ display: 'none' }}>AKAZUBA FLORIST</span>
