@@ -27,6 +27,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
             <button
               onClick={() => onNavigate('home')}
               className="flex items-center space-x-2 text-2xl font-bold text-green-600 hover:text-green-700 transition"
+              style={{color: '#059669'}}
             >
               <img 
                 src="/images/logo/akazuba-logo.png" 
@@ -151,6 +152,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount }: Navba
                 <button
                   onClick={() => onNavigate('signup')}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                  style={{backgroundColor: '#059669', color: 'white'}}
                 >
                   Sign Up
                 </button>
