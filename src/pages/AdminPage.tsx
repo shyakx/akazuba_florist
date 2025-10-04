@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Plus, CreditCard as Edit2, Trash2, Save, X, ShoppingBag, DollarSign, Package, Users, Eye, Search, MapPin, Phone, Mail, CheckCircle, Clock, Truck, Star, Activity } from 'lucide-react';
 import { supabase, Product, Category, SiteContent, Order, OrderItem, Profile } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { testEmailJS } from '../lib/emailService';
 
 type AdminPageProps = {
   onNavigate: (page: string) => void;
@@ -30,6 +31,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
     averageOrderValue: 0,
     monthlyRevenue: 0
   });
+  const [emailTestResult, setEmailTestResult] = useState<string>('');
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -45,6 +47,20 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   const handleNavigate = useCallback((page: string) => {
     onNavigate(page);
   }, [onNavigate]);
+
+  const handleTestEmail = async () => {
+    setEmailTestResult('Testing email...');
+    try {
+      const success = await testEmailJS();
+      if (success) {
+        setEmailTestResult('✅ Test email sent successfully! Check your inbox.');
+      } else {
+        setEmailTestResult('❌ Test email failed. Check console for errors.');
+      }
+    } catch (error) {
+      setEmailTestResult('❌ Test email failed: ' + (error as Error).message);
+    }
+  };
 
   useEffect(() => {
     if (!profile?.is_admin) {
@@ -542,6 +558,22 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                     <p className="text-2xl font-bold text-gray-900">{analytics.deliveredOrders}</p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Email Test Section */}
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">Email Notification Test</h3>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handleTestEmail}
+                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
+                >
+                  Test Email Notification
+                </button>
+                {emailTestResult && (
+                  <p className="text-sm text-gray-600">{emailTestResult}</p>
+                )}
               </div>
             </div>
 

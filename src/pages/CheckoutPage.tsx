@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Smartphone, Building, DollarSign, Check } from 'lucide-react';
 import { supabase, CartItem, Product } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { sendOrderNotificationEmail, sendFallbackEmail, OrderEmailData } from '../lib/emailService';
 
 type CheckoutPageProps = {
   onNavigate: (page: string) => void;
@@ -111,6 +112,60 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
+
+      // Handle payment proof upload if provided
+      let paymentProofUrl = '';
+      if (paymentProof) {
+        try {
+          // Upload payment proof to Supabase storage
+          const fileExt = paymentProof.name.split('.').pop();
+          const fileName = `${order.id}_payment_proof.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('payment-proofs')
+            .upload(fileName, paymentProof);
+
+          if (!uploadError && uploadData) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('payment-proofs')
+              .getPublicUrl(fileName);
+            paymentProofUrl = publicUrl;
+          }
+        } catch {
+          // Handle upload error silently
+        }
+      }
+
+      // Send email notification to admin
+      const emailData: OrderEmailData = {
+        orderNumber: order.order_number,
+        customerName: customerInfo.fullName,
+        customerEmail: customerInfo.email,
+        customerPhone: customerInfo.phone,
+        deliveryAddress: customerInfo.address,
+        deliveryCity: customerInfo.city,
+        paymentMethod: paymentMethod,
+        subtotal: calculateTotal(),
+        deliveryFee: calculateDeliveryFee(),
+        total: calculateFinalTotal(),
+        notes: customerInfo.notes,
+        paymentProofUrl: paymentProofUrl,
+        orderItems: cartItems.map(item => ({
+          productName: item.products.name,
+          quantity: item.quantity,
+          price: item.products.price,
+          total: item.products.price * item.quantity
+        })),
+        adminEmail: import.meta.env.VITE_ADMIN_EMAIL || 'info.akazubaflorist@gmail.com'
+      };
+
+      // Try to send email notification
+      const emailSent = await sendOrderNotificationEmail(emailData);
+      
+      if (!emailSent) {
+        // Fallback to mailto link if EmailJS fails
+        sendFallbackEmail(emailData);
+      }
 
       // Clear cart
       await supabase
