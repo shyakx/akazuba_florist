@@ -122,8 +122,8 @@ export default function Footer({ onNavigate }: FooterProps) {
                 <div className="bg-primary-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">
                   <Truck className="w-3 h-3 text-primary-500" />
                 </div>
-                <h5 className="font-medium text-sm mb-1">Free Delivery</h5>
-                <p className="text-gray-300 text-xs">RWF 100,000+</p>
+                <h5 className="font-medium text-sm mb-1">Delivery Fee</h5>
+                <p className="text-gray-300 text-xs">RWF 2,000</p>
               </div>
               <div className="text-center">
                 <div className="bg-primary-100 w-6 h-6 rounded-full flex items-center justify-center mx-auto mb-1">

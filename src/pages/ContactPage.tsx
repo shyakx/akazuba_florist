@@ -174,7 +174,7 @@ export default function ContactPage() {
             <div className="bg-white p-6 rounded-xl shadow-sm">
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Kigali City</h3>
               <p className="text-gray-600">
-                Free delivery within Kigali city limits. Same-day delivery available for orders placed before 2:00 PM.
+                RWF 2,000 delivery fee within Kigali city limits. Same-day delivery available for orders placed before 2:00 PM.
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm">

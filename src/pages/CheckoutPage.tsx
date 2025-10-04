@@ -58,9 +58,8 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
   };
 
   const calculateDeliveryFee = () => {
-    const total = calculateTotal();
-    if (total >= 100000) return 0; // Free delivery for orders over RWF 100,000
-    return 5000; // RWF 5,000 delivery fee
+    // Flat delivery fee of RWF 2,000 for everywhere in Kigali
+    return 2000;
   };
 
   const calculateFinalTotal = () => {
@@ -468,7 +467,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
                 <div className="flex justify-between text-gray-600">
                   <span>Delivery Fee</span>
                   <span>
-                    {calculateDeliveryFee() === 0 ? 'Free' : `RWF ${calculateDeliveryFee().toLocaleString()}`}
+                    RWF {calculateDeliveryFee().toLocaleString()}
                   </span>
                 </div>
                 <div className="border-t pt-3 flex justify-between text-xl font-bold text-gray-800">
