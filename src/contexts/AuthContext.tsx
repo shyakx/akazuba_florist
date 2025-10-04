@@ -105,8 +105,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      // Clear local state first
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
+      
+      // Attempt to sign out from Supabase with timeout
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('SignOut timeout')), 5000)
+      );
+      
+      try {
+        const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+        
+        if (error) {
+          console.warn('Supabase signOut error (non-critical):', error);
+        }
+      } catch (timeoutError) {
+        console.warn('SignOut timeout (non-critical):', timeoutError);
+      }
+    } catch (error) {
+      console.warn('SignOut error (non-critical):', error);
+      // Don't throw error - we've already cleared local state
+    }
   };
 
   return (

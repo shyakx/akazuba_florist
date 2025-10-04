@@ -15,8 +15,10 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
     try {
       await signOut();
       onNavigate('home');
-    } catch {
-      // Handle sign out error silently
+    } catch (error) {
+      console.warn('Sign out error (non-critical):', error);
+      // Still navigate to home even if signOut fails
+      onNavigate('home');
     }
   };
 
