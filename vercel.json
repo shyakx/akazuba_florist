@@ -9,21 +9,10 @@
       "has": [
         {
           "type": "host",
-          "value": "akazubaflorist.com"
-        }
-      ],
-      "destination": "https://akazubaflorist.com/$1",
-      "permanent": true
-    },
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
           "value": "www.akazubaflorist.com"
         }
       ],
-      "destination": "https://www.akazubaflorist.com/$1",
+      "destination": "https://akazubaflorist.com/$1",
       "permanent": true
     }
   ],
