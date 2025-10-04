@@ -27,11 +27,12 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-gradient-to-br from-primary-500 to-red-500 text-white py-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
-          <p className="text-lg text-primary-50">
-            Get in touch with AKAZUBA FLORIST
+      <section className="bg-green-600 text-white py-12 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-4">Contact AKAZUBA FLORIST</h1>
+          <p className="text-lg text-green-100 max-w-3xl mx-auto">
+            Ready to make your floral dreams come true? Get in touch with our expert team. 
+            We're here to help you create the perfect arrangement for any occasion.
           </p>
         </div>
       </section>
@@ -42,45 +43,48 @@ export default function ContactPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-800 mb-6">Get in Touch</h2>
               
-              <div className="space-y-4">
-                <div className="flex items-start space-x-4">
-                  <div className="bg-primary-100 p-3 rounded-full">
-                    <Mail className="w-6 h-6 text-primary-500" />
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="bg-green-600 p-3 rounded-full">
+                    <Mail className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Email</h3>
-                    <p className="text-gray-600">{content.email || 'info.akazubaflorist@gmail.com'}</p>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Email Us</h3>
+                    <p className="text-gray-600 mb-1">{content.email || 'info.akazubaflorist@gmail.com'}</p>
+                    <p className="text-sm text-gray-500">We respond within 2 hours during business hours</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-primary-100 p-3 rounded-full">
-                    <Phone className="w-6 h-6 text-primary-500" />
+                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="bg-green-600 p-3 rounded-full">
+                    <Phone className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Phone</h3>
-                    <p className="text-gray-600">{content.phone || '+250 784 586 110'}</p>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Call Us</h3>
+                    <p className="text-gray-600 mb-1">{content.phone || '+250 784 586 110'}</p>
+                    <p className="text-sm text-gray-500">Available 7 days a week, 8 AM - 8 PM</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-primary-100 p-3 rounded-full">
-                    <MapPin className="w-6 h-6 text-primary-500" />
+                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="bg-green-600 p-3 rounded-full">
+                    <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Location</h3>
-                    <p className="text-gray-600">{content.location || 'Kigali, Rwanda'}</p>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Visit Us</h3>
+                    <p className="text-gray-600 mb-1">{content.location || 'Kigali, Rwanda'}</p>
+                    <p className="text-sm text-gray-500">Same-day delivery available throughout Kigali</p>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-primary-100 p-3 rounded-full">
-                    <Clock className="w-6 h-6 text-primary-500" />
+                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="bg-green-600 p-3 rounded-full">
+                    <Clock className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Business Hours</h3>
-                    <p className="text-gray-600">Monday - Sunday: 8:00 AM - 8:00 PM</p>
-                    <p className="text-gray-600 text-sm">Open 7 days a week</p>
+                    <p className="text-gray-600 mb-1">Monday - Sunday: 8:00 AM - 8:00 PM</p>
+                    <p className="text-sm text-gray-500 mb-2">Open 7 days a week for your convenience</p>
                     <div className="mt-2">
                       <BusinessStatus />
                     </div>
@@ -160,7 +164,7 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-primary-500 text-white py-4 rounded-lg font-semibold hover:bg-primary-600 transition text-lg"
+                  className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
                 >
                   Send Message
                 </button>
@@ -170,21 +174,57 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="py-12 px-4 bg-gradient-to-br from-primary-50 to-white">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Delivery Areas</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Kigali City</h3>
-              <p className="text-gray-600">
-                RWF 2,000 delivery fee within Kigali city limits. Same-day delivery available for orders placed before 2:00 PM.
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Delivery Information</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              We deliver fresh flowers throughout Kigali and surrounding areas. 
+              Fast, reliable, and always on time.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <MapPin className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Kigali City</h3>
+              <p className="text-gray-600 mb-3">
+                RWF 2,000 delivery fee within Kigali city limits. 
+                Same-day delivery available for orders placed before 2:00 PM.
               </p>
+              <div className="text-sm text-green-600 font-medium">
+                ✓ Free delivery on orders over RWF 50,000
+              </div>
             </div>
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Surrounding Areas</h3>
-              <p className="text-gray-600">
-                Delivery available to surrounding areas with additional charges. Contact us for specific locations.
+            
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <Clock className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Delivery Times</h3>
+              <p className="text-gray-600 mb-3">
+                We deliver 7 days a week from 8:00 AM to 8:00 PM. 
+                Express delivery available for urgent orders.
               </p>
+              <div className="text-sm text-green-600 font-medium">
+                ✓ 2-hour express delivery available
+              </div>
+            </div>
+            
+            <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                <Phone className="w-6 h-6 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Surrounding Areas</h3>
+              <p className="text-gray-600 mb-3">
+                Delivery available to surrounding areas with additional charges. 
+                Contact us for specific locations and pricing.
+              </p>
+              <div className="text-sm text-green-600 font-medium">
+                ✓ Custom delivery arrangements
+              </div>
             </div>
           </div>
         </div>
