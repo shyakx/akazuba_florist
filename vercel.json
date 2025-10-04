@@ -32,6 +32,22 @@
       ],
       "destination": "https://akazubaflorist.com/$1",
       "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "akazubaflorist.com"
+        },
+        {
+          "type": "header",
+          "key": "x-forwarded-proto",
+          "value": "http"
+        }
+      ],
+      "destination": "https://akazubaflorist.com/$1",
+      "permanent": true
     }
   ],
   "headers": [
