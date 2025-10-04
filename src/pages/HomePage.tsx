@@ -43,7 +43,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative text-white py-20 px-4 overflow-hidden bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700">
+      <section className="relative text-white py-12 px-4 overflow-hidden bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-20 w-40 h-40 bg-white rounded-full blur-3xl"></div>
@@ -57,15 +57,15 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 <Sparkles className="w-12 h-12 animate-pulse" />
               </div>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
               {content.hero_title || 'Welcome to AKAZUBA FLORIST'}
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-primary-50">
+            <p className="text-lg md:text-xl mb-6 text-primary-50">
               {content.hero_subtitle || 'Discover premium flowers and perfumes delivered to your door in Rwanda'}
             </p>
             <button
               onClick={() => onNavigate('products')}
-              className="inline-flex items-center space-x-2 px-8 py-4 rounded-full font-semibold text-lg transition shadow-lg hover:shadow-xl transform hover:scale-105 text-primary-600 bg-white border-2 border-primary-600 hover:bg-primary-50"
+              className="inline-flex items-center space-x-2 px-6 py-3 rounded-full font-semibold text-base transition shadow-lg hover:shadow-xl transform hover:scale-105 text-primary-600 bg-white border-2 border-primary-600 hover:bg-primary-50"
             >
               <span>Shop Now</span>
               <ArrowRight className="w-5 h-5" />
@@ -74,19 +74,19 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </section>
 
-      <section className="py-16 px-4">
+      <section className="py-12 px-4">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-800 mb-4">Shop by Category</h2>
-          <p className="text-center text-gray-600 mb-12 text-lg">
+          <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">Shop by Category</h2>
+          <p className="text-center text-gray-600 mb-8 text-base">
             Explore our beautiful collections
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
             {categories.map((category) => (
               <div
                 key={category.id}
                 onClick={() => onNavigate('products', category.id)}
-                className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition cursor-pointer transform hover:scale-[1.02] duration-300"
+                className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer transform hover:scale-[1.02] duration-300"
               >
                 <div className="aspect-video overflow-hidden">
                   <img
@@ -95,12 +95,12 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                     className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                   />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6">
-                  <h3 className="text-3xl font-bold text-white mb-2">{category.name}</h3>
-                  <p className="text-white/90 mb-4">{category.description}</p>
-                  <div className="inline-flex items-center space-x-2 text-white font-semibold group-hover:gap-4 transition-all">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-4">
+                  <h3 className="text-xl font-bold text-white mb-1">{category.name}</h3>
+                  <p className="text-white/90 mb-3 text-sm">{category.description}</p>
+                  <div className="inline-flex items-center space-x-2 text-white font-semibold group-hover:gap-4 transition-all text-sm">
                     <span>Explore Collection</span>
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-4 h-4" />
                   </div>
                 </div>
               </div>

@@ -298,6 +298,35 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
     setShowOrderDetails(true);
   };
 
+  const handleDeleteOrder = async (orderId: string) => {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) {
+        console.error('Error deleting order:', error);
+        return;
+      }
+
+      // Remove from local state
+      setOrders(orders.filter(order => order.id !== orderId));
+      
+      // Close modal if the deleted order was selected
+      if (selectedOrder?.id === orderId) {
+        setShowOrderDetails(false);
+        setSelectedOrder(null);
+      }
+    } catch (error) {
+      console.error('Error deleting order:', error);
+    }
+  };
+
   const filteredOrders = orders.filter(order => {
     const matchesFilter = orderFilter === 'all' || order.status === orderFilter;
     const matchesSearch = searchTerm === '' || 
@@ -427,9 +456,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen w-screen bg-gray-50 flex overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-green-600 to-green-700 shadow-lg">
+      <div className="w-64 bg-gradient-to-b from-green-600 to-green-700 shadow-lg flex-shrink-0">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
@@ -527,17 +556,18 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+          <div className="p-6 overflow-auto flex-1 min-w-0">
 
         {activeTab === 'dashboard' && (
           <div>
             {/* Key Metrics Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 min-w-0">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Total Products</p>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Total Products</p>
+                    <p className="text-xl font-bold text-gray-900">
                       {analytics.totalProducts}
                     </p>
                     {analytics.lowStockProducts > 0 && (
@@ -555,11 +585,11 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Total Orders</p>
+                    <p className="text-xl font-bold text-gray-900">
                       {analytics.totalOrders}
                     </p>
                     <div className="flex items-center mt-2">
@@ -575,11 +605,11 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Total Revenue</p>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Total Revenue</p>
+                    <p className="text-xl font-bold text-gray-900">
                       RWF {analytics.totalRevenue.toLocaleString()}
                     </p>
                     <div className="flex items-center mt-2">
@@ -595,11 +625,11 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600 mb-1">Total Customers</p>
-                    <p className="text-3xl font-bold text-gray-900">
+                    <p className="text-xs font-medium text-gray-600 mb-1">Total Customers</p>
+                    <p className="text-xl font-bold text-gray-900">
                       {analytics.totalCustomers}
                     </p>
                     <div className="flex items-center mt-2">
@@ -615,63 +645,63 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
 
             {/* Order Status Overview */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-              <div className="bg-white rounded-xl shadow-sm p-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 min-w-0">
+              <div className="bg-white rounded-lg shadow-sm p-3">
                 <div className="flex items-center space-x-3">
-                  <div className="bg-yellow-100 p-2 rounded-lg">
-                    <Clock className="w-5 h-5 text-yellow-600" />
+                  <div className="bg-yellow-100 p-1.5 rounded-lg">
+                    <Clock className="w-4 h-4 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Pending</p>
-                    <p className="text-2xl font-bold text-gray-900">{analytics.pendingOrders}</p>
+                    <p className="text-xs font-medium text-gray-600">Pending</p>
+                    <p className="text-sm font-bold text-gray-900">{analytics.pendingOrders}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-4">
+              <div className="bg-white rounded-lg shadow-sm p-3">
                 <div className="flex items-center space-x-3">
                   <div className="bg-blue-100 p-2 rounded-lg">
                     <CheckCircle className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Confirmed</p>
-                    <p className="text-2xl font-bold text-gray-900">{analytics.confirmedOrders}</p>
+                    <p className="text-xs font-medium text-gray-600">Confirmed</p>
+                    <p className="text-sm font-bold text-gray-900">{analytics.confirmedOrders}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-4">
+              <div className="bg-white rounded-lg shadow-sm p-3">
                 <div className="flex items-center space-x-3">
                   <div className="bg-primary-100 p-2 rounded-lg">
                     <Activity className="w-5 h-5 text-primary-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Processing</p>
-                    <p className="text-2xl font-bold text-gray-900">{analytics.processingOrders}</p>
+                    <p className="text-xs font-medium text-gray-600">Processing</p>
+                    <p className="text-sm font-bold text-gray-900">{analytics.processingOrders}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-4">
+              <div className="bg-white rounded-lg shadow-sm p-3">
                 <div className="flex items-center space-x-3">
                   <div className="bg-purple-100 p-2 rounded-lg">
                     <Truck className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Shipped</p>
-                    <p className="text-2xl font-bold text-gray-900">{analytics.shippedOrders}</p>
+                    <p className="text-xs font-medium text-gray-600">Shipped</p>
+                    <p className="text-sm font-bold text-gray-900">{analytics.shippedOrders}</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-4">
+              <div className="bg-white rounded-lg shadow-sm p-3">
                 <div className="flex items-center space-x-3">
                   <div className="bg-primary-100 p-2 rounded-lg">
                     <Star className="w-5 h-5 text-primary-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Delivered</p>
-                    <p className="text-2xl font-bold text-gray-900">{analytics.deliveredOrders}</p>
+                    <p className="text-xs font-medium text-gray-600">Delivered</p>
+                    <p className="text-sm font-bold text-gray-900">{analytics.deliveredOrders}</p>
                   </div>
                 </div>
               </div>
@@ -704,19 +734,19 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               </div>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-6">
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Orders</h3>
+            <div className="grid lg:grid-cols-2 gap-4 min-w-0">
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">Recent Orders</h3>
                 <div className="space-y-3">
                   {orders.slice(0, 5).map((order) => (
-                    <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={order.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="font-medium text-gray-800">{order.customer_name}</p>
-                        <p className="text-sm text-gray-600">Order #{order.order_number}</p>
+                        <p className="text-xs font-medium text-gray-800">{order.customer_name}</p>
+                        <p className="text-xs text-gray-600">#{order.order_number.slice(-8)}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-800">RWF {order.total.toLocaleString()}</p>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
+                        <p className="text-xs font-semibold text-gray-800">RWF {order.total.toLocaleString()}</p>
+                        <span className={`px-1 py-0.5 text-xs rounded-full ${
                           order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                           order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
                           order.status === 'processing' ? 'bg-primary-100 text-primary-800' :
@@ -732,18 +762,18 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Products</h3>
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3">Top Products</h3>
                 <div className="space-y-3">
                   {products.slice(0, 5).map((product) => (
-                    <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={product.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="font-medium text-gray-800">{product.name}</p>
-                        <p className="text-sm text-gray-600">Stock: {product.stock_quantity}</p>
+                        <p className="text-xs font-medium text-gray-800">{product.name}</p>
+                        <p className="text-xs text-gray-600">Stock: {product.stock_quantity}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold text-gray-800">RWF {product.price.toLocaleString()}</p>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
+                        <p className="text-xs font-semibold text-gray-800">RWF {product.price.toLocaleString()}</p>
+                        <span className={`px-1 py-0.5 text-xs rounded-full ${
                           product.is_active ? 'bg-primary-100 text-primary-800' : 'bg-red-100 text-red-800'
                         }`}>
                           {product.is_active ? 'Active' : 'Inactive'}
@@ -789,34 +819,33 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto min-w-0">
+                <table className="w-full min-w-max">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order #</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Order #</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">Customer</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Payment</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Total</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Status</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Date</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-100">
                     {filteredOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-gray-50 transition-colors duration-200">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {order.order_number}
+                        <td className="px-3 py-3 whitespace-nowrap text-xs font-medium text-gray-900">
+                          {order.order_number.slice(-8)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap">
                           <div>
-                            <div className="text-sm font-medium text-gray-900">{order.customer_name}</div>
-                            <div className="text-sm text-gray-500">{order.customer_email}</div>
-                            <div className="text-sm text-gray-500">{order.customer_phone}</div>
+                            <div className="text-xs font-medium text-gray-900 truncate">{order.customer_name}</div>
+                            <div className="text-xs text-gray-500 truncate">{order.customer_email}</div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          <span className={`inline-flex px-1 py-0.5 text-xs font-semibold rounded-full ${
                             order.payment_method === 'momo' ? 'bg-primary-100 text-primary-800' :
                             order.payment_method === 'bk' ? 'bg-blue-100 text-blue-800' :
                             'bg-gray-100 text-gray-800'
@@ -824,14 +853,14 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                             {order.payment_method.toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-900">
                           RWF {order.total.toLocaleString()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-3 whitespace-nowrap">
                           <select
                             value={order.status}
                             onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                            className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${
+                            className={`text-xs font-semibold rounded-full px-1 py-0.5 border-0 ${
                               order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                               order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
                               order.status === 'processing' ? 'bg-primary-100 text-primary-800' :
@@ -848,17 +877,26 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                             <option value="cancelled">Cancelled</option>
                           </select>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-500">
                           {new Date(order.created_at).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button 
-                            onClick={() => handleViewOrder(order)}
-                            className="text-indigo-600 hover:text-indigo-900 mr-3 flex items-center"
-                          >
-                            <Eye className="w-4 h-4 mr-1" />
-                            View
-                          </button>
+                        <td className="px-3 py-3 whitespace-nowrap text-xs font-medium">
+                          <div className="flex items-center space-x-1">
+                            <button 
+                              onClick={() => handleViewOrder(order)}
+                              className="text-indigo-600 hover:text-indigo-900 flex items-center px-2 py-1 rounded text-xs hover:bg-indigo-50 transition-colors"
+                            >
+                              <Eye className="w-3 h-3 mr-1" />
+                              View
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteOrder(order.id)}
+                              className="text-red-600 hover:text-red-900 flex items-center px-2 py-1 rounded text-xs hover:bg-red-50 transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -879,16 +917,16 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto min-w-0">
+                <table className="w-full min-w-max">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member Since</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Orders</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Spent</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">Customer</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-48">Email</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Member Since</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Total Orders</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">Total Spent</th>
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -898,42 +936,42 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       
                       return (
                         <tr key={customer.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-3 py-3 whitespace-nowrap">
                             <div className="flex items-center">
-                              <div className="flex-shrink-0 h-10 w-10">
-                                <div className="h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center">
-                                  <Users className="h-5 w-5 text-primary-600" />
+                              <div className="flex-shrink-0 h-6 w-6">
+                                <div className="h-6 w-6 rounded-full bg-primary-100 flex items-center justify-center">
+                                  <Users className="h-3 w-3 text-primary-600" />
                                 </div>
                               </div>
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">
+                              <div className="ml-2">
+                                <div className="text-xs font-medium text-gray-900 truncate">
                                   {customer.full_name || 'No Name'}
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  ID: {customer.id.slice(0, 8)}...
+                                <div className="text-xs text-gray-500">
+                                  ID: {customer.id.slice(0, 6)}...
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-900 truncate">
                             {customer.email}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-500">
                             {new Date(customer.created_at).toLocaleDateString()}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-900">
                             {customerOrderStats.length}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-900">
                             RWF {totalSpent.toLocaleString()}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-3 py-3 whitespace-nowrap text-xs font-medium">
                             <button 
                               onClick={() => handleViewCustomer(customer)}
-                              className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                              className="text-indigo-600 hover:text-indigo-900 flex items-center text-xs"
                             >
-                              <Eye className="w-4 h-4 mr-1" />
-                              View Details
+                              <Eye className="w-3 h-3 mr-1" />
+                              View
                             </button>
                           </td>
                         </tr>
@@ -1165,26 +1203,26 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             )}
 
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
+              <div className="overflow-x-auto min-w-0">
+                <table className="w-full min-w-max">
                   <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 w-48">
                         Product
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 w-24">
                         Category
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 w-20">
                         Price
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 w-16">
                         Stock
                       </th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 w-20">
                         Status
                       </th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                      <th className="px-3 py-3 text-right text-xs font-semibold text-gray-700 w-24">
                         Actions
                       </th>
                     </tr>
@@ -1194,34 +1232,34 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       .filter(product => showDeletedProducts || product.is_active)
                       .map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center space-x-3">
+                        <td className="px-3 py-3">
+                          <div className="flex items-center space-x-2">
                             <img
                               src={product.image_url || 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image'}
                               alt={product.name}
-                              className="w-12 h-12 rounded-lg object-cover"
+                              className="w-8 h-8 rounded object-cover"
                               onError={(e) => {
                                 e.currentTarget.src = 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image';
                               }}
                             />
                             <div>
-                              <div className="font-medium text-gray-800">{product.name}</div>
-                              <div className="text-sm text-gray-500 line-clamp-1">
+                              <div className="text-xs font-medium text-gray-800 truncate">{product.name}</div>
+                              <div className="text-xs text-gray-500 line-clamp-1">
                                 {product.description}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-gray-700">
+                        <td className="px-3 py-3 text-xs text-gray-700">
                           {categories.find((c) => c.id === product.category_id)?.name}
                         </td>
-                        <td className="px-6 py-4 font-semibold text-gray-800">
-                          ${product.price.toFixed(2)}
+                        <td className="px-3 py-3 text-xs font-semibold text-gray-800">
+                          RWF {product.price.toLocaleString()}
                         </td>
-                        <td className="px-6 py-4 text-gray-700">{product.stock_quantity}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-3 py-3 text-xs text-gray-700">{product.stock_quantity}</td>
+                        <td className="px-3 py-3">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
                               product.is_active
                                 ? 'bg-primary-100 text-primary-700'
                                 : 'bg-gray-100 text-gray-700'
@@ -1230,33 +1268,33 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                             {product.is_active ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex justify-end space-x-2">
+                        <td className="px-3 py-3">
+                          <div className="flex justify-end space-x-1">
                             <button
                               onClick={() => {
                                 setEditingProduct(product);
                                 setShowProductForm(true);
                               }}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                              className="p-1 text-blue-600 hover:bg-blue-50 rounded transition"
                               title="Edit Product"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Edit2 className="w-3 h-3" />
                             </button>
                             {product.is_active ? (
                               <button
                                 onClick={() => handleDeleteProduct(product.id)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                className="p-1 text-red-600 hover:bg-red-50 rounded transition"
                                 title="Delete Product (Soft Delete)"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Trash2 className="w-3 h-3" />
                               </button>
                             ) : (
                               <button
                                 onClick={() => handleRestoreProduct(product.id)}
-                                className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition"
+                                className="p-1 text-primary-600 hover:bg-primary-50 rounded transition"
                                 title="Restore Product"
                               >
-                                <Save className="w-4 h-4" />
+                                <Save className="w-3 h-3" />
                               </button>
                             )}
                           </div>
@@ -1307,104 +1345,207 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Order Details Modal */}
+      {/* Enhanced Order Details Modal */}
       {showOrderDetails && selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold text-gray-800">Order Details</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-y-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-t-2xl">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-2xl font-bold">Order Details</h3>
+                  <p className="text-green-100 mt-1">Order #{selectedOrder.order_number}</p>
+                </div>
                 <button
                   onClick={() => setShowOrderDetails(false)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-white hover:text-green-200 transition-colors p-2 rounded-lg hover:bg-green-600"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
+            </div>
 
-              <div className="grid md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-800 mb-3">Order Information</h4>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Order Number:</span>
-                      <span className="font-medium">{selectedOrder.order_number}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Status:</span>
-                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                        selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        selectedOrder.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
-                        selectedOrder.status === 'processing' ? 'bg-primary-100 text-primary-800' :
-                        selectedOrder.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
-                        selectedOrder.status === 'delivered' ? 'bg-primary-100 text-primary-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {selectedOrder.status}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Payment Method:</span>
-                      <span className="font-medium">{selectedOrder.payment_method.toUpperCase()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Total:</span>
-                      <span className="font-bold text-lg">RWF {selectedOrder.total.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Date:</span>
-                      <span className="font-medium">{new Date(selectedOrder.created_at).toLocaleString()}</span>
+            <div className="p-6">
+              {/* Order Status Banner */}
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${
+                      selectedOrder.status === 'pending' ? 'bg-yellow-500' :
+                      selectedOrder.status === 'confirmed' ? 'bg-blue-500' :
+                      selectedOrder.status === 'processing' ? 'bg-primary-500' :
+                      selectedOrder.status === 'shipped' ? 'bg-purple-500' :
+                      selectedOrder.status === 'delivered' ? 'bg-green-500' :
+                      'bg-red-500'
+                    }`}></div>
+                    <span className="text-lg font-semibold text-gray-800">Order Status</span>
+                  </div>
+                  <span className={`px-4 py-2 text-sm font-semibold rounded-full ${
+                    selectedOrder.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    selectedOrder.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                    selectedOrder.status === 'processing' ? 'bg-primary-100 text-primary-800' :
+                    selectedOrder.status === 'shipped' ? 'bg-purple-100 text-purple-800' :
+                    selectedOrder.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {selectedOrder.status.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Main Content Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                {/* Order Information */}
+                <div className="lg:col-span-1">
+                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                      <Package className="w-5 h-5 mr-2 text-green-600" />
+                      Order Information
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Order Number:</span>
+                        <span className="font-medium text-gray-900">{selectedOrder.order_number}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Payment Method:</span>
+                        <span className="font-medium text-gray-900">{selectedOrder.payment_method.toUpperCase()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Total Amount:</span>
+                        <span className="font-bold text-lg text-green-600">RWF {selectedOrder.total.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Order Date:</span>
+                        <span className="font-medium text-gray-900">{new Date(selectedOrder.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Order Time:</span>
+                        <span className="font-medium text-gray-900">{new Date(selectedOrder.created_at).toLocaleTimeString()}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-800 mb-3">Customer Information</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Users className="w-4 h-4 text-gray-500" />
-                      <span className="font-medium">{selectedOrder.customer_name}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Mail className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">{selectedOrder.customer_email}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Phone className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">{selectedOrder.customer_phone}</span>
-                    </div>
-                    <div className="flex items-start space-x-2">
-                      <MapPin className="w-4 h-4 text-gray-500 mt-1" />
-                      <div>
-                        <div className="text-gray-600">{selectedOrder.delivery_address}</div>
-                        <div className="text-gray-500 text-sm">{selectedOrder.delivery_city}</div>
+                {/* Customer Information */}
+                <div className="lg:col-span-1">
+                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                      <Users className="w-5 h-5 mr-2 text-green-600" />
+                      Customer Information
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                          <Users className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <div className="font-medium text-gray-900">{selectedOrder.customer_name}</div>
+                          <div className="text-sm text-gray-500">Customer</div>
+                        </div>
                       </div>
+                      <div className="flex items-center space-x-3">
+                        <Mail className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-700">{selectedOrder.customer_email}</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Phone className="w-4 h-4 text-gray-500" />
+                        <span className="text-gray-700">{selectedOrder.customer_phone}</span>
+                      </div>
+                      <div className="flex items-start space-x-3">
+                        <MapPin className="w-4 h-4 text-gray-500 mt-1" />
+                        <div>
+                          <div className="text-gray-700 font-medium">{selectedOrder.delivery_address}</div>
+                          <div className="text-sm text-gray-500">{selectedOrder.delivery_city}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Actions */}
+                <div className="lg:col-span-1">
+                  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                      <Activity className="w-5 h-5 mr-2 text-green-600" />
+                      Order Actions
+                    </h4>
+                    <div className="space-y-3">
+                      <select
+                        value={selectedOrder.status}
+                        onChange={(e) => {
+                          updateOrderStatus(selectedOrder.id, e.target.value);
+                          setSelectedOrder({...selectedOrder, status: e.target.value as Order['status']});
+                        }}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                      <button
+                        onClick={() => handleDeleteOrder(selectedOrder.id)}
+                        className="w-full bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Order
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
 
+              {/* Enhanced Order Items */}
               <div className="mb-6">
-                <h4 className="text-lg font-semibold text-gray-800 mb-3">Order Items</h4>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  {orderItems.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center py-2 border-b last:border-b-0">
-                      <div className="flex items-center space-x-3">
-                        <img 
-                          src={item.products?.image_url || '/placeholder.jpg'} 
-                          alt={item.products?.name || 'Product'}
-                          className="w-12 h-12 object-cover rounded-lg"
-                        />
-                        <div>
-                          <div className="font-medium">{item.products?.name || 'Unknown Product'}</div>
-                          <div className="text-sm text-gray-600">Qty: {item.quantity}</div>
+                <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <ShoppingBag className="w-5 h-5 mr-2 text-green-600" />
+                  Order Items ({orderItems.length} items)
+                </h4>
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                  {orderItems.map((item, index) => (
+                    <div key={item.id} className={`p-6 ${index !== orderItems.length - 1 ? 'border-b border-gray-100' : ''}`}>
+                      <div className="flex items-center space-x-6">
+                        {/* Large Product Image */}
+                        <div className="flex-shrink-0">
+                          <img 
+                            src={item.products?.image_url || 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image'} 
+                            alt={item.products?.name || 'Product'}
+                            className="w-24 h-24 object-cover rounded-xl shadow-md"
+                            onError={(e) => {
+                              e.currentTarget.src = 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image';
+                            }}
+                          />
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">RWF {((item.quantity * (item.products?.price || 0))).toLocaleString()}</div>
-                        <div className="text-sm text-gray-600">RWF {(item.products?.price || 0).toLocaleString()} each</div>
+                        
+                        {/* Product Details */}
+                        <div className="flex-1 min-w-0">
+                          <h5 className="text-lg font-semibold text-gray-900 mb-1">
+                            {item.products?.name || 'Unknown Product'}
+                          </h5>
+                          {item.products?.description && (
+                            <p className="text-gray-600 text-sm mb-2 line-clamp-2">
+                              {item.products.description}
+                            </p>
+                          )}
+                          <div className="flex items-center space-x-4 text-sm text-gray-500">
+                            <span>Quantity: <span className="font-medium text-gray-900">{item.quantity}</span></span>
+                            <span>Price: <span className="font-medium text-gray-900">RWF {(item.products?.price || 0).toLocaleString()}</span></span>
+                          </div>
+                        </div>
+                        
+                        {/* Total Price */}
+                        <div className="flex-shrink-0 text-right">
+                          <div className="text-xl font-bold text-green-600">
+                            RWF {((item.quantity * (item.products?.price || 0))).toLocaleString()}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {item.quantity} × RWF {(item.products?.price || 0).toLocaleString()}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1413,35 +1554,24 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
 
               {selectedOrder.notes && (
                 <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-3">Order Notes</h4>
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                    <Edit2 className="w-5 h-5 mr-2 text-green-600" />
+                    Order Notes
+                  </h4>
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <p className="text-gray-700">{selectedOrder.notes}</p>
                   </div>
                 </div>
               )}
 
-              <div className="flex justify-end space-x-3">
+              {/* Footer Actions */}
+              <div className="flex justify-end pt-6 border-t border-gray-200">
                 <button
                   onClick={() => setShowOrderDetails(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                  className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                 >
                   Close
                 </button>
-                <select
-                  value={selectedOrder.status}
-                  onChange={(e) => {
-                    updateOrderStatus(selectedOrder.id, e.target.value);
-                    setSelectedOrder({...selectedOrder, status: e.target.value as Order['status']});
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="processing">Processing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
               </div>
             </div>
           </div>
@@ -1561,7 +1691,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
           </div>
         </div>
-      )}
+        )}
+          </div>
+        </div>
       </div>
     </div>
   );

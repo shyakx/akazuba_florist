@@ -27,22 +27,22 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-gradient-to-br from-primary-500 to-red-500 text-white py-20 px-4">
+      <section className="bg-gradient-to-br from-primary-500 to-red-500 text-white py-12 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">Contact Us</h1>
-          <p className="text-xl text-primary-50">
+          <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
+          <p className="text-lg text-primary-50">
             Get in touch with AKAZUBA FLORIST
           </p>
         </div>
       </section>
 
-      <section className="py-16 px-4">
+      <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-8">Get in Touch</h2>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Get in Touch</h2>
               
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div className="flex items-start space-x-4">
                   <div className="bg-primary-100 p-3 rounded-full">
                     <Mail className="w-6 h-6 text-primary-500" />
@@ -170,18 +170,18 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <section className="py-16 px-4 bg-gradient-to-br from-primary-50 to-white">
+      <section className="py-12 px-4 bg-gradient-to-br from-primary-50 to-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8">Delivery Areas</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Kigali City</h3>
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Delivery Areas</h2>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Kigali City</h3>
               <p className="text-gray-600">
                 RWF 2,000 delivery fee within Kigali city limits. Same-day delivery available for orders placed before 2:00 PM.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">Surrounding Areas</h3>
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Surrounding Areas</h3>
               <p className="text-gray-600">
                 Delivery available to surrounding areas with additional charges. Contact us for specific locations.
               </p>
