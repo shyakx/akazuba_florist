@@ -36,11 +36,17 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
                 alt="AKAZUBA FLORIST" 
                 className="h-8 w-auto"
                 onError={(e) => {
-                  // Fallback to text if logo not found
-                  e.currentTarget.style.display = 'none';
-                  const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
-                  if (nextElement) {
-                    nextElement.style.display = 'inline';
+                  // Try fallback logo first
+                  const target = e.currentTarget as HTMLImageElement;
+                  if (target.src.includes('akazuba-logo.png')) {
+                    target.src = '/images/logo/akazuba-logo-icon.png';
+                  } else {
+                    // If both logos fail, show text
+                    target.style.display = 'none';
+                    const nextElement = target.nextElementSibling as HTMLElement;
+                    if (nextElement) {
+                      nextElement.style.display = 'inline';
+                    }
                   }
                 }}
               />

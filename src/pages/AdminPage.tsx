@@ -461,8 +461,21 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
       <div className="w-64 bg-gradient-to-b from-green-600 to-green-700 shadow-lg flex-shrink-0">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8">
-            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-              <span className="text-green-600 font-bold text-lg">A</span>
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
+              <img 
+                src="/images/logo/akazuba-logo-icon.png" 
+                alt="AKAZUBA" 
+                className="w-6 h-6 object-contain"
+                onError={(e) => {
+                  // Fallback to text if logo not found
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = '<span class="text-green-600 font-bold text-lg">A</span>';
+                  }
+                }}
+              />
             </div>
             <div>
               <h1 className="text-white font-semibold text-lg">AKAZUBA</h1>

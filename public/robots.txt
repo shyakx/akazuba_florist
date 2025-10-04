@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://akazubaflorist.com/sitemap.xml
+
+# Disallow admin area
+Disallow: /admin/
+
+# Allow all other content
+Allow: /products/
+Allow: /contact/
+Allow: /about/
