@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Mail, MapPin, Phone, Clock } from 'lucide-react';
 import { supabase, SiteContent } from '../lib/supabase';
+import BusinessStatus from '../components/BusinessStatus';
 
 export default function ContactPage() {
   const [content, setContent] = useState<{ [key: string]: string }>({});
@@ -78,9 +79,11 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Business Hours</h3>
-                    <p className="text-gray-600">Monday - Friday: 8:00 AM - 6:00 PM</p>
-                    <p className="text-gray-600">Saturday: 9:00 AM - 4:00 PM</p>
-                    <p className="text-gray-600">Sunday: Closed</p>
+                    <p className="text-gray-600">Monday - Sunday: 8:00 AM - 8:00 PM</p>
+                    <p className="text-gray-600 text-sm">Open 7 days a week</p>
+                    <div className="mt-2">
+                      <BusinessStatus />
+                    </div>
                   </div>
                 </div>
               </div>

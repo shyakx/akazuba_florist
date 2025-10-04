@@ -1,45 +1,32 @@
 import emailjs from '@emailjs/browser';
 
 // EmailJS configuration
-const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_akazuba';
-const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_order_notification';
-const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'your_public_key_here';
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_5532uqf';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_ryduhos';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'GEvK-7ZQGZAobO6pi';
 
-// Initialize EmailJS
-emailjs.init(EMAILJS_PUBLIC_KEY);
+
+// Initialize EmailJS with error handling
+try {
+  emailjs.init(EMAILJS_PUBLIC_KEY);
+} catch (error) {
+  console.error('Failed to initialize EmailJS:', error);
+}
 
 // Test function to verify EmailJS setup
 export const testEmailJS = async (): Promise<boolean> => {
   try {
-    console.log('Testing EmailJS with:', {
-      serviceId: EMAILJS_SERVICE_ID,
-      templateId: EMAILJS_TEMPLATE_ID,
-      publicKey: EMAILJS_PUBLIC_KEY
-    });
-
-    const response = await emailjs.send(
+    await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
       {
-        order_number: 'TEST-001',
-        customer_name: 'Test Customer',
-        customer_email: 'test@example.com',
-        customer_phone: '+250 123 456 789',
-        delivery_address: 'Test Address',
-        delivery_city: 'Kigali',
-        payment_method: 'Test Payment',
-        subtotal: 'RWF 50,000',
-        delivery_fee: 'RWF 2,000',
-        total: 'RWF 52,000',
-        notes: 'This is a test email',
-        payment_proof_url: 'No payment proof uploaded',
-        order_items: 'Test Product x1 - RWF 50,000',
-        admin_email: 'info.akazubaflorist@gmail.com',
-        order_date: new Date().toLocaleString('en-RW')
+        to_email: 'info.akazubaflorist@gmail.com',
+        from_name: 'AKAZUBA FLORIST',
+        message: 'Test email from AKAZUBA FLORIST admin panel',
+        reply_to: 'info.akazubaflorist@gmail.com'
       }
     );
 
-    console.log('Test email sent successfully:', response);
     return true;
   } catch (error) {
     console.error('Test email failed:', error);
@@ -65,6 +52,7 @@ export interface OrderEmailData {
     quantity: number;
     price: number;
     total: number;
+    imageUrl?: string;
   }>;
   adminEmail: string;
 }
@@ -87,6 +75,13 @@ export const sendOrderNotificationEmail = async (orderData: OrderEmailData): Pro
       order_items: orderData.orderItems.map(item => 
         `${item.productName} x${item.quantity} - ${item.total.toLocaleString('en-RW', { style: 'currency', currency: 'RWF' })}`
       ).join('\n'),
+      order_items_with_images: orderData.orderItems.map(item => ({
+        name: item.productName,
+        quantity: item.quantity,
+        price: item.price.toLocaleString('en-RW', { style: 'currency', currency: 'RWF' }),
+        total: item.total.toLocaleString('en-RW', { style: 'currency', currency: 'RWF' }),
+        image: item.imageUrl || ''
+      })),
       admin_email: orderData.adminEmail,
       order_date: new Date().toLocaleString('en-RW', {
         year: 'numeric',
@@ -97,13 +92,15 @@ export const sendOrderNotificationEmail = async (orderData: OrderEmailData): Pro
       })
     };
 
-    const response = await emailjs.send(
+    await emailjs.send(
       EMAILJS_SERVICE_ID,
       EMAILJS_TEMPLATE_ID,
-      templateParams
+      templateParams,
+      {
+        publicKey: EMAILJS_PUBLIC_KEY
+      }
     );
 
-    console.log('Email sent successfully:', response);
     return true;
   } catch (error) {
     console.error('Failed to send email:', error);

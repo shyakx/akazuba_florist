@@ -1,4 +1,5 @@
 import { Heart, Mail, Phone, MapPin, Clock, Facebook, Instagram, Twitter, Truck } from 'lucide-react';
+import { BusinessStatusCompact } from './BusinessStatus';
 
 type FooterProps = {
   onNavigate: (page: string) => void;
@@ -105,8 +106,11 @@ export default function Footer({ onNavigate }: FooterProps) {
               <div className="flex items-center space-x-2">
                 <Clock className="w-4 h-4 text-primary-500" />
                 <div className="text-gray-300 text-sm">
-                  <div>Mon-Fri: 8AM-6PM</div>
-                  <div>Sat: 9AM-4PM, Sun: Closed</div>
+                  <div>Mon-Sun: 8AM-8PM</div>
+                  <div className="flex items-center space-x-1">
+                    <span>Open 7 days a week</span>
+                    <BusinessStatusCompact />
+                  </div>
                 </div>
               </div>
             </div>

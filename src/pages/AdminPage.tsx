@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, Save, X, ShoppingBag, DollarSign, Package, Users, Eye, Search, MapPin, Phone, Mail, CheckCircle, Clock, Truck, Star, Activity } from 'lucide-react';
+import { CreditCard as Edit2, Trash2, Save, X, ShoppingBag, DollarSign, Package, Users, Eye, Search, MapPin, Phone, Mail, CheckCircle, Clock, Truck, Star, Activity } from 'lucide-react';
 import { supabase, Product, Category, SiteContent, Order, OrderItem, Profile } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { testEmailJS } from '../lib/emailService';
@@ -32,6 +32,8 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
     monthlyRevenue: 0
   });
   const [emailTestResult, setEmailTestResult] = useState<string>('');
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [productImagePreview, setProductImagePreview] = useState<string>('');
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
@@ -59,6 +61,18 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
       }
     } catch (error) {
       setEmailTestResult('❌ Test email failed: ' + (error as Error).message);
+    }
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProductImageFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setProductImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -297,23 +311,62 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
     if (!editingProduct) return;
 
     try {
+      let imageUrl = editingProduct.image_url;
+
+      // Handle image upload if a new file is selected
+      if (productImageFile) {
+        const fileExt = productImageFile.name.split('.').pop();
+        const fileName = `${Date.now()}_${editingProduct.name?.replace(/\s+/g, '_') || 'product'}.${fileExt}`;
+        
+        try {
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(fileName, productImageFile);
+
+          if (uploadError) {
+            console.error('Upload error:', uploadError);
+            // If upload fails, keep the existing image_url or use a placeholder
+            if (!editingProduct.image_url) {
+              imageUrl = 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image';
+            }
+          } else if (uploadData) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('product-images')
+              .getPublicUrl(fileName);
+            imageUrl = publicUrl;
+          }
+        } catch (error) {
+          console.error('Image upload failed:', error);
+          // If upload fails, keep the existing image_url or use a placeholder
+          if (!editingProduct.image_url) {
+            imageUrl = 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image';
+          }
+        }
+      }
+
+      const productData = {
+        ...editingProduct,
+        image_url: imageUrl || 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image',
+        updated_at: new Date().toISOString(),
+      };
+
       if (editingProduct.id) {
         await supabase
           .from('products')
-          .update({
-            ...editingProduct,
-            updated_at: new Date().toISOString(),
-          })
+          .update(productData)
           .eq('id', editingProduct.id);
       } else {
-        await supabase.from('products').insert(editingProduct);
+        await supabase.from('products').insert(productData);
       }
 
+      // Reset form
       setEditingProduct(null);
       setShowProductForm(false);
+      setProductImageFile(null);
+      setProductImagePreview('');
       loadProducts();
     } catch {
-      // Error handled silently('Error saving product:', error);
+      // Error handled silently
     }
   };
 
@@ -374,125 +427,188 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
-
-        <div className="bg-white rounded-xl shadow-sm mb-6">
-          <div className="flex border-b">
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-gradient-to-b from-green-600 to-green-700 shadow-lg">
+        <div className="p-6">
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+              <span className="text-green-600 font-bold text-lg">A</span>
+            </div>
+            <div>
+              <h1 className="text-white font-semibold text-lg">AKAZUBA</h1>
+              <p className="text-green-100 text-xs">Admin Panel</p>
+            </div>
+          </div>
+          
+          <nav className="space-y-2">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`px-6 py-4 font-semibold transition ${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                 activeTab === 'dashboard'
-                  ? 'text-primary-500 border-b-2 border-primary-500'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-white text-green-700 shadow-md'
+                  : 'text-green-100 hover:bg-green-500 hover:text-white'
               }`}
             >
-              Dashboard
+              <Activity className="w-5 h-5" />
+              <span className="font-medium">Dashboard</span>
             </button>
+            
             <button
               onClick={() => setActiveTab('products')}
-              className={`px-6 py-4 font-semibold transition ${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                 activeTab === 'products'
-                  ? 'text-primary-500 border-b-2 border-primary-500'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-white text-green-700 shadow-md'
+                  : 'text-green-100 hover:bg-green-500 hover:text-white'
               }`}
             >
-              Products
+              <Package className="w-5 h-5" />
+              <span className="font-medium">Products</span>
             </button>
+            
             <button
               onClick={() => setActiveTab('orders')}
-              className={`px-6 py-4 font-semibold transition ${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                 activeTab === 'orders'
-                  ? 'text-primary-500 border-b-2 border-primary-500'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-white text-green-700 shadow-md'
+                  : 'text-green-100 hover:bg-green-500 hover:text-white'
               }`}
             >
-              Orders
+              <ShoppingBag className="w-5 h-5" />
+              <span className="font-medium">Orders</span>
             </button>
+            
             <button
               onClick={() => setActiveTab('customers')}
-              className={`px-6 py-4 font-semibold transition ${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                 activeTab === 'customers'
-                  ? 'text-primary-500 border-b-2 border-primary-500'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-white text-green-700 shadow-md'
+                  : 'text-green-100 hover:bg-green-500 hover:text-white'
               }`}
             >
-              Customers
+              <Users className="w-5 h-5" />
+              <span className="font-medium">Customers</span>
             </button>
+            
             <button
               onClick={() => setActiveTab('content')}
-              className={`px-6 py-4 font-semibold transition ${
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                 activeTab === 'content'
-                  ? 'text-primary-500 border-b-2 border-primary-500'
-                  : 'text-gray-600 hover:text-gray-800'
+                  ? 'bg-white text-green-700 shadow-md'
+                  : 'text-green-100 hover:bg-green-500 hover:text-white'
               }`}
             >
-              Content
+              <Edit2 className="w-5 h-5" />
+              <span className="font-medium">Content</span>
             </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-900 capitalize">{activeTab}</h1>
+              <p className="text-gray-600 text-sm">Manage your AKAZUBA FLORIST business</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="text-right">
+                <p className="text-sm font-medium text-gray-900">Welcome back!</p>
+                <p className="text-xs text-gray-500">Admin User</p>
+              </div>
+              <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <span className="text-green-600 font-semibold">A</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Content Area */}
+        <div className="flex-1 p-6 overflow-auto">
 
         {activeTab === 'dashboard' && (
           <div>
             {/* Key Metrics Grid */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Products</p>
-                    <p className="text-3xl font-bold text-gray-900">{analytics.totalProducts}</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Products</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {analytics.totalProducts}
+                    </p>
                     {analytics.lowStockProducts > 0 && (
-                      <p className="text-xs text-primary-600 mt-1">
-                        {analytics.lowStockProducts} low stock
-                      </p>
+                      <div className="flex items-center mt-2">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                        <p className="text-xs text-orange-600 font-medium">
+                          {analytics.lowStockProducts} low stock
+                        </p>
+                      </div>
                     )}
                   </div>
-                  <div className="bg-primary-100 p-3 rounded-full">
-                    <Package className="w-6 h-6 text-primary-500" />
+                  <div className="bg-gradient-to-br from-green-100 to-green-200 p-4 rounded-xl">
+                    <Package className="w-6 h-6 text-green-600" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                    <p className="text-3xl font-bold text-gray-900">{analytics.totalOrders}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Avg: RWF {analytics.averageOrderValue.toLocaleString()}
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Orders</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {analytics.totalOrders}
                     </p>
+                    <div className="flex items-center mt-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                      <p className="text-xs text-blue-600 font-medium">
+                        Avg: RWF {analytics.averageOrderValue.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="bg-blue-100 p-3 rounded-full">
-                    <ShoppingBag className="w-6 h-6 text-blue-500" />
+                  <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-xl">
+                    <ShoppingBag className="w-6 h-6 text-blue-600" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-3xl font-bold text-gray-900">RWF {analytics.totalRevenue.toLocaleString()}</p>
-                    <p className="text-xs text-primary-600 mt-1">
-                      This month: RWF {analytics.monthlyRevenue.toLocaleString()}
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Revenue</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      RWF {analytics.totalRevenue.toLocaleString()}
                     </p>
+                    <div className="flex items-center mt-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                      <p className="text-xs text-green-600 font-medium">
+                        This month: RWF {analytics.monthlyRevenue.toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <div className="bg-primary-100 p-3 rounded-full">
-                    <DollarSign className="w-6 h-6 text-primary-500" />
+                  <div className="bg-gradient-to-br from-emerald-100 to-emerald-200 p-4 rounded-xl">
+                    <DollarSign className="w-6 h-6 text-emerald-600" />
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Customers</p>
-                    <p className="text-3xl font-bold text-gray-900">{analytics.totalCustomers}</p>
-                    <p className="text-xs text-gray-500 mt-1">Registered users</p>
+                    <p className="text-sm font-medium text-gray-600 mb-1">Total Customers</p>
+                    <p className="text-3xl font-bold text-gray-900">
+                      {analytics.totalCustomers}
+                    </p>
+                    <div className="flex items-center mt-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                      <p className="text-xs text-purple-600 font-medium">Registered users</p>
+                    </div>
                   </div>
-                  <div className="bg-purple-100 p-3 rounded-full">
-                    <Users className="w-6 h-6 text-purple-500" />
+                  <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-xl">
+                    <Users className="w-6 h-6 text-purple-600" />
                   </div>
                 </div>
               </div>
@@ -562,17 +678,28 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
 
             {/* Email Test Section */}
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Email Notification Test</h3>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="bg-gradient-to-br from-green-100 to-green-200 p-3 rounded-xl">
+                  <Mail className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Email Notification Test</h3>
+                  <p className="text-sm text-gray-600">Test your email notification system</p>
+                </div>
+              </div>
               <div className="flex items-center gap-4">
                 <button
                   onClick={handleTestEmail}
-                  className="bg-primary-500 text-white px-4 py-2 rounded-lg hover:bg-primary-600 transition"
+                  className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   Test Email Notification
                 </button>
                 {emailTestResult && (
-                  <p className="text-sm text-gray-600">{emailTestResult}</p>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <p className="text-sm text-gray-600">{emailTestResult}</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -661,23 +788,23 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order #</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white divide-y divide-gray-100">
                     {filteredOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-50">
+                      <tr key={order.id} className="hover:bg-gray-50 transition-colors duration-200">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {order.order_number}
                         </td>
@@ -751,17 +878,17 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member Since</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Spent</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Customer</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Member Since</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Orders</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Spent</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -833,12 +960,13 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                     category_id: categories[0]?.id || '',
                     is_active: true,
                   });
+                  setProductImageFile(null);
+                  setProductImagePreview('');
                   setShowProductForm(true);
                 }}
-                className="flex items-center space-x-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium"
+                className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                <Plus className="w-5 h-5" />
-                <span>Add New Product</span>
+                Add New Product
               </button>
               
               <div className="flex items-center space-x-4">
@@ -855,15 +983,22 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
 
             {showProductForm && editingProduct && (
-              <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    {editingProduct.id ? 'Edit Product' : 'Add New Product'}
-                  </h2>
+              <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 mb-8">
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">
+                      {editingProduct.id ? 'Edit Product' : 'Add New Product'}
+                    </h2>
+                    <p className="text-gray-600">
+                      {editingProduct.id ? 'Update product information' : 'Create a new product for your store'}
+                    </p>
+                  </div>
                   <button
                     onClick={() => {
                       setShowProductForm(false);
                       setEditingProduct(null);
+                      setProductImageFile(null);
+                      setProductImagePreview('');
                     }}
                     className="text-gray-500 hover:text-gray-700"
                   >
@@ -871,9 +1006,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                   </button>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
                       Product Name
                     </label>
                     <input
@@ -882,18 +1017,19 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, name: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="Enter product name"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">Category</label>
                     <select
                       value={editingProduct.category_id || ''}
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, category_id: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                     >
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>
@@ -904,37 +1040,40 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">Price (RWF)</label>
                     <input
                       type="number"
-                      step="0.01"
-                      value={editingProduct.price || 0}
+                      step="100"
+                      value={editingProduct.price || ''}
                       onChange={(e) =>
-                        setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })
+                        setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="25,000"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
                       Stock Quantity
                     </label>
                     <input
                       type="number"
-                      value={editingProduct.stock_quantity || 0}
+                      min="0"
+                      value={editingProduct.stock_quantity || ''}
                       onChange={(e) =>
                         setEditingProduct({
                           ...editingProduct,
-                          stock_quantity: parseInt(e.target.value),
+                          stock_quantity: parseInt(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      placeholder="3"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
                       Description
                     </label>
                     <textarea
@@ -942,23 +1081,50 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                       onChange={(e) =>
                         setEditingProduct({ ...editingProduct, description: e.target.value })
                       }
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      rows={4}
+                      placeholder="Describe your product..."
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
                     />
                   </div>
 
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image URL
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Product Image
                     </label>
-                    <input
-                      type="text"
-                      value={editingProduct.image_url || ''}
-                      onChange={(e) =>
-                        setEditingProduct({ ...editingProduct, image_url: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-green-400 transition-colors duration-200">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageFileChange}
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                      />
+                      <p className="text-xs text-gray-500 mt-2">PNG, JPG, GIF up to 10MB</p>
+                    </div>
+                    {productImagePreview && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-700 mb-3">Preview:</p>
+                        <div className="relative inline-block">
+                          <img
+                            src={productImagePreview}
+                            alt="Product preview"
+                            className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200 shadow-sm"
+                          />
+                          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                            New
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {editingProduct.image_url && !productImagePreview && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-700 mb-3">Current image:</p>
+                        <img
+                          src={editingProduct.image_url}
+                          alt="Current product"
+                          className="w-32 h-32 object-cover rounded-xl border-2 border-gray-200 shadow-sm"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="md:col-span-2">
@@ -976,31 +1142,32 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                   </div>
                 </div>
 
-                <div className="flex space-x-3 mt-6">
-                  <button
-                    onClick={handleSaveProduct}
-                    className="flex items-center space-x-2 px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium"
-                  >
-                    <Save className="w-5 h-5" />
-                    <span>Save Product</span>
-                  </button>
+                <div className="flex justify-end space-x-4 pt-6 border-t border-gray-100">
                   <button
                     onClick={() => {
                       setShowProductForm(false);
                       setEditingProduct(null);
+                      setProductImageFile(null);
+                      setProductImagePreview('');
                     }}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+                    className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
                   >
                     Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveProduct}
+                    className="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    {editingProduct.id ? 'Update Product' : 'Add Product'}
                   </button>
                 </div>
               </div>
             )}
 
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 border-b">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">
                         Product
@@ -1030,9 +1197,12 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-3">
                             <img
-                              src={product.image_url}
+                              src={product.image_url || 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image'}
                               alt={product.name}
                               className="w-12 h-12 rounded-lg object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://via.placeholder.com/300x300/16a34a/ffffff?text=No+Image';
+                              }}
                             />
                             <div>
                               <div className="font-medium text-gray-800">{product.name}</div>
@@ -1392,6 +1562,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

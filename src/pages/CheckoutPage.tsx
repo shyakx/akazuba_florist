@@ -130,7 +130,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
               .getPublicUrl(fileName);
             paymentProofUrl = publicUrl;
           }
-        } catch {
+        } catch (error) {
           // Handle upload error silently
         }
       }
@@ -153,7 +153,8 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
           productName: item.products.name,
           quantity: item.quantity,
           price: item.products.price,
-          total: item.products.price * item.quantity
+          total: item.products.price * item.quantity,
+          imageUrl: item.products.image_url
         })),
         adminEmail: import.meta.env.VITE_ADMIN_EMAIL || 'info.akazubaflorist@gmail.com'
       };
