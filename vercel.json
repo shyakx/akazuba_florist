@@ -3,6 +3,12 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci",
   "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "redirects": [
     {
       "source": "/(.*)",
@@ -10,6 +16,18 @@
         {
           "type": "host",
           "value": "www.akazubaflorist.com"
+        }
+      ],
+      "destination": "https://akazubaflorist.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "x-forwarded-proto",
+          "value": "http"
         }
       ],
       "destination": "https://akazubaflorist.com/$1",
@@ -31,6 +49,10 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains; preload"
         }
       ]
     }
