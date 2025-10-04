@@ -1,12 +1,24 @@
 {
   "redirects": [
     {
-      "source": "http://akazubaflorist.com/(.*)",
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "akazubaflorist.com"
+        }
+      ],
       "destination": "https://akazubaflorist.com/$1",
       "permanent": true
     },
     {
-      "source": "http://www.akazubaflorist.com/(.*)",
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.akazubaflorist.com"
+        }
+      ],
       "destination": "https://www.akazubaflorist.com/$1",
       "permanent": true
     }
