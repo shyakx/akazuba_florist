@@ -1,28 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { supabase, CartItem, Product } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 type CartPageProps = {
   onNavigate: (page: string) => void;
+  updateCartCount: (increment: number) => void;
 };
 
 type CartItemWithProduct = CartItem & {
   products: Product;
 };
 
-export default function CartPage({ onNavigate }: CartPageProps) {
+export default function CartPage({ onNavigate, updateCartCount }: CartPageProps) {
   const [cartItems, setCartItems] = useState<CartItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      loadCart();
-    }
-  }, [user]);
-
-  const loadCart = async () => {
+  const loadCart = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -35,10 +30,21 @@ export default function CartPage({ onNavigate }: CartPageProps) {
       setCartItems(data as CartItemWithProduct[]);
     }
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadCart();
+    }
+  }, [user, loadCart]);
 
   const updateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
+
+    const currentItem = cartItems.find(item => item.id === itemId);
+    if (!currentItem) return;
+
+    const quantityDifference = newQuantity - currentItem.quantity;
 
     await supabase
       .from('cart_items')
@@ -48,11 +54,16 @@ export default function CartPage({ onNavigate }: CartPageProps) {
       })
       .eq('id', itemId);
 
+    updateCartCount(quantityDifference); // Update count immediately
     loadCart();
   };
 
   const removeItem = async (itemId: string) => {
+    const currentItem = cartItems.find(item => item.id === itemId);
+    if (!currentItem) return;
+
     await supabase.from('cart_items').delete().eq('id', itemId);
+    updateCartCount(-currentItem.quantity); // Update count immediately
     loadCart();
   };
 

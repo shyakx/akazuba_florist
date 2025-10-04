@@ -19,7 +19,10 @@ export default function Footer({ onNavigate }: FooterProps) {
                 onError={(e) => {
                   // Fallback to heart icon if logo not found
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling.style.display = 'block';
+                  const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                  if (nextElement) {
+                    nextElement.style.display = 'block';
+                  }
                 }}
               />
               <div className="bg-primary-600 p-1.5 rounded-full" style={{ display: 'none' }}>

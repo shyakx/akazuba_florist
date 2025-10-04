@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -18,13 +18,48 @@ function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
   const [cartItemCount, setCartItemCount] = useState(0);
+  const [wishlistItemCount, setWishlistItemCount] = useState(0);
   const { user, profile, loading } = useAuth();
+
+  const loadCartCount = useCallback(async () => {
+    if (!user) {
+      setCartItemCount(0);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('cart_items')
+      .select('quantity')
+      .eq('user_id', user.id);
+
+    if (data && !error) {
+      const total = data.reduce((sum, item) => sum + item.quantity, 0);
+      setCartItemCount(total);
+    }
+  }, [user]);
+
+  const loadWishlistCount = useCallback(async () => {
+    if (!user) {
+      setWishlistItemCount(0);
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from('wishlist')
+      .select('id')
+      .eq('user_id', user.id);
+
+    if (data && !error) {
+      setWishlistItemCount(data.length);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
       loadCartCount();
+      loadWishlistCount();
 
-      const channel = supabase
+      const cartChannel = supabase
         .channel('cart-changes')
         .on(
           'postgres_changes',
@@ -40,11 +75,32 @@ function AppContent() {
         )
         .subscribe();
 
+      const wishlistChannel = supabase
+        .channel('wishlist-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'wishlist',
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            loadWishlistCount();
+          }
+        )
+        .subscribe();
+
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(cartChannel);
+        supabase.removeChannel(wishlistChannel);
       };
+    } else {
+      // Reset counts when user logs out
+      setCartItemCount(0);
+      setWishlistItemCount(0);
     }
-  }, [user]);
+  }, [user, loadCartCount, loadWishlistCount]);
 
   // Auto-redirect admin users to admin page
   useEffect(() => {
@@ -52,23 +108,6 @@ function AppContent() {
       setCurrentPage('admin');
     }
   }, [profile, currentPage]);
-
-  const loadCartCount = async () => {
-    if (!user) {
-      setCartItemCount(0);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from('cart_items')
-      .select('quantity')
-      .eq('user_id', user.id);
-
-    if (data && !error) {
-      const total = data.reduce((sum, item) => sum + item.quantity, 0);
-      setCartItemCount(total);
-    }
-  };
 
   const handleNavigate = (page: string, categoryId?: string) => {
     setCurrentPage(page);
@@ -78,6 +117,15 @@ function AppContent() {
       setSelectedCategoryId(undefined);
     }
   };
+
+  // Functions to update counts immediately for better UX
+  const updateCartCount = useCallback((increment: number) => {
+    setCartItemCount(prev => Math.max(0, prev + increment));
+  }, []);
+
+  const updateWishlistCount = useCallback((increment: number) => {
+    setWishlistItemCount(prev => Math.max(0, prev + increment));
+  }, []);
 
   if (loading) {
     return (
@@ -116,18 +164,23 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Navbar onNavigate={handleNavigate} currentPage={currentPage} cartItemCount={cartItemCount} />
+      <Navbar onNavigate={handleNavigate} currentPage={currentPage} cartItemCount={cartItemCount} wishlistItemCount={wishlistItemCount} />
 
       <main className="flex-1">
         {currentPage === 'home' && <HomePage onNavigate={handleNavigate} />}
         {currentPage === 'products' && (
-          <ProductsPage onNavigate={handleNavigate} selectedCategoryId={selectedCategoryId} />
+          <ProductsPage 
+            onNavigate={handleNavigate} 
+            selectedCategoryId={selectedCategoryId}
+            updateCartCount={updateCartCount}
+            updateWishlistCount={updateWishlistCount}
+          />
         )}
         {currentPage === 'about' && <AboutPage />}
         {currentPage === 'contact' && <ContactPage />}
-        {currentPage === 'cart' && <CartPage onNavigate={handleNavigate} />}
+        {currentPage === 'cart' && <CartPage onNavigate={handleNavigate} updateCartCount={updateCartCount} />}
         {currentPage === 'checkout' && <CheckoutPage onNavigate={handleNavigate} />}
-        {currentPage === 'wishlist' && <WishlistPage onNavigate={handleNavigate} />}
+        {currentPage === 'wishlist' && <WishlistPage onNavigate={handleNavigate} updateWishlistCount={updateWishlistCount} updateCartCount={updateCartCount} />}
         {currentPage === 'admin' && <AdminPage onNavigate={handleNavigate} />}
       </main>
 

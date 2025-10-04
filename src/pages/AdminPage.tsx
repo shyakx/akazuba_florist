@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Plus, CreditCard as Edit2, Trash2, Save, X, ShoppingBag, DollarSign, Package, Users, Eye, Search, MapPin, Phone, Mail, CheckCircle, Clock, Truck, Star, Activity } from 'lucide-react';
-import { supabase, Product, Category, SiteContent, Order, OrderItem } from '../lib/supabase';
+import { supabase, Product, Category, SiteContent, Order, OrderItem, Profile } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 type AdminPageProps = {
@@ -42,9 +42,13 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   const [showCustomerDetails, setShowCustomerDetails] = useState(false);
   const { profile } = useAuth();
 
+  const handleNavigate = useCallback((page: string) => {
+    onNavigate(page);
+  }, [onNavigate]);
+
   useEffect(() => {
     if (!profile?.is_admin) {
-      onNavigate('home');
+      handleNavigate('home');
       return;
     }
     loadProducts();
@@ -53,7 +57,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
     loadOrders();
     loadAnalytics();
     loadCustomers();
-  }, [profile]);
+  }, [profile, handleNavigate]);
 
   const loadProducts = async () => {
     const { data, error } = await supabase

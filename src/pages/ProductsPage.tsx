@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ShoppingCart, Check, Heart } from 'lucide-react';
 import { supabase, Product, Category, WishlistItem } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,35 +6,17 @@ import { useAuth } from '../contexts/AuthContext';
 type ProductsPageProps = {
   onNavigate: (page: string) => void;
   selectedCategoryId?: string;
+  updateCartCount: (increment: number) => void;
+  updateWishlistCount: (increment: number) => void;
 };
 
-export default function ProductsPage({ onNavigate, selectedCategoryId }: ProductsPageProps) {
+export default function ProductsPage({ onNavigate, selectedCategoryId, updateCartCount, updateWishlistCount }: ProductsPageProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(selectedCategoryId || 'all');
   const [addedToCart, setAddedToCart] = useState<{ [key: string]: boolean }>({});
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const { user } = useAuth();
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
-
-  useEffect(() => {
-    loadProducts();
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    if (user) {
-      loadWishlist();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (selectedCategoryId) {
-      setSelectedCategory(selectedCategoryId);
-    }
-  }, [selectedCategoryId]);
 
   const loadCategories = async () => {
     const { data, error } = await supabase
@@ -47,7 +29,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
     }
   };
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     let query = supabase
       .from('products')
       .select('*')
@@ -63,9 +45,9 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
     if (data && !error) {
       setProducts(data);
     }
-  };
+  }, [selectedCategory]);
 
-  const loadWishlist = async () => {
+  const loadWishlist = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -76,7 +58,27 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
     if (data && !error) {
       setWishlistItems(data);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [selectedCategory, loadProducts]);
+
+  useEffect(() => {
+    if (user) {
+      loadWishlist();
+    }
+  }, [user, loadWishlist]);
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      setSelectedCategory(selectedCategoryId);
+    }
+  }, [selectedCategoryId]);
 
   const isInWishlist = (productId: string) => {
     return wishlistItems.some(item => item.product_id === productId);
@@ -97,6 +99,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
           .delete()
           .eq('user_id', user.id)
           .eq('product_id', productId);
+        updateWishlistCount(-1); // Decrease count immediately
       } else {
         await supabase
           .from('wishlist')
@@ -104,6 +107,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
             user_id: user.id,
             product_id: productId,
           });
+        updateWishlistCount(1); // Increase count immediately
       }
       
       loadWishlist();
@@ -144,6 +148,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId }: Product
           });
       }
 
+      updateCartCount(1); // Increase count immediately
       setAddedToCart({ ...addedToCart, [productId]: true });
       setTimeout(() => {
         setAddedToCart({ ...addedToCart, [productId]: false });

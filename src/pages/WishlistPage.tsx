@@ -1,28 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Heart, ShoppingCart, Trash2, ArrowLeft } from 'lucide-react';
 import { supabase, WishlistItem, Product } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 type WishlistPageProps = {
   onNavigate: (page: string) => void;
+  updateWishlistCount: (increment: number) => void;
+  updateCartCount: (increment: number) => void;
 };
 
 type WishlistItemWithProduct = WishlistItem & {
   products: Product;
 };
 
-export default function WishlistPage({ onNavigate }: WishlistPageProps) {
+export default function WishlistPage({ onNavigate, updateWishlistCount, updateCartCount }: WishlistPageProps) {
   const [wishlistItems, setWishlistItems] = useState<WishlistItemWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      loadWishlist();
-    }
-  }, [user]);
-
-  const loadWishlist = async () => {
+  const loadWishlist = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -35,7 +31,13 @@ export default function WishlistPage({ onNavigate }: WishlistPageProps) {
       setWishlistItems(data as WishlistItemWithProduct[]);
     }
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadWishlist();
+    }
+  }, [user, loadWishlist]);
 
   const handleRemoveFromWishlist = async (itemId: string) => {
     await supabase
@@ -43,6 +45,7 @@ export default function WishlistPage({ onNavigate }: WishlistPageProps) {
       .delete()
       .eq('id', itemId);
     
+    updateWishlistCount(-1); // Update count immediately
     loadWishlist();
   };
 
@@ -75,6 +78,7 @@ export default function WishlistPage({ onNavigate }: WishlistPageProps) {
           });
       }
 
+      updateCartCount(1); // Update count immediately
       // Show success message (you could add a toast notification here)
       alert('Added to cart!');
     } catch {

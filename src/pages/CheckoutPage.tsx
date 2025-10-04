@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Smartphone, Building, DollarSign, Check } from 'lucide-react';
 import { supabase, CartItem, Product } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -29,13 +29,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) {
-      loadCart();
-    }
-  }, [user]);
-
-  const loadCart = async () => {
+  const loadCart = useCallback(async () => {
     if (!user) return;
 
     const { data, error } = await supabase
@@ -48,7 +42,13 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       setCartItems(data as CartItemWithProduct[]);
     }
     setLoading(false);
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      loadCart();
+    }
+  }, [user, loadCart]);
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
