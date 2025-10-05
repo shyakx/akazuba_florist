@@ -1,4 +1,4 @@
-import { ShoppingCart, User, LogOut, Home, Info, Package, Phone, Heart } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Home, Info, Package, Phone, Heart, MessageCircle, Instagram } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 type NavbarProps = {
@@ -105,6 +105,28 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Social Media Links */}
+            <div className="hidden md:flex items-center space-x-2">
+              <a
+                href="https://wa.me/250784586110"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                title="WhatsApp: +250 784 586 110"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </a>
+              <a
+                href="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-pink-600 hover:bg-pink-50 rounded-lg transition"
+                title="Instagram: @akazuba_florists"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
+            </div>
+
             {user && (
               <>
                 <button
