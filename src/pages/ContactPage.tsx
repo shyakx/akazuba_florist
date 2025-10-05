@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Mail, MapPin, Phone, Clock } from 'lucide-react';
+import { Mail, MapPin, Phone, Clock, Instagram } from 'lucide-react';
 import { supabase, SiteContent } from '../lib/supabase';
 import BusinessStatus from '../components/BusinessStatus';
 
@@ -88,6 +88,24 @@ export default function ContactPage() {
                     <div className="mt-2">
                       <BusinessStatus />
                     </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
+                  <div className="bg-green-600 p-3 rounded-full">
+                    <Instagram className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-1">Follow Us</h3>
+                    <a 
+                      href="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-gray-600 mb-1 hover:text-green-600 transition-colors"
+                    >
+                      @akazuba_florists
+                    </a>
+                    <p className="text-sm text-gray-500">See our latest arrangements and behind-the-scenes</p>
                   </div>
                 </div>
               </div>

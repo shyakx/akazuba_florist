@@ -39,7 +39,12 @@ export default function Footer({ onNavigate }: FooterProps) {
               <a href="#" className="text-gray-400 hover:text-primary-500 transition">
                 <Facebook className="w-5 h-5" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-primary-500 transition">
+              <a 
+                href="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-primary-500 transition"
+              >
                 <Instagram className="w-5 h-5" />
               </a>
               <a href="#" className="text-gray-400 hover:text-primary-500 transition">
