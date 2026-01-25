@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Flower2, Sparkles } from 'lucide-react';
-import { supabase, Category, SiteContent } from '../lib/supabase';
+import { ArrowRight, Flower2, Sparkles, ShoppingCart, Heart, Truck, Shield, Clock, Gift, CheckCircle } from 'lucide-react';
+import { supabase, Category, SiteContent, Product } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 type HomePageProps = {
   onNavigate: (page: string, categoryId?: string) => void;
@@ -8,10 +9,13 @@ type HomePageProps = {
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [content, setContent] = useState<{ [key: string]: string }>({});
+  const { user } = useAuth();
 
   useEffect(() => {
     loadCategories();
+    loadProducts();
     loadContent();
   }, []);
 
@@ -23,6 +27,19 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
     if (data && !error) {
       setCategories(data);
+    }
+  };
+
+  const loadProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(8);
+
+    if (data && !error) {
+      setProducts(data);
     }
   };
 
@@ -42,106 +59,196 @@ export default function HomePage({ onNavigate }: HomePageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <section className="relative text-white py-12 px-4 overflow-hidden bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-20 w-40 h-40 bg-white rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="flex justify-center mb-6">
-              <div className="flex space-x-4">
-                <Flower2 className="w-12 h-12 animate-pulse" />
-                <Sparkles className="w-12 h-12 animate-pulse" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Banner Section - Light Gray Background */}
+      <section className="bg-gray-100 py-4">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex gap-4 items-center">
+            {/* Left Side - Advertisement Image */}
+            <div className="hidden lg:block flex-1 max-w-sm">
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                <img
+                  src="/images/special announcment on valentines.jpg"
+                  alt="Special Valentine's Day Offer"
+                  className="w-full h-auto object-contain max-h-[300px]"
+                  onError={(e) => {
+                    console.error('Failed to load advertisement image');
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-              {content.hero_title || 'Welcome to AKAZUBA FLORIST'}
-            </h1>
-            <p className="text-lg md:text-xl mb-6 text-primary-50">
-              {content.hero_subtitle || 'Discover premium flowers and perfumes delivered to your door in Rwanda'}
-            </p>
-            <button
-              onClick={() => onNavigate('products')}
-              className="inline-flex items-center space-x-2 px-6 py-3 rounded-full font-semibold text-base transition shadow-lg hover:shadow-xl transform hover:scale-105 text-primary-600 bg-white border-2 border-primary-600 hover:bg-primary-50"
-            >
-              <span>Shop Now</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
+
+            {/* Center - Promotional Banner */}
+            <div className="flex-1 text-center lg:text-left">
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
+                  SAVE UP TO A RWF 50,000
+                </div>
+                <div className="text-lg md:text-xl font-bold text-gray-800 mb-3">
+                  On Selected Bouquets & Perfumes
+                </div>
+                <p className="text-gray-600 text-sm mb-4">Terms and Condition Apply</p>
+                <button
+                  onClick={() => onNavigate('products')}
+                  className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-semibold text-sm"
+                >
+                  Shop Now
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-4">Shop by Category</h2>
-          <p className="text-center text-gray-600 mb-8 text-base">
-            Explore our beautiful collections
-          </p>
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Main Content - Full Width */}
+        <div className="w-full">
+            {/* Shop by Category Section */}
+            <section className="mb-8">
+              <h2 className="text-xl font-bold text-gray-800 mb-2">Shop by Category</h2>
+              <p className="text-gray-600 text-sm mb-4">
+                Explore our beautiful collections
+              </p>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                onClick={() => onNavigate('products', category.id)}
-                className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer transform hover:scale-[1.02] duration-300"
-              >
-                <div className="aspect-video overflow-hidden">
-                  <img
-                    src={category.image_url}
-                    alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-4">
-                  <h3 className="text-xl font-bold text-white mb-1">{category.name}</h3>
-                  <p className="text-white/90 mb-3 text-sm">{category.description}</p>
-                  <div className="inline-flex items-center space-x-2 text-white font-semibold group-hover:gap-4 transition-all text-sm">
-                    <span>Explore Collection</span>
-                    <ArrowRight className="w-4 h-4" />
+              <div className="grid md:grid-cols-2 gap-4">
+                {categories.map((category) => (
+                  <div
+                    key={category.id}
+                    onClick={() => onNavigate('products', category.id)}
+                    className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer transform hover:scale-[1.02] duration-300"
+                  >
+                    <div className="aspect-video overflow-hidden">
+                      <img
+                        src={category.image_url}
+                        alt={category.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-3">
+                      <h3 className="text-lg font-bold text-white mb-1">{category.name}</h3>
+                      <p className="text-white/90 mb-2 text-xs">{category.description}</p>
+                      <div className="inline-flex items-center space-x-1 text-white font-semibold group-hover:gap-3 transition-all text-xs">
+                        <span>Explore Collection</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </div>
+                    </div>
                   </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Our Products Section */}
+            <section className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-800">Our Products</h2>
+                <div className="flex space-x-1">
+                  <button className="px-3 py-1.5 bg-primary-600 text-white rounded-lg text-xs font-medium">
+                    All Products
+                  </button>
+                  <button className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300">
+                    New Arrivals
+                  </button>
+                  <button className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300">
+                    Featured
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {products.slice(0, 8).map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-lg shadow-sm hover:shadow-lg transition overflow-hidden group"
+                  >
+                    <div className="aspect-square overflow-hidden bg-gray-100 relative">
+                      <img
+                        src={product.image_url}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                      />
+                      {product.stock_quantity === 0 && (
+                        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                          Out of Stock
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-2">
+                      <h3 className="text-xs font-semibold text-gray-800 mb-1 line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-600 text-xs mb-1.5 line-clamp-2">{product.description}</p>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-sm font-bold text-primary-600">
+                          RWF {product.price.toLocaleString()}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => onNavigate('products')}
+                        className="w-full flex items-center justify-center space-x-1 px-2 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-xs font-medium"
+                      >
+                        <ShoppingCart className="w-3 h-3" />
+                        <span>Add To Cart</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
         </div>
-      </section>
+      </div>
 
-      <section className="py-16 px-4 bg-gradient-to-br from-primary-50 to-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Flower2 className="w-8 h-8 text-primary-600" />
+      {/* Service Features Section - Bottom */}
+      <section className="bg-white border-t border-gray-200 py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="text-center">
+              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Truck className="w-6 h-6 text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Premium Quality</h3>
-              <p className="text-gray-600">
-                Only the finest flowers and fragrances sourced from trusted suppliers
-              </p>
+              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Free Return</h3>
+              <p className="text-gray-600 text-xs">30 days money back guarantee!</p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+            <div className="text-center">
+              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Truck className="w-6 h-6 text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Fast Delivery</h3>
-              <p className="text-gray-600">
-                Quick and reliable delivery straight to your doorstep
-              </p>
+              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Free Shipping</h3>
+              <p className="text-gray-600 text-xs">Free shipping on all order</p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-8 h-8 text-primary-600" />
+            <div className="text-center">
+              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Clock className="w-6 h-6 text-primary-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Customer Care</h3>
-              <p className="text-gray-600">
-                Dedicated support team ready to help you with any questions
-              </p>
+              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Support 24/7</h3>
+              <p className="text-gray-600 text-xs">We support online 24 hrs a day</p>
+            </div>
+
+            <div className="text-center">
+              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Gift className="w-6 h-6 text-primary-600" />
+              </div>
+              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Receive Gift Card</h3>
+              <p className="text-gray-600 text-xs">Receive gift all over order RWF 50,000</p>
+            </div>
+
+            <div className="text-center">
+              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Shield className="w-6 h-6 text-primary-600" />
+              </div>
+              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Secure Payment</h3>
+              <p className="text-gray-600 text-xs">We Value Your Security</p>
+            </div>
+
+            <div className="text-center">
+              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
+                <CheckCircle className="w-6 h-6 text-primary-600" />
+              </div>
+              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Online Service</h3>
+              <p className="text-gray-600 text-xs">Free return products in 30 days</p>
             </div>
           </div>
         </div>
