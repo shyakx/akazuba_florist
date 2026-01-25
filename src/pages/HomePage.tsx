@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Flower2, Sparkles, ShoppingCart, Heart, Truck, Shield, Clock, Gift, CheckCircle } from 'lucide-react';
+import { ArrowRight, Flower2, Sparkles, ShoppingCart, Heart, Truck, Shield, Clock, Gift, CheckCircle, Phone } from 'lucide-react';
 import { supabase, Category, SiteContent, Product } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -60,17 +60,18 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Banner Section - Light Gray Background */}
-      <section className="bg-gray-100 py-4">
+      {/* Hero Banner Section - Enhanced Size */}
+      <section className="bg-gray-100 py-8">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-4 items-center">
-            {/* Left Side - Advertisement Image */}
-            <div className="hidden lg:block flex-1 max-w-sm">
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="flex flex-col lg:flex-row gap-8 items-center">
+            
+            {/* Left Side - Larger Advertisement Image */}
+            <div className="w-full lg:flex-[1.6] max-w-xl">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-pink-100 transform hover:scale-[1.01] transition-transform duration-300">
                 <img
                   src="/images/special announcment on valentines.jpg"
-                  alt="Special Valentine's Day Offer"
-                  className="w-full h-auto object-contain max-h-[300px]"
+                  alt="Akazuba Valentine's Day Menu"
+                  className="w-full h-auto object-contain max-h-[550px]"
                   onError={(e) => {
                     console.error('Failed to load advertisement image');
                     e.currentTarget.style.display = 'none';
@@ -79,59 +80,79 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               </div>
             </div>
 
-            {/* Center - Promotional Banner */}
-            <div className="flex-1 text-center lg:text-left">
-              <div className="bg-white rounded-lg p-5 shadow-sm">
-                <div className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">
-                  SAVE UP TO A RWF 50,000
+            {/* Right Side - Promotional Text Banner */}
+            <div className="w-full lg:flex-1 text-center lg:text-left">
+              <div className="bg-white rounded-2xl p-8 md:p-10 shadow-lg border-l-8 border-pink-500">
+                <div className="inline-block px-4 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-bold mb-4">
+                  LIMITED TIME OFFER
                 </div>
-                <div className="text-lg md:text-xl font-bold text-gray-800 mb-3">
-                  On Selected Bouquets & Perfumes
+                <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
+                  AKAZUBA <span className="text-pink-600">VALENTINE'S</span> PACKAGES
+                </h1>
+                <p className="text-xl text-gray-700 font-semibold mb-6">
+                  Luxury Bouquets, Cakes & Gifts 
+                  <span className="block text-pink-600 mt-1">Starting from RWF 55,000</span>
+                </p>
+                
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center justify-center lg:justify-start gap-3 text-gray-600">
+                    <div className="p-2 bg-pink-50 rounded-lg">
+                      <Truck className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <span className="font-medium text-lg">Free Delivery in Kigali</span>
+                  </div>
+                  <div className="flex items-center justify-center lg:justify-start gap-3 text-gray-600">
+                    <div className="p-2 bg-pink-50 rounded-lg">
+                      <Phone className="w-5 h-5 text-pink-500" />
+                    </div>
+                    <span className="font-medium text-lg">Call to Order: 0784586110</span>
+                  </div>
                 </div>
-                <p className="text-gray-600 text-sm mb-4">Terms and Condition Apply</p>
+
                 <button
                   onClick={() => onNavigate('products')}
-                  className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition font-semibold text-sm"
+                  className="w-full md:w-auto px-10 py-4 bg-pink-600 text-white rounded-xl hover:bg-pink-700 transition-all shadow-lg hover:shadow-pink-200 font-bold text-lg flex items-center justify-center gap-2"
                 >
-                  Shop Now
+                  <Heart className="w-5 h-5 fill-current" />
+                  Shop Valentine's Menu
                 </button>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Main Content - Full Width */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="w-full">
             {/* Shop by Category Section */}
-            <section className="mb-8">
-              <h2 className="text-xl font-bold text-gray-800 mb-2">Shop by Category</h2>
-              <p className="text-gray-600 text-sm mb-4">
-                Explore our beautiful collections
-              </p>
+            <section className="mb-16">
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Shop by Category</h2>
+                  <p className="text-gray-600">Explore our curated floral and gift collections</p>
+                </div>
+              </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-6">
                 {categories.map((category) => (
                   <div
                     key={category.id}
                     onClick={() => onNavigate('products', category.id)}
-                    className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition cursor-pointer transform hover:scale-[1.02] duration-300"
+                    className="group relative h-80 overflow-hidden rounded-2xl shadow-lg cursor-pointer"
                   >
-                    <div className="aspect-video overflow-hidden">
-                      <img
-                        src={category.image_url}
-                        alt={category.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                      />
-                    </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-3">
-                      <h3 className="text-lg font-bold text-white mb-1">{category.name}</h3>
-                      <p className="text-white/90 mb-2 text-xs">{category.description}</p>
-                      <div className="inline-flex items-center space-x-1 text-white font-semibold group-hover:gap-3 transition-all text-xs">
+                    <img
+                      src={category.image_url}
+                      alt={category.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-8">
+                      <h3 className="text-2xl font-bold text-white mb-2">{category.name}</h3>
+                      <p className="text-white/80 mb-4 line-clamp-2">{category.description}</p>
+                      <div className="inline-flex items-center space-x-2 text-pink-400 font-bold group-hover:text-pink-300 transition-colors">
                         <span>Explore Collection</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                       </div>
                     </div>
                   </div>
@@ -141,26 +162,26 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
             {/* Our Products Section */}
             <section className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-800">Our Products</h2>
-                <div className="flex space-x-1">
-                  <button className="px-3 py-1.5 bg-primary-600 text-white rounded-lg text-xs font-medium">
-                    All Products
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                <h2 className="text-3xl font-bold text-gray-900">Featured Products</h2>
+                <div className="flex bg-gray-200/50 p-1 rounded-xl">
+                  <button className="px-6 py-2 bg-white text-gray-900 rounded-lg shadow-sm text-sm font-bold">
+                    All
                   </button>
-                  <button className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300">
-                    New Arrivals
+                  <button className="px-6 py-2 text-gray-600 hover:text-gray-900 rounded-lg text-sm font-bold transition">
+                    New
                   </button>
-                  <button className="px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300">
-                    Featured
+                  <button className="px-6 py-2 text-gray-600 hover:text-gray-900 rounded-lg text-sm font-bold transition">
+                    Popular
                   </button>
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {products.slice(0, 8).map((product) => (
                   <div
                     key={product.id}
-                    className="bg-white rounded-lg shadow-sm hover:shadow-lg transition overflow-hidden group"
+                    className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group border border-gray-100"
                   >
                     <div className="aspect-square overflow-hidden bg-gray-100 relative">
                       <img
@@ -169,27 +190,27 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                         className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
                       />
                       {product.stock_quantity === 0 && (
-                        <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
-                          Out of Stock
+                        <div className="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-lg">
+                          Sold Out
                         </div>
                       )}
                     </div>
-                    <div className="p-2">
-                      <h3 className="text-xs font-semibold text-gray-800 mb-1 line-clamp-2">
+                    <div className="p-5">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1 line-clamp-1">
                         {product.name}
                       </h3>
-                      <p className="text-gray-600 text-xs mb-1.5 line-clamp-2">{product.description}</p>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-sm font-bold text-primary-600">
+                      <p className="text-gray-500 text-sm mb-4 line-clamp-2 h-10">{product.description}</p>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-xl font-black text-pink-600">
                           RWF {product.price.toLocaleString()}
                         </span>
                       </div>
                       <button
                         onClick={() => onNavigate('products')}
-                        className="w-full flex items-center justify-center space-x-1 px-2 py-1.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-xs font-medium"
+                        className="w-full flex items-center justify-center space-x-2 py-3 bg-gray-900 text-white rounded-xl hover:bg-pink-600 transition-colors font-bold text-sm"
                       >
-                        <ShoppingCart className="w-3 h-3" />
-                        <span>Add To Cart</span>
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Add to Cart</span>
                       </button>
                     </div>
                   </div>
@@ -198,61 +219,6 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </section>
         </div>
       </div>
-
-      {/* Service Features Section - Bottom */}
-      <section className="bg-white border-t border-gray-200 py-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="text-center">
-              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Truck className="w-6 h-6 text-primary-600" />
-              </div>
-              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Free Return</h3>
-              <p className="text-gray-600 text-xs">30 days money back guarantee!</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Truck className="w-6 h-6 text-primary-600" />
-              </div>
-              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Free Shipping</h3>
-              <p className="text-gray-600 text-xs">Free shipping on all order</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Clock className="w-6 h-6 text-primary-600" />
-              </div>
-              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Support 24/7</h3>
-              <p className="text-gray-600 text-xs">We support online 24 hrs a day</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Gift className="w-6 h-6 text-primary-600" />
-              </div>
-              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Receive Gift Card</h3>
-              <p className="text-gray-600 text-xs">Receive gift all over order RWF 50,000</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Shield className="w-6 h-6 text-primary-600" />
-              </div>
-              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Secure Payment</h3>
-              <p className="text-gray-600 text-xs">We Value Your Security</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-primary-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2">
-                <CheckCircle className="w-6 h-6 text-primary-600" />
-              </div>
-              <h3 className="font-bold text-gray-800 mb-0.5 text-xs">Online Service</h3>
-              <p className="text-gray-600 text-xs">Free return products in 30 days</p>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }
