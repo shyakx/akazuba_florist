@@ -161,7 +161,22 @@ export default function ProductsPage({ onNavigate, selectedCategoryId, updateCar
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Our Products</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Our Products</h1>
+        
+        {/* Red Flower Shortage Notice */}
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="p-1 bg-red-100 rounded-full mt-0.5">
+              <Heart className="w-4 h-4 text-red-600 fill-current" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-red-800 mb-1">Red Flowers Temporarily Unavailable</h3>
+              <p className="text-sm text-red-700">
+                We're currently out of red flowers. Please explore our beautiful alternatives in pink, white, yellow, and purple - perfect for expressing your love and affection!
+              </p>
+            </div>
+          </div>
+        </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
           <button
@@ -194,7 +209,7 @@ export default function ProductsPage({ onNavigate, selectedCategoryId, updateCar
             <p className="text-gray-500 text-lg">No products found in this category.</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {products.map((product) => (
               <div
                 key={product.id}

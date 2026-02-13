@@ -60,18 +60,30 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Red Flower Shortage Alert Banner */}
+      <div className="bg-red-600 text-white py-3 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
+          <div className="p-1 bg-white/20 rounded-full">
+            <Heart className="w-4 h-4 fill-current" />
+          </div>
+          <span className="font-semibold text-sm">
+            ⚠️ RED FLOWERS TEMPORARILY OUT OF STOCK - Please order other beautiful colors available
+          </span>
+        </div>
+      </div>
+
       {/* Hero Banner Section - Enhanced Size */}
       <section className="bg-gray-100 py-8">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-8 items-center">
             
-            {/* Left Side - Larger Advertisement Image */}
-            <div className="w-full lg:flex-[1.6] max-w-xl">
+            {/* Left Side - Advertisement Image */}
+            <div className="w-full lg:flex-1">
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-pink-100 transform hover:scale-[1.01] transition-transform duration-300">
                 <img
                   src="/images/special announcment on valentines.jpg"
                   alt="Akazuba Valentine's Day Menu"
-                  className="w-full h-auto object-contain max-h-[550px]"
+                  className="w-full h-auto object-contain max-h-[500px] lg:max-h-[600px]"
                   onError={(e) => {
                     console.error('Failed to load advertisement image');
                     e.currentTarget.style.display = 'none';
@@ -81,7 +93,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </div>
 
             {/* Right Side - Promotional Text Banner */}
-            <div className="w-full lg:flex-1 text-center lg:text-left">
+            <div className="w-full lg:flex-1 lg:max-w-md text-center lg:text-left">
               <div className="bg-white rounded-2xl p-8 md:p-10 shadow-lg border-l-8 border-pink-500">
                 <div className="inline-block px-4 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-bold mb-4">
                   LIMITED TIME OFFER
@@ -89,10 +101,15 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
                   AKAZUBA <span className="text-pink-600">VALENTINE'S</span> PACKAGES
                 </h1>
-                <p className="text-xl text-gray-700 font-semibold mb-6">
+                <p className="text-xl text-gray-700 font-semibold mb-4">
                   Luxury Bouquets, Cakes & Gifts 
                   <span className="block text-pink-600 mt-1">Starting from RWF 55,000</span>
                 </p>
+                <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4 rounded">
+                  <p className="text-sm font-semibold text-red-800">
+                    ⚠️ Red flowers temporarily unavailable - Choose from our beautiful pink, white, yellow, and purple arrangements!
+                  </p>
+                </div>
                 
                 <div className="space-y-4 mb-8">
                   <div className="flex items-center justify-center lg:justify-start gap-3 text-gray-600">
@@ -177,7 +194,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6">
                 {products.slice(0, 8).map((product) => (
                   <div
                     key={product.id}
