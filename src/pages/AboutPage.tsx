@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Heart, Award, Users, Flower, Star, Shield, Truck } from 'lucide-react';
 import { supabase, SiteContent } from '../lib/supabase';
 
 export default function AboutPage() {
-  const [content, setContent] = useState<{ [key: string]: string }>({});
-
   useEffect(() => {
     loadContent();
   }, []);
@@ -20,7 +18,6 @@ export default function AboutPage() {
       data.forEach((item: SiteContent) => {
         contentMap[item.section] = item.content;
       });
-      setContent(contentMap);
     }
   };
 

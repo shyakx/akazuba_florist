@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ArrowRight, Flower2, Sparkles, ShoppingCart, Heart, Truck, Shield, Clock, Gift, CheckCircle, Phone } from 'lucide-react';
-import { supabase, Category, SiteContent, Product } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
+import { ArrowRight, ShoppingCart } from 'lucide-react';
+import { supabase, Category, Product } from '../lib/supabase';
 
 type HomePageProps = {
   onNavigate: (page: string, categoryId?: string) => void;
@@ -10,13 +9,10 @@ type HomePageProps = {
 export default function HomePage({ onNavigate }: HomePageProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [content, setContent] = useState<{ [key: string]: string }>({});
-  const { user } = useAuth();
 
   useEffect(() => {
     loadCategories();
     loadProducts();
-    loadContent();
   }, []);
 
   const loadCategories = async () => {
@@ -43,100 +39,13 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }
   };
 
-  const loadContent = async () => {
-    const { data, error } = await supabase
-      .from('site_content')
-      .select('*')
-      .eq('page', 'home');
-
-    if (data && !error) {
-      const contentMap: { [key: string]: string } = {};
-      data.forEach((item: SiteContent) => {
-        contentMap[item.section] = item.content;
-      });
-      setContent(contentMap);
-    }
-  };
-
+  
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Red Flower Shortage Alert Banner */}
-      <div className="bg-red-600 text-white py-3 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
-          <div className="p-1 bg-white/20 rounded-full">
-            <Heart className="w-4 h-4 fill-current" />
-          </div>
-          <span className="font-semibold text-sm">
-            ⚠️ RED FLOWERS TEMPORARILY OUT OF STOCK - Please order other beautiful colors available
-          </span>
-        </div>
-      </div>
 
       {/* Hero Banner Section - Enhanced Size */}
       <section className="bg-gray-100 py-8">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8 items-center">
-            
-            {/* Left Side - Advertisement Image */}
-            <div className="w-full lg:flex-1">
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-pink-100 transform hover:scale-[1.01] transition-transform duration-300">
-                <img
-                  src="/images/special announcment on valentines.jpg"
-                  alt="Akazuba Valentine's Day Menu"
-                  className="w-full h-auto object-contain max-h-[500px] lg:max-h-[600px]"
-                  onError={(e) => {
-                    console.error('Failed to load advertisement image');
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Right Side - Promotional Text Banner */}
-            <div className="w-full lg:flex-1 lg:max-w-md text-center lg:text-left">
-              <div className="bg-white rounded-2xl p-8 md:p-10 shadow-lg border-l-8 border-pink-500">
-                <div className="inline-block px-4 py-1 rounded-full bg-pink-100 text-pink-600 text-sm font-bold mb-4">
-                  LIMITED TIME OFFER
-                </div>
-                <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-4 leading-tight">
-                  AKAZUBA <span className="text-pink-600">VALENTINE'S</span> PACKAGES
-                </h1>
-                <p className="text-xl text-gray-700 font-semibold mb-4">
-                  Luxury Bouquets, Cakes & Gifts 
-                  <span className="block text-pink-600 mt-1">Starting from RWF 55,000</span>
-                </p>
-                <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4 rounded">
-                  <p className="text-sm font-semibold text-red-800">
-                    ⚠️ Red flowers temporarily unavailable - Choose from our beautiful pink, white, yellow, and purple arrangements!
-                  </p>
-                </div>
-                
-                <div className="space-y-4 mb-8">
-                  <div className="flex items-center justify-center lg:justify-start gap-3 text-gray-600">
-                    <div className="p-2 bg-pink-50 rounded-lg">
-                      <Truck className="w-5 h-5 text-pink-500" />
-                    </div>
-                    <span className="font-medium text-lg">Free Delivery in Kigali</span>
-                  </div>
-                  <div className="flex items-center justify-center lg:justify-start gap-3 text-gray-600">
-                    <div className="p-2 bg-pink-50 rounded-lg">
-                      <Phone className="w-5 h-5 text-pink-500" />
-                    </div>
-                    <span className="font-medium text-lg">Call to Order: 0784586110</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onNavigate('products')}
-                  className="w-full md:w-auto px-10 py-4 bg-pink-600 text-white rounded-xl hover:bg-pink-700 transition-all shadow-lg hover:shadow-pink-200 font-bold text-lg flex items-center justify-center gap-2"
-                >
-                  <Heart className="w-5 h-5 fill-current" />
-                  Shop Valentine's Menu
-                </button>
-              </div>
-            </div>
-
-          </div>
         </div>
       </section>
 

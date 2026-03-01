@@ -118,7 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
       
       try {
-        const { error } = await Promise.race([signOutPromise, timeoutPromise]) as any;
+        const result = await Promise.race([signOutPromise, timeoutPromise]);
+        const { error } = result as { error: { message: string } | null };
         
         if (error) {
           console.warn('Supabase signOut error (non-critical):', error);

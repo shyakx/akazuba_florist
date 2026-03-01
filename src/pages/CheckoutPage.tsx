@@ -130,7 +130,7 @@ export default function CheckoutPage({ onNavigate }: CheckoutPageProps) {
               .getPublicUrl(fileName);
             paymentProofUrl = publicUrl;
           }
-        } catch (error) {
+        } catch {
           // Handle upload error silently
         }
       }

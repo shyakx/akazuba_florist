@@ -1,4 +1,4 @@
-import { ShoppingCart, User, LogOut, Home, Info, Package, Phone, Heart, MessageCircle, Instagram, Search, Menu, ChevronDown } from 'lucide-react';
+import { ShoppingCart, User, Home, Phone, Heart, Search, Menu, ChevronDown } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 type NavbarProps = {

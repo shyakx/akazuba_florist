@@ -54,8 +54,7 @@ export default function AdvertisementSidebar({
               src={imagePath}
               alt="Special Offer Announcement"
               className="w-full h-auto object-contain"
-              onError={(e) => {
-                console.error('Failed to load advertisement image:', imagePath);
+              onError={() => {
                 handleClose();
               }}
             />
