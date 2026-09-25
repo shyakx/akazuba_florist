@@ -19,8 +19,8 @@ This guide will help you set up your custom domain `akazubaflorist.org` on Verce
 
 ### 1.3 Get DNS Configuration
 Vercel will show you the DNS records needed. Note down:
-- **A Record**: `@` → `216.198.79.1` (Updated IP address)
-- **CNAME Record**: `www` → `39dc2a9a667c6364.vercel-dns-017.com.` (Updated CNAME)
+- **A Record**: `@` → the IP address shown by Vercel
+- **CNAME Record**: `www` → the CNAME target shown by Vercel
 
 ## Step 2: Configure Namecheap DNS
 
@@ -35,8 +35,8 @@ Vercel will show you the DNS records needed. Note down:
 3. Go to **"Advanced DNS"** tab
 4. **Remove existing records** for `@` and `www`
 5. **Add new records**:
-   - **A Record**: Host `@`, Value `216.198.79.1`, TTL `Automatic`
-   - **CNAME Record**: Host `www`, Value `39dc2a9a667c6364.vercel-dns-017.com.`, TTL `Automatic`
+  - **A Record**: Host `@`, Value from Vercel, TTL `Automatic`
+  - **CNAME Record**: Host `www`, Value from Vercel, TTL `Automatic`
 
 ## Step 3: Update Supabase Configuration
 
@@ -51,6 +51,7 @@ Vercel will show you the DNS records needed. Note down:
   - `https://akazubaflorist.org`
   - `https://www.akazubaflorist.org`
   - `https://akazubaflorist.org/auth/callback`
+  - `https://www.akazubaflorist.org/auth/callback`
 
 ## Step 4: Update Vercel Environment Variables
 
