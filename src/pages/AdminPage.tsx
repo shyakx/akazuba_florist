@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { CreditCard as Edit2, Trash2, Save, X, ShoppingBag, DollarSign, Package, Users, Eye, Search, MapPin, Phone, Mail, CheckCircle, Clock, Truck, Star, Activity, Calendar } from 'lucide-react';
+import { CreditCard as Edit2, Trash2, Save, X, ShoppingBag, DollarSign, Package, Users, Eye, Search, MapPin, Phone, Mail, CheckCircle, Clock, Truck, Star, Activity, Calendar, Menu } from 'lucide-react';
 import { supabase, Product, Category, SiteContent, Order, OrderItem, Profile } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { testEmailJS } from '../lib/emailService';
@@ -43,6 +43,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   const [customers, setCustomers] = useState<Profile[]>([]);
   const [customerOrders, setCustomerOrders] = useState<Order[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Profile | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showCustomerDetails, setShowCustomerDetails] = useState(false);
   const { profile } = useAuth();
 
@@ -456,9 +457,9 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
   };
 
   return (
-    <div className="h-screen w-screen bg-gray-50 flex overflow-hidden">
+    <div className="min-h-screen w-full bg-gray-50 flex overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-green-600 to-green-700 shadow-lg flex-shrink-0">
+      <div className="hidden md:block w-64 bg-gradient-to-b from-green-600 to-green-700 shadow-lg flex-shrink-0">
         <div className="p-6">
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center overflow-hidden">
@@ -547,14 +548,53 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
         </div>
       </div>
 
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 bg-black/40 md:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <aside className="h-full w-72 max-w-[85vw] bg-gradient-to-b from-green-600 to-green-700 p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">AKAZUBA</h2>
+                <p className="text-xs text-green-100">Admin Panel</p>
+              </div>
+              <button onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-2 text-white hover:bg-white/10" aria-label="Close admin menu">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <nav className="space-y-2">
+              {[
+                ['dashboard', 'Dashboard', Activity],
+                ['products', 'Products', Package],
+                ['orders', 'Orders', ShoppingBag],
+                ['customers', 'Customers', Users],
+                ['content', 'Content', Edit2],
+              ].map(([tab, label, Icon]) => (
+                <button
+                  key={tab as string}
+                  onClick={() => { setActiveTab(tab as typeof activeTab); setMobileMenuOpen(false); }}
+                  className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition ${activeTab === tab ? 'bg-white text-green-700 shadow-md' : 'text-green-100 hover:bg-green-500 hover:text-white'}`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="font-medium">{label as string}</span>
+                </button>
+              ))}
+            </nav>
+          </aside>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white shadow-sm border-b border-gray-200 px-4 py-4 sm:px-6">
+          <div className="flex items-center justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 capitalize">{activeTab}</h1>
-              <p className="text-gray-600 text-sm">Manage your AKAZUBA FLORIST business</p>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setMobileMenuOpen(true)} className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 md:hidden" aria-label="Open admin menu">
+                  <Menu className="h-5 w-5" />
+                </button>
+                <h1 className="text-xl font-semibold text-gray-900 capitalize sm:text-2xl">{activeTab}</h1>
+              </div>
+              <p className="hidden text-sm text-gray-600 sm:block">Manage your AKAZUBA FLORIST business</p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-right">
@@ -571,15 +611,15 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
         {/* Content Area */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           {/* Enhanced Header */}
-          <div className="bg-white border-b border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+          <div className="bg-white border-b border-gray-200 px-4 py-4 sm:px-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center space-x-3">
                 <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                   <span className="text-green-600 font-bold text-lg">A</span>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">Welcome back! Admin User</h1>
-                  <p className="text-sm text-gray-500">Manage your store efficiently</p>
+                  <h1 className="truncate text-base font-bold text-gray-900 sm:text-xl">Welcome back! Admin User</h1>
+                  <p className="hidden text-sm text-gray-500 sm:block">Manage your store efficiently</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -591,7 +631,7 @@ export default function AdminPage({ onNavigate }: AdminPageProps) {
             </div>
           </div>
           
-          <div className="p-6 overflow-auto flex-1 min-w-0">
+          <div className="min-w-0 flex-1 overflow-auto p-4 sm:p-6">
 
         {activeTab === 'dashboard' && (
           <div>
