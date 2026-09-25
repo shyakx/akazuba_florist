@@ -49,13 +49,13 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           loop
           playsInline
           poster="/images/hero-flower.jpg"
-          className="absolute inset-0 h-full w-full object-cover opacity-100"
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-100"
           aria-label="Flower arrangement video"
         >
           <source src="/images/Pink%20Elegant%20Minimalist%20Hello%20May%20Mobile%20Video.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-gradient-to-r from-black/65 via-black/25 to-black/5" />
-        <div className="relative mx-auto flex min-h-[280px] max-w-7xl items-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="relative mx-auto flex min-h-[320px] max-w-7xl items-center px-4 py-12 sm:min-h-[360px] sm:px-6 lg:min-h-[420px] lg:px-8">
           <div className="max-w-xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-primary-100">
               <Sparkles className="h-4 w-4" /> Thoughtful gifts, beautifully made
