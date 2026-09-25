@@ -1,7 +1,7 @@
 # 🌐 Custom Domain Setup Guide for AKAZUBA FLORIST
 
 ## Overview
-This guide will help you set up your custom domain `akazubaflorist.com` on Vercel and configure all necessary settings.
+This guide will help you set up your custom domain `akazubaflorist.org` on Vercel and configure all necessary settings.
 
 ## Step 1: Add Domain to Vercel
 
@@ -14,7 +14,7 @@ This guide will help you set up your custom domain `akazubaflorist.com` on Verce
 1. Click on **"Settings"** tab
 2. Click on **"Domains"** in the left sidebar
 3. Click **"Add Domain"**
-4. Enter: `akazubaflorist.com`
+4. Enter: `akazubaflorist.org`
 5. Click **"Add"**
 
 ### 1.3 Get DNS Configuration
@@ -30,7 +30,7 @@ Vercel will show you the DNS records needed. Note down:
 3. Go to **"Domain List"**
 
 ### 2.2 Update DNS Records
-1. Find `akazubaflorist.com`
+1. Find `akazubaflorist.org`
 2. Click **"Manage"**
 3. Go to **"Advanced DNS"** tab
 4. **Remove existing records** for `@` and `www`
@@ -46,11 +46,11 @@ Vercel will show you the DNS records needed. Note down:
 
 ### 3.2 Update Authentication URLs
 1. Go to **"Authentication"** → **"URL Configuration"**
-2. Update **Site URL** to: `https://akazubaflorist.com`
+2. Update **Site URL** to: `https://akazubaflorist.org`
 3. Add **Redirect URLs**:
-   - `https://akazubaflorist.com`
-   - `https://www.akazubaflorist.com`
-   - `https://akazubaflorist.com/auth/callback`
+  - `https://akazubaflorist.org`
+  - `https://www.akazubaflorist.org`
+  - `https://akazubaflorist.org/auth/callback`
 
 ## Step 4: Update Vercel Environment Variables
 
@@ -77,8 +77,8 @@ VITE_ADMIN_EMAIL=info.akazubaflorist@gmail.com
 3. This can take 5-60 minutes
 
 ### 5.2 Test Your Site
-1. Visit `https://akazubaflorist.com`
-2. Visit `https://www.akazubaflorist.com`
+1. Visit `https://akazubaflorist.org`
+2. Visit `https://www.akazubaflorist.org`
 3. Both should redirect to your Vercel app
 4. Test authentication (login/signup)
 5. Test admin panel access
@@ -94,10 +94,10 @@ Your `vercel.json` already includes HTTPS redirects:
       "has": [
         {
           "type": "host",
-          "value": "akazubaflorist.com"
+          "value": "akazubaflorist.org"
         }
       ],
-      "destination": "https://akazubaflorist.com/$1",
+      "destination": "https://akazubaflorist.org/$1",
       "permanent": true
     }
   ]
@@ -127,8 +127,8 @@ Your `vercel.json` already includes HTTPS redirects:
 
 ## Final Result
 After setup, your site will be accessible at:
-- ✅ `https://akazubaflorist.com`
-- ✅ `https://www.akazubaflorist.com`
+- ✅ `https://akazubaflorist.org`
+- ✅ `https://www.akazubaflorist.org`
 - ✅ Both redirect to HTTPS automatically
 - ✅ SSL certificate automatically provisioned
 - ✅ Authentication working with custom domain

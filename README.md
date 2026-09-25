@@ -3,7 +3,7 @@
 **Production E-commerce Platform** - A premium online flower and perfume delivery service based in Kigali, Rwanda. This is the official production website for Akazuba Florist, serving customers throughout Rwanda with fresh flowers, perfumes, and gift items.
 
 ## 🌐 Live Site
-- **Website**: [https://akazubaflorist.com](https://akazubaflorist.com)
+- **Website**: [https://akazubaflorist.org](https://akazubaflorist.org)
 - **Status**: ✅ Production Ready
 - **Launch Date**: 2025
 
@@ -37,7 +37,7 @@ Akazuba Florist is a registered business specializing in:
 - **Database**: Supabase PostgreSQL
 - **Authentication**: Supabase Auth
 - **File Storage**: Supabase Storage
-- **Domain**: akazubaflorist.com (custom domain with SSL)
+- **Domain**: akazubaflorist.org (custom domain with SSL)
 - **Email Service**: EmailJS for contact forms
 
 ### Security Features

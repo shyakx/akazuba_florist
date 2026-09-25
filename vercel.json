@@ -15,10 +15,10 @@
       "has": [
         {
           "type": "host",
-          "value": "www.akazubaflorist.com"
+          "value": "www.akazubaflorist.org"
         }
       ],
-      "destination": "https://akazubaflorist.com/$1",
+      "destination": "https://akazubaflorist.org/$1",
       "permanent": true
     },
     {
@@ -30,7 +30,7 @@
           "value": "http"
         }
       ],
-      "destination": "https://akazubaflorist.com/$1",
+      "destination": "https://akazubaflorist.org/$1",
       "permanent": true
     },
     {
@@ -38,7 +38,7 @@
       "has": [
         {
           "type": "host",
-          "value": "akazubaflorist.com"
+          "value": "akazubaflorist.org"
         },
         {
           "type": "header",
@@ -46,7 +46,7 @@
           "value": "http"
         }
       ],
-      "destination": "https://akazubaflorist.com/$1",
+      "destination": "https://akazubaflorist.org/$1",
       "permanent": true
     }
   ],

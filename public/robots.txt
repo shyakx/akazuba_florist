@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://akazubaflorist.com/sitemap.xml
+Sitemap: https://akazubaflorist.org/sitemap.xml
 
 # Disallow admin area
 Disallow: /admin/

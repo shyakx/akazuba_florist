@@ -6,11 +6,12 @@ import { useAuth } from '../contexts/AuthContext';
 type ProductsPageProps = {
   onNavigate: (page: string) => void;
   selectedCategoryId?: string;
+  searchQuery?: string;
   updateCartCount: (increment: number) => void;
   updateWishlistCount: (increment: number) => void;
 };
 
-export default function ProductsPage({ onNavigate, selectedCategoryId, updateCartCount, updateWishlistCount }: ProductsPageProps) {
+export default function ProductsPage({ onNavigate, selectedCategoryId, searchQuery = '', updateCartCount, updateWishlistCount }: ProductsPageProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(selectedCategoryId || 'all');
@@ -40,12 +41,17 @@ export default function ProductsPage({ onNavigate, selectedCategoryId, updateCar
       query = query.eq('category_id', selectedCategory);
     }
 
+    if (searchQuery.trim()) {
+      const escapedSearch = searchQuery.trim().replace(/[,()]/g, '');
+      query = query.or(`name.ilike.%${escapedSearch}%,description.ilike.%${escapedSearch}%`);
+    }
+
     const { data, error } = await query;
 
     if (data && !error) {
       setProducts(data);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
 
   const loadWishlist = useCallback(async () => {
     if (!user) return;
@@ -79,6 +85,12 @@ export default function ProductsPage({ onNavigate, selectedCategoryId, updateCar
       setSelectedCategory(selectedCategoryId);
     }
   }, [selectedCategoryId]);
+
+  useEffect(() => {
+    if (searchQuery) {
+      setSelectedCategory('all');
+    }
+  }, [searchQuery]);
 
   const isInWishlist = (productId: string) => {
     return wishlistItems.some(item => item.product_id === productId);
@@ -161,7 +173,12 @@ export default function ProductsPage({ onNavigate, selectedCategoryId, updateCar
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4">Our Products</h1>
+        <div className="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">Our Products</h1>
+            {searchQuery && <p className="mt-1 text-sm text-gray-500">Search results for "{searchQuery}"</p>}
+          </div>
+        </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
           <button

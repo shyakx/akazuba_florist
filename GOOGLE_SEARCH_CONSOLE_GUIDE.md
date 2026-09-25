@@ -11,7 +11,7 @@ This guide will help you remove duplicate search results from Google by properly
 
 2. **Add Your Property:**
    - Click "Add Property"
-   - Enter: `https://akazubaflorist.com`
+   - Enter: `https://akazubaflorist.org`
    - Choose "URL prefix" method
    - Verify ownership (you can use HTML file upload method)
 
@@ -34,7 +34,7 @@ This guide will help you remove duplicate search results from Google by properly
    - Look for "Preferred domain" section
 
 2. **Set Preferred Domain:**
-   - Choose "akazubaflorist.com" (without www)
+   - Choose "akazubaflorist.org" (without www)
    - This tells Google which version to show in search results
 
 ## Step 4: Request URL Removal (Temporary)
@@ -44,15 +44,15 @@ This guide will help you remove duplicate search results from Google by properly
    - Click "New Request"
 
 2. **Remove Duplicate URLs:**
-   - Request removal of: `http://akazubaflorist.com`
-   - Request removal of: `https://www.akazubaflorist.com`
+   - Request removal of: `http://akazubaflorist.org`
+   - Request removal of: `https://www.akazubaflorist.org`
    - This will temporarily hide them from search results
 
 ## Step 5: Submit URL for Indexing
 
 1. **Go to URL Inspection:**
    - In Google Search Console, go to "URL Inspection" in the left sidebar
-   - Enter: `https://akazubaflorist.com`
+   - Enter: `https://akazubaflorist.org`
 
 2. **Request Indexing:**
    - Click "Request Indexing"
@@ -76,7 +76,7 @@ This guide will help you remove duplicate search results from Google by properly
    - Find your AKAZUBA FLORIST listing
 
 2. **Update Website URL:**
-   - Make sure the website URL is set to: `https://akazubaflorist.com`
+   - Make sure the website URL is set to: `https://akazubaflorist.org`
    - Remove any www or http versions
 
 ### Submit to Other Search Engines
@@ -98,7 +98,7 @@ This guide will help you remove duplicate search results from Google by properly
 ## Troubleshooting
 
 ### If Duplicates Still Appear:
-1. **Check Internal Links:** Make sure all internal links use `https://akazubaflorist.com`
+1. **Check Internal Links:** Make sure all internal links use `https://akazubaflorist.org`
 2. **Check External Links:** Contact sites linking to www or http versions
 3. **Monitor Redirects:** Ensure all redirects are working properly
 4. **Re-submit Sitemap:** Submit sitemap again after changes
@@ -113,11 +113,11 @@ This guide will help you remove duplicate search results from Google by properly
 - **Be Patient:** SEO changes take time to take effect
 - **Monitor Regularly:** Check Google Search Console weekly
 - **Keep Sitemap Updated:** Update sitemap when you add new pages
-- **Consistent URLs:** Always use `https://akazubaflorist.com` in all communications
+- **Consistent URLs:** Always use `https://akazubaflorist.org` in all communications
 
 ## Success Indicators
 
 ✅ Only one search result appears for your site
-✅ Search results show `https://akazubaflorist.com`
+✅ Search results show `https://akazubaflorist.org`
 ✅ No more www or http versions in search results
 ✅ Improved search ranking and click-through rates

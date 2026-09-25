@@ -1,8 +1,10 @@
-import { ShoppingCart, User, Home, Phone, Heart, Search, Menu, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ShoppingCart, User, Home, Phone, Heart, Search, List, ChevronDown, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase, Category } from '../lib/supabase';
 
 type NavbarProps = {
-  onNavigate: (page: string, categoryId?: string) => void;
+  onNavigate: (page: string, categoryId?: string, searchQuery?: string) => void;
   currentPage: string;
   cartItemCount: number;
   wishlistItemCount: number;
@@ -10,6 +12,22 @@ type NavbarProps = {
 
 export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlistItemCount }: NavbarProps) {
   const { user, profile, signOut } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [browseOpen, setBrowseOpen] = useState(false);
+  const [pagesOpen, setPagesOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      const { data, error } = await supabase.from('categories').select('*').order('name');
+      if (data && !error) {
+        setCategories(data);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -21,50 +39,74 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
     }
   };
 
+  const navigate = (page: string) => {
+    onNavigate(page);
+    setMobileMenuOpen(false);
+    setBrowseOpen(false);
+    setPagesOpen(false);
+  };
+
+  const navigateToCategory = (categoryId: string) => {
+    onNavigate('products', categoryId);
+    setMobileMenuOpen(false);
+    setBrowseOpen(false);
+  };
+
+  const handleSearch = () => {
+    const query = searchQuery.trim();
+    if (query) {
+      onNavigate('products', undefined, query);
+    } else {
+      onNavigate('products');
+    }
+  };
+
   return (
     <>
       {/* Top Header Bar - Gray Background */}
-      <div className="bg-gray-100 border-b border-gray-200 text-sm">
+      <div className="bg-[#2d8060] text-xs text-white/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-10">
+          <div className="flex justify-between items-center h-9">
             {/* Left Side - Help/Support/Contact */}
-            <div className="hidden md:flex items-center space-x-4 text-gray-600">
-              <button onClick={() => onNavigate('contact')} className="hover:text-primary-600 transition">
-                Help / Support / Contact
+            <div className="hidden md:flex items-center gap-5">
+              <button onClick={() => navigate('contact')} className="hover:text-white transition">
+                Need help? Contact us
               </button>
+              <span className="h-3 w-px bg-white/20" />
+              <span>Fresh flowers, delivered in Kigali</span>
             </div>
 
             {/* Center - Call Us */}
             <div className="flex-1 text-center">
-              <span className="text-gray-600">Call Us: <a href="tel:+250784586110" className="text-primary-600 hover:underline">+250 784 586 110</a></span>
+              <span className="hidden sm:block">Call us: <a href="tel:+250784586110" className="text-white hover:underline">+250 784 586 110</a></span>
             </div>
 
             {/* Right Side - User Actions */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden md:flex items-center gap-4">
               {user ? (
                 <>
                   <button
-                    onClick={() => onNavigate('home')}
-                    className="text-gray-600 hover:text-primary-600 transition flex items-center space-x-1"
+                    onClick={() => navigate('home')}
+                    className="hover:text-white transition flex items-center gap-1"
                   >
                     <Home className="w-4 h-4" />
                     <span>My Dashboard</span>
                   </button>
                   <button
-                    onClick={() => onNavigate('wishlist')}
-                    className="text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => navigate('wishlist')}
+                    className="hover:text-white transition"
                   >
                     Wishlist
                   </button>
                   <button
-                    onClick={() => onNavigate('cart')}
-                    className="text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => navigate('cart')}
+                    className="hover:text-white transition"
                   >
                     My Cart
                   </button>
                   <button
                     onClick={handleSignOut}
-                    className="text-gray-600 hover:text-primary-600 transition"
+                    className="hover:text-white transition"
                   >
                     Log Out
                   </button>
@@ -72,20 +114,20 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
               ) : (
                 <>
                   <button
-                    onClick={() => onNavigate('login')}
-                    className="text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => navigate('login')}
+                    className="hover:text-white transition"
                   >
                     Login
                   </button>
                   <button
-                    onClick={() => onNavigate('wishlist')}
-                    className="text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => navigate('wishlist')}
+                    className="hover:text-white transition"
                   >
                     Wishlist
                   </button>
                   <button
-                    onClick={() => onNavigate('cart')}
-                    className="text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => navigate('cart')}
+                    className="hover:text-white transition"
                   >
                     My Cart
                   </button>
@@ -97,13 +139,13 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
       </div>
 
       {/* Main Header - White Background with Logo and Search */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-[76px] gap-5">
             {/* Logo */}
             <button
-              onClick={() => onNavigate('home')}
-              className="flex items-center space-x-2"
+              onClick={() => navigate('home')}
+              className="flex items-center gap-2 shrink-0"
             >
               <img 
                 src="/images/logo/akazuba-logo.png" 
@@ -118,21 +160,28 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
                   }
                 }}
               />
-              <span className="text-2xl font-bold text-primary-600">AKAZUBA</span>
+              <span className="text-2xl font-black tracking-tight text-primary-600">AKAZUBA</span>
             </button>
 
             {/* Search Bar */}
-            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-              <div className="flex w-full">
-                <select className="px-4 py-2 border border-gray-300 rounded-l-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500">
-                  <option>All Category</option>
-                </select>
+            <div className="hidden md:flex flex-1 max-w-2xl">
+              <div className="flex w-full rounded-xl bg-gray-50 border border-gray-200 focus-within:border-primary-600 focus-within:ring-4 focus-within:ring-primary-600/10 overflow-hidden">
+                <button className="px-4 text-sm font-semibold text-gray-700 border-r border-gray-200 flex items-center gap-2">
+                  All categories <ChevronDown className="w-4 h-4 text-gray-400" />
+                </button>
                 <input
                   type="text"
                   placeholder="Search Looking For?"
-                  className="flex-1 px-4 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-transparent text-sm focus:outline-none"
                 />
-                <button className="px-6 py-2 bg-primary-600 text-white rounded-r-lg hover:bg-primary-700 transition">
+                <button onClick={handleSearch} className="px-5 bg-primary-600 text-white hover:bg-primary-700 transition" aria-label="Search">
                   <Search className="w-5 h-5" />
                 </button>
               </div>
@@ -155,7 +204,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
                 </button>
               )}
               <button
-                onClick={() => onNavigate('cart')}
+                onClick={() => navigate('cart')}
                 className="relative p-2 text-gray-700 hover:text-primary-600 transition"
                 title="Cart"
               >
@@ -184,39 +233,71 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Left - All Categories & Navigation */}
-            <div className="flex items-center space-x-6">
-              <button className="flex items-center space-x-2 px-4 py-2 hover:bg-primary-700 transition rounded">
-                <Menu className="w-5 h-5" />
-                <span className="font-medium">All Categories</span>
-              </button>
-              
-              <div className="hidden lg:flex items-center space-x-1">
+            <div className="flex items-center gap-2">
+              <div className="relative">
                 <button
-                  onClick={() => onNavigate('home')}
-                  className={`px-4 py-2 hover:bg-primary-700 transition rounded ${
+                  onClick={() => {
+                    setBrowseOpen(!browseOpen);
+                    setMobileMenuOpen(!mobileMenuOpen);
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-primary-700 transition rounded-lg"
+                  aria-label="Browse product categories"
+                  aria-expanded={browseOpen}
+                >
+                  <List className="w-5 h-5" />
+                  <span className="font-semibold hidden sm:inline">Browse</span>
+                  <ChevronDown className={`hidden sm:block w-4 h-4 transition ${browseOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {browseOpen && (
+                  <div className="absolute left-0 top-full z-50 mt-2 hidden w-64 overflow-hidden rounded-xl bg-white py-2 text-sm text-gray-700 shadow-xl ring-1 ring-black/5 lg:block">
+                    <button onClick={() => navigate('products')} className="flex w-full items-center justify-between px-4 py-3 text-left font-semibold hover:bg-primary-50 hover:text-primary-600">
+                      All products <span className="text-gray-300">&#8594;</span>
+                    </button>
+                    <div className="my-1 border-t border-gray-100" />
+                    {categories.length > 0 ? categories.map((category) => (
+                      <button key={category.id} onClick={() => navigateToCategory(category.id)} className="flex w-full items-center justify-between px-4 py-2.5 text-left hover:bg-primary-50 hover:text-primary-600">
+                        <span className="truncate">{category.name}</span>
+                        <span className="text-gray-300">&#8594;</span>
+                      </button>
+                    )) : (
+                      <p className="px-4 py-3 text-xs text-gray-500">Categories loading...</p>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="hidden lg:flex items-center gap-1">
+                <button
+                  onClick={() => navigate('home')}
+                  className={`px-4 py-2 hover:bg-primary-700 transition rounded-lg ${
                     currentPage === 'home' ? 'bg-primary-700' : ''
                   }`}
                 >
                   Home
                 </button>
                 <button
-                  onClick={() => onNavigate('products')}
-                  className={`px-4 py-2 hover:bg-primary-700 transition rounded ${
+                  onClick={() => navigate('products')}
+                  className={`px-4 py-2 hover:bg-primary-700 transition rounded-lg ${
                     currentPage === 'products' ? 'bg-primary-700' : ''
                   }`}
                 >
                   Shop
                 </button>
                 <button
-                  onClick={() => onNavigate('about')}
-                  className="px-4 py-2 hover:bg-primary-700 transition rounded flex items-center space-x-1"
+                  onClick={() => setPagesOpen(!pagesOpen)}
+                  className="px-4 py-2 hover:bg-primary-700 transition rounded-lg flex items-center gap-1"
                 >
                   <span>Pages</span>
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className={`w-4 h-4 transition ${pagesOpen ? 'rotate-180' : ''}`} />
                 </button>
+                {pagesOpen && (
+                  <div className="absolute mt-40 ml-28 w-40 rounded-xl bg-white py-2 text-sm text-gray-700 shadow-xl ring-1 ring-black/5">
+                    <button onClick={() => navigate('about')} className="block w-full px-4 py-2 text-left hover:bg-gray-50">About us</button>
+                  </div>
+                )}
                 <button
-                  onClick={() => onNavigate('contact')}
-                  className={`px-4 py-2 hover:bg-primary-700 transition rounded ${
+                  onClick={() => navigate('contact')}
+                  className={`px-4 py-2 hover:bg-primary-700 transition rounded-lg ${
                     currentPage === 'contact' ? 'bg-primary-700' : ''
                   }`}
                 >
@@ -228,7 +309,7 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
             {/* Right - Phone Button */}
             <a
               href="tel:+250784586110"
-              className="flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition"
+              className="hidden sm:flex items-center gap-2 bg-[#c84b3f] hover:bg-[#ad3d33] px-4 py-2 rounded-lg transition"
             >
               <Phone className="w-4 h-4" />
               <span className="font-medium">+250 784 586 110</span>
@@ -236,6 +317,43 @@ export default function Navbar({ onNavigate, currentPage, cartItemCount, wishlis
           </div>
         </div>
       </nav>
+
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/30 lg:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <aside className="h-full w-80 max-w-[85vw] bg-white p-5 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <span className="text-lg font-black tracking-tight text-primary-600">AKAZUBA</span>
+              <button onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-2 text-gray-500 hover:bg-gray-100" aria-label="Close navigation menu">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="mt-5 space-y-1">
+              {[
+                ['home', 'Home'],
+                ['products', 'Shop all products'],
+                ['about', 'About us'],
+                ['contact', 'Contact'],
+                ['wishlist', 'Wishlist'],
+                ['cart', 'My cart'],
+              ].map(([page, label]) => (
+                <button key={page} onClick={() => navigate(page)} className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left text-gray-700 hover:bg-primary-50 hover:text-primary-600">
+                  {label}
+                  <span className="text-gray-300">&#8594;</span>
+                </button>
+              ))}
+              <div className="mt-4 border-t border-gray-100 pt-4">
+                <p className="px-3 pb-2 text-xs font-bold uppercase tracking-wider text-gray-400">Shop by category</p>
+                {categories.map((category) => (
+                  <button key={category.id} onClick={() => navigateToCategory(category.id)} className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left text-gray-700 hover:bg-primary-50 hover:text-primary-600">
+                    {category.name}
+                    <span className="text-gray-300">&#8594;</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </aside>
+        </div>
+      )}
     </>
   );
 }

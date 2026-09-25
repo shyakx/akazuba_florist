@@ -126,7 +126,7 @@ vercel
 
 1. **In Vercel Dashboard**:
    - Go to your project → Settings → Domains
-   - Add your custom domain (e.g., `akazubaflorist.com`)
+   - Add your custom domain (e.g., `akazubaflorist.org`)
    - Follow DNS configuration instructions
 
 2. **DNS Configuration**:

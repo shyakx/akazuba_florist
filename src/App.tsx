@@ -17,6 +17,7 @@ import { supabase } from './lib/supabase';
 function AppContent() {
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
   const [cartItemCount, setCartItemCount] = useState(0);
   const [wishlistItemCount, setWishlistItemCount] = useState(0);
   const { user, profile, loading } = useAuth();
@@ -109,8 +110,9 @@ function AppContent() {
     }
   }, [profile, currentPage]);
 
-  const handleNavigate = (page: string, categoryId?: string) => {
+  const handleNavigate = (page: string, categoryId?: string, nextSearchQuery?: string) => {
     setCurrentPage(page);
+    setSearchQuery(nextSearchQuery ?? '');
     if (categoryId) {
       setSelectedCategoryId(categoryId);
     } else {
@@ -172,6 +174,7 @@ function AppContent() {
           <ProductsPage 
             onNavigate={handleNavigate} 
             selectedCategoryId={selectedCategoryId}
+            searchQuery={searchQuery}
             updateCartCount={updateCartCount}
             updateWishlistCount={updateWishlistCount}
           />

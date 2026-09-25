@@ -23,10 +23,10 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-green-600 text-white py-16 px-4">
+      <section className="bg-primary-600 text-white py-16 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl font-bold mb-4">About AKAZUBA FLORIST</h1>
-          <p className="text-lg text-green-100 max-w-3xl mx-auto">
+          <p className="text-lg text-primary-100 max-w-3xl mx-auto">
             Rwanda's premier destination for premium fresh flowers and elegant floral arrangements. 
             We specialize in creating stunning bouquets, wedding arrangements, and custom floral designs 
             that celebrate life's most precious moments.
@@ -47,8 +47,8 @@ export default function AboutPage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Flower className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <Flower className="w-6 h-6 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Fresh Flower Bouquets</h3>
               <p className="text-gray-600">
@@ -58,8 +58,8 @@ export default function AboutPage() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Heart className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <Heart className="w-6 h-6 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Wedding Arrangements</h3>
               <p className="text-gray-600">
@@ -69,8 +69,8 @@ export default function AboutPage() {
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Award className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <Award className="w-6 h-6 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Graduation Celebrations</h3>
               <p className="text-gray-600">
@@ -106,11 +106,11 @@ export default function AboutPage() {
               </div>
             </div>
             
-            <div className="bg-green-50 p-8 rounded-2xl">
+            <div className="bg-primary-50 p-8 rounded-2xl">
               <h3 className="text-2xl font-bold text-gray-800 mb-6">Why Choose AKAZUBA FLORIST?</h3>
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Star className="w-4 h-4 text-white" />
                   </div>
                   <div>
@@ -120,7 +120,7 @@ export default function AboutPage() {
                 </div>
                 
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Truck className="w-4 h-4 text-white" />
                   </div>
                   <div>
@@ -130,7 +130,7 @@ export default function AboutPage() {
                 </div>
                 
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Shield className="w-4 h-4 text-white" />
                   </div>
                   <div>
@@ -140,7 +140,7 @@ export default function AboutPage() {
                 </div>
                 
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center flex-shrink-0">
                     <Users className="w-4 h-4 text-white" />
                   </div>
                   <div>
@@ -155,14 +155,14 @@ export default function AboutPage() {
       </section>
 
       {/* Mission & Values Section */}
-      <section className="py-16 px-4 bg-green-600">
+      <section className="py-16 px-4 bg-primary-600">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-white mb-8">Our Mission & Values</h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-xl">
               <Heart className="w-12 h-12 text-white mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-4">Our Mission</h3>
-              <p className="text-green-100 leading-relaxed">
+              <p className="text-primary-100 leading-relaxed">
                 To bring joy and beauty into your life through carefully curated flowers and 
                 exceptional service. We believe every occasion deserves the perfect flowers, 
                 and we're committed to making your floral dreams come true.
@@ -172,7 +172,7 @@ export default function AboutPage() {
             <div className="bg-white bg-opacity-10 backdrop-blur-sm p-8 rounded-xl">
               <Award className="w-12 h-12 text-white mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-4">Our Values</h3>
-              <p className="text-green-100 leading-relaxed">
+              <p className="text-primary-100 leading-relaxed">
                 Quality, integrity, and customer satisfaction are at the heart of everything we do. 
                 We work with suppliers who share our commitment to environmental responsibility 
                 and ethical business practices.

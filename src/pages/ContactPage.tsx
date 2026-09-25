@@ -27,10 +27,10 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="bg-green-600 text-white py-12 px-4">
+      <section className="bg-primary-600 text-white py-12 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-4xl font-bold mb-4">Contact AKAZUBA FLORIST</h1>
-          <p className="text-lg text-green-100 max-w-3xl mx-auto">
+          <p className="text-lg text-primary-100 max-w-3xl mx-auto">
             Ready to make your floral dreams come true? Get in touch with our expert team. 
             We're here to help you create the perfect arrangement for any occasion.
           </p>
@@ -44,8 +44,8 @@ export default function ContactPage() {
               <h2 className="text-2xl font-bold text-gray-800 mb-6">Get in Touch</h2>
               
               <div className="space-y-6">
-                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="bg-green-600 p-3 rounded-full">
+                <div className="flex items-start space-x-4 p-4 bg-primary-50 rounded-xl border border-primary-200">
+                  <div className="bg-primary-600 p-3 rounded-full">
                     <Mail className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -55,8 +55,8 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="bg-green-600 p-3 rounded-full">
+                <div className="flex items-start space-x-4 p-4 bg-primary-50 rounded-xl border border-primary-200">
+                  <div className="bg-primary-600 p-3 rounded-full">
                     <Phone className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -66,8 +66,8 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="bg-green-600 p-3 rounded-full">
+                <div className="flex items-start space-x-4 p-4 bg-primary-50 rounded-xl border border-primary-200">
+                  <div className="bg-primary-600 p-3 rounded-full">
                     <MapPin className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -77,8 +77,8 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="bg-green-600 p-3 rounded-full">
+                <div className="flex items-start space-x-4 p-4 bg-primary-50 rounded-xl border border-primary-200">
+                  <div className="bg-primary-600 p-3 rounded-full">
                     <Clock className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -91,8 +91,8 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border border-green-200">
-                  <div className="bg-green-600 p-3 rounded-full">
+                <div className="flex items-start space-x-4 p-4 bg-primary-50 rounded-xl border border-primary-200">
+                  <div className="bg-primary-600 p-3 rounded-full">
                     <Instagram className="w-6 h-6 text-white" />
                   </div>
                   <div>
@@ -101,7 +101,7 @@ export default function ContactPage() {
                       href="https://www.instagram.com/akazuba_florists?igsh=aXdsY203Y3Eza2x4" 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-gray-600 mb-1 hover:text-green-600 transition-colors"
+                      className="text-gray-600 mb-1 hover:text-primary-600 transition-colors"
                     >
                       @akazuba_florists
                     </a>
@@ -182,7 +182,7 @@ export default function ContactPage() {
 
                 <button
                   type="submit"
-                  className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition text-lg"
+                  className="w-full bg-primary-600 text-white py-4 rounded-lg font-semibold hover:bg-primary-700 transition text-lg"
                 >
                   Send Message
                 </button>
@@ -204,43 +204,43 @@ export default function ContactPage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <MapPin className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <MapPin className="w-6 h-6 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Kigali City</h3>
               <p className="text-gray-600 mb-3">
                 RWF 2,000 delivery fee within Kigali city limits. 
                 Same-day delivery available for orders placed before 2:00 PM.
               </p>
-              <div className="text-sm text-green-600 font-medium">
+              <div className="text-sm text-primary-600 font-medium">
                 ✓ Free delivery on orders over RWF 50,000
               </div>
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Clock className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <Clock className="w-6 h-6 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Delivery Times</h3>
               <p className="text-gray-600 mb-3">
                 We deliver 7 days a week from 8:00 AM to 8:00 PM. 
                 Express delivery available for urgent orders.
               </p>
-              <div className="text-sm text-green-600 font-medium">
+              <div className="text-sm text-primary-600 font-medium">
                 ✓ 2-hour express delivery available
               </div>
             </div>
             
             <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                <Phone className="w-6 h-6 text-green-600" />
+              <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mb-4">
+                <Phone className="w-6 h-6 text-primary-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-800 mb-3">Surrounding Areas</h3>
               <p className="text-gray-600 mb-3">
                 Delivery available to surrounding areas with additional charges. 
                 Contact us for specific locations and pricing.
               </p>
-              <div className="text-sm text-green-600 font-medium">
+              <div className="text-sm text-primary-600 font-medium">
                 ✓ Custom delivery arrangements
               </div>
             </div>
